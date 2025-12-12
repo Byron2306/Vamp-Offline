@@ -35,6 +35,11 @@ class MergedKPA:
     kpis: object
     outcomes: object
     active: bool = True
+    status: str = "OK"
+    source_hours: str = "TA"
+    source_kpis: str = "PA"
+    context: dict | None = None
+    review_reason: Optional[str] = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -129,10 +134,26 @@ def build_final_contract(ta_contract: TAPerformanceContract, pa_data: Optional[D
         matched_any = matched_any or bool(pa_row)
 
         outputs = _extract_field(pa_row, "output", default=ta_kpa.outputs)
-        kpis = _extract_field(pa_row, "kpi", default=ta_kpa.kpis)
-        if (not kpis or kpis == "") and outputs:
+        kpis = _extract_field(pa_row, "kpi", default=ta_kpa.kpis if pa_row else [])
+        kpa_status = "OK"
+        source_kpis = "PA" if pa_row else "AUTO"
+        review_reason: Optional[str] = None
+
+        if not kpis and outputs:
             kpis = generate_kpis_from_outputs(outputs)
             kpis_generated = True
+            kpa_status = "NEEDS_REVIEW"
+            source_kpis = "AUTO"
+            review_reason = "Batch4 auto-generated KPIs due to missing PA KPIs"
+        elif not kpis:
+            kpa_status = "MISSING_KPIS"
+            review_reason = "Batch4 PA provided no KPIs"
+            kpis = []
+
+        if not pa_row:
+            kpa_status = "MISSING_KPIS"
+            source_kpis = "PA"
+            review_reason = review_reason or "Batch4 PA missing for this KPA"
 
         merged_kpa = MergedKPA(
             code=ta_kpa.code,
@@ -143,6 +164,11 @@ def build_final_contract(ta_contract: TAPerformanceContract, pa_data: Optional[D
             kpis=kpis,
             outcomes=_extract_field(pa_row, "outcome", default=ta_kpa.outcomes),
             active=_extract_active(pa_row) if pa_row else ta_kpa.active,
+            status=kpa_status,
+            source_hours="TA",
+            source_kpis=source_kpis,
+            context=getattr(ta_kpa, "context", {}),
+            review_reason=review_reason,
         )
         kpas[merged_kpa.code] = merged_kpa
 
@@ -153,7 +179,7 @@ def build_final_contract(ta_contract: TAPerformanceContract, pa_data: Optional[D
         kpas=kpas,
         total_weight_pct=total_weight,
         valid=ta_contract.valid,
-        kpis_missing=not matched_any,
+        kpis_missing=not matched_any or any(k.status != "OK" for k in kpas.values()),
         kpis_generated=kpis_generated,
     )
     return contract
