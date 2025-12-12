@@ -26,7 +26,9 @@ def test_ta_import_attaches_context_and_flags(monkeypatch, tmp_path):
     }
 
     monkeypatch.setattr(
-        task_agreement_import, "parse_task_agreement", lambda path: fake_summary
+        task_agreement_import,
+        "parse_task_agreement",
+        lambda path, director_level=False: fake_summary,
     )
 
     ta_path = tmp_path / "ta.xlsx"

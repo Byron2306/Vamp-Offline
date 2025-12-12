@@ -117,8 +117,11 @@ def import_task_agreement_excel(profile: StaffProfile, xlsx_path: Path) -> Staff
     if not xlsx_path.exists():
         raise FileNotFoundError(f"Task Agreement Excel not found: {xlsx_path}")
 
-    summary: Dict[str, Any] = parse_task_agreement(str(xlsx_path))
-    summary = _fold_people_management_summary(summary, staff_is_director_level(profile))
+    director_level = staff_is_director_level(profile)
+    summary: Dict[str, Any] = parse_task_agreement(
+        str(xlsx_path), director_level=director_level
+    )
+    summary = _fold_people_management_summary(summary, director_level)
     kpa_map = _ensure_kpa_map(profile)
 
     for code, kpa_obj in kpa_map.items():
