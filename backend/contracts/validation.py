@@ -91,10 +91,18 @@ def validate_ta_contract(contract, director_level: bool | None = None) -> Tuple[
         errors.append(f"Missing KPA sections: {', '.join(missing)}")
 
     total_weight = sum(_safe_float(getattr(kpa, "weight_pct", 0.0)) for kpa in kpas.values())
+    total_hours = sum(_safe_float(getattr(kpa, "hours", 0.0)) for kpa in kpas.values())
+    snapshot = getattr(contract, "snapshot", {}) or {}
+    norm_hours = _safe_float(snapshot.get("norm_hours")) if snapshot else 0.0
     if abs(total_weight - 100.0) > 1.0:
         errors.append(f"KPA weights total {total_weight:.2f}% (expected ≈100%).")
     elif abs(total_weight - 100.0) > 0.25:
         warnings.append(f"KPA weights total {total_weight:.2f}% (slightly off 100%).")
+
+    if norm_hours and total_hours > norm_hours:
+        warnings.append(
+            f"Over-norm workload: +{total_hours - norm_hours:.1f} hours"
+        )
 
     for code, kpa in kpas.items():
         hours = _safe_float(getattr(kpa, "hours", 0.0))
@@ -110,7 +118,8 @@ def validate_ta_contract(contract, director_level: bool | None = None) -> Tuple[
             if NAME_PLACEHOLDER_RE.search(kpi_text) or NAME_LIKE_RE.search(kpi_text):
                 errors.append(f"{code} KPI appears to contain a name: '{kpi_text}'.")
 
-    snapshot = getattr(contract, "snapshot", {}) or {}
+    if snapshot:
+        warnings.extend(snapshot.get("ta_warnings", []) or [])
     parse_report = snapshot.get("ta_parse_report", {}) or {}
     for section, report in parse_report.items():
         try:

@@ -130,6 +130,41 @@ def _extract_month_tokens(text: str) -> List[str]:
     return tokens
 
 
+def _fold_people_management_summary(
+    summary: Dict[str, Any], director_level: bool
+) -> Dict[str, Any]:
+    """Merge People Management into KPA4 for ordinary staff."""
+
+    if director_level:
+        return summary or {}
+
+    merged = dict(summary or {})
+    kpa_summary = dict(merged.get("kpa_summary") or {})
+    people_management = list(merged.get("people_management") or [])
+
+    pm_block = kpa_summary.pop("KPA6", None)
+    if pm_block:
+        kpa4 = dict(kpa_summary.get("KPA4") or {})
+        kpa4_hours = _safe_float(kpa4.get("hours")) + _safe_float(pm_block.get("hours"))
+        kpa4_weight = _safe_float(kpa4.get("weight_pct")) + _safe_float(
+            pm_block.get("weight_pct")
+        )
+
+        if not kpa4.get("name"):
+            kpa4["name"] = pm_block.get(
+                "name", "Academic Leadership and Administration"
+            )
+
+        kpa4["hours"] = kpa4_hours
+        kpa4["weight_pct"] = kpa4_weight
+        kpa_summary["KPA4"] = kpa4
+
+    merged["kpa_summary"] = kpa_summary
+    if people_management:
+        merged["people_management"] = people_management
+    return merged
+
+
 def _iter_sheet_rows(zf: zipfile.ZipFile, sheet_path: str, shared: List[str]) -> Iterable[List[str]]:
     sheet = ET.fromstring(zf.read(sheet_path))
     for row in sheet.findall("main:sheetData/main:row", XML_NS):
@@ -209,12 +244,13 @@ BLACKLIST_PHRASES = [
 # Core TA parser
 # ----------------------------
 
-def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
+def parse_task_agreement(excel_path: str, director_level: bool = False) -> Dict[str, Any]:
     """
     Parse the NWU FEDU Task Agreement form into a structured expectations summary.
 
     What we extract:
-      - Per-KPA hours and approximate weight %
+      - Per-KPA hours and approximate weight % (KPA6 is folded into KPA4 for
+        ordinary staff)
       - Teaching / module expectations
       - Supervision expectations
       - Research expectations
@@ -257,6 +293,8 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
             "teaching_modules": [],
             "teaching_practice_windows": [],
             "ta_parse_report": {},
+            "warnings": [f"TA parse failed: {e}"],
+            "total_hours": 0.0,
         }
 
     current_section: int | None = None
@@ -273,6 +311,7 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
     ta_parse_report: Dict[int, Dict[str, object]] = {}
     current_block: str | None = None
 
+    warnings: List[str] = []
     norm_hours = 0.0
 
     # First pass: detect Norm = 1728 hours if present
@@ -367,6 +406,30 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
 
         dlow = detail.lower()
 
+        # Teaching Practice Assessment rows sometimes contain only month windows
+        # (e.g., "April / July"). Do not treat those as targets or people names –
+        # always bucket them as practice windows when hours are present.
+        month_tokens = _extract_month_tokens(detail)
+        if month_tokens and (
+            current_block == "teaching_practice_windows"
+            or "teaching practice" in dlow
+            or "practice assessment" in dlow
+        ):
+            teaching_practice_windows.extend(month_tokens)
+            consumed = True
+            if current_section is not None:
+                ta_parse_report.setdefault(
+                    current_section,
+                    {
+                        "blocks_detected": set(),
+                        "rows_consumed": 0,
+                        "rows_unconsumed": 0,
+                        "unconsumed_examples": [],
+                    },
+                )
+                ta_parse_report[current_section]["rows_consumed"] += 1
+            continue
+
         # Ignore totals / meta lines
         if any(phrase in dlow for phrase in BLACKLIST_PHRASES):
             continue
@@ -387,7 +450,7 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
                 supervision.append(detail)
             consumed = True
         elif current_block == "teaching_practice_windows":
-            months = _extract_month_tokens(detail)
+            months = month_tokens or _extract_month_tokens(detail)
             if months:
                 teaching_practice_windows.extend(months)
                 consumed = True
@@ -459,24 +522,39 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
         if code == "KPA2" and teaching_modules:
             kpa_summary[code]["teaching_modules"] = teaching_modules
 
+    # Fold KPA6 into KPA4 for ordinary staff so downstream UI never shows a
+    # People Management KPA unless the profile is flagged as director-level.
+    folded_summary = _fold_people_management_summary(
+        {
+            "kpa_summary": kpa_summary,
+            "teaching": teaching,
+            "supervision": supervision,
+            "research": research,
+            "leadership": leadership,
+            "social": social,
+            "ohs": ohs,
+            "norm_hours": norm_hours,
+            "teaching_modules": teaching_modules,
+            "teaching_practice_windows": teaching_practice_windows,
+            "people_management": people_management,
+            "ta_parse_report": ta_parse_report,
+        },
+        director_level,
+    )
+
+    total_hours = sum(v.get("hours", 0.0) for v in folded_summary.get("kpa_summary", {}).values())
+    if norm_hours and total_hours > norm_hours:
+        warnings.append(
+            f"Over-norm workload: +{total_hours - norm_hours:.1f} hours"
+        )
+
     for report in ta_parse_report.values():
         if isinstance(report.get("blocks_detected"), set):
             report["blocks_detected"] = sorted(report["blocks_detected"])  # type: ignore[index]
 
-    return {
-        "kpa_summary": kpa_summary,
-        "teaching": teaching,
-        "supervision": supervision,
-        "research": research,
-        "leadership": leadership,
-        "social": social,
-        "ohs": ohs,
-        "norm_hours": norm_hours,
-        "teaching_modules": teaching_modules,
-        "teaching_practice_windows": teaching_practice_windows,
-        "people_management": people_management,
-        "ta_parse_report": ta_parse_report,
-    }
+    folded_summary["warnings"] = warnings
+    folded_summary["total_hours"] = total_hours
+    return folded_summary
 
 
 # ----------------------------

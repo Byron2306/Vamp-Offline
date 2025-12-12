@@ -267,7 +267,8 @@ def parse_nwu_ta(path_to_xlsx: str, director_level: bool = False) -> Performance
             from backend.expectation_engine import parse_task_agreement  # type: ignore
 
             summary = _fold_people_management_summary(
-                parse_task_agreement(path_to_xlsx), director_level
+                parse_task_agreement(path_to_xlsx, director_level=director_level),
+                director_level,
             )
             modules = summary.get("teaching_modules") or []
         except Exception:
@@ -314,6 +315,7 @@ def parse_nwu_ta(path_to_xlsx: str, director_level: bool = False) -> Performance
             kpa.context = merged
 
     total_weight = sum(kpa.weight_pct for kpa in kpas.values())
+    total_hours = sum(kpa.hours for kpa in kpas.values()) if kpas else 0.0
     if abs(total_weight - 100.0) >= 0.5:
         validation_errors.append(
             f"Section weights total {total_weight:.2f}, expected approximately 100"
@@ -345,6 +347,9 @@ def parse_nwu_ta(path_to_xlsx: str, director_level: bool = False) -> Performance
             "section_totals": section_totals,
             "modules": modules,
             "ta_parse_report": summary.get("ta_parse_report", {}),
+            "norm_hours": summary.get("norm_hours"),
+            "total_hours": total_hours,
+            "ta_warnings": summary.get("warnings", []),
         },
     )
 
