@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import datetime
 import os
+import uuid
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -65,6 +66,13 @@ def guess_relpath(root: Path, p: Path) -> str:
         return str(p.relative_to(root))
     except Exception:
         return p.name
+
+
+def generate_run_id() -> str:
+    """Create a stable-ish identifier for a single scan run."""
+
+    stamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    return f"run-{stamp}-{uuid.uuid4().hex[:8]}"
 
 
 # -------------------------
