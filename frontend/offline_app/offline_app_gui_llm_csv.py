@@ -660,42 +660,6 @@ class OfflineApp(tk.Tk):
             self.btn_import_ta.configure(state=("normal" if has_profile else "disabled"))
 
         if hasattr(self, "btn_gen_skeleton"):
-            state = "normal" if ta_valid and not getattr(self, "ta_import_running", False) else "disabled"
-            self.btn_gen_skeleton.configure(state=state)
-        if hasattr(self, "btn_gen_ai"):
-            state = "normal" if skeleton_ready and not ai_running else "disabled"
-            self.btn_gen_ai.configure(state=state)
-
-        if hasattr(self, "btn_export_pa"):
-            state = "normal" if ai_ready else "disabled"
-            self.btn_export_pa.configure(state=state)
-
-        if hasattr(self, "generate_skeleton_btn"):
-            state = "normal" if ta_valid else "disabled"
-            self.generate_skeleton_btn.configure(state=state)
-        if hasattr(self, "export_skeleton_btn"):
-            state = "normal" if skeleton_ready or ta_valid else "disabled"
-            self.export_skeleton_btn.configure(state=state)
-        if hasattr(self, "export_pa_btn"):
-            state = "normal" if ai_ready and not contract_invalid else "disabled"
-            self.export_pa_btn.configure(state=state)
-        if hasattr(self, "btn_gen_ai"):
-            state = "normal" if skeleton_ready and not ai_running else "disabled"
-            self.btn_gen_ai.configure(state=state)
-
-        if hasattr(self, "btn_export_pa"):
-            state = "normal" if ai_ready else "disabled"
-            self.btn_export_pa.configure(state=state)
-
-        if hasattr(self, "generate_skeleton_btn"):
-            state = "normal" if ta_valid else "disabled"
-            self.generate_skeleton_btn.configure(state=state)
-        if hasattr(self, "export_skeleton_btn"):
-            state = "normal" if skeleton_ready or ta_valid else "disabled"
-            self.export_skeleton_btn.configure(state=state)
-        if hasattr(self, "export_pa_btn"):
-            state = "normal" if ai_ready and not contract_invalid else "disabled"
-            self.export_pa_btn.configure(state=state)
             self.btn_gen_skeleton.configure(state=("normal" if getattr(self, "ta_valid", False) else "disabled"))
         if hasattr(self, "btn_gen_ai"):
             self.btn_gen_ai.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
