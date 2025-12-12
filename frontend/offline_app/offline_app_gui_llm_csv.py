@@ -84,7 +84,11 @@ except Exception:
 # Backend imports (expected)
 # ---------------------------
 try:
-    from backend.staff_profile import create_or_load_profile, StaffProfile  # type: ignore
+    from backend.staff_profile import (
+        StaffProfile,
+        create_or_load_profile,
+        staff_is_director_level,
+    )  # type: ignore
 except Exception as e:
     raise RuntimeError("Missing backend.staff_profile. Please ensure you're running from the repo root.") from e
 
@@ -1320,7 +1324,10 @@ class OfflineApp(tk.Tk):
         # Validate TA structure and capture teaching modules for KPA2 context
         if parse_nwu_ta is not None:
             try:
-                ta_contract = parse_nwu_ta(str(self.task_agreement_path))
+                director_level = staff_is_director_level(self.profile) if self.profile else False
+                ta_contract = parse_nwu_ta(
+                    str(self.task_agreement_path), director_level=director_level
+                )
                 self.contract_validation_errors = list(
                     getattr(ta_contract, "validation_errors", []) or []
                 )

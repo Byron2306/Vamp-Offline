@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from backend.expectation_engine import parse_task_agreement
-from backend.staff_profile import DEFAULT_KPAS, KPA, StaffProfile
+from backend.staff_profile import DEFAULT_KPAS, KPA, StaffProfile, staff_is_director_level
 
 
 def _ensure_kpa_map(profile: StaffProfile) -> Dict[str, KPA]:
@@ -70,7 +70,41 @@ def _build_ta_context(kpa_code: str, summary: Dict[str, Any]) -> Dict[str, Any]:
         if value:
             context[key] = value
 
+    if kpa_code == "KPA4":
+        people_management = summary.get("people_management")
+        if people_management:
+            context["people_management_items"] = list(people_management)
+
     return context
+
+
+def _fold_people_management_summary(summary: Dict[str, Any], director_level: bool) -> Dict[str, Any]:
+    """Merge TA People Management data into KPA4 for non-director staff."""
+
+    if director_level:
+        return summary
+
+    merged_summary = dict(summary or {})
+    kpa_summary = dict(merged_summary.get("kpa_summary") or {})
+    people_management = list(merged_summary.get("people_management") or [])
+
+    pm_block = kpa_summary.pop("KPA6", None)
+    if pm_block:
+        kpa4 = dict(kpa_summary.get("KPA4") or {})
+        kpa4_hours = float(kpa4.get("hours", 0.0) or 0.0) + float(pm_block.get("hours", 0.0) or 0.0)
+        kpa4_weight = float(kpa4.get("weight_pct", 0.0) or 0.0) + float(pm_block.get("weight_pct", 0.0) or 0.0)
+
+        if not kpa4.get("name"):
+            kpa4["name"] = pm_block.get("name", "Academic Leadership and Management")
+
+        kpa4["hours"] = kpa4_hours
+        kpa4["weight_pct"] = kpa4_weight
+        kpa_summary["KPA4"] = kpa4
+
+    merged_summary["kpa_summary"] = kpa_summary
+    if people_management:
+        merged_summary["people_management"] = people_management
+    return merged_summary
 
 
 def import_task_agreement_excel(profile: StaffProfile, xlsx_path: Path) -> StaffProfile:
@@ -84,6 +118,7 @@ def import_task_agreement_excel(profile: StaffProfile, xlsx_path: Path) -> Staff
         raise FileNotFoundError(f"Task Agreement Excel not found: {xlsx_path}")
 
     summary: Dict[str, Any] = parse_task_agreement(str(xlsx_path))
+    summary = _fold_people_management_summary(summary, staff_is_director_level(profile))
     kpa_map = _ensure_kpa_map(profile)
 
     for code, kpa_obj in kpa_map.items():

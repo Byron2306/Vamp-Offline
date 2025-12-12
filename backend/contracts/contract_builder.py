@@ -120,7 +120,47 @@ def _extract_active(pa_row: Dict[str, object]) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def build_final_contract(ta_contract: TAPerformanceContract, pa_data: Optional[Dict[str, Dict[str, object]]]) -> PerformanceContract:
+def _fold_people_management(ta_kpas: Dict[str, TAPerformanceContract], director_level: bool) -> Dict[str, TAPerformanceContract]:
+    """Merge KPA6 into KPA4 when the staff member is not director-level."""
+
+    if director_level or "KPA6" not in ta_kpas:
+        return ta_kpas
+
+    merged = dict(ta_kpas)
+    pm_kpa = merged.pop("KPA6")
+    leader_kpa = merged.get("KPA4")
+    if leader_kpa:
+        leader_kpa.hours = (leader_kpa.hours or 0.0) + (pm_kpa.hours or 0.0)
+        leader_kpa.weight_pct = (leader_kpa.weight_pct or 0.0) + (pm_kpa.weight_pct or 0.0)
+
+        pm_context_raw = getattr(pm_kpa, "context", {}) or {}
+        pm_context = pm_context_raw if isinstance(pm_context_raw, dict) else {}
+        leader_context_raw = getattr(leader_kpa, "context", {}) or {}
+        leader_context = leader_context_raw if isinstance(leader_context_raw, dict) else {}
+        combined_context = dict(leader_context)
+
+        pm_items = pm_context.get("people_management_items") if isinstance(pm_context, dict) else None
+        if pm_items:
+            existing = combined_context.get("people_management_items") or []
+            combined_context["people_management_items"] = list(existing) + list(pm_items)
+
+        for key, value in pm_context.items():
+            combined_context.setdefault(key, value)
+
+        leader_kpa.context = combined_context
+    else:
+        pm_kpa.code = "KPA4"
+        pm_kpa.name = "Academic Leadership and Management"
+        merged["KPA4"] = pm_kpa
+
+    return merged
+
+
+def build_final_contract(
+    ta_contract: TAPerformanceContract,
+    pa_data: Optional[Dict[str, Dict[str, object]]],
+    director_level: bool = False,
+) -> PerformanceContract:
     """Merge TA and PA data into a final canonical PerformanceContract."""
 
     pa_data = pa_data or {}
@@ -128,7 +168,9 @@ def build_final_contract(ta_contract: TAPerformanceContract, pa_data: Optional[D
     matched_any = False
     kpis_generated = False
 
-    for ta_kpa in ta_contract.kpas.values():
+    ta_kpas = _fold_people_management(ta_contract.kpas, director_level)
+
+    for ta_kpa in ta_kpas.values():
         pa_match_name = _find_pa_match(ta_kpa.name, pa_data.keys()) if pa_data else None
         pa_row = pa_data.get(pa_match_name, {}) if pa_match_name else {}
         matched_any = matched_any or bool(pa_row)
@@ -172,7 +214,7 @@ def build_final_contract(ta_contract: TAPerformanceContract, pa_data: Optional[D
         )
         kpas[merged_kpa.code] = merged_kpa
 
-    total_weight = sum(k.weight_pct for k in ta_contract.kpas.values())
+    total_weight = sum(k.weight_pct for k in ta_kpas.values())
     contract = PerformanceContract(
         staff_id=str(ta_contract.staff_id),
         cycle_year=str(ta_contract.cycle_year),

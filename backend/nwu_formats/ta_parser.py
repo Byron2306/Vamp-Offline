@@ -134,10 +134,42 @@ def _build_kpa_context_from_summary(summary: Dict[str, Any], kpa_code: str) -> D
         if value:
             context[key] = value
 
+    if kpa_code == "KPA4":
+        people_management = summary.get("people_management")
+        if people_management:
+            context["people_management_items"] = list(people_management)
+
     return context
 
 
-def parse_nwu_ta(path_to_xlsx: str) -> PerformanceContract:
+def _fold_people_management_summary(summary: Dict[str, Any], director_level: bool) -> Dict[str, Any]:
+    """Merge People Management metrics into KPA4 for non-director staff."""
+
+    if director_level:
+        return summary or {}
+
+    merged_summary = dict(summary or {})
+    kpa_summary = dict(merged_summary.get("kpa_summary") or {})
+    people_management = merged_summary.get("people_management")
+
+    pm_block = kpa_summary.pop("KPA6", None)
+    if pm_block:
+        kpa4 = dict(kpa_summary.get("KPA4") or {})
+        kpa4_hours = _safe_float(kpa4.get("hours")) + _safe_float(pm_block.get("hours"))
+        kpa4_weight = _safe_float(kpa4.get("weight_pct")) + _safe_float(pm_block.get("weight_pct"))
+        if not kpa4.get("name"):
+            kpa4["name"] = pm_block.get("name", "Academic Leadership and Management")
+        kpa4["hours"] = kpa4_hours
+        kpa4["weight_pct"] = kpa4_weight
+        kpa_summary["KPA4"] = kpa4
+
+    merged_summary["kpa_summary"] = kpa_summary
+    if people_management:
+        merged_summary["people_management"] = people_management
+    return merged_summary
+
+
+def parse_nwu_ta(path_to_xlsx: str, director_level: bool = False) -> PerformanceContract:
     """Parse NWU Task Agreement grand totals into a PerformanceContract."""
     validation_errors: List[str] = []
     snapshot_rows: List[Dict[str, Any]] = []
@@ -234,7 +266,9 @@ def parse_nwu_ta(path_to_xlsx: str) -> PerformanceContract:
         try:
             from backend.expectation_engine import parse_task_agreement  # type: ignore
 
-            summary = parse_task_agreement(path_to_xlsx)
+            summary = _fold_people_management_summary(
+                parse_task_agreement(path_to_xlsx), director_level
+            )
             modules = summary.get("teaching_modules") or []
         except Exception:
             modules = []
@@ -251,6 +285,25 @@ def parse_nwu_ta(path_to_xlsx: str) -> PerformanceContract:
         kpa2 = kpas["KPA2"]
         kpa2.context = kpa2.context or {}
         kpa2.context["modules"] = modules
+
+    if not director_level and "KPA6" in kpas:
+        pm_kpa = kpas.pop("KPA6")
+        target = kpas.get("KPA4")
+        if target:
+            target.hours = (target.hours or 0.0) + (pm_kpa.hours or 0.0)
+            target.weight_pct = (target.weight_pct or 0.0) + (pm_kpa.weight_pct or 0.0)
+            pm_context_raw = getattr(pm_kpa, "context", {}) or {}
+            pm_context = pm_context_raw if isinstance(pm_context_raw, dict) else {}
+            if pm_context:
+                combined_ctx = dict(pm_context)
+                target_context_raw = getattr(target, "context", {}) or {}
+                if isinstance(target_context_raw, dict):
+                    combined_ctx.update(target_context_raw)
+                target.context = combined_ctx
+        else:
+            kpas["KPA4"] = pm_kpa
+            pm_kpa.code = "KPA4"
+            pm_kpa.name = "Academic Leadership and Management"
 
     # Attach TA context buckets when available
     if summary:

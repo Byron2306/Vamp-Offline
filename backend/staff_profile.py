@@ -169,3 +169,20 @@ def create_or_load_profile(
     profile.kpas = _default_kpas()
     profile.save()
     return profile
+
+
+def staff_is_director_level(profile: StaffProfile) -> bool:
+    """
+    Heuristic to detect whether a staff member should carry a dedicated
+    People Management KPA.
+
+    The flag is primarily driven by the position title, but a profile flag
+    of "DIRECTOR_LEVEL" can be used to force the behaviour when needed.
+    """
+
+    if "DIRECTOR_LEVEL" in (profile.flags or []):
+        return True
+
+    position = (profile.position or "").lower()
+    director_tokens = {"director", "executive director", "deputy director", "chief director"}
+    return any(token in position for token in director_tokens)
