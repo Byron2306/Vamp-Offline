@@ -529,12 +529,6 @@ class OfflineApp(tk.Tk):
 
         self.selected_detail: Dict[str, Any] = {}
 
-        # Status badge vars (top-of-UI indicators)
-        self.contract_loaded_status_var = tk.StringVar(value="Contract Loaded: ❌")
-        self.ta_imported_status_var = tk.StringVar(value="TA Imported: ❌")
-        self.pa_skeleton_status_var = tk.StringVar(value="PA Skeleton: ❌")
-        self.ai_enriched_status_var = tk.StringVar(value="AI Enriched: ❌")
-
         # UI handoff queue to keep worker threads away from Tk operations
         self.ui_queue: "queue.Queue[Tuple[Any, ...]]" = queue.Queue()
         self.after(80, self._drain_ui_queue)
@@ -679,6 +673,12 @@ class OfflineApp(tk.Tk):
         if hasattr(self, "export_pa_btn"):
             state = "normal" if ai_ready and not contract_invalid else "disabled"
             self.export_pa_btn.configure(state=state)
+            self.btn_gen_skeleton.configure(state=("normal" if getattr(self, "ta_valid", False) else "disabled"))
+        if hasattr(self, "btn_gen_ai"):
+            self.btn_gen_ai.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
+
+        if hasattr(self, "btn_export_pa"):
+            self.btn_export_pa.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
 
         if hasattr(self, "start_btn"):
             evidence_folder = getattr(self, "evidence_folder", None) or self.current_evidence_folder
