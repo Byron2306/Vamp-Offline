@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from typing import List, Optional, Any, Dict
+from typing import Any, Dict, List, Optional
 import json
 
 # This file lives in: backend/staff_profile.py
@@ -37,6 +37,7 @@ class KPA:
     hours: Optional[float] = None
     kpis: List[KPI] = field(default_factory=list)
     context: Dict[str, Any] = field(default_factory=dict)
+    ta_context: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -51,6 +52,7 @@ class StaffProfile:
     faculty: str = ""
     line_manager: str = ""
     kpas: List[KPA] = field(default_factory=list)
+    flags: List[str] = field(default_factory=list)
 
     @property
     def contract_path(self) -> Path:
@@ -79,6 +81,7 @@ class StaffProfile:
                 hours=k.get("hours"),
                 kpis=kpis,
                 context=k.get("context", {}),
+                ta_context=k.get("ta_context", {}),
             )
             kpas.append(kpa)
 
@@ -90,6 +93,7 @@ class StaffProfile:
             faculty=data.get("faculty", ""),
             line_manager=data.get("line_manager", ""),
             kpas=kpas,
+            flags=data.get("flags", []),
         )
 
     def save(self) -> None:
@@ -120,7 +124,7 @@ def _default_kpas() -> List[KPA]:
     have the 5 core NWU KPAs present.
     """
     return [
-        KPA(code=code, name=name, weight=None, hours=None, kpis=[])
+        KPA(code=code, name=name, weight=None, hours=None, kpis=[], ta_context={})
         for code, name in DEFAULT_KPAS
     ]
 
