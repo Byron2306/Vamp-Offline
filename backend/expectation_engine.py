@@ -265,6 +265,7 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
     supervision: List[str] = []
     research: List[str] = []
     leadership: List[str] = []
+    people_management: List[str] = []
     social: List[str] = []
     teaching_practice_windows: List[str] = []
     ohs: List[str] = []
@@ -424,6 +425,7 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
                 consumed = True
             elif kpa_code == "KPA6":
                 leadership.append(detail)
+                people_management.append(detail)
                 consumed = True
 
         if current_section is not None:
@@ -472,6 +474,7 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
         "norm_hours": norm_hours,
         "teaching_modules": teaching_modules,
         "teaching_practice_windows": teaching_practice_windows,
+        "people_management": people_management,
         "ta_parse_report": ta_parse_report,
     }
 
