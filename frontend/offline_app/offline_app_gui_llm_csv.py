@@ -559,19 +559,35 @@ class OfflineApp(tk.Tk):
         self.cinzel_family = "Cinzel"
         self._configure_styles()
 
-        # Layout: three vertical zones
+        # Layout: three vertical zones held in a PanedWindow so the user can resize
+        # and, critically, so each panel retains a minimum size instead of collapsing
+        # and disappearing on smaller displays.
         self.configure(bg=self._colors["bg"])
-        self.top_panel = tk.Frame(self, bg=self._colors["bg"], height=260)
-        self.top_panel.grid(row=0, column=0, sticky="nsew")
-        self.middle_panel = tk.Frame(self, bg=self._colors["bg"])
-        self.middle_panel.grid(row=1, column=0, sticky="nsew")
-        self.bottom_panel = tk.Frame(self, bg=self._colors["bg"])
-        self.bottom_panel.grid(row=2, column=0, sticky="nsew")
-
-        self.rowconfigure(0, weight=0, minsize=240)
-        self.rowconfigure(1, weight=3)
-        self.rowconfigure(2, weight=2, minsize=220)
+        # Use a Tk PanedWindow (instead of ttk) so we can enforce a minimum size
+        # per pane via the built-in ``minsize`` option. ttk's variant does not
+        # recognize ``minsize`` and would raise a TclError on some Python/Tk
+        # installations.
+        self.main_split = tk.PanedWindow(
+            self,
+            orient="vertical",
+            sashrelief="flat",
+            bg=self._colors["bg"],
+            bd=0,
+            sashwidth=6,
+            sashpad=2,
+            handlepad=2,
+        )
+        self.main_split.grid(row=0, column=0, sticky="nsew")
+        self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
+
+        self.top_panel = tk.Frame(self.main_split, bg=self._colors["bg"], height=260)
+        self.middle_panel = tk.Frame(self.main_split, bg=self._colors["bg"])
+        self.bottom_panel = tk.Frame(self.main_split, bg=self._colors["bg"])
+
+        self.main_split.add(self.top_panel, minsize=240)
+        self.main_split.add(self.middle_panel, minsize=220)
+        self.main_split.add(self.bottom_panel, minsize=220)
 
         self._build_top_dashboard()
         self._build_middle_table()
