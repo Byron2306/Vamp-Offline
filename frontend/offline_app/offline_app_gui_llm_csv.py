@@ -109,6 +109,11 @@ except Exception:
     generate_final_review = None
 
 try:
+    from backend.contracts.validation import validate_ta_contract  # type: ignore
+except Exception:
+    validate_ta_contract = None
+
+try:
     from backend.expectation_engine import build_staff_expectations, load_staff_expectations  # type: ignore
 except Exception:
     build_staff_expectations = None
@@ -481,6 +486,7 @@ class OfflineApp(tk.Tk):
         self.detail_rows: Dict[str, Dict[str, Any]] = {}
         self._detail_counter = 0
         self.contract_validation_errors: List[str] = []
+        self.contract_validation_warnings: List[str] = []
         self.kpa2_modules: List[str] = []
 
         self.filter_status_var = tk.StringVar(value="All")
@@ -945,10 +951,13 @@ class OfflineApp(tk.Tk):
 
         ttk.Button(btns, text="Enroll / Load", command=self._enroll).grid(row=0, column=0, sticky="ew", pady=4)
         ttk.Button(btns, text="Import Task Agreement", command=self._import_ta).grid(row=1, column=0, sticky="ew", pady=4)
-        ttk.Button(btns, text="Generate Initial PA", command=self._generate_initial_pa).grid(row=2, column=0, sticky="ew", pady=4)
-        ttk.Button(btns, text="Mid-year Review (Jan–Jun)", command=self._generate_midyear).grid(row=3, column=0, sticky="ew", pady=4)
-        ttk.Button(btns, text="Final Review (Jul–Oct)", command=self._generate_final).grid(row=4, column=0, sticky="ew", pady=4)
-        ttk.Button(btns, text="Open Results Folder", command=lambda: _open_file(OFFLINE_RESULTS_DIR)).grid(row=5, column=0, sticky="ew", pady=4)
+        self.generate_skeleton_btn = ttk.Button(btns, text="Generate PA Skeleton", command=self._generate_initial_pa)
+        self.generate_skeleton_btn.grid(row=2, column=0, sticky="ew", pady=4)
+        self.export_skeleton_btn = ttk.Button(btns, text="Export PA Skeleton", command=self._export_pa_skeleton)
+        self.export_skeleton_btn.grid(row=3, column=0, sticky="ew", pady=4)
+        ttk.Button(btns, text="Mid-year Review (Jan–Jun)", command=self._generate_midyear).grid(row=4, column=0, sticky="ew", pady=4)
+        ttk.Button(btns, text="Final Review (Jul–Oct)", command=self._generate_final).grid(row=5, column=0, sticky="ew", pady=4)
+        ttk.Button(btns, text="Open Results Folder", command=lambda: _open_file(OFFLINE_RESULTS_DIR)).grid(row=6, column=0, sticky="ew", pady=4)
 
         self.staff_status = tk.Label(
             p,
@@ -1288,6 +1297,7 @@ class OfflineApp(tk.Tk):
             line_manager=mgr,
         )
         self.contract_validation_errors = []
+        self.contract_validation_warnings = []
         self.kpa2_modules = []
         self.staff_status.configure(
             text=f"Enrolled: {self.profile.name} ({self.profile.staff_id}) | {self.profile.position} | {self.profile.cycle_year}"
@@ -1309,6 +1319,7 @@ class OfflineApp(tk.Tk):
             return
         self.task_agreement_path = Path(path)
         self.contract_validation_errors = []
+        self.contract_validation_warnings = []
         self.kpa2_modules = []
 
         try:
@@ -1328,11 +1339,29 @@ class OfflineApp(tk.Tk):
                 ta_contract = parse_nwu_ta(
                     str(self.task_agreement_path), director_level=director_level
                 )
-                self.contract_validation_errors = list(
-                    getattr(ta_contract, "validation_errors", []) or []
-                )
-                if getattr(ta_contract, "status", "OK") == "INVALID_TA":
-                    self.contract_validation_errors.append("TA marked invalid")
+                if validate_ta_contract is not None:
+                    valid, errors, warnings = validate_ta_contract(
+                        ta_contract, director_level=director_level
+                    )
+                    self.contract_validation_errors = list(errors)
+                    self.contract_validation_warnings = list(warnings)
+                    if not valid and getattr(ta_contract, "status", "OK") != "INVALID_TA":
+                        self.contract_validation_errors.append("TA failed validation checks")
+                else:
+                    self.contract_validation_errors = list(
+                        getattr(ta_contract, "validation_errors", []) or []
+                    )
+                    if getattr(ta_contract, "status", "OK") == "INVALID_TA":
+                        self.contract_validation_errors.append("TA marked invalid")
+                if self.contract_validation_errors:
+                    self._log(
+                        "❌ TA validation failed: "
+                        + "; ".join(self.contract_validation_errors)
+                    )
+                elif self.contract_validation_warnings:
+                    self._log(
+                        "⚠️ TA warnings: " + "; ".join(self.contract_validation_warnings)
+                    )
                 # Propagate hours/weights/context into the profile for visibility
                 if self.profile is not None:
                     kpa_map = {k.code: k for k in self.profile.kpas}
@@ -1373,6 +1402,10 @@ class OfflineApp(tk.Tk):
     def _generate_initial_pa(self) -> None:
         if not self._ensure_profile():
             return
+        self._update_contract_status()
+        if self.contract_validation_errors:
+            messagebox.showerror("Contract invalid", self.contract_status_reason)
+            return
         try:
             if generate_initial_pa is None:
                 raise RuntimeError("backend/contracts/pa_excel.py not available")
@@ -1386,6 +1419,20 @@ class OfflineApp(tk.Tk):
         _play_sound("vamp.wav")
         self._refresh_expectations_snapshot()
         self._refresh_kpa_breakdown()
+
+    def _export_pa_skeleton(self) -> None:
+        if not self._ensure_profile():
+            return
+        self._update_contract_status()
+        if self.contract_validation_errors:
+            messagebox.showerror("Contract invalid", self.contract_status_reason)
+            return
+        if self.pa_initial_path and self.pa_initial_path.exists():
+            _open_file(self.pa_initial_path)
+            return
+        self._generate_initial_pa()
+        if self.pa_initial_path and self.pa_initial_path.exists():
+            _open_file(self.pa_initial_path)
 
     def _generate_midyear(self) -> None:
         if not self._ensure_profile():
@@ -1515,7 +1562,10 @@ class OfflineApp(tk.Tk):
             self.start_btn.state(["disabled"])
         else:
             self.contract_status_var.set("✅ Contract Loaded")
-            self.contract_status_reason = "All KPAs have hours and weights."
+            if self.contract_validation_warnings:
+                self.contract_status_reason = "; ".join(self.contract_validation_warnings)
+            else:
+                self.contract_status_reason = "All KPAs have hours and weights."
             self.start_btn.state(["!disabled"])
         self._refresh_action_states()
 
@@ -1526,9 +1576,21 @@ class OfflineApp(tk.Tk):
             if self.contract_validation_errors:
                 self.start_btn.state(["disabled"])
 
+        if hasattr(self, "generate_skeleton_btn"):
+            if self.contract_validation_errors:
+                self.generate_skeleton_btn.state(["disabled"])
+            else:
+                self.generate_skeleton_btn.state(["!disabled"])
+
+        if hasattr(self, "export_skeleton_btn"):
+            if self.contract_validation_errors:
+                self.export_skeleton_btn.state(["disabled"])
+            else:
+                self.export_skeleton_btn.state(["!disabled"])
+
         if hasattr(self, "export_pa_btn"):
             # Disable export when Batch 8-style summaries are incomplete
-            if not self.rows or any(r.get("status") != "SCORED" for r in self.rows):
+            if self.contract_validation_errors or not self.rows or any(r.get("status") != "SCORED" for r in self.rows):
                 self.export_pa_btn.state(["disabled"])
             else:
                 self.export_pa_btn.state(["!disabled"])
