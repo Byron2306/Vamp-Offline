@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field, asdict
-from typing import List, Dict
+from typing import Any, Dict, List
 
 
 # ---------------------------------------------------------------------------
@@ -47,6 +47,7 @@ class KPA:
     weight: float = 0.0  # overall KPA weight in the PA (%)
     hours: float = 0.0   # total hours allocated in the contract year
     kpis: List[KPI] = field(default_factory=list)
+    ta_context: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         data = asdict(self)
@@ -69,6 +70,7 @@ class StaffProfile:
     line_manager: str = ""
     cycle_year: int = 0
     kpas: List[KPA] = field(default_factory=list)
+    flags: List[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return asdict(self)
