@@ -114,6 +114,11 @@ except Exception:
     generate_pa_skeleton_from_ta = None
 
 try:
+    from backend.contracts.pa_enricher_ai import enrich_pa_with_ai  # type: ignore
+except Exception:
+    enrich_pa_with_ai = None
+
+try:
     from backend.contracts.validation import validate_ta_contract  # type: ignore
 except Exception:
     validate_ta_contract = None
@@ -481,6 +486,7 @@ class OfflineApp(tk.Tk):
         # State
         self.profile: Optional[StaffProfile] = None
         self.task_agreement_path: Optional[Path] = None
+        self.pa_skeleton_path: Optional[Path] = None
         self.pa_initial_path: Optional[Path] = None
         self.pa_mid_path: Optional[Path] = None
         self.pa_final_path: Optional[Path] = None
@@ -960,11 +966,12 @@ class OfflineApp(tk.Tk):
         ttk.Button(btns, text="Import Task Agreement", command=self._import_ta).grid(row=1, column=0, sticky="ew", pady=4)
         self.generate_skeleton_btn = ttk.Button(btns, text="Generate PA Skeleton", command=self._generate_initial_pa)
         self.generate_skeleton_btn.grid(row=2, column=0, sticky="ew", pady=4)
+        ttk.Button(btns, text="Generate PA (AI)", command=self._generate_ai_pa).grid(row=3, column=0, sticky="ew", pady=4)
         self.export_skeleton_btn = ttk.Button(btns, text="Export PA Skeleton", command=self._export_pa_skeleton)
-        self.export_skeleton_btn.grid(row=3, column=0, sticky="ew", pady=4)
-        ttk.Button(btns, text="Mid-year Review (Jan–Jun)", command=self._generate_midyear).grid(row=4, column=0, sticky="ew", pady=4)
-        ttk.Button(btns, text="Final Review (Jul–Oct)", command=self._generate_final).grid(row=5, column=0, sticky="ew", pady=4)
-        ttk.Button(btns, text="Open Results Folder", command=lambda: _open_file(OFFLINE_RESULTS_DIR)).grid(row=6, column=0, sticky="ew", pady=4)
+        self.export_skeleton_btn.grid(row=4, column=0, sticky="ew", pady=4)
+        ttk.Button(btns, text="Mid-year Review (Jan–Jun)", command=self._generate_midyear).grid(row=5, column=0, sticky="ew", pady=4)
+        ttk.Button(btns, text="Final Review (Jul–Oct)", command=self._generate_final).grid(row=6, column=0, sticky="ew", pady=4)
+        ttk.Button(btns, text="Open Results Folder", command=lambda: _open_file(OFFLINE_RESULTS_DIR)).grid(row=7, column=0, sticky="ew", pady=4)
 
         self.staff_status = tk.Label(
             p,
@@ -1417,11 +1424,13 @@ class OfflineApp(tk.Tk):
             if generate_pa_skeleton_from_ta is None:
                 raise RuntimeError("backend/contracts/pa_generator.py not available")
             out, rows = generate_pa_skeleton_from_ta(self.profile, OFFLINE_RESULTS_DIR)
-            self.pa_initial_path = Path(out)
+            self.pa_skeleton_path = Path(out)
+            # Keep initial path pointing to the skeleton until AI enrichment replaces it.
+            self.pa_initial_path = self.pa_initial_path or self.pa_skeleton_path
             self.pa_skeleton_rows = list(rows or [])
             self.session_state["pa_skeleton_rows"] = list(rows or [])
-            self.session_state["pa_skeleton_path"] = str(self.pa_initial_path)
-            self._log(f"✅ PA skeleton generated at: {self.pa_initial_path}")
+            self.session_state["pa_skeleton_path"] = str(self.pa_skeleton_path)
+            self._log(f"✅ PA skeleton generated at: {self.pa_skeleton_path}")
         except Exception as e:
             self._log(f"❌ Error generating PA skeleton: {e}")
             self._log(traceback.format_exc())
@@ -1430,6 +1439,42 @@ class OfflineApp(tk.Tk):
         self._refresh_expectations_snapshot()
         self._refresh_kpa_breakdown()
 
+    def _generate_ai_pa(self) -> None:
+        if enrich_pa_with_ai is None:
+            messagebox.showerror("AI not available", "backend/contracts/pa_enricher_ai.py could not be loaded.")
+            return
+        if not self._ensure_profile():
+            return
+        if not self.pa_skeleton_rows:
+            messagebox.showwarning(
+                "PA skeleton required",
+                "Generate the PA skeleton before requesting AI enrichment.",
+            )
+            return
+
+        def _worker() -> None:
+            try:
+                self._set_status("Contacting AI for PA enrichment…")
+                enrich_pa_with_ai(self.profile, self.pa_skeleton_rows)
+                if generate_initial_pa is None:
+                    raise RuntimeError("backend/contracts/pa_excel.py not available")
+                out = generate_initial_pa(self.profile, OFFLINE_RESULTS_DIR)
+                self.pa_initial_path = Path(out)
+                self.session_state["pa_initial_path"] = str(self.pa_initial_path)
+                self._log(f"✅ AI-enriched PA generated at: {self.pa_initial_path}")
+                self._set_status("AI enrichment complete")
+            except Exception as e:
+                self._log("AI enrichment failed—manual edit required")
+                self._log(f"❌ AI enrichment error: {e}")
+                self._log(traceback.format_exc())
+                self._set_status("AI enrichment failed—manual edit required")
+            self._rebuild_expectations()
+            _play_sound("vamp.wav")
+            self._refresh_expectations_snapshot()
+            self._refresh_kpa_breakdown()
+
+        threading.Thread(target=_worker, daemon=True).start()
+
     def _export_pa_skeleton(self) -> None:
         if not self._ensure_profile():
             return
@@ -1437,12 +1482,12 @@ class OfflineApp(tk.Tk):
         if self.contract_validation_errors:
             messagebox.showerror("Contract invalid", self.contract_status_reason)
             return
-        if self.pa_initial_path and self.pa_initial_path.exists():
-            _open_file(self.pa_initial_path)
+        if self.pa_skeleton_path and self.pa_skeleton_path.exists():
+            _open_file(self.pa_skeleton_path)
             return
         self._generate_initial_pa()
-        if self.pa_initial_path and self.pa_initial_path.exists():
-            _open_file(self.pa_initial_path)
+        if self.pa_skeleton_path and self.pa_skeleton_path.exists():
+            _open_file(self.pa_skeleton_path)
 
     def _generate_midyear(self) -> None:
         if not self._ensure_profile():
@@ -1489,7 +1534,8 @@ class OfflineApp(tk.Tk):
             self._log("ℹ️ No Task Agreement selected yet – expectations will be limited.")
         try:
             ta_path = str(self.task_agreement_path) if self.task_agreement_path else ""
-            pa_path = str(self.pa_initial_path) if self.pa_initial_path else None
+            pa_path_obj = self.pa_initial_path or self.pa_skeleton_path
+            pa_path = str(pa_path_obj) if pa_path_obj else None
             self.expectations = build_staff_expectations(self.profile.staff_id, ta_path, pa_path)
             self._log("✅ Expectations JSON rebuilt (for contextual scoring).")
         except Exception as e:
