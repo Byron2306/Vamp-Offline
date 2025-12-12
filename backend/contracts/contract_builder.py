@@ -56,6 +56,7 @@ class PerformanceContract:
     valid: bool
     kpis_missing: bool = False
     kpis_generated: bool = False
+    flags: list[dict[str, object]] | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -65,6 +66,7 @@ class PerformanceContract:
             "valid": self.valid,
             "kpis_missing": self.kpis_missing,
             "kpis_generated": self.kpis_generated,
+            "flags": list(self.flags or []),
             "kpas": {code: kpa.to_dict() for code, kpa in self.kpas.items()},
         }
 
@@ -95,6 +97,21 @@ def _find_pa_match(kpa_name: str, pa_names: Iterable[str]) -> Optional[str]:
         if _normalise_name(original) == matched_norm:
             return original
     return None
+
+
+def _extract_norm_hours(ta_kpas: Dict[str, TAPerformanceContract]) -> float:
+    """Pull the norm hours from any TA KPA context, falling back to 1728."""
+
+    for kpa in ta_kpas.values():
+        context = getattr(kpa, "context", {}) or {}
+        if isinstance(context, dict) and "norm_hours" in context:
+            try:
+                norm_hours = float(context.get("norm_hours", 0.0))
+            except Exception:
+                continue
+            if norm_hours > 0:
+                return norm_hours
+    return 1728.0
 
 
 def _extract_field(pa_row: Dict[str, object], target_substring: str, default: object = "") -> object:
@@ -169,6 +186,7 @@ def build_final_contract(
     kpis_generated = False
 
     ta_kpas = _fold_people_management(ta_contract.kpas, director_level)
+    norm_hours = _extract_norm_hours(ta_kpas)
 
     for ta_kpa in ta_kpas.values():
         pa_match_name = _find_pa_match(ta_kpa.name, pa_data.keys()) if pa_data else None
@@ -214,7 +232,21 @@ def build_final_contract(
         )
         kpas[merged_kpa.code] = merged_kpa
 
-    total_weight = sum(k.weight_pct for k in ta_kpas.values())
+    total_weight = sum((k.weight_pct or 0.0) for k in ta_kpas.values())
+    total_hours = sum((k.hours or 0.0) for k in ta_kpas.values())
+    flags: list[dict[str, object]] = []
+
+    if total_hours > norm_hours:
+        delta = total_hours - norm_hours
+        percentage_of_norm = (total_hours / norm_hours) * 100 if norm_hours else 0.0
+        flags.append(
+            {
+                "code": "OVER_HOURS",
+                "delta_hours": delta,
+                "percentage_of_norm": percentage_of_norm,
+            }
+        )
+
     contract = PerformanceContract(
         staff_id=str(ta_contract.staff_id),
         cycle_year=str(ta_contract.cycle_year),
@@ -223,6 +255,7 @@ def build_final_contract(
         valid=ta_contract.valid,
         kpis_missing=not matched_any or any(k.status != "OK" for k in kpas.values()),
         kpis_generated=kpis_generated,
+        flags=flags,
     )
     return contract
 
