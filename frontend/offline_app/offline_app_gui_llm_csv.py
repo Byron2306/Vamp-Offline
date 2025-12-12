@@ -109,6 +109,11 @@ except Exception:
     generate_final_review = None
 
 try:
+    from backend.contracts.pa_generator import generate_pa_skeleton_from_ta  # type: ignore
+except Exception:
+    generate_pa_skeleton_from_ta = None
+
+try:
     from backend.contracts.validation import validate_ta_contract  # type: ignore
 except Exception:
     validate_ta_contract = None
@@ -488,6 +493,8 @@ class OfflineApp(tk.Tk):
         self.contract_validation_errors: List[str] = []
         self.contract_validation_warnings: List[str] = []
         self.kpa2_modules: List[str] = []
+        self.session_state: Dict[str, Any] = {}
+        self.pa_skeleton_rows: List[List[Any]] = []
 
         self.filter_status_var = tk.StringVar(value="All")
         self.filter_kpa_var = tk.StringVar(value="All")
@@ -1407,13 +1414,16 @@ class OfflineApp(tk.Tk):
             messagebox.showerror("Contract invalid", self.contract_status_reason)
             return
         try:
-            if generate_initial_pa is None:
-                raise RuntimeError("backend/contracts/pa_excel.py not available")
-            out = generate_initial_pa(self.profile, OFFLINE_RESULTS_DIR)
+            if generate_pa_skeleton_from_ta is None:
+                raise RuntimeError("backend/contracts/pa_generator.py not available")
+            out, rows = generate_pa_skeleton_from_ta(self.profile, OFFLINE_RESULTS_DIR)
             self.pa_initial_path = Path(out)
-            self._log(f"✅ Initial PA generated at: {self.pa_initial_path}")
+            self.pa_skeleton_rows = list(rows or [])
+            self.session_state["pa_skeleton_rows"] = list(rows or [])
+            self.session_state["pa_skeleton_path"] = str(self.pa_initial_path)
+            self._log(f"✅ PA skeleton generated at: {self.pa_initial_path}")
         except Exception as e:
-            self._log(f"❌ Error generating Initial PA: {e}")
+            self._log(f"❌ Error generating PA skeleton: {e}")
             self._log(traceback.format_exc())
         self._rebuild_expectations()
         _play_sound("vamp.wav")
