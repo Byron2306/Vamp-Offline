@@ -12,6 +12,32 @@ EXPECT_DIR = os.path.join("backend", "data", "staff_expectations")
 os.makedirs(EXPECT_DIR, exist_ok=True)
 
 MODULE_CODE_RE = re.compile(r"[A-Z]{2,6}\s?\d{3,4}[A-Z]{0,3}")
+MONTH_TOKENS = {
+    "jan",
+    "january",
+    "feb",
+    "february",
+    "mar",
+    "march",
+    "apr",
+    "april",
+    "may",
+    "jun",
+    "june",
+    "jul",
+    "july",
+    "aug",
+    "august",
+    "sep",
+    "sept",
+    "september",
+    "oct",
+    "october",
+    "nov",
+    "november",
+    "dec",
+    "december",
+}
 XML_NS = {
     "main": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
     "rel": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
@@ -88,6 +114,20 @@ def _col_to_index(col_letters: str) -> int:
     for ch in col_letters:
         total = total * 26 + (ord(ch.upper()) - ord("A") + 1)
     return max(total - 1, 0)
+
+
+def _extract_month_tokens(text: str) -> List[str]:
+    """Return canonical month tokens detected in a cell value."""
+
+    tokens: List[str] = []
+    lowered = text.lower()
+    for part in re.split(r"[^A-Za-z/]+", lowered):
+        if not part:
+            continue
+        for candidate in part.split("/"):
+            if candidate and candidate in MONTH_TOKENS:
+                tokens.append(candidate.title())
+    return tokens
 
 
 def _iter_sheet_rows(zf: zipfile.ZipFile, sheet_path: str, shared: List[str]) -> Iterable[List[str]]:
@@ -212,7 +252,11 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
             "research": [],
             "leadership": [],
             "social": [],
+            "ohs": [],
             "norm_hours": 0.0,
+            "teaching_modules": [],
+            "teaching_practice_windows": [],
+            "ta_parse_report": {},
         }
 
     current_section: int | None = None
@@ -222,6 +266,11 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
     research: List[str] = []
     leadership: List[str] = []
     social: List[str] = []
+    teaching_practice_windows: List[str] = []
+    ohs: List[str] = []
+
+    ta_parse_report: Dict[int, Dict[str, object]] = {}
+    current_block: str | None = None
 
     norm_hours = 0.0
 
@@ -259,10 +308,47 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
                     current_section = None
             else:
                 current_section = None
+            if current_section is not None:
+                ta_parse_report.setdefault(
+                    current_section,
+                    {
+                        "blocks_detected": set(),
+                        "rows_consumed": 0,
+                        "rows_unconsumed": 0,
+                        "unconsumed_examples": [],
+                    },
+                )
+            current_block = None
             continue
 
         if current_section is None:
             continue
+
+        # Detect block headers within a section (e.g. supervision tables, WIL months)
+        lowered = row_text_lower
+        new_block = None
+        if "supervision" in lowered:
+            new_block = "supervision"
+        elif "practical teaching" in lowered or ("wil" in lowered and "teaching" in lowered):
+            new_block = "teaching_practice_windows"
+        elif "module code" in lowered and "number of students" in lowered:
+            new_block = "module_table"
+        elif "committee" in lowered or "meetings" in lowered:
+            new_block = "committee_roles"
+        elif "research" in lowered and "section" not in lowered:
+            new_block = "research_block"
+        elif "occupational health" in lowered or "ohs" in lowered:
+            new_block = "ohs_block"
+
+        if new_block:
+            if current_block == "supervision" and new_block == "module_table":
+                pass
+            else:
+                current_block = new_block
+
+        if current_block and current_section is not None:
+            ta_parse_report.setdefault(current_section, {"blocks_detected": set(), "rows_consumed": 0, "rows_unconsumed": 0, "unconsumed_examples": []})
+            ta_parse_report[current_section]["blocks_detected"].add(current_block)
 
         # --- Hours column (in FEDU TA it's the 4th column, index 3) ---
         hours_cell = cells[3] if len(cells) > 3 else None
@@ -292,19 +378,66 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
 
         kpa_hours[kpa_code] = kpa_hours.get(kpa_code, 0.0) + hours_val
 
-        # Attach detail to relevant list
-        if kpa_code == "KPA1":
+        consumed = False
+        if current_block == "supervision":
+            if MODULE_CODE_RE.search(detail):
+                teaching.append(detail)
+            else:
+                supervision.append(detail)
+            consumed = True
+        elif current_block == "teaching_practice_windows":
+            months = _extract_month_tokens(detail)
+            if months:
+                teaching_practice_windows.extend(months)
+                consumed = True
+            else:
+                teaching.append(detail)
+                consumed = True
+        elif current_block == "module_table":
             teaching.append(detail)
-        elif kpa_code == "KPA2":
-            social.append(detail)
-        elif kpa_code == "KPA3":
+            consumed = True
+        elif current_block == "committee_roles":
+            leadership.append(detail)
+            consumed = True
+        elif current_block == "research_block":
             research.append(detail)
-        elif kpa_code == "KPA4":
-            leadership.append(detail)
-        elif kpa_code == "KPA5":
-            social.append(detail)
-        elif kpa_code == "KPA6":
-            leadership.append(detail)
+            consumed = True
+        elif current_block == "ohs_block":
+            ohs.append(detail)
+            consumed = True
+        else:
+            # Attach detail to relevant list using default mapping
+            if kpa_code == "KPA1":
+                teaching.append(detail)
+                consumed = True
+            elif kpa_code == "KPA2":
+                ohs.append(detail)
+                consumed = True
+            elif kpa_code == "KPA3":
+                research.append(detail)
+                consumed = True
+            elif kpa_code == "KPA4":
+                leadership.append(detail)
+                consumed = True
+            elif kpa_code == "KPA5":
+                social.append(detail)
+                consumed = True
+            elif kpa_code == "KPA6":
+                leadership.append(detail)
+                consumed = True
+
+        if current_section is not None:
+            ta_parse_report.setdefault(
+                current_section,
+                {"blocks_detected": set(), "rows_consumed": 0, "rows_unconsumed": 0, "unconsumed_examples": []},
+            )
+            if consumed:
+                ta_parse_report[current_section]["rows_consumed"] += 1
+            else:
+                ta_parse_report[current_section]["rows_unconsumed"] += 1
+                examples = ta_parse_report[current_section]["unconsumed_examples"]
+                if isinstance(examples, list) and len(examples) < 5:
+                    examples.append(detail)
 
     # Convert hours to weight %
     total_hours = sum(kpa_hours.values())
@@ -324,6 +457,10 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
         if code == "KPA2" and teaching_modules:
             kpa_summary[code]["teaching_modules"] = teaching_modules
 
+    for report in ta_parse_report.values():
+        if isinstance(report.get("blocks_detected"), set):
+            report["blocks_detected"] = sorted(report["blocks_detected"])  # type: ignore[index]
+
     return {
         "kpa_summary": kpa_summary,
         "teaching": teaching,
@@ -331,8 +468,11 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
         "research": research,
         "leadership": leadership,
         "social": social,
+        "ohs": ohs,
         "norm_hours": norm_hours,
         "teaching_modules": teaching_modules,
+        "teaching_practice_windows": teaching_practice_windows,
+        "ta_parse_report": ta_parse_report,
     }
 
 
