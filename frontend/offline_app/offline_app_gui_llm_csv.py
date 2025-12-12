@@ -111,7 +111,22 @@ except Exception:
     load_staff_expectations = None
 
 try:
-    from backend.vamp_master import generate_run_id, ingest_paths, extract_text_for  # type: ignore
+    from backend.nwu_formats import parse_nwu_ta  # type: ignore
+except Exception:
+    parse_nwu_ta = None
+
+try:
+    from backend.expectation_engine import parse_task_agreement  # type: ignore
+except Exception:
+    parse_task_agreement = None
+
+try:
+    from backend.vamp_master import (
+        ExtractionResult,
+        extract_text_for,
+        generate_run_id,
+        ingest_paths,
+    )  # type: ignore
 except Exception:
     ingest_paths = None
     extract_text_for = None
@@ -192,6 +207,7 @@ CSV_COLUMNS = [
     "status",
     "confidence",
     "impact_summary",
+    "status_reason",
     "extract_status",
     "extract_error",
     "evidence_type",
@@ -305,21 +321,42 @@ def process_artefact(
     extract_status = "ok"
     extract_error = ""
     extracted_text = ""
+    review_reason = ""
 
     if extract_fn is None:
         extract_status = "failed"
         extract_error = "text extractor unavailable"
+        review_reason = "Batch1 extraction unavailable"
         logger(f"{path.name} → ❌ Failed to extract text: {extract_error}")
     else:
         try:
-            extracted_text = extract_fn(path) or ""
-            if not extracted_text.strip():
-                extract_status = "empty"
-                extract_error = "no text extracted"
+            extraction = extract_fn(path)
+            if isinstance(extraction, ExtractionResult):
+                extracted_text = extraction.extracted_text or ""
+                extract_status = extraction.extract_status or "failed"
+                extract_error = extraction.extract_error or ""
+            elif isinstance(extraction, dict):
+                extracted_text = extraction.get("extracted_text", "") or ""
+                extract_status = extraction.get("extract_status", "failed") or "failed"
+                extract_error = extraction.get("extract_error") or ""
+            else:
+                extracted_text = extraction or ""
+                extract_status = "ok" if str(extracted_text).strip() else "failed"
+
+            if not extracted_text.strip() and extract_status == "ok":
+                extract_status = "failed"
+                extract_error = extract_error or "no text extracted"
         except Exception as e:
             extract_status = "failed"
             extract_error = str(e)
+            review_reason = f"Batch1 extraction error: {e}"
             logger(f"{path.name} → ❌ Failed to extract text: {e}")
+
+    if extract_status != "ok" and not review_reason:
+        origin = "Batch1 extraction"
+        if extract_status == "image_no_ocr":
+            origin = "Batch1 image OCR"
+        review_reason = f"{origin}: {extract_error or 'no text extracted'}"
 
     ctx: Dict[str, Any] = _default_ctx(kpa_hint)
     scoring_available = False
@@ -339,6 +376,7 @@ def process_artefact(
                 )
             except Exception as ex:
                 scoring_error = True
+                review_reason = review_reason or f"Batch7 contextual scoring error: {ex}"
                 logger(f"{path.name} → ⚠️ Contextual scoring error (fallback to brain): {ex}")
                 ctx = {}
         if (not ctx or not ctx.get("primary_kpa_code")) and brain_fn is not None:
@@ -349,6 +387,7 @@ def process_artefact(
                 ctx.setdefault("raw_llm_json", {})
             except Exception as ex:
                 scoring_error = True
+                review_reason = review_reason or f"Batch7 brain scoring error: {ex}"
                 logger(f"{path.name} → ❌ Brain scoring error: {ex}")
         ctx = _normalize_ctx(ctx, kpa_hint)
     else:
@@ -361,10 +400,20 @@ def process_artefact(
     else:
         status = "UNSCORABLE"
 
+    if status != "SCORED" and not review_reason:
+        if extract_status != "ok":
+            review_reason = f"Batch1 extraction issue: {extract_error or 'no text'}"
+        elif not scoring_available:
+            review_reason = "Batch7 scoring unavailable"
+        elif scoring_error:
+            review_reason = "Batch7 scoring error"
+
     evidence_type = _guess_evidence_type(path)
     kpa_code = str(ctx.get("primary_kpa_code") or "").strip()
     kpa_name = str(ctx.get("primary_kpa_name") or "").strip() or "Unknown"
     impact = (ctx.get("impact_summary") or ctx.get("contextual_response") or "").strip()
+    if not impact and review_reason:
+        impact = review_reason
     confidence = ctx.get("confidence")
     try:
         confidence_val = float(confidence) if confidence is not None else None
@@ -388,6 +437,7 @@ def process_artefact(
         "status": status,
         "confidence": confidence_pct,
         "impact_summary": impact,
+        "status_reason": review_reason,
         "evidence_type": evidence_type,
         "extract_status": extract_status,
         "extract_error": extract_error,
@@ -426,6 +476,8 @@ class OfflineApp(tk.Tk):
         self.rows: List[Dict[str, Any]] = []
         self.detail_rows: Dict[str, Dict[str, Any]] = {}
         self._detail_counter = 0
+        self.contract_validation_errors: List[str] = []
+        self.kpa2_modules: List[str] = []
 
         self.filter_status_var = tk.StringVar(value="All")
         self.filter_kpa_var = tk.StringVar(value="All")
@@ -602,6 +654,17 @@ class OfflineApp(tk.Tk):
         self.kpa_tree.configure(yscrollcommand=ykpa.set)
         ykpa.grid(row=1, column=1, sticky="ns", pady=(0, 8))
 
+        self.modules_var = tk.StringVar(value="Teaching modules: –")
+        tk.Label(
+            col2,
+            textvariable=self.modules_var,
+            bg=self._colors["panel"],
+            fg=self._colors["fg"],
+            font=(self.cinzel_family, 10),
+            wraplength=320,
+            justify="left",
+        ).grid(row=2, column=0, columnspan=2, sticky="w", padx=10, pady=(0, 6))
+
         # Column 3: Scan & export controls
         col3 = self._panel(wrapper)
         col3.grid(row=1, column=2, sticky="nsew", padx=(6, 8), pady=6)
@@ -716,7 +779,17 @@ class OfflineApp(tk.Tk):
         meta.grid(row=1, column=0, sticky="ew", padx=10)
         meta.columnconfigure(1, weight=1)
         self.detail_labels: Dict[str, tk.StringVar] = {}
-        for idx, key in enumerate(["Filename", "Evidence Type", "Status", "Final Rating", "Final Tier", "Confidence", "KPA", "KPI"]):
+        for idx, key in enumerate([
+            "Filename",
+            "Evidence Type",
+            "Status",
+            "Review Reason",
+            "Final Rating",
+            "Final Tier",
+            "Confidence",
+            "KPA",
+            "KPI",
+        ]):
             tk.Label(meta, text=f"{key}:", bg=self._colors["panel"], fg=self._colors["fg"], font=(self.cinzel_family, 10)).grid(row=idx, column=0, sticky="w", pady=1)
             var = tk.StringVar(value="–")
             self.detail_labels[key] = var
@@ -1122,6 +1195,8 @@ class OfflineApp(tk.Tk):
                 var.set(row.get("evidence_type", "–"))
             elif key == "Status":
                 var.set(row.get("status", "–"))
+            elif key == "Review Reason":
+                var.set(row.get("status_reason") or "–")
             elif key == "Final Rating":
                 var.set(str(row.get("rating") or "–"))
             elif key == "Final Tier":
@@ -1208,6 +1283,8 @@ class OfflineApp(tk.Tk):
             faculty=faculty,
             line_manager=mgr,
         )
+        self.contract_validation_errors = []
+        self.kpa2_modules = []
         self.staff_status.configure(
             text=f"Enrolled: {self.profile.name} ({self.profile.staff_id}) | {self.profile.position} | {self.profile.cycle_year}"
         )
@@ -1227,6 +1304,8 @@ class OfflineApp(tk.Tk):
         if not path:
             return
         self.task_agreement_path = Path(path)
+        self.contract_validation_errors = []
+        self.kpa2_modules = []
 
         try:
             if import_task_agreement_excel is not None:
@@ -1237,6 +1316,46 @@ class OfflineApp(tk.Tk):
         except Exception as e:
             self._log(f"❌ Task Agreement import failed: {e}")
             self._log(traceback.format_exc())
+
+        # Validate TA structure and capture teaching modules for KPA2 context
+        if parse_nwu_ta is not None:
+            try:
+                ta_contract = parse_nwu_ta(str(self.task_agreement_path))
+                self.contract_validation_errors = list(
+                    getattr(ta_contract, "validation_errors", []) or []
+                )
+                if getattr(ta_contract, "status", "OK") == "INVALID_TA":
+                    self.contract_validation_errors.append("TA marked invalid")
+                # Propagate hours/weights/context into the profile for visibility
+                if self.profile is not None:
+                    kpa_map = {k.code: k for k in self.profile.kpas}
+                    for code, kpa_data in getattr(ta_contract, "kpas", {}).items():
+                        if code in kpa_map:
+                            kpa_map[code].hours = getattr(kpa_data, "hours", None)
+                            kpa_map[code].weight = getattr(kpa_data, "weight_pct", None)
+                            ctx = getattr(kpa_data, "context", {}) or {}
+                            if isinstance(ctx, dict):
+                                kpa_map[code].context = ctx
+                            if code == "KPA2":
+                                self.kpa2_modules = list(ctx.get("modules", [])) if isinstance(ctx, dict) else []
+                    self.profile.save()
+            except Exception as e:
+                self.contract_validation_errors.append(f"TA parse failed: {e}")
+
+        if parse_task_agreement is not None and not self.kpa2_modules:
+            try:
+                summary = parse_task_agreement(str(self.task_agreement_path)) or {}
+                modules = summary.get("teaching_modules") or []
+                if modules:
+                    self.kpa2_modules = list(modules)
+                    if self.profile is not None:
+                        for k in self.profile.kpas:
+                            if k.code == "KPA2":
+                                k.context = k.context or {}
+                                k.context["modules"] = list(modules)
+                        self.profile.save()
+            except Exception:
+                pass
 
         # Build expectations JSON (used by Ollama prompt + UI snapshot)
         self._rebuild_expectations()
@@ -1357,6 +1476,16 @@ class OfflineApp(tk.Tk):
                 "end",
                 values=[code, name, hours if hours is not None else "–", weight if weight is not None else "–", status],
             )
+        modules = list(self.kpa2_modules)
+        if not modules and kpa_lookup.get("KPA2"):
+            context = getattr(kpa_lookup.get("KPA2"), "context", {}) or {}
+            if isinstance(context, dict):
+                modules = list(context.get("modules") or [])
+        if hasattr(self, "modules_var"):
+            if modules:
+                self.modules_var.set("Teaching modules: " + "; ".join(modules))
+            else:
+                self.modules_var.set("Teaching modules: –")
         self._update_contract_status()
 
     def _update_contract_status(self) -> None:
@@ -1365,10 +1494,15 @@ class OfflineApp(tk.Tk):
             self.contract_status_var.set("❌ No Contract")
             self.contract_status_reason = "No valid Task/Performance Agreement loaded."
             self.start_btn.state(["disabled"])
+            self._refresh_action_states()
             return
         kpas = profile.kpas or []
         missing = [k for k in kpas if not (getattr(k, "hours", 0) and getattr(k, "weight", 0))]
-        if missing:
+        if self.contract_validation_errors:
+            self.contract_status_var.set("❌ Contract Invalid")
+            self.contract_status_reason = "; ".join(self.contract_validation_errors)
+            self.start_btn.state(["disabled"])
+        elif missing:
             self.contract_status_var.set("⚠️ Contract Incomplete")
             self.contract_status_reason = "KPAs are missing hours/weights. Add them in the contract before scanning."
             self.start_btn.state(["disabled"])
@@ -1376,6 +1510,21 @@ class OfflineApp(tk.Tk):
             self.contract_status_var.set("✅ Contract Loaded")
             self.contract_status_reason = "All KPAs have hours and weights."
             self.start_btn.state(["!disabled"])
+        self._refresh_action_states()
+
+    def _refresh_action_states(self) -> None:
+        """Synchronise button states with contract/scanning readiness."""
+
+        if hasattr(self, "start_btn"):
+            if self.contract_validation_errors:
+                self.start_btn.state(["disabled"])
+
+        if hasattr(self, "export_pa_btn"):
+            # Disable export when Batch 8-style summaries are incomplete
+            if not self.rows or any(r.get("status") != "SCORED" for r in self.rows):
+                self.export_pa_btn.state(["disabled"])
+            else:
+                self.export_pa_btn.state(["!disabled"])
 
     def _show_contract_tooltip(self) -> None:
         messagebox.showinfo("Contract status", self.contract_status_reason)
@@ -1403,7 +1552,7 @@ class OfflineApp(tk.Tk):
         self._update_contract_status()
         status_text = self.contract_status_var.get()
         if status_text.startswith("❌"):
-            messagebox.showerror("No contract", "No valid Task/Performance Agreement loaded.")
+            messagebox.showerror("Contract invalid", self.contract_status_reason)
             return
         if status_text.startswith("⚠️"):
             messagebox.showwarning("Contract incomplete", self.contract_status_reason)
@@ -1451,6 +1600,11 @@ class OfflineApp(tk.Tk):
                 if kpa.hours is not None:
                     kpa_line += f" | hours={kpa.hours}"
                 parts.append(kpa_line)
+                kpa_context = getattr(kpa, "context", {}) or {}
+                if kpa.code == "KPA2":
+                    modules = kpa_context.get("modules") or self.kpa2_modules
+                    if modules:
+                        parts.append("  • Modules: " + ", ".join(modules))
                 # Show top few KPIs as anchors (avoid huge prompts)
                 for kpi in (kpa.kpis or [])[:6]:
                     desc = (kpi.description or "").strip()
@@ -1524,6 +1678,7 @@ class OfflineApp(tk.Tk):
             self.detail_rows.clear()
             self._detail_counter = 0
             self.after(0, lambda: self.tree.delete(*self.tree.get_children()))
+            self._refresh_action_states()
             self._log(f"🔎 Starting scan of {len(artefacts)} artefacts for month {month_bucket}…")
 
             for path in artefacts:
@@ -1558,10 +1713,9 @@ class OfflineApp(tk.Tk):
 
                 if impact:
                     self._log(f"{path.name} → {impact}")
-                elif row.get("status") == "NEEDS_REVIEW":
-                    self._log(f"{path.name} → needs review (no impact summary)")
                 else:
-                    self._log(f"{path.name} → (no impact summary)")
+                    reason = row.get("status_reason") or row.get("status")
+                    self._log(f"{path.name} → {reason or '(no impact summary)'}")
 
                 # 5) Persist detailed evidence row (longitudinal log)
                 if append_evidence_row is not None:
@@ -1600,6 +1754,7 @@ class OfflineApp(tk.Tk):
                             "status": row.get("status", ""),
                             "extract_status": row.get("extract_status", ""),
                             "extract_error": row.get("extract_error", ""),
+                            "status_reason": row.get("status_reason", ""),
                         }
                         append_evidence_row(profile.staff_id, profile.cycle_year, evidence_row)
                     except Exception as ex:
@@ -1621,6 +1776,7 @@ class OfflineApp(tk.Tk):
 
             self._set_status("Idle")
             self._update_summary_panel()
+            self._refresh_action_states()
             self._log("✅ Scan complete.")
             _play_sound("vamp.wav")
 

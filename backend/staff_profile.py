@@ -36,6 +36,7 @@ class KPA:
     weight: Optional[float] = None
     hours: Optional[float] = None
     kpis: List[KPI] = field(default_factory=list)
+    context: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -77,6 +78,7 @@ class StaffProfile:
                 weight=k.get("weight"),
                 hours=k.get("hours"),
                 kpis=kpis,
+                context=k.get("context", {}),
             )
             kpas.append(kpa)
 

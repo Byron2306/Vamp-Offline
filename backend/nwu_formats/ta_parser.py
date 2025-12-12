@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 
 from openpyxl import load_workbook  # type: ignore
 
@@ -23,6 +23,11 @@ class PerformanceKPA:
     kpis: List = None
     outcomes: List = None
     active: bool = True
+    context: Dict[str, Any] | None = None
+    source_sheet: str | None = None
+    row_number: int | None = None
+    status: str = "OK"
+    validation_note: str | None = None
 
     def __post_init__(self) -> None:
         self.outputs = [] if self.outputs is None else self.outputs
@@ -39,6 +44,9 @@ class PerformanceContract:
     kpas: Dict[str, PerformanceKPA]
     total_weight_pct: float
     valid: bool
+    status: str = "OK"
+    validation_errors: List[str] = field(default_factory=list)
+    snapshot: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict:
         return {
@@ -47,6 +55,9 @@ class PerformanceContract:
             "total_weight_pct": self.total_weight_pct,
             "valid": self.valid,
             "kpas": {code: asdict(kpa) for code, kpa in self.kpas.items()},
+            "status": self.status,
+            "validation_errors": list(self.validation_errors),
+            "snapshot": self.snapshot,
         }
 
 
@@ -76,35 +87,76 @@ def _extract_section_number(text: str) -> int | None:
 
 def _detect_sheet(path_to_xlsx: str):
     wb = load_workbook(filename=path_to_xlsx, data_only=True)
-    if "Task Agreement Form" in wb.sheetnames:
-        return wb["Task Agreement Form"], wb
-    return wb[wb.sheetnames[0]], wb
+    chosen = wb.sheetnames[0]
+    for sheet_name in wb.sheetnames:
+        if "task agreement" in sheet_name.lower():
+            chosen = sheet_name
+            break
+    return wb[chosen], wb, chosen
+
+
+def _is_numeric(value: object) -> bool:
+    try:
+        float(value)
+        return True
+    except Exception:
+        return False
 
 
 def parse_nwu_ta(path_to_xlsx: str) -> PerformanceContract:
     """Parse NWU Task Agreement grand totals into a PerformanceContract."""
-
-    ws, wb = _detect_sheet(path_to_xlsx)
-
+    validation_errors: List[str] = []
+    snapshot_rows: List[Dict[str, Any]] = []
     kpas: Dict[str, PerformanceKPA] = {}
+    sheet_name = "unknown"
 
-    for row in ws.iter_rows(values_only=True):
+    try:
+        ws, wb, sheet_name = _detect_sheet(path_to_xlsx)
+    except Exception as exc:
+        contract = PerformanceContract(
+            staff_id="unknown_staff",
+            cycle_year="unknown_year",
+            kpas={},
+            total_weight_pct=0.0,
+            valid=False,
+            status="INVALID_TA",
+            validation_errors=[str(exc)],
+        )
+        _save_snapshot(contract)
+        return contract
+
+    for idx, row in enumerate(ws.iter_rows(values_only=True), start=1):
         if not row or not row[0]:
             continue
         label = str(row[0]).strip()
-        if not label.lower().startswith("grand total: section"):
+        m = re.search(r"GRAND\s+TOTAL\s*:\s*SECTION\s+(\d+)", label, re.IGNORECASE)
+        if not m:
             continue
 
         section_num = _extract_section_number(label)
         if section_num is None:
+            validation_errors.append(f"Row {idx}: could not detect section number")
             continue
 
         mapping = SECTION_KPA_MAP.get(section_num)
         if mapping is None:
+            validation_errors.append(f"Row {idx}: unknown section {section_num}")
             continue
 
-        hours = _safe_float(row[3] if len(row) > 3 else 0)
-        weight_pct = _safe_float(row[4] if len(row) > 4 else 0)
+        if len(row) <= 4:
+            validation_errors.append(f"Row {idx}: missing hours/weight columns D/E")
+            continue
+
+        hours_raw = row[3]
+        weight_raw = row[4] if len(row) > 4 else None
+        if not _is_numeric(hours_raw) or not _is_numeric(weight_raw):
+            validation_errors.append(
+                f"Row {idx}: non-numeric hours/weight in columns D/E"
+            )
+            continue
+
+        hours = _safe_float(hours_raw)
+        weight_pct = _safe_float(weight_raw)
 
         code, name = mapping
         kpa = PerformanceKPA(
@@ -116,15 +168,51 @@ def parse_nwu_ta(path_to_xlsx: str) -> PerformanceContract:
             kpis=[],
             outcomes=[],
             active=True,
+            context={},
+            source_sheet=sheet_name,
+            row_number=idx,
         )
         kpas[kpa.code] = kpa
+        snapshot_rows.append(
+            {
+                "section": section_num,
+                "sheet": sheet_name,
+                "row_number": idx,
+                "label": label,
+                "hours_raw": hours_raw,
+                "weight_raw": weight_raw,
+                "hours": hours,
+                "weight_pct": weight_pct,
+            }
+        )
+
+    # Attach teaching modules from Addendum B if available
+    modules: List[str] = []
+    try:
+        from backend.expectation_engine import parse_task_agreement  # type: ignore
+
+        summary = parse_task_agreement(path_to_xlsx)
+        modules = summary.get("teaching_modules") or []
+    except Exception:
+        modules = []
+
+    if modules and "KPA2" in kpas:
+        kpa2 = kpas["KPA2"]
+        kpa2.context = kpa2.context or {}
+        kpa2.context["modules"] = modules
 
     total_weight = sum(kpa.weight_pct for kpa in kpas.values())
-    is_valid = abs(total_weight - 100.0) < 0.5
+    is_valid = bool(kpas) and abs(total_weight - 100.0) < 0.5 and not validation_errors
+    status = "OK" if is_valid else "INVALID_TA"
 
     # Fallback metadata if we cannot read it from the workbook properties
-    staff_id = wb.properties.creator or "unknown_staff"
-    cycle_year = wb.properties.created and wb.properties.created.year
+    try:
+        staff_id = getattr(wb.properties, "creator", None) or "unknown_staff"
+        created = getattr(wb.properties, "created", None)
+        cycle_year = created.year if created else None
+    except Exception:
+        staff_id = "unknown_staff"
+        cycle_year = None
     cycle_year = str(cycle_year) if cycle_year else "unknown_year"
 
     contract = PerformanceContract(
@@ -133,6 +221,9 @@ def parse_nwu_ta(path_to_xlsx: str) -> PerformanceContract:
         kpas=kpas,
         total_weight_pct=total_weight,
         valid=is_valid,
+        status=status,
+        validation_errors=validation_errors,
+        snapshot={"sheet": sheet_name, "grand_totals": snapshot_rows, "modules": modules},
     )
 
     _save_snapshot(contract)

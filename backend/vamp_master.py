@@ -80,6 +80,13 @@ def generate_run_id() -> str:
 # -------------------------
 
 
+@dataclass
+class ExtractionResult:
+    extracted_text: str
+    extract_status: str
+    extract_error: Optional[str] = None
+
+
 def _bytes_decode_guess(raw: bytes) -> str:
     """Best-effort bytes→str with chardet fallback."""
     try:
@@ -204,39 +211,73 @@ def txt_from_pptx(path: Path) -> str:
         return ""
 
 
-def extract_text_for(path: Path, size_limit: int = 200_000) -> str:
-    """Deep Read extraction; on failure returns filename only.
+def _is_image(ext: str) -> bool:
+    return ext in {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp"}
 
-    This is the same logic used in the full VAMP stack, but packaged here
-    without any dependency on NWUScorer or agent state.
-    """
-    name = path.name.lower()
+
+def extract_text_for(path: Path, size_limit: int = 200_000) -> ExtractionResult:
+    """Deep Read extraction that always reports a status and error context."""
+
+    name = path.name
+    ext = path.suffix.lower()
+    text = ""
+    status = "ok"
+    error: Optional[str] = None
+
     try:
-        if name.endswith(".pdf"):
-            s = txt_from_pdf(path)
-        elif name.endswith(".docx"):
-            s = txt_from_docx(path)
-        elif name.endswith(".xlsx"):
-            s = txt_from_xlsx(path)
-        elif name.endswith(".pptx"):
-            s = txt_from_pptx(path)
-        elif name.endswith((".txt", ".md", ".csv", ".log")):
-            s = _bytes_decode_guess(path.read_bytes())
-        elif name.endswith(".zip"):
+        if ext == ".pdf":
+            text = txt_from_pdf(path)
+        elif ext == ".docx":
+            text = txt_from_docx(path)
+        elif ext in {".xlsx", ".xls", ".xlsm"}:
+            text = txt_from_xlsx(path)
+            if not text.strip():
+                status = "empty_sheet"
+        elif ext == ".pptx":
+            text = txt_from_pptx(path)
+        elif ext in {".txt", ".md", ".csv", ".log"}:
+            text = _bytes_decode_guess(path.read_bytes())
+        elif _is_image(ext):
+            if not OCR_AVAILABLE:
+                status = "image_no_ocr"
+                error = _OCR_ERROR or "OCR dependencies not available"
+                text = "IMAGE_EVIDENCE_REQUIRES_MANUAL_REVIEW"
+            else:
+                try:
+                    img = Image.open(path)  # type: ignore[arg-type]
+                    text = pytesseract.image_to_string(img, config="--psm 6")  # type: ignore[name-defined]
+                    if not text.strip():
+                        status = "failed"
+                        error = "OCR returned no text"
+                except Exception as ocr_exc:  # pragma: no cover - best-effort logging
+                    status = "failed"
+                    error = str(ocr_exc)
+        elif ext == ".zip":
             try:
                 with zipfile.ZipFile(str(path), "r") as zf:
                     inner = zf.namelist()[:80]
-                    s = "ZIP " + " | ".join(inner)
-            except Exception:
-                s = name
+                    text = "ZIP " + " | ".join(inner)
+                    status = "unsupported"
+            except Exception as zip_exc:
+                status = "failed"
+                error = str(zip_exc)
         else:
-            s = name
-    except Exception:
-        s = name
-    s = s or name
-    if len(s) > size_limit:
-        s = s[:size_limit]
-    return s
+            status = "unsupported"
+            text = name
+    except Exception as exc:  # pragma: no cover - defensive
+        text = ""
+        status = "failed"
+        error = str(exc)
+
+    text = text or ""
+    if len(text) > size_limit:
+        text = text[:size_limit]
+
+    if status == "ok" and not text.strip():
+        status = "failed"
+        error = error or "no text extracted"
+
+    return ExtractionResult(extracted_text=text, extract_status=status, extract_error=error)
 
 
 # -------------------------
