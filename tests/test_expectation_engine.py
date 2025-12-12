@@ -46,3 +46,24 @@ def test_supervision_rows_are_classified_and_reported():
     assert section2_report.get("rows_unconsumed", 0) < section2_report.get(
         "rows_consumed", 0
     )
+
+
+def test_people_management_is_folded_for_non_directors():
+    from backend import expectation_engine as ee
+
+    folded = ee._fold_people_management_summary(  # type: ignore[attr-defined]
+        {
+            "kpa_summary": {
+                "KPA4": {"hours": 500.0, "weight_pct": 40.0, "name": "Leadership"},
+                "KPA6": {"hours": 120.0, "weight_pct": 10.0, "name": "People Management"},
+            },
+            "people_management": ["coach", "support"],
+        },
+        director_level=False,
+    )
+
+    kpa_summary = folded.get("kpa_summary", {})
+    assert "KPA6" not in kpa_summary
+    assert kpa_summary.get("KPA4", {}).get("hours") == 620.0
+    assert kpa_summary.get("KPA4", {}).get("weight_pct") == 50.0
+    assert folded.get("people_management") == ["coach", "support"]

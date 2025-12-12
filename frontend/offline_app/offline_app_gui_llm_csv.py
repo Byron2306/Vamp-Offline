@@ -679,6 +679,29 @@ class OfflineApp(tk.Tk):
         if hasattr(self, "export_pa_btn"):
             state = "normal" if ai_ready and not contract_invalid else "disabled"
             self.export_pa_btn.configure(state=state)
+        if hasattr(self, "btn_gen_ai"):
+            state = "normal" if skeleton_ready and not ai_running else "disabled"
+            self.btn_gen_ai.configure(state=state)
+
+        if hasattr(self, "btn_export_pa"):
+            state = "normal" if ai_ready else "disabled"
+            self.btn_export_pa.configure(state=state)
+
+        if hasattr(self, "generate_skeleton_btn"):
+            state = "normal" if ta_valid else "disabled"
+            self.generate_skeleton_btn.configure(state=state)
+        if hasattr(self, "export_skeleton_btn"):
+            state = "normal" if skeleton_ready or ta_valid else "disabled"
+            self.export_skeleton_btn.configure(state=state)
+        if hasattr(self, "export_pa_btn"):
+            state = "normal" if ai_ready and not contract_invalid else "disabled"
+            self.export_pa_btn.configure(state=state)
+            self.btn_gen_skeleton.configure(state=("normal" if getattr(self, "ta_valid", False) else "disabled"))
+        if hasattr(self, "btn_gen_ai"):
+            self.btn_gen_ai.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
+
+        if hasattr(self, "btn_export_pa"):
+            self.btn_export_pa.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
 
         if hasattr(self, "start_btn"):
             evidence_folder = getattr(self, "evidence_folder", None) or self.current_evidence_folder
@@ -1613,6 +1636,7 @@ class OfflineApp(tk.Tk):
         self.pa_skeleton_path = None
         self.pa_ai_path = None
         self.ai_enrich_status = "Awaiting skeleton"
+        director_level = staff_is_director_level(self.profile) if self.profile else False
 
         try:
             if import_task_agreement_excel is not None:
@@ -1627,7 +1651,6 @@ class OfflineApp(tk.Tk):
         # Validate TA structure and capture teaching modules for KPA2 context
         if parse_nwu_ta is not None:
             try:
-                director_level = staff_is_director_level(self.profile) if self.profile else False
                 ta_contract = parse_nwu_ta(
                     str(self.task_agreement_path), director_level=director_level
                 )
@@ -1675,7 +1698,9 @@ class OfflineApp(tk.Tk):
 
         if parse_task_agreement is not None and not self.kpa2_modules:
             try:
-                summary = parse_task_agreement(str(self.task_agreement_path)) or {}
+                summary = parse_task_agreement(
+                    str(self.task_agreement_path), director_level=director_level
+                ) or {}
                 modules = summary.get("teaching_modules") or []
                 if modules:
                     self.kpa2_modules = list(modules)
@@ -1997,6 +2022,11 @@ class OfflineApp(tk.Tk):
             self.expectations = self.expectations or self._summary_from_profile_only()
             kpa_summary = self.expectations.get("kpa_summary") or {}
 
+
+        if not kpa_summary and self.profile:
+            self.expectations = self.expectations or self._summary_from_profile_only()
+            kpa_summary = self.expectations.get("kpa_summary") or {}
+
         lines: List[str] = []
         for kpa_label, details in kpa_summary.items():
             weight = details.get("weight", "–") if isinstance(details, dict) else "–"
@@ -2038,8 +2068,10 @@ class OfflineApp(tk.Tk):
                 self.kpa_health_tree.delete(iid)
         profile = self.profile
         kpas = profile.kpas if profile else []
-        # Always show KPA1-6 ordering even if missing
-        code_order = [f"KPA{i}" for i in range(1, 7)]
+        director_level = staff_is_director_level(profile) if profile else False
+        code_order = [f"KPA{i}" for i in range(1, 6)]
+        if director_level:
+            code_order.append("KPA6")
         kpa_lookup = {k.code: k for k in (kpas or [])}
         for code in code_order:
             kpa = kpa_lookup.get(code)
