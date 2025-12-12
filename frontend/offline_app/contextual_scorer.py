@@ -124,6 +124,19 @@ def _summarise_expectations_for_prompt(staff_id: Optional[str], expectations: Di
             else:
                 lines.append(f"- {code_guess} ({name}): {detail}. (No specific bullet expectations captured.)")
 
+    kpa2_modules = []
+    kpa2_data = kpa_summary.get("KPA2") if kpa_summary else None
+    if isinstance(kpa2_data, dict):
+        raw_modules = kpa2_data.get("teaching_modules") or []
+        kpa2_modules = [str(m).strip() for m in raw_modules if str(m).strip()]
+
+    if kpa2_modules:
+        module_line = ", ".join(kpa2_modules[:8])
+        extra = len(kpa2_modules) - 8
+        if extra > 0:
+            module_line += f" (+{extra} more)"
+        lines.append(f"Teaching modules (Addendum B): {module_line}")
+
     # Add light examples across domains if present
     for key, label, n in [
         ("teaching", "Teaching modules/responsibilities", 6),

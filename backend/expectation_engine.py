@@ -1,6 +1,7 @@
 import os
 import json
 import math
+import re
 from typing import Dict, Any, List, Tuple
 
 import pandas as pd
@@ -8,6 +9,8 @@ import pandas as pd
 # Where we stash the JSON summary that the LLM can use
 EXPECT_DIR = os.path.join("backend", "data", "staff_expectations")
 os.makedirs(EXPECT_DIR, exist_ok=True)
+
+MODULE_CODE_RE = re.compile(r"[A-Z]{2,6}\s?\d{3,4}[A-Z]{0,3}")
 
 
 # ----------------------------
@@ -34,6 +37,44 @@ def _safe_float(v) -> float:
     if isinstance(f, float) and math.isnan(f):
         return 0.0
     return f
+
+
+def _extract_teaching_modules_from_addendum(xls: pd.ExcelFile) -> List[str]:
+    """
+    Read the Addendum B sheet (module list) and extract module codes.
+
+    The data is attached to KPA2 as contextual metadata and does not
+    affect any scoring/weight calculations.
+    """
+
+    target_sheet = None
+    for name in xls.sheet_names:
+        norm = name.lower().strip()
+        if "addendumb" in norm and "section 2" in norm:
+            target_sheet = name
+            break
+
+    if target_sheet is None:
+        return []
+
+    try:
+        df_addendum = pd.read_excel(xls, sheet_name=target_sheet, header=None, dtype=str)
+    except Exception:
+        return []
+
+    teaching_modules: List[str] = []
+    seen: set[str] = set()
+
+    for value in df_addendum.to_numpy().ravel():
+        if pd.isna(value):
+            continue
+        for match in MODULE_CODE_RE.findall(str(value)):
+            code = match.replace(" ", "").upper()
+            if code not in seen:
+                seen.add(code)
+                teaching_modules.append(code)
+
+    return teaching_modules
 
 
 # Mapping of TA "SECTION X" to NWU KPA codes and names
@@ -81,6 +122,7 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
         if sheet_name not in xls.sheet_names:
             sheet_name = xls.sheet_names[0]
         df = pd.read_excel(excel_path, sheet_name=sheet_name, header=None)
+        teaching_modules = _extract_teaching_modules_from_addendum(xls)
     except Exception as e:
         print(f"[expectation_engine] Error reading TA file {excel_path}: {e}")
         return {
@@ -212,6 +254,16 @@ def parse_task_agreement(excel_path: str) -> Dict[str, Any]:
             "hours": round(hours, 2),
             "weight_pct": weight_pct,
         }
+
+    if teaching_modules:
+        kpa2_default_name = SECTION_TO_KPA.get(5, ("KPA2", "KPA2"))[1]
+        kpa2_entry = kpa_summary.get("KPA2", {
+            "name": kpa2_default_name,
+            "hours": 0.0,
+            "weight_pct": 0.0,
+        })
+        kpa2_entry["teaching_modules"] = teaching_modules
+        kpa_summary["KPA2"] = kpa2_entry
 
     summary: Dict[str, Any] = {
         "norm_hours": norm_hours,
@@ -364,6 +416,17 @@ def format_expectations_summary(summary: Dict[str, Any]) -> str:
             lines.append(f" • (+{len(teaching) - 8} more teaching items)")
     else:
         lines.append(" • (No modules specified with hours)")
+
+    teaching_modules = (
+        summary.get("kpa_summary", {})
+        .get("KPA2", {})
+        .get("teaching_modules", [])
+    )
+    if teaching_modules:
+        preview = ", ".join(teaching_modules[:8])
+        extra = len(teaching_modules) - 8
+        suffix = f" (+{extra} more)" if extra > 0 else ""
+        lines.append(f" • Modules (Addendum B): {preview}{suffix}")
 
     # Supervision
     lines.append("\nSupervision expectations:")
