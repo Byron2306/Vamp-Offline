@@ -559,19 +559,22 @@ class OfflineApp(tk.Tk):
         self.cinzel_family = "Cinzel"
         self._configure_styles()
 
-        # Layout: three vertical zones
+        # Layout: three vertical zones held in a PanedWindow so the user can resize
+        # and, critically, so each panel retains a minimum size instead of collapsing
+        # and disappearing on smaller displays.
         self.configure(bg=self._colors["bg"])
-        self.top_panel = tk.Frame(self, bg=self._colors["bg"], height=260)
-        self.top_panel.grid(row=0, column=0, sticky="nsew")
-        self.middle_panel = tk.Frame(self, bg=self._colors["bg"])
-        self.middle_panel.grid(row=1, column=0, sticky="nsew")
-        self.bottom_panel = tk.Frame(self, bg=self._colors["bg"])
-        self.bottom_panel.grid(row=2, column=0, sticky="nsew")
-
-        self.rowconfigure(0, weight=0, minsize=240)
-        self.rowconfigure(1, weight=3)
-        self.rowconfigure(2, weight=2, minsize=220)
+        self.main_split = ttk.PanedWindow(self, orient="vertical")
+        self.main_split.grid(row=0, column=0, sticky="nsew")
+        self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
+
+        self.top_panel = tk.Frame(self.main_split, bg=self._colors["bg"], height=260)
+        self.middle_panel = tk.Frame(self.main_split, bg=self._colors["bg"])
+        self.bottom_panel = tk.Frame(self.main_split, bg=self._colors["bg"])
+
+        self.main_split.add(self.top_panel, weight=1, minsize=240)
+        self.main_split.add(self.middle_panel, weight=3, minsize=220)
+        self.main_split.add(self.bottom_panel, weight=2, minsize=220)
 
         self._build_top_dashboard()
         self._build_middle_table()
