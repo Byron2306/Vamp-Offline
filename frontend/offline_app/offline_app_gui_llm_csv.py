@@ -529,6 +529,12 @@ class OfflineApp(tk.Tk):
 
         self.selected_detail: Dict[str, Any] = {}
 
+        # Status badge vars (top-of-UI indicators)
+        self.contract_loaded_status_var = tk.StringVar(value="Contract Loaded: ❌")
+        self.ta_imported_status_var = tk.StringVar(value="TA Imported: ❌")
+        self.pa_skeleton_status_var = tk.StringVar(value="PA Skeleton: ❌")
+        self.ai_enriched_status_var = tk.StringVar(value="AI Enriched: ❌")
+
         # UI handoff queue to keep worker threads away from Tk operations
         self.ui_queue: "queue.Queue[Tuple[Any, ...]]" = queue.Queue()
         self.after(80, self._drain_ui_queue)
@@ -656,6 +662,23 @@ class OfflineApp(tk.Tk):
         if hasattr(self, "btn_gen_skeleton"):
             state = "normal" if ta_valid and not getattr(self, "ta_import_running", False) else "disabled"
             self.btn_gen_skeleton.configure(state=state)
+        if hasattr(self, "btn_gen_ai"):
+            state = "normal" if skeleton_ready and not ai_running else "disabled"
+            self.btn_gen_ai.configure(state=state)
+
+        if hasattr(self, "btn_export_pa"):
+            state = "normal" if ai_ready else "disabled"
+            self.btn_export_pa.configure(state=state)
+
+        if hasattr(self, "generate_skeleton_btn"):
+            state = "normal" if ta_valid else "disabled"
+            self.generate_skeleton_btn.configure(state=state)
+        if hasattr(self, "export_skeleton_btn"):
+            state = "normal" if skeleton_ready or ta_valid else "disabled"
+            self.export_skeleton_btn.configure(state=state)
+        if hasattr(self, "export_pa_btn"):
+            state = "normal" if ai_ready and not contract_invalid else "disabled"
+            self.export_pa_btn.configure(state=state)
         if hasattr(self, "btn_gen_ai"):
             state = "normal" if skeleton_ready and not ai_running else "disabled"
             self.btn_gen_ai.configure(state=state)
@@ -1994,6 +2017,11 @@ class OfflineApp(tk.Tk):
         kpa_summary: Dict[str, Any] = {}
         if isinstance(summary, dict):
             kpa_summary = summary.get("kpa_summary") or {}
+
+        if not kpa_summary and self.profile:
+            self.expectations = self.expectations or self._summary_from_profile_only()
+            kpa_summary = self.expectations.get("kpa_summary") or {}
+
 
         if not kpa_summary and self.profile:
             self.expectations = self.expectations or self._summary_from_profile_only()
