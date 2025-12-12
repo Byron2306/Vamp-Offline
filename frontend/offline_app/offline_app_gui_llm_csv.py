@@ -559,19 +559,70 @@ class OfflineApp(tk.Tk):
         self.cinzel_family = "Cinzel"
         self._configure_styles()
 
-        # Layout: three vertical zones
+        # Layout: three vertical zones held in a PanedWindow so the user can resize
+        # and, critically, so each panel retains a minimum size instead of collapsing
+        # and disappearing on smaller displays.
         self.configure(bg=self._colors["bg"])
-        self.top_panel = tk.Frame(self, bg=self._colors["bg"], height=260)
-        self.top_panel.grid(row=0, column=0, sticky="nsew")
-        self.middle_panel = tk.Frame(self, bg=self._colors["bg"])
-        self.middle_panel.grid(row=1, column=0, sticky="nsew")
-        self.bottom_panel = tk.Frame(self, bg=self._colors["bg"])
-        self.bottom_panel.grid(row=2, column=0, sticky="nsew")
-
-        self.rowconfigure(0, weight=0, minsize=240)
-        self.rowconfigure(1, weight=3)
-        self.rowconfigure(2, weight=2, minsize=220)
+        self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
+
+        # Make the entire UI vertically scrollable so every pane remains reachable on
+        # smaller screens (or when the system falls back to larger minimum heights).
+        self._scroll_shell = tk.Frame(self, bg=self._colors["bg"])
+        self._scroll_shell.grid(row=0, column=0, sticky="nsew")
+        self._scroll_shell.rowconfigure(0, weight=1)
+        self._scroll_shell.columnconfigure(0, weight=1)
+
+        self._scroll_canvas = tk.Canvas(
+            self._scroll_shell,
+            bg=self._colors["bg"],
+            bd=0,
+            highlightthickness=0,
+        )
+        self._scroll_canvas.grid(row=0, column=0, sticky="nsew")
+        self._scrollbar_y = ttk.Scrollbar(
+            self._scroll_shell, orient="vertical", command=self._scroll_canvas.yview
+        )
+        self._scrollbar_y.grid(row=0, column=1, sticky="ns")
+        self._scroll_canvas.configure(yscrollcommand=self._scrollbar_y.set)
+
+        self._scroll_frame = tk.Frame(self._scroll_canvas, bg=self._colors["bg"])
+        self._scroll_window = self._scroll_canvas.create_window(
+            (0, 0), window=self._scroll_frame, anchor="nw"
+        )
+
+        self._scroll_frame.bind("<Configure>", self._refresh_scroll_region)
+        self._scroll_canvas.bind("<Configure>", self._expand_scroll_width)
+        for sequence in ("<MouseWheel>", "<Button-4>", "<Button-5>"):
+            self._scroll_frame.bind(sequence, self._on_mousewheel)
+
+        # Use a Tk PanedWindow (instead of ttk) so we can enforce a minimum size
+        # per pane via the built-in ``minsize`` option. ttk's variant does not
+        # recognize ``minsize`` and would raise a TclError on some Python/Tk
+        # installations.
+        self.main_split = tk.PanedWindow(
+            self._scroll_frame,
+            orient="vertical",
+            sashrelief="flat",
+            bg=self._colors["bg"],
+            bd=0,
+            sashwidth=6,
+            sashpad=2,
+            handlepad=2,
+        )
+        self.main_split.grid(row=0, column=0, sticky="nsew")
+        self._scroll_frame.rowconfigure(0, weight=1)
+        self._scroll_frame.columnconfigure(0, weight=1)
+
+        self._pane_minsizes: List[Tuple[tk.Frame, int]] = []
+
+        self.top_panel = tk.Frame(self.main_split, bg=self._colors["bg"], height=260)
+        self.middle_panel = tk.Frame(self.main_split, bg=self._colors["bg"])
+        self.bottom_panel = tk.Frame(self.main_split, bg=self._colors["bg"])
+
+        self._add_pane_with_minsize(self.top_panel, 240)
+        self._add_pane_with_minsize(self.middle_panel, 220)
+        self._add_pane_with_minsize(self.bottom_panel, 220)
 
         self._build_top_dashboard()
         self._build_middle_table()
@@ -579,6 +630,55 @@ class OfflineApp(tk.Tk):
 
         self.bind("<Escape>", lambda e: self._stop_scan())
         self._refresh_button_states()
+
+    def _add_pane_with_minsize(self, pane: tk.Frame, minsize: int) -> None:
+        """Add a pane and apply a minsize when supported by the Tk build.
+
+        Some Windows Python/Tk distributions omit the ``-minsize`` option on
+        ``panedwindow add``. We attempt to set the minsize via ``paneconfigure``
+        and, if that also fails, fall back to raising the overall window
+        minimum height so panes do not disappear.
+        """
+
+        self.main_split.add(pane)
+        try:
+            self.main_split.paneconfigure(pane, minsize=minsize)
+        except tk.TclError:
+            self._pane_minsizes.append((pane, minsize))
+            if not getattr(self, "_pane_minsize_bound", False):
+                self._pane_minsize_bound = True
+                self.main_split.bind("<Configure>", self._enforce_pane_minsizes, add="+")
+
+    def _enforce_pane_minsizes(self, _event: Optional[tk.Event] = None) -> None:
+        if not self._pane_minsizes:
+            return
+
+        min_total = sum(minsize for _, minsize in self._pane_minsizes)
+        current_width = max(self.winfo_width(), self.winfo_reqwidth())
+        try:
+            self.minsize(current_width, min_total)
+        except Exception:
+            pass
+
+    def _refresh_scroll_region(self, _event: Optional[tk.Event] = None) -> None:
+        if hasattr(self, "_scroll_canvas"):
+            self._scroll_canvas.configure(scrollregion=self._scroll_canvas.bbox("all"))
+
+    def _expand_scroll_width(self, event: tk.Event) -> None:
+        if hasattr(self, "_scroll_canvas") and hasattr(self, "_scroll_window"):
+            self._scroll_canvas.itemconfigure(self._scroll_window, width=event.width)
+
+    def _on_mousewheel(self, event: tk.Event) -> None:
+        if not hasattr(self, "_scroll_canvas"):
+            return
+        if event.num == 4:
+            delta = -1
+        elif event.num == 5:
+            delta = 1
+        else:
+            delta = -1 * int(event.delta / 120) if event.delta else 0
+        if delta:
+            self._scroll_canvas.yview_scroll(delta, "units")
 
     # ---------------------------
     # Styles
