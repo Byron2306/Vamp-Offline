@@ -165,14 +165,15 @@ KPA_OPTIONS: List[Tuple[str, str]] = [
 ]
 
 TABLE_COLUMNS = [
-    "file",
-    "month",
-    "kpa_code",
-    "kpa_name",
-    "rating",
-    "rating_label",
-    "tier_label",
+    "filename",
+    "evidence_type",
+    "kpa_codes",
+    "kpi_labels",
     "status",
+    "final_rating",
+    "final_tier",
+    "confidence",
+    "impact_summary",
 ]
 
 CSV_COLUMNS = [
@@ -183,12 +184,17 @@ CSV_COLUMNS = [
     "month",
     "kpa_code",
     "kpa_name",
+    "kpa_codes",
+    "kpi_labels",
     "rating",
     "rating_label",
     "tier_label",
     "status",
+    "confidence",
+    "impact_summary",
     "extract_status",
     "extract_error",
+    "evidence_type",
 ]
 
 
@@ -349,11 +355,22 @@ def process_artefact(
         ctx = _normalize_ctx(ctx, kpa_hint)
 
     if extract_status != "ok" or scoring_error:
-        status = "needs_review"
+        status = "NEEDS_REVIEW"
     elif scoring_available:
-        status = "scored"
+        status = "SCORED"
     else:
-        status = "unscorable"
+        status = "UNSCORABLE"
+
+    evidence_type = _guess_evidence_type(path)
+    kpa_code = str(ctx.get("primary_kpa_code") or "").strip()
+    kpa_name = str(ctx.get("primary_kpa_name") or "").strip() or "Unknown"
+    impact = (ctx.get("impact_summary") or ctx.get("contextual_response") or "").strip()
+    confidence = ctx.get("confidence")
+    try:
+        confidence_val = float(confidence) if confidence is not None else None
+    except Exception:
+        confidence_val = None
+    confidence_pct = "" if confidence_val is None else round(confidence_val * 100)
 
     row = {
         "run_id": run_id,
@@ -361,16 +378,23 @@ def process_artefact(
         "file_path": str(path),
         "file": path.name,
         "month": month_bucket,
-        "kpa_code": str(ctx.get("primary_kpa_code") or "").strip(),
-        "kpa_name": str(ctx.get("primary_kpa_name") or "").strip() or "Unknown",
+        "kpa_code": kpa_code,
+        "kpa_name": kpa_name,
+        "kpa_codes": kpa_code,
+        "kpi_labels": "",
         "rating": "" if ctx.get("rating") is None else ctx.get("rating"),
         "rating_label": str(ctx.get("rating_label") or "").strip() or "Unrated",
         "tier_label": str(ctx.get("tier_label") or "").strip() or "Developmental",
         "status": status,
+        "confidence": confidence_pct,
+        "impact_summary": impact,
+        "evidence_type": evidence_type,
         "extract_status": extract_status,
         "extract_error": extract_error,
     }
-    impact = (ctx.get("impact_summary") or ctx.get("contextual_response") or "").strip()
+    kpi_matches = ctx.get("kpi_matches")
+    if isinstance(kpi_matches, list):
+        row["kpi_labels"] = "; ".join(str(k) for k in kpi_matches if str(k).strip())
     return row, ctx, impact
 
 
@@ -400,6 +424,14 @@ class OfflineApp(tk.Tk):
 
         self.expectations: Dict[str, Any] = {}
         self.rows: List[Dict[str, Any]] = []
+        self.detail_rows: Dict[str, Dict[str, Any]] = {}
+        self._detail_counter = 0
+
+        self.filter_status_var = tk.StringVar(value="All")
+        self.filter_kpa_var = tk.StringVar(value="All")
+        self.filter_type_var = tk.StringVar(value="All")
+
+        self.selected_detail: Dict[str, Any] = {}
 
         self._scan_thread: Optional[threading.Thread] = None
         self._stop_flag = threading.Event()
@@ -421,19 +453,23 @@ class OfflineApp(tk.Tk):
         self.cinzel_family = "Cinzel"
         self._configure_styles()
 
-        # Layout: two rows
+        # Layout: three vertical zones
         self.configure(bg=self._colors["bg"])
-        self.outer = tk.Frame(self, bg=self._colors["bg"])
-        self.outer.grid(row=0, column=0, sticky="nsew")
-        self.bottom = tk.Frame(self, bg=self._colors["bg"])
-        self.bottom.grid(row=1, column=0, sticky="nsew")
+        self.top_panel = tk.Frame(self, bg=self._colors["bg"], height=260)
+        self.top_panel.grid(row=0, column=0, sticky="nsew")
+        self.middle_panel = tk.Frame(self, bg=self._colors["bg"])
+        self.middle_panel.grid(row=1, column=0, sticky="nsew")
+        self.bottom_panel = tk.Frame(self, bg=self._colors["bg"])
+        self.bottom_panel.grid(row=2, column=0, sticky="nsew")
 
-        self.rowconfigure(0, weight=0)
-        self.rowconfigure(1, weight=1)
+        self.rowconfigure(0, weight=0, minsize=240)
+        self.rowconfigure(1, weight=3)
+        self.rowconfigure(2, weight=2, minsize=220)
         self.columnconfigure(0, weight=1)
 
-        self._build_scrollable_top()
-        self._build_bottom_panes()
+        self._build_top_dashboard()
+        self._build_middle_table()
+        self._build_bottom_split()
 
         self.bind("<Escape>", lambda e: self._stop_scan())
 
@@ -465,48 +501,267 @@ class OfflineApp(tk.Tk):
     # ---------------------------
     # UI builders
     # ---------------------------
-    def _build_scrollable_top(self) -> None:
+    def _build_top_dashboard(self) -> None:
         bg = self._colors["bg"]
-        canvas = tk.Canvas(self.outer, bg=bg, highlightthickness=0)
-        vbar = ttk.Scrollbar(self.outer, orient="vertical", command=canvas.yview)
-        canvas.configure(yscrollcommand=vbar.set)
+        wrapper = self._panel(self.top_panel)
+        wrapper.pack(fill="both", expand=True, padx=12, pady=10)
+        wrapper.columnconfigure(0, weight=1)
+        wrapper.columnconfigure(1, weight=1)
+        wrapper.columnconfigure(2, weight=1)
 
-        canvas.grid(row=0, column=0, sticky="nsew")
-        vbar.grid(row=0, column=1, sticky="ns")
-        self.outer.columnconfigure(0, weight=1)
-        self.outer.rowconfigure(0, weight=1)
+        # Header row
+        header = tk.Frame(wrapper, bg=bg)
+        header.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(4, 8))
+        header.columnconfigure(1, weight=1)
+        ttk.Label(header, text=APP_TITLE, style="Title.TLabel").grid(row=0, column=0, columnspan=3, sticky="w")
+        ttk.Label(header, text=APP_SUBTITLE, style="Subtitle.TLabel").grid(row=1, column=0, columnspan=3, sticky="w")
 
-        self.top_frame = tk.Frame(canvas, bg=bg)
-        self._top_window = canvas.create_window((0, 0), window=self.top_frame, anchor="n")
+        # Column 1: staff profile summary and contract status
+        col1 = self._panel(wrapper)
+        col1.grid(row=1, column=0, sticky="nsew", padx=(8, 6), pady=6)
+        col1.columnconfigure(1, weight=1)
+        ttk.Label(col1, text="Staff Profile", style="Section.TLabel").grid(row=0, column=0, columnspan=2, sticky="w", padx=10, pady=(8, 4))
 
-        def _on_configure(_event):
-            canvas.configure(scrollregion=canvas.bbox("all"))
+        self.staff_id_var = tk.StringVar()
+        self.staff_name_var = tk.StringVar()
+        self.staff_pos_var = tk.StringVar()
+        self.staff_faculty_var = tk.StringVar()
+        self.staff_manager_var = tk.StringVar()
+        self.staff_year_var = tk.StringVar(value=str(_dt.datetime.now().year))
 
-        def _on_canvas_configure(event):
-            canvas.itemconfig(self._top_window, width=event.width)
+        self.contract_status_var = tk.StringVar(value="❌ No Contract")
+        self.contract_status_reason = "No valid Task/Performance Agreement loaded."
 
-        self.top_frame.bind("<Configure>", _on_configure)
-        canvas.bind("<Configure>", _on_canvas_configure)
+        profile_fields = [
+            ("Staff Number", self.staff_id_var),
+            ("Full Name", self.staff_name_var),
+            ("Faculty", self.staff_faculty_var),
+            ("Post Level", self.staff_pos_var),
+            ("Performance Year", self.staff_year_var),
+        ]
+        for idx, (label, var) in enumerate(profile_fields, start=1):
+            tk.Label(col1, text=f"{label}:", bg=self._colors["panel"], fg=self._colors["fg"], font=(self.cinzel_family, 10)).grid(
+                row=idx, column=0, sticky="w", padx=10, pady=2
+            )
+            entry = tk.Entry(
+                col1,
+                textvariable=var,
+                bg="#0f0f17",
+                fg=self._colors["fg"],
+                insertbackground=self._colors["fg"],
+                highlightthickness=1,
+                highlightbackground=self._colors["accent"],
+            )
+            entry.grid(row=idx, column=1, sticky="ew", padx=6, pady=2)
 
-        def _on_mousewheel(event):
-            # Windows: delta in ±120
-            delta = -1 * int(event.delta / 120) if event.delta else 0
-            canvas.yview_scroll(delta, "units")
+        tk.Label(col1, text="Contract Status:", bg=self._colors["panel"], fg=self._colors["fg"], font=(self.cinzel_family, 10, "bold")).grid(
+            row=len(profile_fields) + 1, column=0, sticky="w", padx=10, pady=(4, 6)
+        )
+        self.contract_status_label = tk.Label(
+            col1,
+            textvariable=self.contract_status_var,
+            bg=self._colors["panel"],
+            fg=self._colors["warn"],
+            font=(self.cinzel_family, 10, "bold"),
+        )
+        self.contract_status_label.grid(row=len(profile_fields) + 1, column=1, sticky="w", padx=6, pady=(4, 6))
+        self.contract_status_label.bind("<Enter>", lambda _e: self._show_contract_tooltip())
 
-        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        action_row = tk.Frame(col1, bg=self._colors["panel"])
+        action_row.grid(row=len(profile_fields) + 2, column=0, columnspan=2, sticky="ew", padx=8, pady=(4, 10))
+        ttk.Button(action_row, text="Enroll / Load", command=self._enroll).grid(row=0, column=0, padx=(0, 6))
+        ttk.Button(action_row, text="Import Task Agreement", command=self._import_ta).grid(row=0, column=1, padx=(0, 6))
 
-        self.center = tk.Frame(self.top_frame, bg=bg)
-        self.center.grid(row=0, column=0, sticky="nsew", padx=24, pady=16)
-        self.top_frame.columnconfigure(0, weight=1)
+        self.staff_status = tk.Label(
+            col1,
+            text="Not enrolled",
+            bg=self._colors["panel"],
+            fg=self._colors["muted"],
+            font=(self.cinzel_family, 10, "italic"),
+        )
+        self.staff_status.grid(row=len(profile_fields) + 3, column=0, columnspan=2, sticky="w", padx=10, pady=(2, 6))
 
-        self._build_header()
-        self._build_staff_panel(row=1)
-        self._build_expectations_panel(row=2)
-        self._build_scan_panel(row=3)
+        # Column 2: KPA breakdown table
+        col2 = self._panel(wrapper)
+        col2.grid(row=1, column=1, sticky="nsew", padx=6, pady=6)
+        col2.columnconfigure(0, weight=1)
+        ttk.Label(col2, text="KPA Hours & Weight Breakdown", style="Section.TLabel").grid(row=0, column=0, sticky="w", padx=10, pady=(8, 4))
+        self.kpa_tree = ttk.Treeview(col2, columns=["kpa", "name", "hours", "weight", "status"], show="headings", height=6)
+        headings = [
+            ("kpa", "KPA"),
+            ("name", "Name"),
+            ("hours", "Hours"),
+            ("weight", "Weight %"),
+            ("status", "Status"),
+        ]
+        for cid, label in headings:
+            self.kpa_tree.heading(cid, text=label)
+            self.kpa_tree.column(cid, anchor="w", width=120)
+        self.kpa_tree.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 8))
+        ykpa = ttk.Scrollbar(col2, orient="vertical", command=self.kpa_tree.yview)
+        self.kpa_tree.configure(yscrollcommand=ykpa.set)
+        ykpa.grid(row=1, column=1, sticky="ns", pady=(0, 8))
+
+        # Column 3: Scan & export controls
+        col3 = self._panel(wrapper)
+        col3.grid(row=1, column=2, sticky="nsew", padx=(6, 8), pady=6)
+        col3.columnconfigure(1, weight=1)
+        ttk.Label(col3, text="Scan & Export", style="Section.TLabel").grid(row=0, column=0, columnspan=3, sticky="w", padx=10, pady=(8, 4))
+
+        self.folder_var = tk.StringVar(value="(no folder selected)")
+        self.month_var = tk.StringVar(value=str(_dt.datetime.now().month))
+        self.kpa_var = tk.StringVar(value="AUTO")
+        self.use_ollama_score_var = tk.BooleanVar(value=True)
+        self.prefer_llm_rating_var = tk.BooleanVar(value=True)
+
+        tk.Label(col3, text="Evidence Folder", bg=self._colors["panel"], fg=self._colors["fg"], font=(self.cinzel_family, 10)).grid(row=1, column=0, sticky="w", padx=10, pady=4)
+        tk.Entry(
+            col3,
+            textvariable=self.folder_var,
+            bg="#0f0f17",
+            fg=self._colors["fg"],
+            insertbackground=self._colors["fg"],
+            highlightthickness=1,
+            highlightbackground=self._colors["accent"],
+        ).grid(row=1, column=1, sticky="ew", padx=6, pady=4)
+        ttk.Button(col3, text="Select", command=self._choose_folder).grid(row=1, column=2, padx=6, pady=4)
+
+        tk.Label(col3, text="Performance Period", bg=self._colors["panel"], fg=self._colors["fg"], font=(self.cinzel_family, 10)).grid(row=2, column=0, sticky="w", padx=10, pady=4)
+        ttk.Combobox(col3, textvariable=self.month_var, state="readonly", values=[m[0] for m in MONTH_OPTIONS], width=10).grid(row=2, column=1, sticky="w", padx=6, pady=4)
+
+        tk.Label(col3, text="KPA Hint", bg=self._colors["panel"], fg=self._colors["fg"], font=(self.cinzel_family, 10)).grid(row=3, column=0, sticky="w", padx=10, pady=4)
+        ttk.Combobox(col3, textvariable=self.kpa_var, state="readonly", values=[k[0] for k in KPA_OPTIONS], width=10).grid(row=3, column=1, sticky="w", padx=6, pady=4)
+
+        tk.Checkbutton(
+            col3,
+            text="Use Ollama contextual scoring",
+            variable=self.use_ollama_score_var,
+            bg=self._colors["panel"],
+            fg=self._colors["fg"],
+            selectcolor=self._colors["panel"],
+            activebackground=self._colors["panel"],
+        ).grid(row=4, column=0, columnspan=3, sticky="w", padx=10, pady=(6, 2))
+        tk.Checkbutton(
+            col3,
+            text="Prefer LLM rating over brain rating",
+            variable=self.prefer_llm_rating_var,
+            bg=self._colors["panel"],
+            fg=self._colors["fg"],
+            selectcolor=self._colors["panel"],
+            activebackground=self._colors["panel"],
+        ).grid(row=5, column=0, columnspan=3, sticky="w", padx=10, pady=(0, 6))
+
+        btn_row = tk.Frame(col3, bg=self._colors["panel"])
+        btn_row.grid(row=6, column=0, columnspan=3, sticky="ew", padx=8, pady=(4, 4))
+        self.start_btn = ttk.Button(btn_row, text="Start Scan", command=self._start_scan)
+        self.start_btn.grid(row=0, column=0, padx=(0, 6))
+        ttk.Button(btn_row, text="Stop Scan", command=self._stop_scan).grid(row=0, column=1, padx=(0, 6))
+        ttk.Button(btn_row, text="Export CSV", command=self._export_csv).grid(row=0, column=2, padx=(0, 6))
+        self.export_pa_btn = ttk.Button(btn_row, text="Export PA Excel", command=self._generate_final)
+        self.export_pa_btn.grid(row=0, column=3, padx=(0, 6))
+
+        self.scan_status = tk.Label(col3, text="Idle", bg=self._colors["panel"], fg=self._colors["muted"], font=(self.cinzel_family, 10, "italic"))
+        self.scan_status.grid(row=7, column=0, columnspan=3, sticky="w", padx=10, pady=(4, 4))
+
+        self._refresh_kpa_breakdown()
 
     def _panel(self, parent) -> tk.Frame:
         f = tk.Frame(parent, bg=self._colors["panel"], highlightthickness=1, highlightbackground=self._colors["line"])
         return f
+
+    def _build_middle_table(self) -> None:
+        panel = self._panel(self.middle_panel)
+        panel.pack(fill="both", expand=True, padx=12, pady=8)
+        panel.columnconfigure(0, weight=1)
+        panel.rowconfigure(2, weight=1)
+
+        ttk.Label(panel, text="Evidence Decisions", style="Section.TLabel").grid(row=0, column=0, sticky="w", padx=10, pady=(6, 2))
+
+        # Filters
+        filters = tk.Frame(panel, bg=self._colors["panel"])
+        filters.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 6))
+        tk.Label(filters, text="Status", bg=self._colors["panel"], fg=self._colors["fg"], font=(self.cinzel_family, 10)).grid(row=0, column=0, padx=(0, 6))
+        ttk.Combobox(filters, textvariable=self.filter_status_var, values=["All", "SCORED", "NEEDS_REVIEW", "UNSCORABLE"], state="readonly", width=14, postcommand=self._apply_filters).grid(row=0, column=1)
+        tk.Label(filters, text="KPA", bg=self._colors["panel"], fg=self._colors["fg"], font=(self.cinzel_family, 10)).grid(row=0, column=2, padx=(12, 6))
+        ttk.Combobox(filters, textvariable=self.filter_kpa_var, values=["All", "KPA1", "KPA2", "KPA3", "KPA4", "KPA5"], state="readonly", width=10, postcommand=self._apply_filters).grid(row=0, column=3)
+        tk.Label(filters, text="Evidence Type", bg=self._colors["panel"], fg=self._colors["fg"], font=(self.cinzel_family, 10)).grid(row=0, column=4, padx=(12, 6))
+        ttk.Combobox(filters, textvariable=self.filter_type_var, values=["All", "pdf", "word", "excel", "powerpoint", "email", "other"], state="readonly", width=12, postcommand=self._apply_filters).grid(row=0, column=5)
+
+        self.tree = ttk.Treeview(panel, columns=TABLE_COLUMNS, show="headings")
+        for c in TABLE_COLUMNS:
+            label = c.replace("_", " ").title()
+            self.tree.heading(c, text=label, command=lambda col=c: self._sort_tree(col, False))
+            width = 220 if c == "impact_summary" else 140
+            self.tree.column(c, width=width, anchor="w")
+        self.tree.grid(row=2, column=0, sticky="nsew", padx=10, pady=(0, 8))
+        yscroll = ttk.Scrollbar(panel, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=yscroll.set)
+        yscroll.grid(row=2, column=1, sticky="ns", pady=(0, 8))
+        self.tree.bind("<<TreeviewSelect>>", self._on_row_select)
+
+        self.tree.tag_configure("NEEDS_REVIEW", background="#3b2f00", foreground=self._colors["fg"])
+        self.tree.tag_configure("UNSCORABLE", background="#1f1f1f", foreground=self._colors["muted"], font=(self.cinzel_family, 10, "italic"))
+        self.tree.tag_configure("SCORED", background="#101018", foreground=self._colors["fg"])
+
+    def _build_bottom_split(self) -> None:
+        pw = ttk.PanedWindow(self.bottom_panel, orient="horizontal")
+        pw.pack(fill="both", expand=True, padx=12, pady=(4, 12))
+
+        # Detail pane
+        detail_frame = self._panel(pw)
+        detail_frame.columnconfigure(0, weight=1)
+        ttk.Label(detail_frame, text="Artefact Detail", style="Section.TLabel").grid(row=0, column=0, sticky="w", padx=10, pady=(8, 4))
+
+        meta = tk.Frame(detail_frame, bg=self._colors["panel"])
+        meta.grid(row=1, column=0, sticky="ew", padx=10)
+        meta.columnconfigure(1, weight=1)
+        self.detail_labels: Dict[str, tk.StringVar] = {}
+        for idx, key in enumerate(["Filename", "Evidence Type", "Status", "Final Rating", "Final Tier", "Confidence", "KPA", "KPI"]):
+            tk.Label(meta, text=f"{key}:", bg=self._colors["panel"], fg=self._colors["fg"], font=(self.cinzel_family, 10)).grid(row=idx, column=0, sticky="w", pady=1)
+            var = tk.StringVar(value="–")
+            self.detail_labels[key] = var
+            tk.Label(meta, textvariable=var, bg=self._colors["panel"], fg=self._colors["fg"], font=(self.cinzel_family, 10, "bold")).grid(row=idx, column=1, sticky="w", pady=1)
+
+        ttk.Label(detail_frame, text="Impact Summary", style="Subtitle.TLabel").grid(row=2, column=0, sticky="w", padx=10, pady=(8, 2))
+        self.impact_text = tk.Text(detail_frame, height=4, wrap="word", bg="#0f0f17", fg=self._colors["fg"], insertbackground=self._colors["fg"], highlightthickness=1, highlightbackground=self._colors["accent"], font=(self.cinzel_family, 10))
+        self.impact_text.grid(row=3, column=0, sticky="nsew", padx=10)
+        self.impact_text.config(state="disabled")
+
+        ttk.Label(detail_frame, text="Raw Analysis (read-only)", style="Subtitle.TLabel").grid(row=4, column=0, sticky="w", padx=10, pady=(8, 2))
+        self.raw_json_text = tk.Text(detail_frame, height=6, wrap="word", bg="#0f0f17", fg=self._colors["fg"], insertbackground=self._colors["fg"], highlightthickness=1, highlightbackground=self._colors["accent"], font=(self.cinzel_family, 10))
+        self.raw_json_text.grid(row=5, column=0, sticky="nsew", padx=10, pady=(0, 8))
+        self.raw_json_text.config(state="disabled")
+
+        ttk.Label(detail_frame, text="Summary (Batch 8 output)", style="Subtitle.TLabel").grid(row=6, column=0, sticky="w", padx=10, pady=(4, 2))
+        self.summary_text = tk.Text(detail_frame, height=4, wrap="word", bg="#0f0f17", fg=self._colors["fg"], insertbackground=self._colors["fg"], highlightthickness=1, highlightbackground=self._colors["accent"], font=(self.cinzel_family, 10))
+        self.summary_text.grid(row=7, column=0, sticky="nsew", padx=10, pady=(0, 8))
+        self.summary_text.config(state="disabled")
+
+        detail_frame.rowconfigure(3, weight=1)
+        detail_frame.rowconfigure(5, weight=1)
+        detail_frame.rowconfigure(7, weight=1)
+
+        # Activity log pane
+        log_frame = self._panel(pw)
+        log_frame.columnconfigure(0, weight=1)
+        ttk.Label(log_frame, text="Activity Log", style="Section.TLabel").grid(row=0, column=0, sticky="w", padx=10, pady=(8, 4))
+        self.log_text = tk.Text(
+            log_frame,
+            height=8,
+            wrap="word",
+            bg="#0f0f17",
+            fg=self._colors["fg"],
+            insertbackground=self._colors["fg"],
+            highlightthickness=1,
+            highlightbackground=self._colors["accent"],
+            font=(self.cinzel_family, 10),
+        )
+        self.log_text.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 8))
+        self.log_text.config(state="disabled")
+        log_frame.rowconfigure(1, weight=1)
+
+        pw.add(detail_frame, weight=3)
+        pw.add(log_frame, weight=2)
 
     def _build_header(self) -> None:
         header = tk.Frame(self.center, bg=self._colors["bg"])
@@ -790,16 +1045,135 @@ class OfflineApp(tk.Tk):
         run_id = getattr(self, "current_run_id", None) or "no-run"
 
         def _do():
-            self.log.config(state="normal")
-            self.log.insert("end", f"▶ [{run_id}] [{_now_ts()}] {msg}\n")
-            self.log.see("end")
-            self.log.config(state="disabled")
+            if not hasattr(self, "log_text"):
+                return
+            self.log_text.config(state="normal")
+            self.log_text.insert("end", f"▶ [{run_id}] [{_now_ts()}] {msg}\n")
+            self.log_text.see("end")
+            self.log_text.config(state="disabled")
         self.after(0, _do)
 
     def _set_status(self, msg: str) -> None:
         def _do():
             self.scan_status.configure(text=msg)
         self.after(0, _do)
+
+    def _apply_filters(self, *_args) -> None:
+        if not hasattr(self, "tree"):
+            return
+        status_filter = self.filter_status_var.get()
+        kpa_filter = self.filter_kpa_var.get()
+        type_filter = self.filter_type_var.get()
+
+        for iid in self.tree.get_children():
+            self.tree.delete(iid)
+
+        for row in self.rows:
+            if status_filter != "All" and str(row.get("status")) != status_filter:
+                continue
+            if kpa_filter != "All" and str(row.get("kpa_code")) not in {kpa_filter, row.get("kpa_codes")}:
+                continue
+            if type_filter != "All" and str(row.get("evidence_type")) != type_filter:
+                continue
+            detail_id = row.get("detail_id")
+            tags = (row.get("status"),)
+            values = [
+                row.get("filename", ""),
+                row.get("evidence_type", ""),
+                row.get("kpa_codes", ""),
+                row.get("kpi_labels", ""),
+                row.get("status", ""),
+                row.get("rating", ""),
+                row.get("tier_label", ""),
+                row.get("confidence", ""),
+                row.get("impact_summary", ""),
+            ]
+            self.tree.insert("", "end", iid=detail_id, values=values, tags=tags)
+
+    def _sort_tree(self, col: str, reverse: bool) -> None:
+        if not hasattr(self, "tree"):
+            return
+        data = []
+        for iid in self.tree.get_children(""):
+            data.append((self.tree.set(iid, col), iid))
+        data.sort(reverse=reverse)
+        for index, (_val, iid) in enumerate(data):
+            self.tree.move(iid, "", index)
+        self.tree.heading(col, command=lambda: self._sort_tree(col, not reverse))
+
+    def _on_row_select(self, _event=None) -> None:
+        if not hasattr(self, "tree"):
+            return
+        selection = self.tree.selection()
+        if not selection:
+            return
+        detail_id = selection[0]
+        detail = self.detail_rows.get(detail_id)
+        if detail:
+            self._populate_detail(detail)
+
+    def _populate_detail(self, detail: Dict[str, Any]) -> None:
+        row = detail.get("row", {})
+        ctx = detail.get("ctx", {})
+        for key, var in self.detail_labels.items():
+            if key == "Filename":
+                var.set(row.get("filename", "–"))
+            elif key == "Evidence Type":
+                var.set(row.get("evidence_type", "–"))
+            elif key == "Status":
+                var.set(row.get("status", "–"))
+            elif key == "Final Rating":
+                var.set(str(row.get("rating") or "–"))
+            elif key == "Final Tier":
+                var.set(row.get("tier_label", "–"))
+            elif key == "Confidence":
+                var.set(f"{row.get('confidence', '')}%" if row.get("confidence") not in {None, ""} else "–")
+            elif key == "KPA":
+                var.set(row.get("kpa_codes", row.get("kpa_code", "–")))
+            elif key == "KPI":
+                var.set(row.get("kpi_labels", "–"))
+
+        impact = detail.get("impact") or row.get("impact_summary", "")
+        self.impact_text.config(state="normal")
+        self.impact_text.delete("1.0", "end")
+        self.impact_text.insert("1.0", impact or "–")
+        self.impact_text.config(state="disabled")
+
+        self.raw_json_text.config(state="normal")
+        self.raw_json_text.delete("1.0", "end")
+        try:
+            pretty = json.dumps(ctx.get("raw_llm_json", ctx), ensure_ascii=False, indent=2)
+        except Exception:
+            pretty = str(ctx)
+        self.raw_json_text.insert("1.0", pretty or "–")
+        self.raw_json_text.config(state="disabled")
+
+    def _update_summary_panel(self) -> None:
+        scored = [r for r in self.rows if r.get("status") == "SCORED"]
+        lines = ["KPA\tWeight %\tCompletion %\tStatus"]
+        kpa_totals: Dict[str, List[Dict[str, Any]]] = {}
+        for r in self.rows:
+            code = str(r.get("kpa_code") or "").strip() or "Unknown"
+            kpa_totals.setdefault(code, []).append(r)
+        for code, entries in sorted(kpa_totals.items()):
+            total = len(entries)
+            scored_ct = len([e for e in entries if e.get("status") == "SCORED"])
+            completion = 0 if total == 0 else int((scored_ct / total) * 100)
+            lines.append(f"{code}\t–\t{completion}%\t{'OK' if completion else 'Partial Results'}")
+        if scored:
+            ratings = [float(r.get("rating") or 0) for r in scored if str(r.get("rating")).strip()]
+            avg = sum(ratings) / len(ratings) if ratings else 0
+            justification = "Deterministic justification: Derived from Batch 8 aggregator inputs where available."
+            lines.append("")
+            lines.append(f"Final Rating: {avg:.2f}")
+            tier = scored[-1].get("tier_label", "")
+            lines.append(f"Final Tier: {tier or '–'}")
+            lines.append(justification)
+        summary_text = "\n".join(lines)
+        self.summary_text.config(state="normal")
+        self.summary_text.delete("1.0", "end")
+        self.summary_text.insert("1.0", summary_text)
+        self.summary_text.config(state="disabled")
 
     # ---------------------------
     # Staff / agreements actions
@@ -840,6 +1214,7 @@ class OfflineApp(tk.Tk):
         self._log(f"✅ Enrolled / loaded profile: {self.profile.staff_id} ({self.profile.name})")
         _play_sound("vamp.wav")
         self._refresh_expectations_snapshot()
+        self._refresh_kpa_breakdown()
 
     def _import_ta(self) -> None:
         if not self._ensure_profile():
@@ -867,6 +1242,7 @@ class OfflineApp(tk.Tk):
         self._rebuild_expectations()
         _play_sound("vamp.wav")
         self._refresh_expectations_snapshot()
+        self._refresh_kpa_breakdown()
 
     def _generate_initial_pa(self) -> None:
         if not self._ensure_profile():
@@ -883,6 +1259,7 @@ class OfflineApp(tk.Tk):
         self._rebuild_expectations()
         _play_sound("vamp.wav")
         self._refresh_expectations_snapshot()
+        self._refresh_kpa_breakdown()
 
     def _generate_midyear(self) -> None:
         if not self._ensure_profile():
@@ -899,6 +1276,7 @@ class OfflineApp(tk.Tk):
         self._rebuild_expectations()
         _play_sound("vamp.wav")
         self._refresh_expectations_snapshot()
+        self._refresh_kpa_breakdown()
 
     def _generate_final(self) -> None:
         if not self._ensure_profile():
@@ -915,6 +1293,7 @@ class OfflineApp(tk.Tk):
         self._rebuild_expectations()
         _play_sound("vamp.wav")
         self._refresh_expectations_snapshot()
+        self._refresh_kpa_breakdown()
 
     def _rebuild_expectations(self) -> None:
         if not self._ensure_profile():
@@ -947,10 +1326,59 @@ class OfflineApp(tk.Tk):
         else:
             snap = "Import Task Agreement / Generate PA to populate expectations."
 
-        self.expectations_text.config(state="normal")
-        self.expectations_text.delete("1.0", "end")
-        self.expectations_text.insert("1.0", snap)
-        self.expectations_text.config(state="disabled")
+        if hasattr(self, "expectations_text"):
+            self.expectations_text.config(state="normal")
+            self.expectations_text.delete("1.0", "end")
+            self.expectations_text.insert("1.0", snap)
+            self.expectations_text.config(state="disabled")
+
+    def _refresh_kpa_breakdown(self) -> None:
+        if not hasattr(self, "kpa_tree"):
+            return
+        for iid in self.kpa_tree.get_children():
+            self.kpa_tree.delete(iid)
+        profile = self.profile
+        kpas = profile.kpas if profile else []
+        # Always show KPA1-6 ordering even if missing
+        code_order = [f"KPA{i}" for i in range(1, 7)]
+        kpa_lookup = {k.code: k for k in (kpas or [])}
+        for code in code_order:
+            kpa = kpa_lookup.get(code)
+            name = getattr(kpa, "name", "") or f"{code}"
+            hours = getattr(kpa, "hours", None)
+            weight = getattr(kpa, "weight", None)
+            status = "Missing"
+            if hours is not None and weight is not None and float(hours or 0) > 0 and float(weight or 0) > 0:
+                status = "OK"
+            elif hours or weight:
+                status = "Needs Review"
+            self.kpa_tree.insert(
+                "",
+                "end",
+                values=[code, name, hours if hours is not None else "–", weight if weight is not None else "–", status],
+            )
+        self._update_contract_status()
+
+    def _update_contract_status(self) -> None:
+        profile = self.profile
+        if profile is None:
+            self.contract_status_var.set("❌ No Contract")
+            self.contract_status_reason = "No valid Task/Performance Agreement loaded."
+            self.start_btn.state(["disabled"])
+            return
+        kpas = profile.kpas or []
+        missing = [k for k in kpas if not (getattr(k, "hours", 0) and getattr(k, "weight", 0))]
+        if missing:
+            self.contract_status_var.set("⚠️ Contract Incomplete")
+            self.contract_status_reason = "KPAs are missing hours/weights. Add them in the contract before scanning."
+            self.start_btn.state(["disabled"])
+        else:
+            self.contract_status_var.set("✅ Contract Loaded")
+            self.contract_status_reason = "All KPAs have hours and weights."
+            self.start_btn.state(["!disabled"])
+
+    def _show_contract_tooltip(self) -> None:
+        messagebox.showinfo("Contract status", self.contract_status_reason)
 
     # ---------------------------
     # Folder / scan actions
@@ -971,6 +1399,14 @@ class OfflineApp(tk.Tk):
 
     def _start_scan(self) -> None:
         if not self._ensure_profile():
+            return
+        self._update_contract_status()
+        status_text = self.contract_status_var.get()
+        if status_text.startswith("❌"):
+            messagebox.showerror("No contract", "No valid Task/Performance Agreement loaded.")
+            return
+        if status_text.startswith("⚠️"):
+            messagebox.showwarning("Contract incomplete", self.contract_status_reason)
             return
         if self.current_evidence_folder is None or not self.current_evidence_folder.exists():
             messagebox.showerror("Missing folder", "Please choose an evidence folder.")
@@ -1085,6 +1521,8 @@ class OfflineApp(tk.Tk):
 
             # Reset UI
             self.rows.clear()
+            self.detail_rows.clear()
+            self._detail_counter = 0
             self.after(0, lambda: self.tree.delete(*self.tree.get_children()))
             self._log(f"🔎 Starting scan of {len(artefacts)} artefacts for month {month_bucket}…")
 
@@ -1110,12 +1548,17 @@ class OfflineApp(tk.Tk):
                     brain_fn=brain_score_evidence,
                 )
 
+                self._detail_counter += 1
+                detail_id = f"row-{self._detail_counter}"
+                row["detail_id"] = detail_id
                 self.rows.append(row)
-                self.after(0, lambda r=row: self.tree.insert("", "end", values=[r.get(c, "") for c in TABLE_COLUMNS]))
+                detail = {"row": row, "ctx": ctx, "impact": impact}
+                self.detail_rows[detail_id] = detail
+                self.after(0, self._apply_filters)
 
                 if impact:
                     self._log(f"{path.name} → {impact}")
-                elif row.get("status") == "needs_review":
+                elif row.get("status") == "NEEDS_REVIEW":
                     self._log(f"{path.name} → needs review (no impact summary)")
                 else:
                     self._log(f"{path.name} → (no impact summary)")
@@ -1177,6 +1620,7 @@ class OfflineApp(tk.Tk):
                 self._log(f"⚠️ Could not write session CSV: {ex}")
 
             self._set_status("Idle")
+            self._update_summary_panel()
             self._log("✅ Scan complete.")
             _play_sound("vamp.wav")
 

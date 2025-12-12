@@ -35,7 +35,7 @@ def test_broken_file_generates_needs_review_row(tmp_path):
     assert row["filename"] == broken_file.name
     assert row["run_id"] == run_id
     assert row["extract_status"] == "failed"
-    assert row["status"] == "needs_review"
+    assert row["status"] == "NEEDS_REVIEW"
 
     output_csv = tmp_path / "results.csv"
     with output_csv.open("w", newline="", encoding="utf-8") as f:
@@ -47,4 +47,4 @@ def test_broken_file_generates_needs_review_row(tmp_path):
         rows = list(csv.DictReader(f))
 
     assert len(rows) == 1
-    assert rows[0]["status"] == "needs_review"
+    assert rows[0]["status"] == "NEEDS_REVIEW"
