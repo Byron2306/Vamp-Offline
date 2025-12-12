@@ -508,6 +508,7 @@ class OfflineApp(tk.Tk):
         self.ta_validation_errors: List[str] = []
         self.pa_skeleton_ready = False
         self.pa_ai_ready = False
+        self.ai_enrich_status = "Not started"
 
         self.contract: Optional[Dict[str, Any]] = None
         self.pa_ai_path: Optional[Path] = None
@@ -612,12 +613,66 @@ class OfflineApp(tk.Tk):
         if hasattr(self, "lbl_stage"):
             self.lbl_stage.configure(text=txt)
 
+    def _update_status_indicators(self) -> None:
+        contract_loaded = bool(getattr(self, "staff_profile", None))
+        ta_imported = bool(getattr(self, "ta_valid", False))
+        skeleton_ready = bool(getattr(self, "pa_skeleton_ready", False))
+        ai_ready = bool(getattr(self, "pa_ai_ready", False))
+        ai_running = bool(getattr(self, "ai_enrich_running", False))
+
+        self.contract_loaded_status_var.set(
+            f"Contract Loaded: {'✅' if contract_loaded else '❌'}"
+        )
+        self.ta_imported_status_var.set(
+            f"TA Imported: {'✅' if ta_imported else '❌'}"
+        )
+        self.pa_skeleton_status_var.set(
+            f"PA Skeleton: {'✅' if skeleton_ready else '❌'}"
+        )
+
+        ai_icon = "❌"
+        ai_suffix = self.ai_enrich_status or "Not started"
+        if ai_ready:
+            ai_icon = "✅"
+            ai_suffix = "Ready"
+        elif ai_running:
+            ai_icon = "⚠️"
+            ai_suffix = "In progress"
+        elif ai_suffix.lower().startswith("timeout"):
+            ai_icon = "⚠️"
+
+        self.ai_enriched_status_var.set(f"AI Enriched: {ai_icon} {ai_suffix}")
+
     def _refresh_button_states(self) -> None:
         has_profile = bool(getattr(self, "staff_profile", None))
+        ta_valid = bool(getattr(self, "ta_valid", False))
+        skeleton_ready = bool(getattr(self, "pa_skeleton_ready", False))
+        ai_ready = bool(getattr(self, "pa_ai_ready", False))
+        ai_running = bool(getattr(self, "ai_enrich_running", False))
+        contract_invalid = bool(getattr(self, "contract_validation_errors", []))
         if hasattr(self, "btn_import_ta"):
             self.btn_import_ta.configure(state=("normal" if has_profile else "disabled"))
 
         if hasattr(self, "btn_gen_skeleton"):
+            state = "normal" if ta_valid and not getattr(self, "ta_import_running", False) else "disabled"
+            self.btn_gen_skeleton.configure(state=state)
+        if hasattr(self, "btn_gen_ai"):
+            state = "normal" if skeleton_ready and not ai_running else "disabled"
+            self.btn_gen_ai.configure(state=state)
+
+        if hasattr(self, "btn_export_pa"):
+            state = "normal" if ai_ready else "disabled"
+            self.btn_export_pa.configure(state=state)
+
+        if hasattr(self, "generate_skeleton_btn"):
+            state = "normal" if ta_valid else "disabled"
+            self.generate_skeleton_btn.configure(state=state)
+        if hasattr(self, "export_skeleton_btn"):
+            state = "normal" if skeleton_ready or ta_valid else "disabled"
+            self.export_skeleton_btn.configure(state=state)
+        if hasattr(self, "export_pa_btn"):
+            state = "normal" if ai_ready and not contract_invalid else "disabled"
+            self.export_pa_btn.configure(state=state)
             self.btn_gen_skeleton.configure(state=("normal" if getattr(self, "ta_valid", False) else "disabled"))
         if hasattr(self, "btn_gen_ai"):
             self.btn_gen_ai.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
@@ -638,6 +693,7 @@ class OfflineApp(tk.Tk):
             self.btn_stop_scan.configure(state=("normal" if getattr(self, "scan_running", False) else "disabled"))
 
         self._update_stage_label()
+        self._update_status_indicators()
 
     # ---------------------------
     # UI builders
@@ -649,6 +705,7 @@ class OfflineApp(tk.Tk):
         wrapper.columnconfigure(0, weight=1)
         wrapper.columnconfigure(1, weight=1)
         wrapper.columnconfigure(2, weight=1)
+        wrapper.rowconfigure(2, weight=1)
 
         # Header row
         header = tk.Frame(wrapper, bg=bg)
@@ -657,9 +714,29 @@ class OfflineApp(tk.Tk):
         ttk.Label(header, text=APP_TITLE, style="Title.TLabel").grid(row=0, column=0, columnspan=3, sticky="w")
         ttk.Label(header, text=APP_SUBTITLE, style="Subtitle.TLabel").grid(row=1, column=0, columnspan=3, sticky="w")
 
+        status_row = tk.Frame(wrapper, bg=self._colors["panel"])
+        status_row.grid(row=1, column=0, columnspan=3, sticky="ew", padx=4, pady=(0, 6))
+        for idx in range(4):
+            status_row.columnconfigure(idx, weight=1)
+
+        def _status_label(var: tk.StringVar, col: int) -> None:
+            tk.Label(
+                status_row,
+                textvariable=var,
+                bg=self._colors["panel"],
+                fg=self._colors["fg"],
+                font=(self.cinzel_family, 10, "bold"),
+                anchor="w",
+            ).grid(row=0, column=col, sticky="ew", padx=8, pady=4)
+
+        _status_label(self.contract_loaded_status_var, 0)
+        _status_label(self.ta_imported_status_var, 1)
+        _status_label(self.pa_skeleton_status_var, 2)
+        _status_label(self.ai_enriched_status_var, 3)
+
         # Column 1: staff profile summary and contract status
         col1 = self._panel(wrapper)
-        col1.grid(row=1, column=0, sticky="nsew", padx=(8, 6), pady=6)
+        col1.grid(row=2, column=0, sticky="nsew", padx=(8, 6), pady=6)
         col1.columnconfigure(1, weight=1)
         col1.columnconfigure(2, weight=1)
         ttk.Label(col1, text="Staff Profile", style="Section.TLabel").grid(row=0, column=0, columnspan=2, sticky="w", padx=10, pady=(8, 4))
@@ -746,7 +823,7 @@ class OfflineApp(tk.Tk):
 
         # Column 2: KPA breakdown table
         col2 = self._panel(wrapper)
-        col2.grid(row=1, column=1, sticky="nsew", padx=6, pady=6)
+        col2.grid(row=2, column=1, sticky="nsew", padx=6, pady=6)
         col2.columnconfigure(0, weight=1)
         ttk.Label(col2, text="KPA Hours & Weight Breakdown", style="Section.TLabel").grid(row=0, column=0, sticky="w", padx=10, pady=(8, 4))
         self.kpa_health_tree = ttk.Treeview(col2, columns=["kpa", "name", "hours", "weight", "status"], show="headings", height=6)
@@ -778,7 +855,7 @@ class OfflineApp(tk.Tk):
 
         # Column 3: Scan & export controls
         col3 = self._panel(wrapper)
-        col3.grid(row=1, column=2, sticky="nsew", padx=(6, 8), pady=6)
+        col3.grid(row=2, column=2, sticky="nsew", padx=(6, 8), pady=6)
         col3.columnconfigure(1, weight=1)
         ttk.Label(col3, text="Scan & Export", style="Section.TLabel").grid(row=0, column=0, columnspan=3, sticky="w", padx=10, pady=(8, 4))
 
@@ -1496,6 +1573,16 @@ class OfflineApp(tk.Tk):
         self.contract_validation_errors = []
         self.contract_validation_warnings = []
         self.kpa2_modules = []
+        self.task_agreement_path = None
+        self.pa_skeleton_path = None
+        self.pa_ai_path = None
+        self.pa_initial_path = None
+        self.pa_mid_path = None
+        self.pa_final_path = None
+        self.ta_valid = False
+        self.pa_skeleton_ready = False
+        self.pa_ai_ready = False
+        self.ai_enrich_status = "Not started"
         self.staff_status.configure(
             text=f"Enrolled: {self.profile.name} ({self.profile.staff_id}) | {self.profile.position} | {self.profile.cycle_year}"
         )
@@ -1525,6 +1612,8 @@ class OfflineApp(tk.Tk):
         self.pa_ai_ready = False
         self.pa_skeleton_path = None
         self.pa_ai_path = None
+        self.ai_enrich_status = "Awaiting skeleton"
+        director_level = staff_is_director_level(self.profile) if self.profile else False
 
         try:
             if import_task_agreement_excel is not None:
@@ -1539,7 +1628,6 @@ class OfflineApp(tk.Tk):
         # Validate TA structure and capture teaching modules for KPA2 context
         if parse_nwu_ta is not None:
             try:
-                director_level = staff_is_director_level(self.profile) if self.profile else False
                 ta_contract = parse_nwu_ta(
                     str(self.task_agreement_path), director_level=director_level
                 )
@@ -1587,7 +1675,9 @@ class OfflineApp(tk.Tk):
 
         if parse_task_agreement is not None and not self.kpa2_modules:
             try:
-                summary = parse_task_agreement(str(self.task_agreement_path)) or {}
+                summary = parse_task_agreement(
+                    str(self.task_agreement_path), director_level=director_level
+                ) or {}
                 modules = summary.get("teaching_modules") or []
                 if modules:
                     self.kpa2_modules = list(modules)
@@ -1656,6 +1746,7 @@ class OfflineApp(tk.Tk):
             self.pa_skeleton_ready = True
             self.pa_ai_ready = False
             self.pa_ai_path = None
+            self.ai_enrich_status = "Skeleton ready"
             # Keep initial path pointing to the skeleton until AI enrichment replaces it.
             self.pa_initial_path = self.pa_initial_path or self.pa_skeleton_path
             self.pa_skeleton_rows = list(rows or [])
@@ -1665,6 +1756,7 @@ class OfflineApp(tk.Tk):
             self._log(f"✅ PA skeleton generated at: {self.pa_skeleton_path}")
         except Exception as e:
             self.pa_skeleton_ready = False
+            self.ai_enrich_status = "Awaiting skeleton"
             self._log(f"❌ Error generating PA skeleton: {e}")
             self._log(traceback.format_exc())
         self._rebuild_expectations()
@@ -1681,6 +1773,8 @@ class OfflineApp(tk.Tk):
         if not self._ensure_profile():
             return
         if not self.pa_skeleton_rows:
+            self.ai_enrich_status = "Awaiting skeleton"
+            self._refresh_button_states()
             messagebox.showwarning(
                 "PA skeleton required",
                 "Generate the PA skeleton before requesting AI enrichment.",
@@ -1689,6 +1783,7 @@ class OfflineApp(tk.Tk):
 
         self.ai_enrich_running = True
         self.pa_ai_ready = False
+        self.ai_enrich_status = "In progress"
         self._refresh_button_states()
 
         def _worker() -> None:
@@ -1748,6 +1843,7 @@ class OfflineApp(tk.Tk):
             self._log(msg)
         self._set_status(status_message)
         self.pa_ai_ready = success
+        self.ai_enrich_status = status_message
         if not success:
             self.pa_ai_path = None
         self.ai_enrich_running = False
@@ -1761,6 +1857,12 @@ class OfflineApp(tk.Tk):
     def _export_pa_excel(self) -> None:
         if not self.pa_skeleton_ready:
             messagebox.showwarning("Generate PA", "Generate the PA skeleton before exporting.")
+            return
+        if not self.pa_ai_ready:
+            messagebox.showwarning(
+                "AI enrichment pending",
+                "Run AI enrichment first, or use 'Export PA Skeleton' to export the draft.",
+            )
             return
         path_to_open = self.pa_ai_path if self.pa_ai_ready and self.pa_ai_path else self.pa_skeleton_path
         if not path_to_open:
@@ -1938,8 +2040,10 @@ class OfflineApp(tk.Tk):
                 self.kpa_health_tree.delete(iid)
         profile = self.profile
         kpas = profile.kpas if profile else []
-        # Always show KPA1-6 ordering even if missing
-        code_order = [f"KPA{i}" for i in range(1, 7)]
+        director_level = staff_is_director_level(profile) if profile else False
+        code_order = [f"KPA{i}" for i in range(1, 6)]
+        if director_level:
+            code_order.append("KPA6")
         kpa_lookup = {k.code: k for k in (kpas or [])}
         for code in code_order:
             kpa = kpa_lookup.get(code)
