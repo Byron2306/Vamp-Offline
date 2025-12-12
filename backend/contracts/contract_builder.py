@@ -20,6 +20,7 @@ from typing import Dict, Iterable, Optional
 import json
 
 from backend.nwu_formats.ta_parser import PerformanceContract as TAPerformanceContract
+from backend.contracts.kpi_generator import generate_kpis_from_outputs
 
 
 @dataclass
@@ -49,6 +50,7 @@ class PerformanceContract:
     total_weight_pct: float
     valid: bool
     kpis_missing: bool = False
+    kpis_generated: bool = False
 
     def to_dict(self) -> dict:
         return {
@@ -57,6 +59,7 @@ class PerformanceContract:
             "total_weight_pct": self.total_weight_pct,
             "valid": self.valid,
             "kpis_missing": self.kpis_missing,
+            "kpis_generated": self.kpis_generated,
             "kpas": {code: kpa.to_dict() for code, kpa in self.kpas.items()},
         }
 
@@ -118,19 +121,26 @@ def build_final_contract(ta_contract: TAPerformanceContract, pa_data: Optional[D
     pa_data = pa_data or {}
     kpas: Dict[str, MergedKPA] = {}
     matched_any = False
+    kpis_generated = False
 
     for ta_kpa in ta_contract.kpas.values():
         pa_match_name = _find_pa_match(ta_kpa.name, pa_data.keys()) if pa_data else None
         pa_row = pa_data.get(pa_match_name, {}) if pa_match_name else {}
         matched_any = matched_any or bool(pa_row)
 
+        outputs = _extract_field(pa_row, "output", default=ta_kpa.outputs)
+        kpis = _extract_field(pa_row, "kpi", default=ta_kpa.kpis)
+        if (not kpis or kpis == "") and outputs:
+            kpis = generate_kpis_from_outputs(outputs)
+            kpis_generated = True
+
         merged_kpa = MergedKPA(
             code=ta_kpa.code,
             name=ta_kpa.name,
             hours=ta_kpa.hours,
             weight_pct=ta_kpa.weight_pct,
-            outputs=_extract_field(pa_row, "output", default=ta_kpa.outputs),
-            kpis=_extract_field(pa_row, "kpi", default=ta_kpa.kpis),
+            outputs=outputs,
+            kpis=kpis,
             outcomes=_extract_field(pa_row, "outcome", default=ta_kpa.outcomes),
             active=_extract_active(pa_row) if pa_row else ta_kpa.active,
         )
@@ -144,6 +154,7 @@ def build_final_contract(ta_contract: TAPerformanceContract, pa_data: Optional[D
         total_weight_pct=total_weight,
         valid=ta_contract.valid,
         kpis_missing=not matched_any,
+        kpis_generated=kpis_generated,
     )
     return contract
 
