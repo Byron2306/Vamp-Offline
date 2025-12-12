@@ -1,0 +1,281 @@
+{
+  "version": "1.0",
+  "institution": "NWU",
+  "evidence_categories": {
+    "Teaching_and_Learning": {
+      "kpa_code": "KPA2",
+      "kpa_name": "Teaching and Learning, including Higher Degree Supervision",
+      "description": "Evidence directly related to curriculum delivery, assessment, supervision, moderation, and student learning support",
+      "evidence_types": {
+        "assessment_design": {
+          "label": "Assessment Design & Delivery",
+          "examples": [
+            "Exam paper",
+            "Test paper",
+            "Assignment brief",
+            "Assessment task"
+          ],
+          "file_patterns": [
+            "exam",
+            "test",
+            "assessment",
+            "paper"
+          ],
+          "acceptable_formats": ["pdf", "docx"],
+          "credibility_weight": 1.0,
+          "supports_kpis": [
+            "Design assessments",
+            "Align assessment with outcomes",
+            "Assessment delivery"
+          ],
+          "notes": "Core teaching evidence; strong proof when aligned to module codes"
+        },
+        "rubrics_and_memos": {
+          "label": "Rubrics and Memoranda",
+          "examples": [
+            "Rubric",
+            "Marking memorandum",
+            "Memo"
+          ],
+          "file_patterns": [
+            "rubric",
+            "memo",
+            "memorandum"
+          ],
+          "acceptable_formats": ["pdf", "docx", "xlsx"],
+          "credibility_weight": 0.9,
+          "supports_kpis": [
+            "Assessment standards",
+            "Transparent marking",
+            "Quality assurance"
+          ]
+        },
+        "moderation": {
+          "label": "Moderation Evidence",
+          "examples": [
+            "Moderator report",
+            "Internal moderation form",
+            "External moderation letter"
+          ],
+          "file_patterns": [
+            "moderation",
+            "moderator"
+          ],
+          "acceptable_formats": ["pdf", "docx"],
+          "credibility_weight": 1.2,
+          "supports_kpis": [
+            "Moderate assessments",
+            "Quality assurance",
+            "Compliance with academic standards"
+          ],
+          "notes": "Very strong evidence for meeting teaching KPIs"
+        },
+        "supervision": {
+          "label": "Postgraduate Supervision",
+          "examples": [
+            "Supervision feedback",
+            "Thesis chapter feedback",
+            "Turnitin supervision report"
+          ],
+          "file_patterns": [
+            "supervision",
+            "thesis",
+            "dissertation",
+            "chapter"
+          ],
+          "acceptable_formats": ["pdf", "docx"],
+          "credibility_weight": 1.2,
+          "supports_kpis": [
+            "Postgraduate supervision",
+            "Research supervision",
+            "Student development"
+          ]
+        },
+        "lms_activity": {
+          "label": "LMS / eFundi Activity",
+          "examples": [
+            "eFundi screenshot",
+            "Course site activity",
+            "Online content proof"
+          ],
+          "file_patterns": [
+            "efundi",
+            "lms",
+            "course site"
+          ],
+          "acceptable_formats": ["png", "jpg", "pdf"],
+          "credibility_weight": 0.6,
+          "supports_kpis": [
+            "Student engagement",
+            "Online teaching support"
+          ],
+          "notes": "Supportive evidence only; insufficient on its own"
+        }
+      }
+    },
+    "Research_Innovation_and_Creative_Outputs": {
+      "kpa_code": "KPA1",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "description": "Evidence of research outputs, dissemination, and works in progress",
+      "evidence_types": {
+        "journal_article": {
+          "label": "Journal Article",
+          "examples": [
+            "Published article",
+            "Accepted manuscript"
+          ],
+          "file_patterns": [
+            "article",
+            "manuscript"
+          ],
+          "acceptable_formats": ["pdf", "docx"],
+          "credibility_weight": 1.3,
+          "supports_kpis": [
+            "Publish research outputs"
+          ],
+          "notes": "Accepted/published > draft"
+        },
+        "research_draft": {
+          "label": "Research in Progress",
+          "examples": [
+            "Draft article",
+            "Working paper"
+          ],
+          "file_patterns": [
+            "draft",
+            "working"
+          ],
+          "acceptable_formats": ["docx"],
+          "credibility_weight": 0.5,
+          "supports_kpis": [
+            "Research development"
+          ]
+        },
+        "conference": {
+          "label": "Conference Contribution",
+          "examples": [
+            "Conference paper",
+            "Conference presentation"
+          ],
+          "file_patterns": [
+            "conference",
+            "symposium"
+          ],
+          "acceptable_formats": ["pdf", "pptx"],
+          "credibility_weight": 0.9,
+          "supports_kpis": [
+            "Research dissemination"
+          ]
+        }
+      }
+    },
+    "Academic_Leadership_and_Administration": {
+      "kpa_code": "KPA3",
+      "kpa_name": "Academic Leadership & Administration",
+      "description": "Evidence of committee service, coordination, and administrative responsibilities",
+      "evidence_types": {
+        "committee_work": {
+          "label": "Committee and Coordination",
+          "examples": [
+            "Meeting minutes",
+            "Committee report",
+            "Coordinator report"
+          ],
+          "file_patterns": [
+            "minutes",
+            "committee",
+            "coordination"
+          ],
+          "acceptable_formats": ["pdf", "docx"],
+          "credibility_weight": 0.8,
+          "supports_kpis": [
+            "Academic leadership",
+            "Programme coordination"
+          ]
+        },
+        "admin_log": {
+          "label": "Administrative Evidence",
+          "examples": [
+            "Change log",
+            "Administrative report"
+          ],
+          "file_patterns": [
+            "change log",
+            "admin"
+          ],
+          "acceptable_formats": ["docx", "xlsx"],
+          "credibility_weight": 0.6,
+          "supports_kpis": [
+            "Operational administration"
+          ]
+        }
+      }
+    },
+    "Social_Responsiveness_and_Industry": {
+      "kpa_code": "KPA4",
+      "kpa_name": "Social Responsiveness & Industry",
+      "description": "Evidence of engagement with communities and industry partners",
+      "evidence_types": {
+        "community_engagement": {
+          "label": "Community & Industry Engagement",
+          "examples": [
+            "Community project report",
+            "Industry collaboration evidence"
+          ],
+          "file_patterns": [
+            "community",
+            "industry",
+            "engagement"
+          ],
+          "acceptable_formats": ["pdf", "docx"],
+          "credibility_weight": 0.8,
+          "supports_kpis": [
+            "Social responsiveness"
+          ]
+        }
+      }
+    },
+    "Occupational_Health_and_Safety": {
+      "kpa_code": "KPA5",
+      "kpa_name": "Occupational Health & Safety",
+      "description": "Evidence demonstrating compliance with OHS standards",
+      "evidence_types": {
+        "ohs": {
+          "label": "Occupational Health & Safety",
+          "examples": [
+            "Risk assessment",
+            "OHS training attendance"
+          ],
+          "file_patterns": [
+            "ohs",
+            "safety",
+            "risk"
+          ],
+          "acceptable_formats": ["pdf", "docx"],
+          "credibility_weight": 1.0,
+          "supports_kpis": [
+            "OHS compliance"
+          ]
+        }
+      }
+    },
+    "Weak_or_Supporting_Evidence": {
+      "kpa_code": null,
+      "kpa_name": "Weak / Supporting Evidence",
+      "description": "Evidence that typically requires corroboration and carries lower credibility",
+      "evidence_types": {
+        "screenshot": {
+          "label": "Screenshot / Image Evidence",
+          "examples": [
+            "Screenshot",
+            "Photo proof"
+          ],
+          "acceptable_formats": ["png", "jpg"],
+          "credibility_weight": 0.3,
+          "supports_kpis": [],
+          "notes": "Never sufficient alone; requires corroboration"
+        }
+      }
+    }
+  }
+}
