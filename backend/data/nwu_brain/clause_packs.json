@@ -1,0 +1,1830 @@
+{
+  "2PR_2.8": {
+    "mandatory": [
+      {
+        "id": "international_agreements",
+        "regex": "(international\\s+agreements|global\\s+partnerships|international\\s+partnerships|MoU)",
+        "weight": 3
+      },
+      {
+        "id": "research_innovation",
+        "regex": "(research\\s+and\\s+innovation|innovation\\s+agenda|global\\s+research|international\\s+research)",
+        "weight": 3
+      },
+      {
+        "id": "engaged_scholarship",
+        "regex": "(engaged\\s+scholarship|community\\s+engagement|social\\s+responsiveness)",
+        "weight": 2
+      },
+      {
+        "id": "open_access_digital",
+        "regex": "(open\\s+access|digital\\s+scholarship|open\\s+science)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "2PR_2.8",
+    "recommended": [
+      {
+        "id": "global_south_priority",
+        "regex": "(BRICS|SADC|global\\s+south|south-south|Africa)",
+        "weight": 1
+      },
+      {
+        "id": "staff_student_exchange",
+        "regex": "(exchange\\s+programme|mobility|student\\s+exchange|staff\\s+exchange|inbound|outbound)",
+        "weight": 1
+      },
+      {
+        "id": "funding_scholarships",
+        "regex": "(scholarship|funding|bursary|internship|funding\\s+opportunities)",
+        "weight": 1
+      }
+    ]
+  },
+  "2P_2.7.3": {
+    "mandatory": [
+      {
+        "id": "respect_rights",
+        "regex": "(human\\s+rights|dignity|privacy|respect\\s+for\\s+rights|non-?discrimination)",
+        "weight": 3
+      },
+      {
+        "id": "rights_reporting",
+        "regex": "(reporting\\s+human\\s+rights\\s+violations|report\\s+infringements|complaints\\s+procedure|report\\s+mechanism)",
+        "weight": 3
+      },
+      {
+        "id": "training_awareness",
+        "regex": "(awareness|training|education|culture\\s+of\\s+human\\s+rights)",
+        "weight": 2
+      },
+      {
+        "id": "commission_roles",
+        "regex": "(Human\\s+Rights\\s+Commission|Institutional\\s+Forum|UMC|line\\s+managers)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "2P_2.7.3",
+    "recommended": [
+      {
+        "id": "inclusive_culture",
+        "regex": "(inclusive\\s+culture|diversity|safety|safe\\s+environment|ethic\\s+of\\s+care)",
+        "weight": 1
+      },
+      {
+        "id": "monitoring_evaluation",
+        "regex": "(monitoring|evaluation|compliance\\s+with\\s+human\\s+rights|report\\s+to\\s+Council)",
+        "weight": 1
+      }
+    ]
+  },
+  "6P_6.2": {
+    "mandatory": [
+      {
+        "id": "strategy_alignment",
+        "regex": "(overall\\s+strategy|positioning\\s+goals|brand|brand\\s+equity|public\\s+image|promotion)",
+        "weight": 3
+      },
+      {
+        "id": "media_principles",
+        "regex": "(freedom\\s+of\\s+expression|plurality|diverse\\s+views|non-?discrimination|prevention\\s+of\\s+incitement|transparent\\s+communication)",
+        "weight": 3
+      },
+      {
+        "id": "official_spokesperson",
+        "regex": "(first\\s+point\\s+of\\s+referral|official\\s+spokesperson|Director:\\s+Corporate\\s+Communication|media\\s+liaison|approved\\s+media\\s+liaison)",
+        "weight": 2
+      },
+      {
+        "id": "media_frameworks",
+        "regex": "(media\\s+protocol|crisis\\s+communication|social\\s+media\\s+framework|online\\s+publications|media\\s+protocols|framework)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "6P_6.2",
+    "recommended": [
+      {
+        "id": "media_relations",
+        "regex": "(media\\s+relations|optimal\\s+relationships|sound\\s+relationships|media\\s+relationships|building\\s+relationships)",
+        "weight": 1
+      },
+      {
+        "id": "timely_communication",
+        "regex": "(honest|open|timeous|accurate\\s+communication|honest\\s+open\\s+communication|timeous\\s+communication)",
+        "weight": 1
+      },
+      {
+        "id": "internal_guidelines",
+        "regex": "(internal\\s+stakeholders|refer\\s+media\\s+enquiries|corporate\\s+communication|internal\\s+communication)",
+        "weight": 1
+      }
+    ]
+  },
+  "6P_6.6": {
+    "mandatory": [
+      {
+        "id": "outreachstrategy",
+        "regex": "outreach|recruitmentstrategy|marketingschool|marketingevent",
+        "weight": 3
+      }
+    ],
+    "policy_id": "6P_6.6",
+    "recommended": [
+      {
+        "id": "diversityfocus",
+        "regex": "diversityfocus|inclusivemarketing|minoritytargeting",
+        "weight": 1
+      }
+    ]
+  },
+  "7P": {
+    "mandatory": [
+      {
+        "id": "statutory_reference",
+        "regex": "(Higher\\s+Education\\s+Act|HEQSF|NWU\\s+Statute|Constitution)",
+        "weight": 3
+      },
+      {
+        "id": "rule_precedence",
+        "regex": "(General\\s+Academic\\s+Rules\\s+shall\\s+prevail|take\\s+precedence|prevail\\s+over\\s+faculty\\s+rules)",
+        "weight": 3
+      },
+      {
+        "id": "effective_date",
+        "regex": "(effective\\s+from\\s+\\d{1,2}\\s+\\w+\\s+\\d{4}|commencement\\s+date)",
+        "weight": 2
+      },
+      {
+        "id": "decision_recording",
+        "regex": "(record\\s+of\\s+decisions|minutes|decision-?making)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "7P",
+    "recommended": [
+      {
+        "id": "senate_governance",
+        "regex": "(Senate|academic\\s+governance|rules\\s+committee)",
+        "weight": 1
+      },
+      {
+        "id": "glossary_definitions",
+        "regex": "(glossary|definitions|terms\\s+defined)",
+        "weight": 1
+      }
+    ]
+  },
+  "7P_7.3.8": {
+    "mandatory": [
+      {
+        "id": "codesofconduct",
+        "regex": "codeofconduct|studentcode|disciplinarycode|honourcode|universityrules",
+        "weight": 3
+      },
+      {
+        "id": "disciplinaryprocedure",
+        "regex": "disciplinaryprocedure|disciplinaryaction|complaintsinvestigation|sanctions",
+        "weight": 2
+      }
+    ],
+    "policy_id": "7P_7.3.8",
+    "recommended": [
+      {
+        "id": "appealsprocess",
+        "regex": "appealsprocess|disciplinaryappeal|reviewboard",
+        "weight": 1
+      }
+    ]
+  },
+  "ACADEMICRULESPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "rulecompliance",
+        "regex": "rulecompliance|academicauthority|academicpolicy|regulation",
+        "weight": 3
+      },
+      {
+        "id": "resolutionprocedure",
+        "regex": "conflictresolution|appealprocedure|ruleviolation",
+        "weight": 2
+      }
+    ],
+    "policy_id": "ACADEMICRULESPOLICYV2023",
+    "recommended": [
+      {
+        "id": "studentadvocacy",
+        "regex": "studentadvocacy|studentrepresentation|studentvoice",
+        "weight": 1
+      }
+    ]
+  },
+  "ACADEMIC_INTEGRITY_POLICY_V2024": {
+    "mandatory": [
+      {
+        "id": "academic_integrity",
+        "regex": "(academic\\s+integrity|academic\\s+honesty)",
+        "weight": 3
+      },
+      {
+        "id": "misconduct_plagiarism",
+        "regex": "(academic\\s+misconduct|plagiarism|fabricating|falsifying|cheating|misconduct)",
+        "weight": 3
+      },
+      {
+        "id": "ai_use",
+        "regex": "(AI|artificial\\s+intelligence|AI\\s+use)",
+        "weight": 3
+      },
+      {
+        "id": "referencing_citation",
+        "regex": "(referencing|citation|acknowledg?ment|similarity\\s+index)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "ACADEMIC_INTEGRITY_POLICY_V2024",
+    "recommended": [
+      {
+        "id": "responsibilities_roles",
+        "regex": "(responsibilities|responsible\\s+for|obligations|roles|duties)",
+        "weight": 1
+      },
+      {
+        "id": "data_integrity",
+        "regex": "(data\\s+integrity|research\\s+data|sound\\s+academic\\s+writing|ethical\\s+research)",
+        "weight": 1
+      }
+    ]
+  },
+  "ADMISSIONS_POLICY_V2025": {
+    "mandatory": [
+      {
+        "id": "equity_redress",
+        "regex": "(social\\s+justice|redress|equitable|equity|past\\s+inequalities|redress\\s+of\\s+past)",
+        "weight": 3
+      },
+      {
+        "id": "transparent_guidelines",
+        "regex": "(transparent|fair|guidelines|selection|decision-making|clear\\s+guidelines)",
+        "weight": 3
+      },
+      {
+        "id": "rpl_alternative",
+        "regex": "(recognition\\s+of\\s+prior\\s+learning|RPL|alternative\\s+routes|equivalence|credit\\s+accumulation|transfer|CAT)",
+        "weight": 2
+      },
+      {
+        "id": "pqm_selection",
+        "regex": "(programme\\s+qualification\\s+mix|PQM|qualification\\s+mix|Programme\\s+Qualification\\s+Mix)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "ADMISSIONS_POLICY_V2025",
+    "recommended": [
+      {
+        "id": "enrolment_capacity",
+        "regex": "(enrolment\\s+plan|capacity\\s+constraints|reserves\\s+the\\s+right|selection\\s+criteria|professional\\s+bodies)",
+        "weight": 1
+      },
+      {
+        "id": "credit_transfer",
+        "regex": "(credit\\s+accumulation|credit\\s+transfer|CAT|conversion\\s+calculations|recognition\\s+of\\s+other\\s+exam\\s+bodies)",
+        "weight": 1
+      }
+    ]
+  },
+  "AI_RULES_2025": {
+    "mandatory": [
+      {
+        "id": "transparency_record",
+        "regex": "(transparency|declare|record\\s+of\\s+AI\\s+use|keep\\s+a\\s+record)",
+        "weight": 3
+      },
+      {
+        "id": "honesty_integrity",
+        "regex": "(honesty|integrity|accountability|ownership)",
+        "weight": 3
+      },
+      {
+        "id": "referencing_acknowledgement",
+        "regex": "(referencing|acknowledg?ment|citation|APA|Harvard|NWU\\s+Law\\s+referencing)",
+        "weight": 2
+      },
+      {
+        "id": "privacy_security",
+        "regex": "(privacy|security|personal\\s+data|sensitive\\s+data|confidential)",
+        "weight": 2
+      },
+      {
+        "id": "prohibited_content",
+        "regex": "(restricted\\s+for\\s+use|confidential|inappropriate|illegal\\s+content)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "AI_RULES_2025",
+    "recommended": [
+      {
+        "id": "permitted_use",
+        "regex": "(use\\s+only\\s+as\\s+permitted|AI\\s+levels|allowed\\s+AI|permitted\\s+AI\\s+use)",
+        "weight": 1
+      }
+    ]
+  },
+  "ALCOHOLSUBSTANCEPOLICYV2024": {
+    "mandatory": [
+      {
+        "id": "substanceprohibition",
+        "regex": "alcoholprohibition|drugprohibition|prohibitedsubstance|nondrinking",
+        "weight": 3
+      },
+      {
+        "id": "testingprocedure",
+        "regex": "drugtesting|alcoholtesting|randomtesting|for-cause-testing",
+        "weight": 2
+      }
+    ],
+    "policy_id": "ALCOHOLSUBSTANCEPOLICYV2024",
+    "recommended": [
+      {
+        "id": "rehabilitation",
+        "regex": "rehabilitation|counselling|returntowork|supportprogram",
+        "weight": 1
+      }
+    ]
+  },
+  "ALUMNIPOLICYV2024": {
+    "mandatory": [
+      {
+        "id": "alumnirecords",
+        "regex": "alumnirecords|alumnidatabase|contactrecord|graduationrecords",
+        "weight": 3
+      },
+      {
+        "id": "engagementplan",
+        "regex": "engagementplan|alumniprogram|activityplan|alumniparticipation",
+        "weight": 2
+      }
+    ],
+    "policy_id": "ALUMNIPOLICYV2024",
+    "recommended": [
+      {
+        "id": "events",
+        "regex": "eventmanagement|reunionplanning|alumnievent|networkingevent",
+        "weight": 1
+      }
+    ]
+  },
+  "ANTI_CORRUPTION_POLICY_V2023": {
+    "mandatory": [
+      {
+        "id": "zero_tolerance",
+        "regex": "(zero\\s+tolerance|fraud|bribery|corruption|improper\\s+activities|misconduct|unacceptable\\s+conduct)",
+        "weight": 3
+      },
+      {
+        "id": "ethics_professionalism",
+        "regex": "(honesty|integrity|professionalism|probity|accountability|morally|ethically|responsible\\s+corporate\\s+citizen)",
+        "weight": 3
+      },
+      {
+        "id": "reporting_whistle",
+        "regex": "(whistleblowing|whistleblow|reporting|report\\s+improper|report\\s+fraud|disclosure)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "ANTI_CORRUPTION_POLICY_V2023",
+    "recommended": [
+      {
+        "id": "conflict_interest",
+        "regex": "(conflict\\s+of\\s+interest|declarations\\s+of\\s+interest|gifts)",
+        "weight": 1
+      },
+      {
+        "id": "training_awareness",
+        "regex": "(training|awareness|education|culture\\s+of\\s+honesty|anti-corruption\\s+awareness)",
+        "weight": 1
+      },
+      {
+        "id": "legal_frameworks",
+        "regex": "(PRECCA|POCA|PDA|PAIA|PAJA|FICA|organised\\s+crime|international\\s+treaties)",
+        "weight": 1
+      }
+    ]
+  },
+  "ASSETMANAGEMENTPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "assetregister",
+        "regex": "assetregister|assetdatabase|trackingregister",
+        "weight": 3
+      },
+      {
+        "id": "maintenanceplan",
+        "regex": "maintenanceplan|scheduledmaintenance|preventivemaintenance",
+        "weight": 2
+      }
+    ],
+    "policy_id": "ASSETMANAGEMENTPOLICYV2023",
+    "recommended": [
+      {
+        "id": "depreciationaudit",
+        "regex": "depreciationaudit|assetvaluation",
+        "weight": 1
+      }
+    ]
+  },
+  "COMMUNITY_POLICY_V2024": {
+    "mandatory": [
+      {
+        "id": "ce_registration",
+        "regex": "(CE\\s+database|community\\s+engagement\\s+database|registered\\s+on\\s+CE)",
+        "weight": 3
+      },
+      {
+        "id": "formal_partnership",
+        "regex": "(formal\\s+partnership|memorandum\\s+of\\s+understanding|MoU|memorandum\\s+of\\s+agreement|MoA)",
+        "weight": 3
+      },
+      {
+        "id": "impact_evaluation",
+        "regex": "(impact\\s+evaluation|monitoring\\s+and\\s+evaluation|M&E)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "COMMUNITY_POLICY_V2024",
+    "recommended": [
+      {
+        "id": "engaged_research",
+        "regex": "(engaged\\s+research|engaged\\s+innovation)",
+        "weight": 1
+      },
+      {
+        "id": "service_learning",
+        "regex": "(service\\s+learning|work-?integrated\\s+learning|WIL|volunteerism|outreach)",
+        "weight": 1
+      }
+    ]
+  },
+  "CONFLICT_INTEREST_POLICY_V2022": {
+    "mandatory": [
+      {
+        "id": "declare_interest",
+        "regex": "(declare|declaration|disclosure)\\s+of\\s+(interest|conflict)",
+        "weight": 3
+      },
+      {
+        "id": "avoid_conflict",
+        "regex": "(avoid|prevent)\\s+(conflict\\s+of\\s+interest|conflict\\s+of\\s+commitment)",
+        "weight": 3
+      },
+      {
+        "id": "gift_declaration",
+        "regex": "(gift|gifts|hospitality|donations|gift\\s+declaration)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "CONFLICT_INTEREST_POLICY_V2022",
+    "recommended": [
+      {
+        "id": "code_ethics_reference",
+        "regex": "(Code\\s+of\\s+Ethics|ethical\\s+conduct|ethics)",
+        "weight": 1
+      },
+      {
+        "id": "roles_responsibilities",
+        "regex": "(roles|responsibilities|designated\\s+officer|registrar|committee)",
+        "weight": 1
+      }
+    ]
+  },
+  "COUNCILRULESPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "governingstructure",
+        "regex": "governingstructure|councilbody|executivecouncil|committee",
+        "weight": 3
+      },
+      {
+        "id": "votingprocedure",
+        "regex": "votingprocedure|decisionmaking|committeevote|ballotsystem",
+        "weight": 2
+      }
+    ],
+    "policy_id": "COUNCILRULESPOLICYV2023",
+    "recommended": [
+      {
+        "id": "councilreview",
+        "regex": "councilreview|annualcouncilreview|councilfeedback",
+        "weight": 1
+      }
+    ]
+  },
+  "DATAGOVERNANCEPOLICYV2024": {
+    "mandatory": [
+      {
+        "id": "dataclassification",
+        "regex": "dataclassification|datacategorization|datatier|recordclassification",
+        "weight": 3
+      },
+      {
+        "id": "retentionprotocol",
+        "regex": "dataprotection|retentionprotocol|datalifecycle",
+        "weight": 2
+      }
+    ],
+    "policy_id": "DATAGOVERNANCEPOLICYV2024",
+    "recommended": [
+      {
+        "id": "securitytraining",
+        "regex": "securitytraining|dataawareness|dataprivacyworkshop",
+        "weight": 1
+      }
+    ]
+  },
+  "DELEGATIONAUTHORITYPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "delegationmatrix",
+        "regex": "delegationmatrix|approvalmatrix|authorisationlevels",
+        "weight": 3
+      },
+      {
+        "id": "protocolreview",
+        "regex": "protocolreview|annualreview|delegationreview",
+        "weight": 2
+      }
+    ],
+    "policy_id": "DELEGATIONAUTHORITYPOLICYV2023",
+    "recommended": [
+      {
+        "id": "training",
+        "regex": "delegationtraining|authoritytraining",
+        "weight": 1
+      }
+    ]
+  },
+  "DISABILITYPOLICYV2024": {
+    "mandatory": [
+      {
+        "id": "accessibility",
+        "regex": "accessibility|universalaccess|disabilityaccommodation|physicalaccess",
+        "weight": 3
+      },
+      {
+        "id": "nondiscrimination",
+        "regex": "nondiscrimination|equity|equalopportunity|inclusivepractice",
+        "weight": 2
+      }
+    ],
+    "policy_id": "DISABILITYPOLICYV2024",
+    "recommended": [
+      {
+        "id": "supportprograms",
+        "regex": "supportprogram|assistivecare|disabilityservices|helpdesk",
+        "weight": 1
+      }
+    ]
+  },
+  "DISCIPLINE_POLICY_V2024": {
+    "mandatory": [
+      {
+        "id": "fair_transparent",
+        "regex": "(fair|transparent|natural\\s+justice|disciplinary\\s+procedures|procedures\\s+must\\s+be)",
+        "weight": 3
+      },
+      {
+        "id": "education_correction",
+        "regex": "(educate|deter|correct|educational\\s+approach|promote\\s+stability|good\\s+order|institutional\\s+culture)",
+        "weight": 3
+      },
+      {
+        "id": "values_social",
+        "regex": "(reflect\\s+the\\s+values|engaged\\s+scholarship|social\\s+responsiveness|ethic\\s+of\\s+care)",
+        "weight": 2
+      },
+      {
+        "id": "balance_rights",
+        "regex": "(balance\\s+of\\s+parties|rights\\s+of\\s+students|rights\\s+of\\s+complainants|rights\\s+of\\s+community)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "DISCIPLINE_POLICY_V2024",
+    "recommended": [
+      {
+        "id": "disciplinary_structures",
+        "regex": "(disciplinary\\s+hearing|disciplinary\\s+committees|manual\\s+on\\s+student\\s+discipline|appeal|review)",
+        "weight": 1
+      },
+      {
+        "id": "compassion_consistency",
+        "regex": "(compassion|consistent|fairness|educational\\s+goals|reconciliation)",
+        "weight": 1
+      }
+    ]
+  },
+  "EMPLOYMENT_EQUITY_POLICY_V2022": {
+    "mandatory": [
+      {
+        "id": "equity_plan",
+        "regex": "(employment\\s+equity\\s+plan|equity\\s+plan|EE\\s+plan|EEA)",
+        "weight": 3
+      },
+      {
+        "id": "designated_groups",
+        "regex": "(designated\\s+groups|black\\s+people|women|people\\s+with\\s+disabilities)",
+        "weight": 3
+      },
+      {
+        "id": "non_discrimination",
+        "regex": "(unfair\\s+discrimination|eliminate\\s+discrimination|equal\\s+opportunities|equitable\\s+representation)",
+        "weight": 2
+      },
+      {
+        "id": "positive_measures",
+        "regex": "(affirmative\\s+action|positive\\s+measures|EE\\s+targets|preferential\\s+treatment|reasonable\\s+accommodations)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "EMPLOYMENT_EQUITY_POLICY_V2022",
+    "recommended": [
+      {
+        "id": "training_development",
+        "regex": "(training\\s+and\\s+development|skills\\s+development|capacity\\s+building|staff\\s+development)",
+        "weight": 1
+      },
+      {
+        "id": "monitoring_reporting",
+        "regex": "(monitoring\\s+progress|reporting|statistics|workforce\\s+profile|analysis)",
+        "weight": 1
+      }
+    ]
+  },
+  "ENVIRONMENTALSUSTAINABILITYPOLICYV2024": {
+    "mandatory": [
+      {
+        "id": "environmentalreview",
+        "regex": "environmentalreview|environmentalassessment|greenaudit",
+        "weight": 3
+      },
+      {
+        "id": "complianceprocedure",
+        "regex": "complianceprocedure|regulatorycompliance|legalcompliance",
+        "weight": 2
+      }
+    ],
+    "policy_id": "ENVIRONMENTALSUSTAINABILITYPOLICYV2024",
+    "recommended": [
+      {
+        "id": "bestpractice",
+        "regex": "bestpractices|industrybestpractice|exemplarpractice",
+        "weight": 1
+      }
+    ]
+  },
+  "ENV_SUST_2024": {
+    "mandatory": [
+      {
+        "id": "strategicplan",
+        "regex": "sustainabilitystrategy|strategicplan|greenuniversity|carbonfootprint",
+        "weight": 3
+      },
+      {
+        "id": "annualreview",
+        "regex": "annualreview|carbonaudit|environmentalassessment",
+        "weight": 2
+      }
+    ],
+    "policy_id": "ENV_SUST_2024",
+    "recommended": [
+      {
+        "id": "communityoutreach",
+        "regex": "communityoutreach|servicelearning|environmentaleducation",
+        "weight": 1
+      }
+    ]
+  },
+  "ETHICS_POLICY_V2024": {
+    "mandatory": [
+      {
+        "id": "ethical_culture",
+        "regex": "(ethical\\s+culture|culture\\s+of\\s+ethics|ethics\\s+culture|ethical\\s+environment)",
+        "weight": 3
+      },
+      {
+        "id": "conduct_standard",
+        "regex": "(staff\\s+conduct|student\\s+conduct|expected\\s+conduct|code\\s+of\\s+ethics|fair\\s+treatment)",
+        "weight": 3
+      },
+      {
+        "id": "governance_framework",
+        "regex": "(governance\\s+framework|ethical\\s+framework|policies\\s+and\\s+procedures|compliance\\s+with\\s+policies)",
+        "weight": 2
+      },
+      {
+        "id": "sustainability_partnership",
+        "regex": "(sustainability|social\\s+responsibility|community\\s+engagement|responsible\\s+partner|sustainable\\s+development)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "ETHICS_POLICY_V2024",
+    "recommended": [
+      {
+        "id": "training_awareness",
+        "regex": "(ethics\\s+training|ethics\\s+awareness|ethics\\s+education|ethics\\s+workshops)",
+        "weight": 1
+      },
+      {
+        "id": "policy_update",
+        "regex": "(policy\\s+review|update\\s+policies|continuous\\s+improvement|monitoring\\s+compliance)",
+        "weight": 1
+      }
+    ]
+  },
+  "FINANCIAL_POLICY_V2022": {
+    "mandatory": [
+      {
+        "id": "council_oversight",
+        "regex": "(Council|council\\s+oversight|executive\\s+director|finance\\s+and\\s+facilities|line\\s+manager|financial\\s+management)",
+        "weight": 3
+      },
+      {
+        "id": "control_risk",
+        "regex": "(control\\s+environment|internal\\s+control|risk\\s+management|limits\\s+risk|risk\\s+management)",
+        "weight": 3
+      },
+      {
+        "id": "data_integrity_compliance",
+        "regex": "(integrity|accuracy|completeness|compliance|laws|regulations|reporting\\s+standards|financial\\s+standards)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "FINANCIAL_POLICY_V2022",
+    "recommended": [
+      {
+        "id": "delegation_guidelines",
+        "regex": "(delegation|assignment|authorisation|financial\\s+guidelines|manuals|procedures|financial\\s+schedules)",
+        "weight": 1
+      },
+      {
+        "id": "donor_sponsorship",
+        "regex": "(donation|donor|grant|sponsorship|subsidiaries)",
+        "weight": 1
+      }
+    ]
+  },
+  "FUNDRAISING_POLICY_V2021": {
+    "mandatory": [
+      {
+        "id": "fundraising_coordination",
+        "regex": "(fundraising|fundraiser|donor|donations|donor\\s+fatigue|coordination|liaise)",
+        "weight": 3
+      },
+      {
+        "id": "ethical_fundraising",
+        "regex": "(ethical\\s+fundraising|ethical\\s+manner|ethical\\s+fundraising\\s+practices|acceptance\\s+of\\s+donations|donation\\s+conditions)",
+        "weight": 3
+      },
+      {
+        "id": "roles_responsibilities",
+        "regex": "(Executive\\s+director|project\\s+leader|report\\s+once\\s+every\\s+six\\s+months|oversight|facilitate\\s+identification|priorities)",
+        "weight": 2
+      },
+      {
+        "id": "donation_acceptance",
+        "regex": "(acceptance\\s+of\\s+donations|harm\\s+to\\s+reputation|stipulations\\s+attached|unlawful)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "FUNDRAISING_POLICY_V2021",
+    "recommended": [
+      {
+        "id": "student_fundraising",
+        "regex": "(student\\s+fundraising|fundraising\\s+plans|campus\\s+directors)",
+        "weight": 1
+      },
+      {
+        "id": "contracts_record",
+        "regex": "(agreement|contract|Legal\\s+Services|lodged|record\\s+keeping)",
+        "weight": 1
+      }
+    ]
+  },
+  "GOVERNANCEMANAGEMENTPOLICYV2024": {
+    "mandatory": [
+      {
+        "id": "leadershipstructure",
+        "regex": "leadershipstructure|governancebody|emtexecutive|councilcommittee",
+        "weight": 3
+      },
+      {
+        "id": "decisionprotocol",
+        "regex": "decisionprotocol|votingsystem|resolutionprocess",
+        "weight": 2
+      }
+    ],
+    "policy_id": "GOVERNANCEMANAGEMENTPOLICYV2024",
+    "recommended": [
+      {
+        "id": "annualgovernancereview",
+        "regex": "annualreview|governancereview|annualrisk",
+        "weight": 1
+      }
+    ]
+  },
+  "HEALTHSAFETYPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "riskassessment",
+        "regex": "riskassessment|hazardidentification|OSH|HIRA|riskmitigation",
+        "weight": 3
+      },
+      {
+        "id": "trainingrecord",
+        "regex": "OHStrainingsafetytrainingfirstaidfirewardenevacuationdrill",
+        "weight": 2
+      }
+    ],
+    "policy_id": "HEALTHSAFETYPOLICYV2023",
+    "recommended": [
+      {
+        "id": "ppe",
+        "regex": "PPE|personalprotectiveequipment",
+        "weight": 1
+      },
+      {
+        "id": "incidentregister",
+        "regex": "incidentregister|nearmiss|incidentreport",
+        "weight": 1
+      }
+    ]
+  },
+  "HRPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "recruitmentpolicy",
+        "regex": "recruitmentpolicy|appointmentprocedure|advertisedpositions",
+        "weight": 3
+      },
+      {
+        "id": "promotionpolicy",
+        "regex": "promotionpolicy|internalpromotion|careerprogression",
+        "weight": 2
+      }
+    ],
+    "policy_id": "HRPOLICYV2023",
+    "recommended": [
+      {
+        "id": "inductionorientation",
+        "regex": "induction|orientation|onboarding",
+        "weight": 1
+      }
+    ]
+  },
+  "HUMANRIGHTSPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "dignity",
+        "regex": "humandignity|equality|non-discrimination",
+        "weight": 3
+      },
+      {
+        "id": "enforcementprocedure",
+        "regex": "complaintsprocedure|remedialaction|disciplinaryaction|reporting",
+        "weight": 2
+      }
+    ],
+    "policy_id": "HUMANRIGHTSPOLICYV2023",
+    "recommended": [
+      {
+        "id": "advocacy",
+        "regex": "humanrightsadvocacy|awareness|training",
+        "weight": 1
+      }
+    ]
+  },
+  "ICT_POLICY_2023": {
+    "mandatory": [
+      {
+        "id": "assessment_alignment",
+        "regex": "(constructive\\s+alignment|assessment\\s+alignment|curriculum\\s+alignment)",
+        "weight": 3
+      },
+      {
+        "id": "moderation_evidence",
+        "regex": "(internal\\s+moderation|external\\s+moderation|moderation\\s+report)",
+        "weight": 3
+      },
+      {
+        "id": "feedback_turnaround",
+        "regex": "(feedback\\s+turnaround|return\\s+of\\s+marked\\s+work|assessment\\s+feedback)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "ICT_POLICY_2023",
+    "recommended": [
+      {
+        "id": "accessibility_udl",
+        "regex": "(UDL|universal\\s+design|accessibility)",
+        "weight": 1
+      },
+      {
+        "id": "blended_hyflex",
+        "regex": "(blended\\s+learning|hyflex|online\\s+learning|flipped\\s+classroom)",
+        "weight": 1
+      }
+    ]
+  },
+  "INFORMATION_GOVERNANCE_FRAMEWORK_V2021": {
+    "mandatory": [
+      {
+        "id": "information_quality",
+        "regex": "(high\\s+quality\\s+information|quality\\s+information|accurate\\s+information|relevant\\s+information)",
+        "weight": 3
+      },
+      {
+        "id": "data_integrity",
+        "regex": "(data\\s+integrity|integrity\\s+of\\s+data|accurate\\s+data|data\\s+quality)",
+        "weight": 3
+      },
+      {
+        "id": "ownership_responsibility",
+        "regex": "(ownership\\s+of\\s+information|data\\s+ownership|responsibility\\s+for\\s+data|roles\\s+and\\s+responsibilities)",
+        "weight": 2
+      },
+      {
+        "id": "information_governance_framework",
+        "regex": "(information\\s+governance\\s+framework|information\\s+management\\s+framework|governance\\s+model)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "INFORMATION_GOVERNANCE_FRAMEWORK_V2021",
+    "recommended": [
+      {
+        "id": "information_security",
+        "regex": "(information\\s+security|cybersecurity|privacy|confidentiality)",
+        "weight": 1
+      },
+      {
+        "id": "digital_transformation",
+        "regex": "(digital\\s+transformation|digital\\s+strategy|data\\s+governance)",
+        "weight": 1
+      },
+      {
+        "id": "decision_rights",
+        "regex": "(decision\\s+rights|accountability|data\\s+stewardship)",
+        "weight": 1
+      }
+    ]
+  },
+  "INFRASTRUCTURE_POLICY_V2025": {
+    "mandatory": [
+      {
+        "id": "asset_lifecycle",
+        "regex": "(asset\\s+lifecycle|lifecycle\\s+management|acquisition|installation|operation|maintenance|refurbishment|rehabilitation|disposal)",
+        "weight": 3
+      },
+      {
+        "id": "sustainability_risk",
+        "regex": "(sustainable|sustainability|risk\\s+management|planning\\s+principles|economically\\s+responsible)",
+        "weight": 3
+      },
+      {
+        "id": "planning_management",
+        "regex": "(three-year\\s+delivery\\s+plan|delivery\\s+plan|strategic\\s+initiatives|infrastructure\\s+plan|space\\s+utilisation|maintenance\\s+planning)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "INFRASTRUCTURE_POLICY_V2025",
+    "recommended": [
+      {
+        "id": "technology_management",
+        "regex": "(technology\\s+and\\s+information|ICT\\s+infrastructure|information\\s+management)",
+        "weight": 1
+      },
+      {
+        "id": "people_contractor",
+        "regex": "(people\\s+management|contractor|service\\s+provider|service\\s+providers|provider\\s+management)",
+        "weight": 1
+      },
+      {
+        "id": "performance_measurement",
+        "regex": "(performance\\s+measurement|optimisation|performance\\s+monitoring)",
+        "weight": 1
+      }
+    ]
+  },
+  "LANGUAGE_POLICY_V2022": {
+    "mandatory": [
+      {
+        "id": "multilingual_framework",
+        "regex": "(multilingualism|multilingual|functional\\s+multilingual|multilingual\\s+environment)",
+        "weight": 3
+      },
+      {
+        "id": "languages_of_choice",
+        "regex": "(English|Setswana|Sesotho|Afrikaans|languages?\\s+of\\s+choice)",
+        "weight": 3
+      },
+      {
+        "id": "language_plans",
+        "regex": "(language\\s+plan|programme\\s+language\\s+plan|implementation\\s+plan)",
+        "weight": 2
+      },
+      {
+        "id": "develop_african_languages",
+        "regex": "(African\\s+languages|develop\\s+African\\s+languages|promotion\\s+of\\s+African)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "LANGUAGE_POLICY_V2022",
+    "recommended": [
+      {
+        "id": "translanguaging",
+        "regex": "(translanguaging|code\\s+switching|code-switching)",
+        "weight": 1
+      },
+      {
+        "id": "language_partnerships",
+        "regex": "(partnerships\\s+with|collaboration\\s+with|cooperation\\s+to\\s+develop\\s+languages)",
+        "weight": 1
+      }
+    ]
+  },
+  "LEAVEPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "leaveallocation",
+        "regex": "leaveallocation|annualleave|sickleave|specialleave",
+        "weight": 3
+      },
+      {
+        "id": "approvalprocess",
+        "regex": "leaveapproval|supervisorapproval|authorisation|leaveform",
+        "weight": 2
+      }
+    ],
+    "policy_id": "LEAVEPOLICYV2023",
+    "recommended": [
+      {
+        "id": "leaveaudit",
+        "regex": "leaveaudit|leavebalance|leavereport",
+        "weight": 1
+      }
+    ]
+  },
+  "MERITBURSARYPOLICYV2024": {
+    "mandatory": [
+      {
+        "id": "eligibilitycriteria",
+        "regex": "eligibilitycriteria|meritscore|academicperformance",
+        "weight": 3
+      },
+      {
+        "id": "applicationprocess",
+        "regex": "applicationprocess|admissionsportal|submissiondeadline",
+        "weight": 2
+      }
+    ],
+    "policy_id": "MERITBURSARYPOLICYV2024",
+    "recommended": [
+      {
+        "id": "renewalcriteria",
+        "regex": "renewalcriteria|annualreview|recipientscreening",
+        "weight": 1
+      }
+    ]
+  },
+  "MODERATIONPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "internalmoderation",
+        "regex": "internalmoderation|moderationpanel|moderatorassignment",
+        "weight": 3
+      },
+      {
+        "id": "externalmoderation",
+        "regex": "externalmoderation|reviewmoderator|externalpanel",
+        "weight": 2
+      }
+    ],
+    "policy_id": "MODERATIONPOLICYV2023",
+    "recommended": [
+      {
+        "id": "moderationschedule",
+        "regex": "moderationschedule|calendarreview|annualmoderationcalendar",
+        "weight": 1
+      }
+    ]
+  },
+  "OHS_POLICY_V2019": {
+    "mandatory": [
+      {
+        "id": "risk_assessment",
+        "regex": "(risk\\s+assessment|hazard\\s+identification|HIRA)",
+        "weight": 3
+      },
+      {
+        "id": "incident_register",
+        "regex": "(incident\\s+register|near\\s*miss|incident\\s+report)",
+        "weight": 3
+      },
+      {
+        "id": "training_record",
+        "regex": "(OHS\\s+training|safety\\s+training|first\\s+aid|fire\\s+warden|evacuation\\s+drill)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "OHS_POLICY_V2019",
+    "recommended": [
+      {
+        "id": "ppe",
+        "regex": "(PPE|personal\\s+protective\\s+equipment)",
+        "weight": 1
+      },
+      {
+        "id": "ergonomics",
+        "regex": "(ergonomics|workstation\\s+assessment)",
+        "weight": 1
+      }
+    ]
+  },
+  "OPENACCESSPOLICYV2022": {
+    "mandatory": [
+      {
+        "id": "publication",
+        "regex": "openaccesspublication|repository|publicrepository|OAmandate",
+        "weight": 3
+      },
+      {
+        "id": "copyright",
+        "regex": "copyrightclearance|intellectualproperty|IPmanagement",
+        "weight": 2
+      }
+    ],
+    "policy_id": "OPENACCESSPOLICYV2022",
+    "recommended": [
+      {
+        "id": "training",
+        "regex": "openaccesstraining|authortraining|OAtraining",
+        "weight": 1
+      }
+    ]
+  },
+  "PERFORMANCE_POLICY_V2022": {
+    "mandatory": [
+      {
+        "id": "performance_agreement",
+        "regex": "(performance\\s+agreement|performance\\s+contract)",
+        "weight": 3
+      },
+      {
+        "id": "personal_development_plan",
+        "regex": "(personal\\s+development\\s+plan|PDP)",
+        "weight": 3
+      },
+      {
+        "id": "performance_review",
+        "regex": "(performance\\s+review|mid-?year\\s+review|performance\\s+appraisal|final\\s+performance\\s+appraisal)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "PERFORMANCE_POLICY_V2022",
+    "recommended": [
+      {
+        "id": "consistency_process",
+        "regex": "(moderation\\s+committee|consistency\\s+process|consistency\\s+committee)",
+        "weight": 1
+      },
+      {
+        "id": "evidence_portfolio",
+        "regex": "(portfolio\\s+of\\s+evidence|evidence\\s+portfolio)",
+        "weight": 1
+      }
+    ]
+  },
+  "PRIM_HEALTH_2023": {
+    "mandatory": [
+      {
+        "id": "healthscreening",
+        "regex": "healthscreening|medicalscreening|primarycarescreening|clinicappointment",
+        "weight": 3
+      },
+      {
+        "id": "referralprotocol",
+        "regex": "referralprotocol|medicalreferral|referralprocedure",
+        "weight": 2
+      }
+    ],
+    "policy_id": "PRIM_HEALTH_2023",
+    "recommended": [
+      {
+        "id": "preventivecare",
+        "regex": "preventivecare|checkup|wellnessscreening|vaccinationdrive",
+        "weight": 1
+      }
+    ]
+  },
+  "PRIVACY_POLICY_V2021": {
+    "mandatory": [
+      {
+        "id": "privacy_protection",
+        "regex": "(privacy\\s+protection|protection\\s+of\\s+privacy|protect\\s+privacy)",
+        "weight": 3
+      },
+      {
+        "id": "personal_information",
+        "regex": "(personal\\s+information|personal\\s+data|personal\\s+info)",
+        "weight": 3
+      },
+      {
+        "id": "POPIA_compliance",
+        "regex": "(POPIA|Protection\\s+of\\s+Personal\\s+Information\\s+Act)",
+        "weight": 3
+      },
+      {
+        "id": "information_regulator",
+        "regex": "(Information\\s+Regulator)",
+        "weight": 2
+      },
+      {
+        "id": "privacy_impact_assessment",
+        "regex": "(privacy\\s+impact\\s+assessment|PIA)",
+        "weight": 2
+      },
+      {
+        "id": "responsible_use",
+        "regex": "(responsible\\s+use\\s+of\\s+personal\\s+information|responsible\\s+use)",
+        "weight": 2
+      },
+      {
+        "id": "information_governance_privacy",
+        "regex": "(information\\s+governance|privacy\\s+governance|governance\\s+framework)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "PRIVACY_POLICY_V2021",
+    "recommended": [
+      {
+        "id": "consent",
+        "regex": "(consent|consent\\s+to\\s+process)",
+        "weight": 1
+      },
+      {
+        "id": "de_identify",
+        "regex": "(de-identify|anonymisation|anonymization)",
+        "weight": 1
+      },
+      {
+        "id": "security_measures",
+        "regex": "(security\\s+measures|security\\s+controls|protection\\s+measures)",
+        "weight": 1
+      },
+      {
+        "id": "data_subjects",
+        "regex": "(data\\s+subject|data\\s+subjects)",
+        "weight": 1
+      },
+      {
+        "id": "operator_processor",
+        "regex": "(operator|processor)",
+        "weight": 1
+      }
+    ]
+  },
+  "PROCUREMENT_POLICY_2023": {
+    "mandatory": [
+      {
+        "id": "tenderprocess",
+        "regex": "tenderprocess|procurementevaluation|bidcommittee|adjudication",
+        "weight": 3
+      },
+      {
+        "id": "suppliercompliance",
+        "regex": "suppliercompliance|EDR|suppliervetting",
+        "weight": 2
+      }
+    ],
+    "policy_id": "PROCUREMENT_POLICY_2023",
+    "recommended": [
+      {
+        "id": "localprocurement",
+        "regex": "localprocurement|preferencelocal|BBBEEsuppliers",
+        "weight": 1
+      }
+    ]
+  },
+  "PROMOTIONS_POLICY_V2021": {
+    "mandatory": [
+      {
+        "id": "proof_of_excellence",
+        "regex": "(proof\\s+of\\s+excellence|evidence\\s+of\\s+excellence|meritorious\\s+performance|excellent\\s+performance)",
+        "weight": 3
+      },
+      {
+        "id": "external_peer_review",
+        "regex": "(external\\s+peer\\s+review|peer\\s+review\\s+report|international\\s+benchmarking)",
+        "weight": 3
+      },
+      {
+        "id": "promotion_criteria",
+        "regex": "(promotion\\s+criteria|promotion\\s+requirements|promotion\\s+guidelines)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "PROMOTIONS_POLICY_V2021",
+    "recommended": [
+      {
+        "id": "transformation_equity",
+        "regex": "(employment\\s+equity|transformation|diversity)",
+        "weight": 1
+      },
+      {
+        "id": "merit_based",
+        "regex": "(merit-?based|merit\\s+based\\s+evaluation)",
+        "weight": 1
+      }
+    ]
+  },
+  "QUALITY_POLICY_2021": {
+    "mandatory": [
+      {
+        "id": "quality_assurance",
+        "regex": "(quality\\s+assurance)",
+        "weight": 3
+      },
+      {
+        "id": "quality_enhancement",
+        "regex": "(quality\\s+enhancement)",
+        "weight": 3
+      },
+      {
+        "id": "quality_evaluation",
+        "regex": "(quality\\s+evaluation)",
+        "weight": 2
+      },
+      {
+        "id": "quality_management",
+        "regex": "(quality\\s+management\\s+system|quality\\s+management)",
+        "weight": 2
+      },
+      {
+        "id": "quality_promotion",
+        "regex": "(quality\\s+promotion)",
+        "weight": 2
+      },
+      {
+        "id": "continuous_improvement",
+        "regex": "(continuous\\s+improvement|ongoing\\s+improvement)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "QUALITY_POLICY_2021",
+    "recommended": [
+      {
+        "id": "quality_culture",
+        "regex": "(quality\\s+culture|self-driven\\s+quality)",
+        "weight": 1
+      },
+      {
+        "id": "monitoring_evaluation",
+        "regex": "(monitoring\\s+and\\s+evaluation|monitoring\\s+and\\s+review)",
+        "weight": 1
+      },
+      {
+        "id": "external_audits",
+        "regex": "(external\\s+quality\\s+evaluation|external\\s+review|national\\s+audit|HEQC)",
+        "weight": 1
+      },
+      {
+        "id": "employee_empowerment",
+        "regex": "(empower\\s+employees|empowering\\s+employees|capacity\\s+building|training\\s+for\\s+quality)",
+        "weight": 1
+      }
+    ]
+  },
+  "RECORDS_MANAGEMENT_POLICY_V2022": {
+    "mandatory": [
+      {
+        "id": "records_management",
+        "regex": "(records\\s+(management|life\\s*cycle|classification|retention))",
+        "weight": 3
+      },
+      {
+        "id": "archives_museum_management",
+        "regex": "(archives?\\s+management|museum\\s+management)",
+        "weight": 3
+      },
+      {
+        "id": "digitisation",
+        "regex": "(digitisation|digital\\s+archiving|digitization)",
+        "weight": 2
+      },
+      {
+        "id": "roles_responsibilities",
+        "regex": "(information\\s+officer|deputy\\s+information\\s+officer|records\\s+representative|records\\s+officer)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "RECORDS_MANAGEMENT_POLICY_V2022",
+    "recommended": [
+      {
+        "id": "business_continuity",
+        "regex": "(business\\s+continuity|continuity\\s+plan|disaster\\s+recovery)",
+        "weight": 1
+      },
+      {
+        "id": "disposal_retention",
+        "regex": "(retention\\s+schedule|records\\s+disposal|disposal\\s+programme)",
+        "weight": 1
+      },
+      {
+        "id": "information_governance",
+        "regex": "(information\\s+governance|records\\s+governance|integrated\\s+records\\s+management)",
+        "weight": 1
+      }
+    ]
+  },
+  "RECRUITMENT_POLICY_V2023": {
+    "mandatory": [
+      {
+        "id": "recruitment_management",
+        "regex": "(student\\s+recruitment|recruitment\\s+activities|marketing\\s+and\\s+promotion|career\\s+guidance|coordination\\s+of\\s+activities|enrolment\\s+plan)",
+        "weight": 3
+      },
+      {
+        "id": "brand_retention",
+        "regex": "(brand\\s+equity|retention|leads\\s+to\\s+registration|conversion\\s+rates)",
+        "weight": 3
+      },
+      {
+        "id": "approval_materials",
+        "regex": "(marketing\\s+material|brochure|MSR|CRM|approved\\s+by|marketing\\s+and\\s+student\\s+recruitment|approval)",
+        "weight": 2
+      },
+      {
+        "id": "compliance_guidelines",
+        "regex": "(Consumer\\s+Protection\\s+Act|POPIA|government\\s+directives|General\\s+Academic\\s+Rules|related\\s+policies)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "RECRUITMENT_POLICY_V2023",
+    "recommended": [
+      {
+        "id": "prospects_leads",
+        "regex": "(prospect|lead|lead\\s+database|prospect\\s+communication)",
+        "weight": 1
+      },
+      {
+        "id": "events_open_day",
+        "regex": "(open\\s+day|activation|career\\s+day|school\\s+visits|brochures|flyers)",
+        "weight": 1
+      },
+      {
+        "id": "retention_conversion",
+        "regex": "(conversion\\s+rate|retention\\s+activities|pipeline|enrolment\\s+growth)",
+        "weight": 1
+      }
+    ]
+  },
+  "RESEARCH_POLICY_V2013": {
+    "mandatory": [
+      {
+        "id": "ethics_approval",
+        "regex": "(ethics\\s+approval|research\\s+ethics|ethical\\s+clearance|REC)",
+        "weight": 3
+      },
+      {
+        "id": "data_management_plan",
+        "regex": "(data\\s+management\\s+plan|DMP|research\\s+data\\s+management)",
+        "weight": 3
+      },
+      {
+        "id": "research_entity",
+        "regex": "(research\\s+entity|niche\\s+area|focus\\s+area|research\\s+unit|centre\\s+of\\s+excellence)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "RESEARCH_POLICY_V2013",
+    "recommended": [
+      {
+        "id": "open_access",
+        "regex": "(open\\s+access|open\\s+data|repository)",
+        "weight": 1
+      },
+      {
+        "id": "grant_funding",
+        "regex": "(grant\\s+application|external\\s+funding|NRF|Thuthuka)",
+        "weight": 1
+      }
+    ]
+  },
+  "RISKMANAGEMENTPOLICYV2024": {
+    "mandatory": [
+      {
+        "id": "riskassessment",
+        "regex": "riskassessment|hazardidentification|managerisk|mitigationplan",
+        "weight": 3
+      },
+      {
+        "id": "review",
+        "regex": "riskreview|annualassessment|periodicreview",
+        "weight": 2
+      }
+    ],
+    "policy_id": "RISKMANAGEMENTPOLICYV2024",
+    "recommended": [
+      {
+        "id": "training",
+        "regex": "riskmanagementtraining|workshop|stafftraining",
+        "weight": 1
+      }
+    ]
+  },
+  "RISK_COMPLIANCE_POLICY_V2020": {
+    "mandatory": [
+      {
+        "id": "risk_management_framework",
+        "regex": "(risk\\s+management|risk\\s+management\\s+framework)",
+        "weight": 3
+      },
+      {
+        "id": "compliance_management",
+        "regex": "(compliance\\s+management|compliance\\s+framework)",
+        "weight": 3
+      },
+      {
+        "id": "risk_appetite",
+        "regex": "(risk\\s+appetite|risk\\s+tolerance)",
+        "weight": 2
+      },
+      {
+        "id": "internal_controls",
+        "regex": "(internal\\s+control|control\\s+environment)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "RISK_COMPLIANCE_POLICY_V2020",
+    "recommended": [
+      {
+        "id": "combined_assurance",
+        "regex": "(combined\\s+assurance|audit,?\\s+risk\\s+and\\s+compliance\\s+committee|ARCC)",
+        "weight": 1
+      },
+      {
+        "id": "business_continuity",
+        "regex": "(business\\s+continuity\\s+framework|continuity\\s+plan|business\\s+disruption)",
+        "weight": 1
+      }
+    ]
+  },
+  "SECURITY_POLICY_V2025": {
+    "mandatory": [
+      {
+        "id": "security_innovation",
+        "regex": "(security\\s+policy|protection\\s+services|innovative\\s+methods|cutting\\s+edge\\s+technology)",
+        "weight": 3
+      },
+      {
+        "id": "values_ethics",
+        "regex": "(ethics|integrity|responsibility|accountability|fairness|transparency|diversity)",
+        "weight": 2
+      },
+      {
+        "id": "unitary_department",
+        "regex": "(unitary\\s+department|multi-campus\\s+protection\\s+services|integrated\\s+service)",
+        "weight": 2
+      },
+      {
+        "id": "incident_reporting",
+        "regex": "(incident\\s+reporting|incident\\s+response|security\\s+incidents|incident\\s+analysis)",
+        "weight": 2
+      },
+      {
+        "id": "training_and_competence",
+        "regex": "(training|competent\\s+personnel|personnel\\s+competent)",
+        "weight": 2
+      },
+      {
+        "id": "human_rights",
+        "regex": "(human\\s+rights|zero\\s+tolerance|human\\s+rights\\s+violations|respect\\s+for\\s+human\\s+rights)",
+        "weight": 2
+      },
+      {
+        "id": "monitoring_evaluation_security",
+        "regex": "(monitoring\\s+and\\s+performance\\s+evaluation|internal\\s+audits|performance\\s+evaluation|management\\s+reviews)",
+        "weight": 2
+      },
+      {
+        "id": "leadership_commitment",
+        "regex": "(leadership\\s+commitment|senior\\s+management|commitment\\s+to)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "SECURITY_POLICY_V2025",
+    "recommended": [
+      {
+        "id": "risk_embracing",
+        "regex": "(risk\\s+embracing|risk\\s+management|risk\\s+apetite|risk\\s+appetite)",
+        "weight": 1
+      },
+      {
+        "id": "social_justice_participative",
+        "regex": "(social\\s+justice|participative|participation|transformational\\s+practices)",
+        "weight": 1
+      },
+      {
+        "id": "sustainable_competitive_advantage",
+        "regex": "(sustainable\\s+competitive\\s+advantage|sustainability)",
+        "weight": 1
+      }
+    ]
+  },
+  "STAKEHOLDER_FRAMEWORK_V2022": {
+    "mandatory": [
+      {
+        "id": "aa1000_principles",
+        "regex": "(inclusivity|materiality|responsiveness|AA1000|AccountAbility)",
+        "weight": 3
+      },
+      {
+        "id": "material_stakeholder",
+        "regex": "(material\\s+stakeholder|stakeholder\\s+inclusive\\s+approach|material\\s+issues|materiality)",
+        "weight": 3
+      },
+      {
+        "id": "integration_governance",
+        "regex": "(integration\\s+into\\s+governance|integrated\\s+into\\s+governance|governance\\s+system|integration\\s+into\\s+strategy)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "STAKEHOLDER_FRAMEWORK_V2022",
+    "recommended": [
+      {
+        "id": "stakeholder_needs",
+        "regex": "(needs\\s+and\\s+expectations|balanced\\s+needs|reasonable\\s+needs|stakeholder\\s+expectations)",
+        "weight": 1
+      },
+      {
+        "id": "proactive_communication",
+        "regex": "(proactive\\s+information|timely\\s+information|targeted\\s+information|proactive\\s+communication)",
+        "weight": 1
+      },
+      {
+        "id": "sustainability_balance",
+        "regex": "(sustainability|sustainable|balance\\s+needs|balanced\\s+interests)",
+        "weight": 1
+      }
+    ]
+  },
+  "STUDENTUPPORTPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "supportservices",
+        "regex": "studentservices|supportdesk|academicadvising|counselling",
+        "weight": 3
+      }
+    ],
+    "policy_id": "STUDENTUPPORTPOLICYV2023",
+    "recommended": [
+      {
+        "id": "integrationprogram",
+        "regex": "integrationprogram|firstyearsupport|peermentoring",
+        "weight": 1
+      }
+    ]
+  },
+  "STUDENT_GOVERNANCE_RULES_V2025": {
+    "mandatory": [
+      {
+        "id": "election_procedure",
+        "regex": "(election\\s+rules|nomination\\s+process|voting\\s+procedure|campaigning)",
+        "weight": 3
+      },
+      {
+        "id": "composition_terms",
+        "regex": "(composition\\s+of\\s+the|terms\\s+of\\s+office|delegates|membership)",
+        "weight": 3
+      },
+      {
+        "id": "functions_duties",
+        "regex": "(functions|duties|roles|privileges|responsibilities|powers)",
+        "weight": 2
+      },
+      {
+        "id": "constitution_adoption",
+        "regex": "(SRC\\s+constitution|constitution\\s+review|adoption|amendment)",
+        "weight": 2
+      }
+    ],
+    "policy_id": "STUDENT_GOVERNANCE_RULES_V2025",
+    "recommended": [
+      {
+        "id": "campaign_regulation",
+        "regex": "(campaigning|campaign\\s+rules|fair\\s+campaign|no\\s+interference)",
+        "weight": 1
+      },
+      {
+        "id": "accountability_reporting",
+        "regex": "(accountability|reporting|annual\\s+report|performance\\s+report|budget)",
+        "weight": 1
+      }
+    ]
+  },
+  "SUPPLYCHAINPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "procurementprocedure",
+        "regex": "procurementprocedure|acquisitionprocess|requestforquote|tender",
+        "weight": 3
+      },
+      {
+        "id": "suppliermanagement",
+        "regex": "suppliermanagement|supplierdatabase|vetting|contractmanagement",
+        "weight": 2
+      }
+    ],
+    "policy_id": "SUPPLYCHAINPOLICYV2023",
+    "recommended": [
+      {
+        "id": "sustainability",
+        "regex": "sustainablesupplychain|greenprocurement|ecoresponsibility",
+        "weight": 1
+      }
+    ]
+  },
+  "TEACHINGLEARNINGPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "assessmentalignment",
+        "regex": "constructivealignment|assessmentalignment|curriculumalignment",
+        "weight": 3
+      },
+      {
+        "id": "moderationevidence",
+        "regex": "internalmoderation|externalmoderation|moderationreport",
+        "weight": 3
+      },
+      {
+        "id": "feedbackturnaround",
+        "regex": "feedbackturnaround|returnofmarkedwork|assessmentfeedback",
+        "weight": 2
+      }
+    ],
+    "policy_id": "TEACHINGLEARNINGPOLICYV2023",
+    "recommended": [
+      {
+        "id": "accessibilityudl",
+        "regex": "UDL|universaldesign|accessibility",
+        "weight": 1
+      },
+      {
+        "id": "blendedhyflex",
+        "regex": "blendedlearning|hyflex|onlinelearning|flippedclassroom",
+        "weight": 1
+      }
+    ]
+  },
+  "VEHICLEFLEETPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "fleetmanagement",
+        "regex": "vehiclefleet|fleetmanagement|fueleconomy|vehicletracking",
+        "weight": 3
+      },
+      {
+        "id": "maintenanceplan",
+        "regex": "fleetmaintenance|scheduledservicing|repairs|maintenancecalendar",
+        "weight": 2
+      }
+    ],
+    "policy_id": "VEHICLEFLEETPOLICYV2023",
+    "recommended": [
+      {
+        "id": "drivertraining",
+        "regex": "drivertraining|fleettraining|driversafety",
+        "weight": 1
+      }
+    ]
+  },
+  "VISITORPOLICYV2023": {
+    "mandatory": [
+      {
+        "id": "signinvistor",
+        "regex": "visitorlog|signinsheet|guestregistration",
+        "weight": 3
+      },
+      {
+        "id": "escortrequirement",
+        "regex": "escortrequirement|chaperone|hostsignature",
+        "weight": 2
+      }
+    ],
+    "policy_id": "VISITORPOLICYV2023",
+    "recommended": [
+      {
+        "id": "visitorscreening",
+        "regex": "visitorscreening|securityscreening|visitorscan",
+        "weight": 1
+      }
+    ]
+  }
+}

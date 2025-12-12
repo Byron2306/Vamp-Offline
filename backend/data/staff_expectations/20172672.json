@@ -1,0 +1,65 @@
+{
+  "norm_hours": 1728.0,
+  "kpa_summary": {
+    "KPA3": {
+      "name": "Personal Research, Innovation and/or Creative Outputs",
+      "hours": 100.0,
+      "weight_pct": 3.0
+    },
+    "KPA1": {
+      "name": "Teaching and Learning (including supervision)",
+      "hours": 1337.62,
+      "weight_pct": 3.6
+    },
+    "KPA5": {
+      "name": "Social Responsiveness (Community Engagement / Industry)",
+      "hours": 40.0,
+      "weight_pct": 2.4
+    },
+    "KPA4": {
+      "name": "Academic Leadership and Administration",
+      "hours": 203.0,
+      "weight_pct": 12.1
+    }
+  },
+  "teaching": [
+    "Maarman PH MED (40h)",
+    "BSTE312 205 (268.18h)",
+    "BSTE322 125 (234.3h)",
+    "BSTE412 125 (244.95h)",
+    "BSTE422 125 (244.95h)",
+    "BSTD512 10 (102.12h)",
+    "LABD522 10 (102.12h)",
+    "April (40h)",
+    "July (40h)",
+    "BSTE312 (5h)",
+    "BSTE322 (5h)",
+    "BSTE522 (5h)",
+    "Premoderation of assignment BSTE312 (1h)",
+    "Premoderation of assignment BSTE322 (1h)",
+    "Premoderation of assignment BSTE412 (1h)",
+    "Premoderation of assignment BSTE422 (1h)",
+    "Premoderation of assignment BSTD512 (1h)",
+    "Premoderation of assignment LABD522 (1h)"
+  ],
+  "supervision": [],
+  "research": [
+    "Article writing on Promotion of Entrepreneurship (50h)",
+    "Article writing on teaching business studies in rural schools (50h)"
+  ],
+  "leadership": [
+    "Research Focus Area/Unit Management Committee meetings: \nMaximum of 20 hours (5h)",
+    "Mentorship meetings: 8 hours (8h)",
+    "School Management Committee: 24 hours (20h)",
+    "Subject Group meetings: 22 hours (20h)",
+    "School meetings and functions: 10 hours (10h)",
+    "Attendance of research colloquiums, writing schools, workshops (eg. Ethics, Integrity, Turnitin): Maximum of 60 hours (60h)",
+    "Faculty Forums: Maximum of 6 hours (6h)",
+    "Professional development (in accordance with PDP): Maximum of 10 hours (10h)",
+    "BSTE322,BSTD522 (40h)",
+    "Attend graduation ceremony first semester and second semester (24h)"
+  ],
+  "social": [
+    "Student Training Entrepreneurship Programme (40h)"
+  ]
+}

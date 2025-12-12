@@ -1,0 +1,167 @@
+{
+  "version": "2025.11.07",
+  "about": "Unified KPA router derived from file_type_profile.json + kpa_keyword.json. Used by scanner to route artefacts to KPAs deterministically.",
+  "defaults": {
+    "regex_flags": "i,m",
+    "max_alt_kpa": 2,
+    "score_weights": {
+      "filename_cues": 1.0,
+      "content_regex": 2.0,
+      "platform_cues": 0.6,
+      "extension_cues": 0.5,
+      "negative_cues": -2.5
+    },
+    "min_route_score": 1.5
+  },
+  "KPA1": {
+    "name": "Teaching & Learning",
+    "description": "Curriculum design, teaching delivery, assessment quality, moderation, student success & experience.",
+    "extensions": ["pdf","doc","docx","xls","xlsx","csv","ppt","pptx","html","htm","txt","md","msg","eml","zip"],
+    "platform_cues": ["efundi","turnitin","gradescope","moodle","outlook","onedrive","googledrive","sharepoint"],
+    "filename_cues": [
+      "stles","set","student.?evaluation","course.?evaluation","module.?evaluation",
+      "moderation","moderator","assessment","blueprint","rubric","mark.?scheme","memo(?!randum of)",
+      "module.?guide","study.?guide","learning.?guide","lesson.?plan","curriculum","syllabus",
+      "pass.?rate","item.?analysis","question.?analysis","peer.?observation","teaching.?portfolio",
+      "exam","test","quiz","assignment","feedback.?summary","criterion.?referenced","bloom","h5p","lms","efundi"
+    ],
+    "content_regex": [
+      "\\b(STLES|SET|student (teaching|learning) (evaluation|survey|feedback))\\b",
+      "\\bmoderation (report|minutes|summary)|external moderator\\b",
+      "\\brubric(s)?\\b|criterion-?referenced|blueprint|item analysis\\b",
+      "\\bmodule guide\\b|study guide\\b|learning outcomes\\b|curriculum (map|mapping)\\b",
+      "\\bpeer (observation|review)\\b|teaching portfolio\\b",
+      "\\bTurnitin\\b|similarity (report|index)\\b",
+      "\\beFundi\\b|LMS\\b|H5P\\b|online (quiz|assignment)\\b",
+      "\\bpass.?rate\\b|throughput\\b|success rate\\b|retention\\b",
+      "\\bassessment (plan|policy|schedule)\\b|internal moderation\\b|external moderation\\b"
+    ],
+    "negative_cues": [
+      "tender|procurement|supply (chain|management)|purchase order|RFP|RFQ",
+      "fleet|vehicle log|diesel|fuel card|asset register",
+      "safety (audit|inspection)|PPE|incident register|CAPA"
+    ]
+  },
+  "KPA2": {
+    "name": "Occupational Health & Safety",
+    "description": "OHS compliance, induction/training, risk assessment, incidents, drills, PPE, SHEQ.",
+    "extensions": ["pdf","doc","docx","xls","xlsx","csv","ppt","pptx","jpg","jpeg","png","heic","msg","eml","txt"],
+    "platform_cues": ["sharepoint","onedrive","outlook","efundi","googledrive"],
+    "filename_cues": [
+      "OHS","SHEQ","safety","risk.?assessment","HIRA","hazard",
+      "incident","accident","near.?miss","injury","first.?aid",
+      "evacuation.?drill","fire.?drill","PPE","induction","training","MSDS","SDS",
+      "inspection","audit","safety.?committee","minutes","emergency.?plan","permit.?to.?work","lock.?out"
+    ],
+    "content_regex": [
+      "\\b(Occupational Health (and|&) Safety|OHS|SHEQ)\\b",
+      "\\brisk (assessment|register)\\b|HIRA\\b|hazard(s)?\\b|MSDS\\b|SDS\\b",
+      "\\bincident (report|register)|near.?miss\\b|injury on duty\\b|IOD\\b",
+      "\\bPPE\\b|eye protection\\b|lab coat\\b|gloves\\b|respirator\\b",
+      "\\binduction (training|record)\\b|refresher\\b|toolbox talk\\b",
+      "\\bevacu(ation|ee) drill\\b|fire drill\\b|assembly point\\b",
+      "\\binspection (checklist|report)\\b|safety audit\\b|non-?conform(ance|ity)\\b|CAPA\\b",
+      "\\bsafety committee\\b|minutes\\b|emergency (plan|procedure)\\b"
+    ],
+    "negative_cues": [
+      "curriculum|rubric|STLES|module guide|assessment blueprint",
+      "NRF|DHET|Scopus|publication|ethics committee|REC|HREC"
+    ]
+  },
+  "KPA3": {
+    "name": "Research & Innovation",
+    "description": "Publications, grants, supervision, IP/innovation, ethics & data governance.",
+    "extensions": ["pdf","doc","docx","xls","xlsx","csv","ppt","pptx","bib","ris","txt","msg","eml"],
+    "platform_cues": ["googledrive","onedrive","sharepoint","orcid","scopus","outlook"],
+    "filename_cues": [
+      "article|manuscript|journal|paper|preprint|postprint|accepted",
+      "DOI|Scopus|Web.?of.?Science|ISI|DHET",
+      "grant|NRF|Thuthuka|proposal|budget|award|funding",
+      "ethics|REC|HREC|application|approval|clearance|protocol|consent",
+      "supervision|co-?supervision|PhD|MSc|MEd|honours|dissertation|thesis",
+      "DMP|data management plan|FAIR|repository|dataset|anonymi[sz]ed",
+      "patent|IP|disclosure|tech.?transfer|licen[cs]e|prototype|innovation",
+      "conference|proceedings|abstract|poster|oral"
+    ],
+    "content_regex": [
+      "\\b(DOI:|Scopus|Web of Science|ISI|DHET[- ]accredited)\\b",
+      "\\baccepted|in press|revise (and|&) resubmit\\b",
+      "\\bgrant (award|number|agreement)|NRF|Thuthuka|funding\\b",
+      "\\bREC|HREC|ethics (approval|clearance|protocol)|consent form\\b",
+      "\\b(supervis(e|ion)|co-?supervision)\\b|\\b(PhD|MSc|MEd|Honours) (graduated|completed)\\b",
+      "\\bdata management plan\\b|\\bDMP\\b|FAIR (data|principles)\\b|anonymi[sz]ed data\\b|repository\\b",
+      "\\bpatent\\b|IP disclosure\\b|tech(nology)? transfer\\b|prototype\\b|commerciali[sz]e\\b|innovation\\b",
+      "\\bconference (paper|proceedings|presentation)\\b|poster\\b|abstract\\b"
+    ],
+    "negative_cues": [
+      "tender|procurement|supply chain|purchase order",
+      "fleet|logbook|OHS drill|PPE"
+    ]
+  },
+  "KPA4": {
+    "name": "Academic Leadership & Management",
+    "description": "Programme leadership, governance, QA/accreditation, mentorship, workload fairness, committee service.",
+    "extensions": ["pdf","doc","docx","xls","xlsx","csv","ppt","pptx","msg","eml","txt"],
+    "platform_cues": ["sharepoint","onedrive","outlook","googledrive"],
+    "filename_cues": [
+      "programme (leader|leadership)|acting HoD|head of department",
+      "faculty board|senate|committee|quorum|ToR|terms of reference|minutes|agenda|resolution",
+      "accreditation|re-?accreditation|HEQC|SAQA|CHE|quality assurance|QA",
+      "workload|task agreement|TA|allocation|TT|timetable|moderation calendar",
+      "mentorship|mentor|induction (staff)|peer review (of teaching|practice)",
+      "risk register|KPI|scorecard|operational plan|annual plan|PDP"
+    ],
+    "content_regex": [
+      "\\b(programme|program) (leader|leadership)\\b|acting (HoD|head of department)\\b",
+      "\\bfaculty board\\b|senate\\b|committee\\b|quorum\\b|terms of reference\\b|minutes\\b|agenda\\b|resolution\\b",
+      "\\b(accreditation|re-?accreditation)\\b|HEQC\\b|SAQA\\b|CHE\\b|quality assurance\\b|self-?evaluation report\\b",
+      "\\bworkload (allocation|model)\\b|task agreement\\b|TA\\b|moderation calendar\\b|turnaround time\\b",
+      "\\bmentorship\\b|peer review of teaching\\b|induction (programme|plan)\\b",
+      "\\bKPI\\b|risk register\\b|operational plan\\b|PDP\\b|scorecard\\b"
+    ],
+    "negative_cues": [
+      "STLES|SET|module guide|lesson plan",
+      "DOI|Scopus|patent|REC|HREC"
+    ]
+  },
+  "KPA5": {
+    "name": "Community Engagement & Social Responsiveness",
+    "description": "Registered CE projects, stakeholder partnerships, MoUs/MoAs, service-learning, impact reporting.",
+    "extensions": ["pdf","doc","docx","xls","xlsx","csv","ppt","pptx","msg","eml","jpg","jpeg","png","txt"],
+    "platform_cues": ["sharepoint","onedrive","googledrive","outlook"],
+    "filename_cues": [
+      "community (engagement|project)|CE (project|registration)|service-?learning|SL module",
+      "stakeholder (survey|feedback|engagement)|partner(ship)?",
+      "MoU|MoA|memorandum of (understanding|agreement)|agreement",
+      "impact (report|brief)|outreach|workshop|clinic|school",
+      "social responsiveness|SDG|public scholarship|volunteer"
+    ],
+    "content_regex": [
+      "\\bcommunity (engagement|project)\\b|\\bCE (registration|project)\\b|service-?learning\\b",
+      "\\bstakeholder (survey|feedback|engagement)\\b|\\bpartner(ship)?\\b",
+      "\\b(MoU|MoA|memorandum of (understanding|agreement))\\b",
+      "\\bimpact (report|brief)\\b|outreach\\b|clinic\\b|workshop\\b|school outreach\\b",
+      "\\bsocial responsiveness\\b|SDG(s)?\\b|public scholarship\\b|volunteer\\b",
+      "\\bCE[-_ ]?ID[: ]?[A-Z0-9-]+\\b"
+    ],
+    "negative_cues": [
+      "tender|procurement|invoice|purchase order",
+      "exam|rubric|moderation"
+    ]
+  },
+  "_routing": {
+    "notes": "Router computes a score per KPA from cues: filename_cues + content_regex + platform_cues + extension_cues, then subtracts negative_cues. Highest score wins; top-2 retained as alternates if above min_route_score.",
+    "tie_breakers": [
+      "Prefer KPAs with stronger content_regex hits over filename-only hits.",
+      "If policy/ethics terms detected (REC/HREC/DMP/consent), prefer KPA3.",
+      "If STLES/SET/moderation terms detected, prefer KPA1.",
+      "If PPE/risk/incident terms detected, prefer KPA2.",
+      "If committee/QA/accreditation terms detected, prefer KPA4.",
+      "If MoU/CE registration/impact terms detected, prefer KPA5."
+    ],
+    "post_filters": [
+      "If negative_cues exceed 1 match with high weight, drop KPA candidate.",
+      "If evidence contains zero content_regex hits across ALL KPAs, set route='needs_review'."
+    ]
+  }
+}

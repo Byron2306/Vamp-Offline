@@ -1,0 +1,128 @@
+{
+  "core_values": [
+    {
+      "id": "VAL-1",
+      "name": "Excellence",
+      "keywords": [
+        { "pattern": "excell(en(t|ce))|award|distinction|top-tier|best practice|high standard|prestigious", "weight": 2.0 },
+        { "pattern": "benchmark|performance recognition|merit|outstanding", "weight": 1.5 }
+      ]
+    },
+    {
+      "id": "VAL-2",
+      "name": "Ethics",
+      "keywords": [
+        { "pattern": "ethic(s|al)|code of conduct|research misconduct|plagiarism|integrity", "weight": 2.0 },
+        { "pattern": "honesty|fairness|compliance|professional behavior", "weight": 1.5 }
+      ]
+    },
+    {
+      "id": "VAL-3",
+      "name": "Unity in Diversity",
+      "keywords": [
+        { "pattern": "diversity|inclusion|multicultural|race|gender|language|cultural heritage", "weight": 1.8 },
+        { "pattern": "unity|belonging|social cohesion|equity|representation", "weight": 1.5 }
+      ]
+    },
+    {
+      "id": "VAL-4",
+      "name": "Human Dignity",
+      "keywords": [
+        { "pattern": "dignity|respect for humanity|right to be heard|non-discrimination", "weight": 1.7 },
+        { "pattern": "empathy|compassion|self-worth", "weight": 1.2 }
+      ]
+    },
+    {
+      "id": "VAL-5",
+      "name": "Commitment",
+      "keywords": [
+        { "pattern": "commitment|dedication|loyalty|follow-through|work ethic", "weight": 1.6 },
+        { "pattern": "persistence|goal orientation|accountable effort", "weight": 1.2 }
+      ]
+    },
+    {
+      "id": "VAL-6",
+      "name": "Self-Respect",
+      "keywords": [
+        { "pattern": "self-respect|self-worth|personal integrity|confidence", "weight": 1.5 }
+      ]
+    },
+    {
+      "id": "VAL-7",
+      "name": "Respect for Others",
+      "keywords": [
+        { "pattern": "respect for others|civility|professional courtesy|acknowledgement", "weight": 1.6 },
+        { "pattern": "collegiality|tolerance|courteous", "weight": 1.2 }
+      ]
+    },
+    {
+      "id": "VAL-8",
+      "name": "Accountability",
+      "keywords": [
+        { "pattern": "accountability|responsibility|task agreement|ownership|delivery", "weight": 2.0 },
+        { "pattern": "performance contract|TA compliance|answerability", "weight": 1.5 }
+      ]
+    },
+    {
+      "id": "VAL-9",
+      "name": "Transparency",
+      "keywords": [
+        { "pattern": "transparency|openness|clarity of process|full disclosure|audit trail", "weight": 1.8 },
+        { "pattern": "record-keeping|accessible documentation", "weight": 1.2 }
+      ]
+    },
+    {
+      "id": "VAL-10",
+      "name": "Innovation",
+      "keywords": [
+        { "pattern": "innovation|prototype|novel|tech transfer|digital solution", "weight": 1.8 },
+        { "pattern": "first-of-its-kind|automation|AI(?! ethics)|technology integration", "weight": 1.5 }
+      ]
+    },
+    {
+      "id": "VAL-11",
+      "name": "Social Responsiveness",
+      "keywords": [
+        { "pattern": "community|stakeholder|social impact|engagement|CE office", "weight": 1.7 },
+        { "pattern": "outreach|volunteer|MoU with NGO|service learning|CE registration", "weight": 1.5 }
+      ]
+    },
+    {
+      "id": "VAL-12",
+      "name": "Collaboration",
+      "keywords": [
+        { "pattern": "collaboration|joint initiative|co-authorship|interdisciplinary", "weight": 1.5 },
+        { "pattern": "shared leadership|teamwork|co-supervision|cross-faculty", "weight": 1.2 }
+      ]
+    },
+    {
+      "id": "VAL-13",
+      "name": "Lifelong Learning",
+      "keywords": [
+        { "pattern": "lifelong learning|CPD|upskilling|professional development", "weight": 1.5 },
+        { "pattern": "staff development|learning journey|training participation", "weight": 1.2 }
+      ]
+    },
+    {
+      "id": "VAL-14",
+      "name": "Environmental Stewardship",
+      "keywords": [
+        { "pattern": "sustainability|green campus|environmental impact|climate|eco-conscious", "weight": 1.6 },
+        { "pattern": "carbon footprint|recycling|waste management|energy saving", "weight": 1.2 }
+      ]
+    },
+    {
+      "id": "VAL-15",
+      "name": "Service Orientation",
+      "keywords": [
+        { "pattern": "service excellence|student support|academic advising|client service", "weight": 1.5 },
+        { "pattern": "responsiveness|feedback handling|administrative support", "weight": 1.2 }
+      ]
+    }
+  ],
+  "tier_thresholds": {
+    "T1_min": 0.0,
+    "T2_min": 2.5,
+    "T3_min": 5.0
+  }
+}

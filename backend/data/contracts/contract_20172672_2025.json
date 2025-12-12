@@ -1,0 +1,1165 @@
+{
+  "staff_id": "20172672",
+  "name": "Byron Bunt",
+  "position": "Associate Professor",
+  "cycle_year": 2025,
+  "faculty": "Education",
+  "line_manager": "Prof. Martha Matashu",
+  "kpas": [
+    {
+      "code": "KPA1",
+      "name": "Teaching and Learning",
+      "weight": null,
+      "hours": null,
+      "kpis": [
+        {
+          "kpi_id": null,
+          "description": "Maarman PH",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 15.938239174620533,
+          "hours": 268.18,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 13.924712650509326,
+          "hours": 234.3,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE412",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 14.557654134623386,
+          "hours": 244.95,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE422",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 14.557654134623386,
+          "hours": 244.95,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTD512",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 6.069106512462707,
+          "hours": 102.11999999999999,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "LABD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 6.069106512462707,
+          "hours": 102.11999999999999,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "April",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "July",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE412",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE422",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTD512",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment LABD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Research Focus Area/Unit Management Committee meetings: \nMaximum of 20 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Mentorship meetings: 8 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.4754490021514068,
+          "hours": 8.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "School Management Committee: 24 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.1886225053785169,
+          "hours": 20.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Subject Group meetings: 22 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.1886225053785169,
+          "hours": 20.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "School meetings and functions: 10 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.5943112526892584,
+          "hours": 10.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Attendance of research colloquiums, writing schools, workshops (eg. Ethics, Integrity, Turnitin): Maximum of 60 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 3.5658675161355506,
+          "hours": 60.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Maarman PH",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 15.938239174620533,
+          "hours": 268.18,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 13.924712650509326,
+          "hours": 234.3,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE412",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 14.557654134623386,
+          "hours": 244.95,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE422",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 14.557654134623386,
+          "hours": 244.95,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTD512",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 6.069106512462707,
+          "hours": 102.11999999999999,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "LABD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 6.069106512462707,
+          "hours": 102.11999999999999,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "April",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "July",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE412",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE422",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTD512",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment LABD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Research Focus Area/Unit Management Committee meetings: \nMaximum of 20 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Mentorship meetings: 8 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.4754490021514068,
+          "hours": 8.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "School Management Committee: 24 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.1886225053785169,
+          "hours": 20.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Subject Group meetings: 22 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.1886225053785169,
+          "hours": 20.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "School meetings and functions: 10 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.5943112526892584,
+          "hours": 10.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Attendance of research colloquiums, writing schools, workshops (eg. Ethics, Integrity, Turnitin): Maximum of 60 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 3.5658675161355506,
+          "hours": 60.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Maarman PH",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 15.938239174620533,
+          "hours": 268.18,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 13.924712650509326,
+          "hours": 234.3,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE412",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 14.557654134623386,
+          "hours": 244.95,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE422",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 14.557654134623386,
+          "hours": 244.95,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTD512",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 6.069106512462707,
+          "hours": 102.11999999999999,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "LABD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 6.069106512462707,
+          "hours": 102.11999999999999,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "April",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "July",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE412",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE422",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTD512",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment LABD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Research Focus Area/Unit Management Committee meetings: \nMaximum of 20 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Mentorship meetings: 8 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.4754490021514068,
+          "hours": 8.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "School Management Committee: 24 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.1886225053785169,
+          "hours": 20.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Subject Group meetings: 22 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.1886225053785169,
+          "hours": 20.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "School meetings and functions: 10 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.5943112526892584,
+          "hours": 10.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Attendance of research colloquiums, writing schools, workshops (eg. Ethics, Integrity, Turnitin): Maximum of 60 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 3.5658675161355506,
+          "hours": 60.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Maarman PH",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 15.938239174620533,
+          "hours": 268.18,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 13.924712650509326,
+          "hours": 234.3,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE412",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 14.557654134623386,
+          "hours": 244.95,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE422",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 14.557654134623386,
+          "hours": 244.95,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTD512",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 6.069106512462707,
+          "hours": 102.11999999999999,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "LABD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 6.069106512462707,
+          "hours": 102.11999999999999,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "April",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "July",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE312",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE322",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE412",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTE422",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment BSTD512",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Premoderation of assignment LABD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.05943112526892585,
+          "hours": 1.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Research Focus Area/Unit Management Committee meetings: \nMaximum of 20 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.2971556263446292,
+          "hours": 5.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Mentorship meetings: 8 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.4754490021514068,
+          "hours": 8.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "School Management Committee: 24 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.1886225053785169,
+          "hours": 20.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Subject Group meetings: 22 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.1886225053785169,
+          "hours": 20.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "School meetings and functions: 10 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.5943112526892584,
+          "hours": 10.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Attendance of research colloquiums, writing schools, workshops (eg. Ethics, Integrity, Turnitin): Maximum of 60 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 3.5658675161355506,
+          "hours": 60.0,
+          "active": true
+        }
+      ]
+    },
+    {
+      "code": "KPA2",
+      "name": "Occupational Health and Safety",
+      "weight": null,
+      "hours": null,
+      "kpis": [
+        {
+          "kpi_id": null,
+          "description": "Faculty Forums: Maximum of 6 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.3565867516135551,
+          "hours": 6.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Professional development (in accordance with PDP): Maximum of 10 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.5943112526892584,
+          "hours": 10.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322,BSTD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Attend graduation ceremony first semester and second semester",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.4263470064542203,
+          "hours": 24.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Faculty Forums: Maximum of 6 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.3565867516135551,
+          "hours": 6.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Professional development (in accordance with PDP): Maximum of 10 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.5943112526892584,
+          "hours": 10.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322,BSTD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Attend graduation ceremony first semester and second semester",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.4263470064542203,
+          "hours": 24.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Faculty Forums: Maximum of 6 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.3565867516135551,
+          "hours": 6.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Professional development (in accordance with PDP): Maximum of 10 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.5943112526892584,
+          "hours": 10.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322,BSTD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Attend graduation ceremony first semester and second semester",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.4263470064542203,
+          "hours": 24.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Faculty Forums: Maximum of 6 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.3565867516135551,
+          "hours": 6.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Professional development (in accordance with PDP): Maximum of 10 hours",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 0.5943112526892584,
+          "hours": 10.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "BSTE322,BSTD522",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Attend graduation ceremony first semester and second semester",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 1.4263470064542203,
+          "hours": 24.0,
+          "active": true
+        }
+      ]
+    },
+    {
+      "code": "KPA3",
+      "name": "Research and Innovation / Creative Outputs",
+      "weight": null,
+      "hours": null,
+      "kpis": [
+        {
+          "kpi_id": null,
+          "description": "Article writing on Promotion of Entrepreneurship",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.9715562634462924,
+          "hours": 50.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Article writing on teaching business studies in rural schools",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.9715562634462924,
+          "hours": 50.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Article writing on Promotion of Entrepreneurship",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.9715562634462924,
+          "hours": 50.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Article writing on teaching business studies in rural schools",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.9715562634462924,
+          "hours": 50.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Article writing on Promotion of Entrepreneurship",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.9715562634462924,
+          "hours": 50.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Article writing on teaching business studies in rural schools",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.9715562634462924,
+          "hours": 50.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Article writing on Promotion of Entrepreneurship",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.9715562634462924,
+          "hours": 50.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Article writing on teaching business studies in rural schools",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.9715562634462924,
+          "hours": 50.0,
+          "active": true
+        }
+      ]
+    },
+    {
+      "code": "KPA4",
+      "name": "Academic Leadership and Management",
+      "weight": null,
+      "hours": null,
+      "kpis": []
+    },
+    {
+      "code": "KPA5",
+      "name": "Social Responsiveness / Community and Industry Engagement",
+      "weight": null,
+      "hours": null,
+      "kpis": [
+        {
+          "kpi_id": null,
+          "description": "Student Training Entrepreneurship Programme",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Student Training Entrepreneurship Programme",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Student Training Entrepreneurship Programme",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        },
+        {
+          "kpi_id": null,
+          "description": "Student Training Entrepreneurship Programme",
+          "outputs": "",
+          "outcomes": "",
+          "weight": 2.3772450107570338,
+          "hours": 40.0,
+          "active": true
+        }
+      ]
+    }
+  ]
+}

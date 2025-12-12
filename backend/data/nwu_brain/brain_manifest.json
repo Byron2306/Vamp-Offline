@@ -1,0 +1,15 @@
+{
+  "version": "2025.11",
+  "files": {
+    "policy_registry.json": "policy_registry.json",
+    "clause_packs.json": "clause_packs.json",
+    "kpa_router.json": "kpa_router.json",
+    "tier_keywords.json": "tier_keywords.json",
+    "values_index.json": "values_index.json",
+    "institution_profile.json": "institution_profile.json",
+    "policy_id_map.json": "policy_id_map.json",
+    "system_nwu.txt": "system_nwu.txt",
+    "kpa_guidelines.md": "kpa_guidelines.md",
+    "policy_playbook.md": "policy_playbook.md"
+  }
+}

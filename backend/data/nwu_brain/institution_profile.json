@@ -1,0 +1,49 @@
+{
+  "kpas": {
+    "KPA1": "Teaching and Learning",
+    "KPA2": "Occupational Health and Safety and Work Environment",
+    "KPA3": "Research and Innovation",
+    "KPA4": "Academic Leadership and Management",
+    "KPA5": "Community Engagement and Social Responsiveness"
+  },
+  "rating_scale": {
+    "name": "NWU Performance",
+    "bands": [
+      {
+        "min": 0.0,
+        "max": 1.4,
+        "label": "1 - Not Achieved"
+      },
+      {
+        "min": 1.5,
+        "max": 2.4,
+        "label": "2 - Partially Achieved"
+      },
+      {
+        "min": 2.5,
+        "max": 3.4,
+        "label": "3 - Achieved"
+      },
+      {
+        "min": 3.5,
+        "max": 4.4,
+        "label": "4 - Exceeds Expectations"
+      },
+      {
+        "min": 4.5,
+        "max": 5.0,
+        "label": "5 - Exceptional Performance"
+      }
+    ]
+  },
+  "weights": {
+    "tier": 0.4,
+    "policy": 0.3,
+    "values": 0.2,
+    "kpa_coverage": 0.1
+  },
+  "must_pass_policies": [
+    "POL-ETH-1",
+    "POL-OHS-1"
+  ]
+}

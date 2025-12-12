@@ -1,0 +1,1409 @@
+{
+  "10P_10.4": {
+    "aliases": [
+      "COMMUNITY_ENGAGEMENT_POLICY"
+    ],
+    "code": "10P_10.4",
+    "id": "10P_10.4",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Community Engagement Policy"
+  },
+  "1P_1": {
+    "aliases": [
+      "ETHICS_POLICY"
+    ],
+    "code": "1P_1",
+    "id": "1P_1",
+    "must_pass": true,
+    "severity": "high",
+    "source": "normalized",
+    "title": "Ethics Policy"
+  },
+  "1P_1.1.12": {
+    "aliases": [
+      "PERSONAL_INFORMATION_PRIVACY_POLICY"
+    ],
+    "code": "1P_1.1.12",
+    "id": "1P_1.1.12",
+    "must_pass": true,
+    "severity": "high",
+    "source": "normalized",
+    "title": "Personal Information Privacy Policy"
+  },
+  "1P_1.1.3": {
+    "aliases": [
+      "OCCUPATIONAL_HEALTH_AND_SAFETY_POLICY"
+    ],
+    "code": "1P_1.1.3",
+    "id": "1P_1.1.3",
+    "must_pass": true,
+    "severity": "high",
+    "source": "normalized",
+    "title": "Occupational Health and Safety Policy"
+  },
+  "1P_1.16.1": {
+    "aliases": [
+      "INFORMATION_STRATEGY_AND_FRAMEWORK_FOR_INFORMATION_GOVERNANCE"
+    ],
+    "code": "1P_1.16.1",
+    "id": "1P_1.16.1",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Information Strategy and Framework for Information Governance"
+  },
+  "1P_1.20": {
+    "aliases": [
+      "SMOKING_POLICY"
+    ],
+    "code": "1P_1.20",
+    "id": "1P_1.20",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Smoking Policy"
+  },
+  "1P_1.3.1": {
+    "aliases": [
+      "INSTITUTIONAL_RULES_ON_STUDENT_GOVERNANCE"
+    ],
+    "code": "1P_1.3.1",
+    "id": "1P_1.3.1",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Institutional Rules on Student Governance"
+  },
+  "2PR_2.8": {
+    "aliases": [
+      "INTERNATIONALISATION_STRATEGY_2023-2027",
+      "INTERNATIONALISATION_STRATEGY_V2023"
+    ],
+    "code": "2Pr_2.8",
+    "id": "2PR_2.8",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Internationalisation Strategy 2023-2027"
+  },
+  "2P_2.11": {
+    "aliases": [
+      "RECORDS_ARCHIVES_AND_MUSEUM_MANAGEMENT_POLICY"
+    ],
+    "code": "2P_2.11",
+    "id": "2P_2.11",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Records, Archives and Museum Management Policy"
+  },
+  "2P_2.19": {
+    "aliases": [
+      "PROTECTION_SERVICES_SECURITY_POLICY"
+    ],
+    "code": "2P_2.19",
+    "id": "2P_2.19",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Protection Services Security Policy"
+  },
+  "2P_2.25": {
+    "aliases": [
+      "POLICY_AND_RULES_ON_CONFLICT_OF_INTEREST_AND_ON_DECLARATIONS_OF_INTEREST_AND_OF_GIFTS"
+    ],
+    "code": "2P_2.25",
+    "id": "2P_2.25",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Policy and Rules on Conflict of Interest and on Declarations of Interest and of Gifts"
+  },
+  "2P_2.3": {
+    "aliases": [
+      "QUALITY_POLICY"
+    ],
+    "code": "2P_2.3",
+    "id": "2P_2.3",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Quality Policy"
+  },
+  "2P_2.4.3.2": {
+    "aliases": [
+      "POLICY_ON_ACADEMIC_INTEGRITY"
+    ],
+    "code": "2P_2.4.3.2",
+    "id": "2P_2.4.3.2",
+    "must_pass": true,
+    "severity": "high",
+    "source": "normalized",
+    "title": "Policy on Academic Integrity"
+  },
+  "2P_2.5": {
+    "aliases": [
+      "LANGUAGE_POLICY_OF_THE_NWU"
+    ],
+    "code": "2P_2.5",
+    "id": "2P_2.5",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Language Policy of the NWU"
+  },
+  "2P_2.7.3": {
+    "aliases": [
+      "HUMAN_RIGHTS_POLICY",
+      "HUMAN_RIGHTS_POLICY_V2023"
+    ],
+    "code": "2P_2.7.3",
+    "id": "2P_2.7.3",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Human Rights Policy"
+  },
+  "2P_2.9.6_A": {
+    "aliases": [
+      "POLICY_ON_THE_PREVENTION_OF_BRIBERY_CORRUPTION_AND_FRAUD_AND_ON_WHISTLEBLOWING"
+    ],
+    "code": "2P_2.9.6_A",
+    "id": "2P_2.9.6_A",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Policy on the Prevention of Bribery, Corruption and Fraud and on Whistleblowing"
+  },
+  "2P_2.9.7": {
+    "aliases": [
+      "RISK_AND_COMPLIANCE_POLICY"
+    ],
+    "code": "2P_2.9.7",
+    "id": "2P_2.9.7",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Risk and Compliance Policy"
+  },
+  "3P_3.14": {
+    "aliases": [
+      "POLICY_ON_EMPLOYMENT_EQUITY"
+    ],
+    "code": "3P_3.14",
+    "id": "3P_3.14",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Policy on Employment Equity"
+  },
+  "3P_3.15": {
+    "aliases": [
+      "STAFF_ASSESSMENT_POLICY"
+    ],
+    "code": "3P_3.15",
+    "id": "3P_3.15",
+    "must_pass": true,
+    "severity": "high",
+    "source": "normalized",
+    "title": "Staff Assessment Policy"
+  },
+  "3P_3.4": {
+    "aliases": [
+      "STAFF_LEARNING_AND_DEVELOPMENT_POLICY"
+    ],
+    "code": "3P_3.4",
+    "id": "3P_3.4",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Staff Learning and Development Policy"
+  },
+  "3P_3.5": {
+    "aliases": [
+      "PERFORMANCE_MANAGEMENT_POLICY"
+    ],
+    "code": "3P_3.5",
+    "id": "3P_3.5",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Performance Management Policy"
+  },
+  "3P_3.6": {
+    "aliases": [
+      "POLICY_ON_THE_PROMOTION_OF_ACADEMIC_EMPLOYEES"
+    ],
+    "code": "3P_3.6",
+    "id": "3P_3.6",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Policy on the Promotion of Academic Employees"
+  },
+  "3P_3.7": {
+    "aliases": [
+      "SEXUAL_HARASSMENT_POLICY"
+    ],
+    "code": "3P_3.7",
+    "id": "3P_3.7",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Sexual Harassment Policy"
+  },
+  "4P_4": {
+    "aliases": [
+      "FINANCIAL_POLICY"
+    ],
+    "code": "4P_4",
+    "id": "4P_4",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Financial Policy"
+  },
+  "5P_5.1": {
+    "aliases": [
+      "INFRASTRUCTURE_MANAGEMENT_POLICY"
+    ],
+    "code": "5P_5.1",
+    "id": "5P_5.1",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Infrastructure Management Policy"
+  },
+  "6PR_6.4": {
+    "aliases": [
+      "STAKEHOLDER_ENGAGEMENT_POLICY"
+    ],
+    "code": "6Pr_6.4",
+    "id": "6PR_6.4",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Stakeholder Engagement Policy"
+  },
+  "6P_6.2": {
+    "aliases": [
+      "COMMUNICATION_POLICY",
+      "COMMUNICATION_POLICY_V2022"
+    ],
+    "code": "6P_6.2",
+    "id": "6P_6.2",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Communication Policy"
+  },
+  "6P_6.3": {
+    "aliases": [
+      "DEVELOPMENT_AND_FUNDRAISING_POLICY_AND_RULES"
+    ],
+    "code": "6P_6.3",
+    "id": "6P_6.3",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Development and Fundraising Policy and Rules"
+  },
+  "6P_6.6": {
+    "aliases": [
+      "STUDENTRECRUITMENTPOLICYV2023",
+      "STUDENT_RECRUITMENT_POLICY"
+    ],
+    "code": "6P_6.6",
+    "id": "6P_6.6",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Student Recruitment Policy"
+  },
+  "7P": {
+    "aliases": [
+      "GENERAL_ACADEMIC_RULES",
+      "GENERAL_ACADEMIC_RULES_V2024"
+    ],
+    "code": "7P",
+    "id": "7P",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "General Academic Rules"
+  },
+  "7P_7.1": {
+    "aliases": [
+      "ADMISSIONS_POLICY"
+    ],
+    "code": "7P_7.1",
+    "id": "7P_7.1",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Admissions Policy"
+  },
+  "7P_7.1.1": {
+    "aliases": [
+      "SCHEDULE_OF_AUTHORISATION_LEVELS"
+    ],
+    "code": "7P_7.1.1",
+    "id": "7P_7.1.1",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Schedule of Authorisation Levels"
+  },
+  "7P_7.3.8": {
+    "aliases": [
+      "STUDENTDISCIPLINEPOLICYV2024",
+      "STUDENT_DISCIPLINE_POLICY"
+    ],
+    "code": "7P_7.3.8",
+    "id": "7P_7.3.8",
+    "must_pass": false,
+    "severity": "high",
+    "source": "normalized",
+    "title": "Student Discipline Policy"
+  },
+  "8P_8": {
+    "aliases": [
+      "TEACHING_LEARNING_AND_ASSESSMENT_POLICY"
+    ],
+    "code": "8P_8",
+    "id": "8P_8",
+    "must_pass": true,
+    "severity": "high",
+    "source": "normalized",
+    "title": "Teaching, Learning and Assessment Policy"
+  },
+  "9P": {
+    "aliases": [
+      "RESEARCH_AND_INNOVATION_POLICY"
+    ],
+    "code": "9P",
+    "id": "9P",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Research and Innovation Policy"
+  },
+  "ACADEMICRULESPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "ACADEMICRULESPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "academicrulespolicyv2023"
+  },
+  "ACADEMIC_INTEGRITY_POLICY_V2024": {
+    "aliases": [],
+    "code": null,
+    "id": "ACADEMIC_INTEGRITY_POLICY_V2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "academic_integrity_policy_v2024"
+  },
+  "ADMISSIONS_POLICY_V2025": {
+    "aliases": [
+      "ADMISSIONSPOLICYV2025"
+    ],
+    "code": null,
+    "id": "ADMISSIONS_POLICY_V2025",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "admissions_policy_v2025"
+  },
+  "AI_RULES_2025": {
+    "aliases": [
+      "AI_RULES_V2025",
+      "SENATE_RULES_ON_THE_RESPONSIBLE_AND_ETHICAL_USE_OF_AI"
+    ],
+    "code": "AI_Rules_2025",
+    "id": "AI_RULES_2025",
+    "must_pass": true,
+    "severity": "high",
+    "source": "normalized",
+    "title": "Senate Rules on the Responsible and Ethical Use of AI"
+  },
+  "ALCOHOLSUBSTANCEPOLICYV2024": {
+    "aliases": [],
+    "code": null,
+    "id": "ALCOHOLSUBSTANCEPOLICYV2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "alcoholsubstancepolicyv2024"
+  },
+  "ALCOHOL_DRUGS_2024": {
+    "aliases": [
+      "ALCOHOL_SUBSTANCE_ABUSE_AND_DRUG-FREE_WORKPLACE_POLICY"
+    ],
+    "code": "ALCOHOL_DRUGS_2024",
+    "id": "ALCOHOL_DRUGS_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Alcohol, Substance Abuse and Drug-Free Workplace Policy"
+  },
+  "ALUMNIPOLICYV2024": {
+    "aliases": [],
+    "code": null,
+    "id": "ALUMNIPOLICYV2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "alumnipolicyv2024"
+  },
+  "ALUMNI_2024": {
+    "aliases": [
+      "ALUMNI_RELATIONS_POLICY"
+    ],
+    "code": "ALUMNI_2024",
+    "id": "ALUMNI_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Alumni Relations Policy"
+  },
+  "ANTI_CORRUPTION_POLICY_V2023": {
+    "aliases": [],
+    "code": null,
+    "id": "ANTI_CORRUPTION_POLICY_V2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "anti_corruption_policy_v2023"
+  },
+  "ASSETMANAGEMENTPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "ASSETMANAGEMENTPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "assetmanagementpolicyv2023"
+  },
+  "ASSET_MANAGE_2023": {
+    "aliases": [
+      "ASSET_MANAGEMENT_POLICY"
+    ],
+    "code": "ASSET_MANAGE_2023",
+    "id": "ASSET_MANAGE_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Asset Management Policy"
+  },
+  "AUTH_LEVELS_2023": {
+    "aliases": [
+      "SCHEDULE_OF_AUTHORISATION_LEVELS"
+    ],
+    "code": "AUTH_LEVELS_2023",
+    "id": "AUTH_LEVELS_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Schedule of Authorisation Levels"
+  },
+  "BEHAVIOURAL_MANUAL_2023": {
+    "aliases": [
+      "NWU_BEHAVIOURAL_MANUAL_INCLUDES_SUBSTANCEALCOHOL_RULES"
+    ],
+    "code": "BEHAVIOURAL_MANUAL_2023",
+    "id": "BEHAVIOURAL_MANUAL_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "NWU Behavioural Manual (includes substance/alcohol rules)"
+  },
+  "COMMUNITY_POLICY_V2024": {
+    "aliases": [],
+    "code": null,
+    "id": "COMMUNITY_POLICY_V2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "community_policy_v2024"
+  },
+  "CONFLICT_INTEREST_POLICY_V2022": {
+    "aliases": [],
+    "code": null,
+    "id": "CONFLICT_INTEREST_POLICY_V2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "conflict_interest_policy_v2022"
+  },
+  "COUNCILRULESPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "COUNCILRULESPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "councilrulespolicyv2023"
+  },
+  "DATAGOVERNANCEPOLICYV2024": {
+    "aliases": [],
+    "code": null,
+    "id": "DATAGOVERNANCEPOLICYV2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "dataGovernancepolicyv2024"
+  },
+  "DATA_GOVERNANCE_2024": {
+    "aliases": [
+      "DATA_GOVERNANCE_POLICY"
+    ],
+    "code": "DATA_GOVERNANCE_2024",
+    "id": "DATA_GOVERNANCE_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Data Governance Policy"
+  },
+  "DELEGATIONAUTHORITYPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "DELEGATIONAUTHORITYPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "delegationauthoritypolicyv2023"
+  },
+  "DISABILITYPOLICYV2024": {
+    "aliases": [],
+    "code": null,
+    "id": "DISABILITYPOLICYV2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "disabilitypolicyv2024"
+  },
+  "DISABILITY_2024": {
+    "aliases": [
+      "DISABILITY_POLICY"
+    ],
+    "code": "DISABILITY_2024",
+    "id": "DISABILITY_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Disability Policy"
+  },
+  "DISCIPLINE_POLICY_V2024": {
+    "aliases": [],
+    "code": null,
+    "id": "DISCIPLINE_POLICY_V2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "discipline_policy_v2024"
+  },
+  "EMPLOYEE_ASSISTANCE_2023": {
+    "aliases": [
+      "EMPLOYEE_ASSISTANCE_POLICY"
+    ],
+    "code": "EMPLOYEE_ASSISTANCE_2023",
+    "id": "EMPLOYEE_ASSISTANCE_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Employee Assistance Policy"
+  },
+  "EMPLOYEE_RELATIONS_2022": {
+    "aliases": [
+      "EMPLOYEE_RELATIONS_POLICY"
+    ],
+    "code": "EMPLOYEE_RELATIONS_2022",
+    "id": "EMPLOYEE_RELATIONS_2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Employee Relations Policy"
+  },
+  "EMPLOYEE_WELLNESS_2022": {
+    "aliases": [
+      "EMPLOYEE_WELLNESS_POLICY"
+    ],
+    "code": "EMPLOYEE_WELLNESS_2022",
+    "id": "EMPLOYEE_WELLNESS_2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Employee Wellness Policy"
+  },
+  "EMPLOYMENT_EQUITY_POLICY_V2022": {
+    "aliases": [
+      "EMPLOYMENTEQUITYPOLICYV2022"
+    ],
+    "code": null,
+    "id": "EMPLOYMENT_EQUITY_POLICY_V2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "employment_equity_policy_v2022"
+  },
+  "ENVIRONMENTALSUSTAINABILITYPOLICYV2024": {
+    "aliases": [],
+    "code": null,
+    "id": "ENVIRONMENTALSUSTAINABILITYPOLICYV2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "environmentalsustainabilitypolicyv2024"
+  },
+  "ENV_SUST_2024": {
+    "aliases": [
+      "SUSTAINABILITYPOLICYV2024",
+      "SUSTAINABILITY_POLICY"
+    ],
+    "code": "ENV_SUST_2024",
+    "id": "ENV_SUST_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Sustainability Policy"
+  },
+  "ETHICS_POLICY_V2024": {
+    "aliases": [
+      "ETHICSPOLICYV2024"
+    ],
+    "code": null,
+    "id": "ETHICS_POLICY_V2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "ethics_policy_v2024"
+  },
+  "FINANCIAL_POLICY_V2022": {
+    "aliases": [
+      "FINANCIALPOLICYV2022"
+    ],
+    "code": null,
+    "id": "FINANCIAL_POLICY_V2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "financial_policy_v2022"
+  },
+  "FUNDRAISING_POLICY_V2021": {
+    "aliases": [
+      "FUNDRAISINGPOLICYV2021"
+    ],
+    "code": null,
+    "id": "FUNDRAISING_POLICY_V2021",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "fundraising_policy_v2021"
+  },
+  "GOVERNANCEMANAGEMENTPOLICYV2024": {
+    "aliases": [],
+    "code": null,
+    "id": "GOVERNANCEMANAGEMENTPOLICYV2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "governancemanagementpolicyv2024"
+  },
+  "HEALTHSAFETYPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "HEALTHSAFETYPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "healthsafetypolicyv2023"
+  },
+  "HRPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "HRPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "hrpolicyv2023"
+  },
+  "HS_2023": {
+    "aliases": [
+      "HEALTH_AND_SAFETY_POLICY"
+    ],
+    "code": "H&S_2023",
+    "id": "HS_2023",
+    "must_pass": true,
+    "severity": "high",
+    "source": "normalized",
+    "title": "Health and Safety Policy"
+  },
+  "HUMANRIGHTSPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "HUMANRIGHTSPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "humanrightspolicyv2023"
+  },
+  "ICT_POLICY_2023": {
+    "aliases": [
+      "ICTPOLICYV2023",
+      "ICT_POLICY",
+      "TL_POLICY_V2023"
+    ],
+    "code": "ICT_POLICY_2023",
+    "id": "ICT_POLICY_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "ICT Policy"
+  },
+  "INCLUSIVE_EDUCATION_2023": {
+    "aliases": [
+      "INCLUSIVE_EDUCATION_POLICY"
+    ],
+    "code": "INCLUSIVE_EDUCATION_2023",
+    "id": "INCLUSIVE_EDUCATION_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Inclusive Education Policy"
+  },
+  "INFORMATION_GOVERNANCE_FRAMEWORK_V2021": {
+    "aliases": [],
+    "code": null,
+    "id": "INFORMATION_GOVERNANCE_FRAMEWORK_V2021",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "information_governance_framework_v2021"
+  },
+  "INFRASTRUCTURE_POLICY_V2025": {
+    "aliases": [
+      "INFRASTRUCTUREPOLICYV2025"
+    ],
+    "code": null,
+    "id": "INFRASTRUCTURE_POLICY_V2025",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "infrastructure_policy_v2025"
+  },
+  "INNOVATION_STRATEGY_2024": {
+    "aliases": [
+      "INNOVATION_STRATEGY_POLICY"
+    ],
+    "code": "INNOVATION_STRATEGY_2024",
+    "id": "INNOVATION_STRATEGY_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Innovation Strategy Policy"
+  },
+  "INSTITUTIONAL_AUTONOMY_2023": {
+    "aliases": [
+      "INSTITUTIONAL_AUTONOMY_POLICY"
+    ],
+    "code": "INSTITUTIONAL_AUTONOMY_2023",
+    "id": "INSTITUTIONAL_AUTONOMY_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Institutional Autonomy Policy"
+  },
+  "INSTITUTIONAL_FORUM_RULES_2023": {
+    "aliases": [
+      "RULES_FOR_THE_INSTITUTIONAL_FORUM"
+    ],
+    "code": "INSTITUTIONAL_FORUM_RULES_2023",
+    "id": "INSTITUTIONAL_FORUM_RULES_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Rules for the Institutional Forum"
+  },
+  "LANGUAGE_POLICY_V2022": {
+    "aliases": [],
+    "code": null,
+    "id": "LANGUAGE_POLICY_V2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "language_policy_v2022"
+  },
+  "LEAVEPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "LEAVEPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "leavepolicyv2023"
+  },
+  "MERITBURSARYPOLICYV2024": {
+    "aliases": [],
+    "code": null,
+    "id": "MERITBURSARYPOLICYV2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "meritbursarypolicyv2024"
+  },
+  "MERIT_BURSARY_2024": {
+    "aliases": [
+      "MERIT_BURSARY_POLICY"
+    ],
+    "code": "MERIT_BURSARY_2024",
+    "id": "MERIT_BURSARY_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Merit Bursary Policy"
+  },
+  "MODERATIONPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "MODERATIONPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "moderationpolicyv2023"
+  },
+  "OA_2022": {
+    "aliases": [
+      "OPEN_ACCESS_POLICY"
+    ],
+    "code": "OA_2022",
+    "id": "OA_2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Open Access Policy"
+  },
+  "OHS_POLICY_V2019": {
+    "aliases": [],
+    "code": null,
+    "id": "OHS_POLICY_V2019",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "ohs_policy_v2019"
+  },
+  "OPENACCESSPOLICYV2022": {
+    "aliases": [],
+    "code": null,
+    "id": "OPENACCESSPOLICYV2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "openaccesspolicyv2022"
+  },
+  "OPEN_ACCESS_2023": {
+    "aliases": [
+      "OPEN_ACCESS_POLICY"
+    ],
+    "code": "OPEN_ACCESS_2023",
+    "id": "OPEN_ACCESS_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Open Access Policy"
+  },
+  "OPEN_EDU_RES_2023": {
+    "aliases": [
+      "OPEN_EDUCATION_RESOURCES_POLICY"
+    ],
+    "code": "OPEN_EDU_RES_2023",
+    "id": "OPEN_EDU_RES_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Open Education Resources Policy"
+  },
+  "ORG_DEV_2024": {
+    "aliases": [
+      "ORGANISATIONAL_DEVELOPMENT_POLICY"
+    ],
+    "code": "ORG_DEV_2024",
+    "id": "ORG_DEV_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Organisational Development Policy"
+  },
+  "PERFORMANCE_POLICY_V2022": {
+    "aliases": [
+      "PERFORMANCEPOLICYV2022"
+    ],
+    "code": null,
+    "id": "PERFORMANCE_POLICY_V2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "performance_policy_v2022"
+  },
+  "PREV_TRAFFICK_2024": {
+    "aliases": [
+      "PREVENTION_AND_COMBATING_OF_TRAFFICKING_IN_PERSONS_POLICY"
+    ],
+    "code": "PREV_TRAFFICK_2024",
+    "id": "PREV_TRAFFICK_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Prevention and Combating of Trafficking in Persons Policy"
+  },
+  "PRIM_HEALTH_2023": {
+    "aliases": [
+      "PRIMARYHEALTHCAREPOLICYV2023",
+      "PRIMARY_HEALTHCARE_POLICY"
+    ],
+    "code": "PRIM_HEALTH_2023",
+    "id": "PRIM_HEALTH_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Primary Healthcare Policy"
+  },
+  "PRIVACY_POLICY_V2021": {
+    "aliases": [],
+    "code": null,
+    "id": "PRIVACY_POLICY_V2021",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "privacy_policy_v2021"
+  },
+  "PROCUREMENT_2024": {
+    "aliases": [
+      "PROCUREMENT_POLICY"
+    ],
+    "code": "PROCUREMENT_2024",
+    "id": "PROCUREMENT_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Procurement Policy"
+  },
+  "PROCUREMENT_POLICY_2023": {
+    "aliases": [
+      "PROCUREMENTPOLICYV2024",
+      "PROCUREMENT_POLICY"
+    ],
+    "code": "PROCUREMENT_POLICY_2023",
+    "id": "PROCUREMENT_POLICY_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Procurement Policy"
+  },
+  "PROMOTIONS_POLICY_V2021": {
+    "aliases": [
+      "PROMOTIONPOLICYV2021"
+    ],
+    "code": null,
+    "id": "PROMOTIONS_POLICY_V2021",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "promotions_policy_v2021"
+  },
+  "PROMO_SUPPORT_2023": {
+    "aliases": [
+      "PROMOTION_OF_SUPPORT_STAFF_POLICY"
+    ],
+    "code": "PROMO_SUPPORT_2023",
+    "id": "PROMO_SUPPORT_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Promotion of Support Staff Policy"
+  },
+  "QUALITY_POLICY_2021": {
+    "aliases": [
+      "QUALITYPOLICYV2021",
+      "QUALITY_POLICY",
+      "QUALITY_POLICY_V2021"
+    ],
+    "code": "QUALITY_POLICY_2021",
+    "id": "QUALITY_POLICY_2021",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Quality Policy"
+  },
+  "RECORDS_MANAGEMENT_POLICY_V2022": {
+    "aliases": [
+      "RECORDSMANAGEMENTPOLICYV2022"
+    ],
+    "code": null,
+    "id": "RECORDS_MANAGEMENT_POLICY_V2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "records_management_policy_v2022"
+  },
+  "RECRUITMENT_POLICY_V2023": {
+    "aliases": [],
+    "code": null,
+    "id": "RECRUITMENT_POLICY_V2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "recruitment_policy_v2023"
+  },
+  "RECRUIT_SEL_2023": {
+    "aliases": [
+      "RECRUITMENT_AND_SELECTION_POLICY"
+    ],
+    "code": "RECRUIT_SEL_2023",
+    "id": "RECRUIT_SEL_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Recruitment and Selection Policy"
+  },
+  "REMUNE_2023": {
+    "aliases": [
+      "REMUNERATION_POLICY"
+    ],
+    "code": "REMUNE_2023",
+    "id": "REMUNE_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Remuneration Policy"
+  },
+  "RESEARCH_POLICY_V2013": {
+    "aliases": [
+      "RESEARCHPOLICYV2023"
+    ],
+    "code": null,
+    "id": "RESEARCH_POLICY_V2013",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "research_policy_v2013"
+  },
+  "RES_ETHICS_2024": {
+    "aliases": [
+      "RESEARCH_ETHICS_POLICY"
+    ],
+    "code": "RES_ETHICS_2024",
+    "id": "RES_ETHICS_2024",
+    "must_pass": true,
+    "severity": "high",
+    "source": "normalized",
+    "title": "Research Ethics Policy"
+  },
+  "RISKMANAGEMENTPOLICYV2024": {
+    "aliases": [],
+    "code": null,
+    "id": "RISKMANAGEMENTPOLICYV2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "riskmanagementpolicyv2024"
+  },
+  "RISK_COMPLIANCE_POLICY_V2020": {
+    "aliases": [],
+    "code": null,
+    "id": "RISK_COMPLIANCE_POLICY_V2020",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "risk_compliance_policy_v2020"
+  },
+  "RISK_MANAGE_2024": {
+    "aliases": [
+      "RISK_MANAGEMENT_POLICY"
+    ],
+    "code": "RISK_MANAGE_2024",
+    "id": "RISK_MANAGE_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Risk Management Policy"
+  },
+  "RULES_DONORS_2023": {
+    "aliases": [
+      "RULES_FOR_THE_BOARD_OF_DONORS"
+    ],
+    "code": "RULES_DONORS_2023",
+    "id": "RULES_DONORS_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Rules for the Board of Donors"
+  },
+  "RULES_INST_FORUM_2023": {
+    "aliases": [
+      "RULES_FOR_THE_INSTITUTIONAL_FORUM"
+    ],
+    "code": "RULES_INST_FORUM_2023",
+    "id": "RULES_INST_FORUM_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Rules for the Institutional Forum"
+  },
+  "SECURITY_POLICY_V2025": {
+    "aliases": [
+      "SECURITYPOLICYV2025"
+    ],
+    "code": null,
+    "id": "SECURITY_POLICY_V2025",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "security_policy_v2025"
+  },
+  "SEXUAL_HARASS_2024": {
+    "aliases": [
+      "SEXUAL_HARASSMENT_POLICY"
+    ],
+    "code": "SEXUAL_HARASS_2024",
+    "id": "SEXUAL_HARASS_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Sexual Harassment Policy"
+  },
+  "SMOKING_2023": {
+    "aliases": [
+      "SMOKING_POLICY"
+    ],
+    "code": "SMOKING_2023",
+    "id": "SMOKING_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Smoking Policy"
+  },
+  "STAFF_ASSESS_2023": {
+    "aliases": [
+      "STAFF_ASSESSMENT_POLICY"
+    ],
+    "code": "STAFF_ASSESS_2023",
+    "id": "STAFF_ASSESS_2023",
+    "must_pass": true,
+    "severity": "high",
+    "source": "normalized",
+    "title": "Staff Assessment Policy"
+  },
+  "STAFF_LEARNING_DEV_2022": {
+    "aliases": [
+      "STAFF_LEARNING_AND_DEVELOPMENT_POLICY"
+    ],
+    "code": "STAFF_LEARNING_DEV_2022",
+    "id": "STAFF_LEARNING_DEV_2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Staff Learning and Development Policy"
+  },
+  "STAFF_LEARN_DEV_2023": {
+    "aliases": [
+      "STAFF_LEARNING_AND_DEVELOPMENT_POLICY"
+    ],
+    "code": "STAFF_LEARN_DEV_2023",
+    "id": "STAFF_LEARN_DEV_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Staff Learning and Development Policy"
+  },
+  "STAKEHOLDER_ENGAGEMENT_2024": {
+    "aliases": [
+      "STAKEHOLDER_ENGAGEMENT_POLICY"
+    ],
+    "code": "STAKEHOLDER_ENGAGEMENT_2024",
+    "id": "STAKEHOLDER_ENGAGEMENT_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Stakeholder Engagement Policy"
+  },
+  "STAKEHOLDER_FRAMEWORK_V2022": {
+    "aliases": [
+      "STAKEHOLDERFRAMEWORKV2022"
+    ],
+    "code": null,
+    "id": "STAKEHOLDER_FRAMEWORK_V2022",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "stakeholder_framework_v2022"
+  },
+  "STUDENTUPPORTPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "STUDENTUPPORTPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "studentupportpolicyv2023"
+  },
+  "STUDENT_GOVERNANCE_RULES_V2025": {
+    "aliases": [],
+    "code": null,
+    "id": "STUDENT_GOVERNANCE_RULES_V2025",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "student_governance_rules_v2025"
+  },
+  "STUDENT_SUPPORT_2023": {
+    "aliases": [
+      "STUDENT_SUPPORT_POLICY"
+    ],
+    "code": "STUDENT_SUPPORT_2023",
+    "id": "STUDENT_SUPPORT_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Student Support Policy"
+  },
+  "SUPPLYCHAINPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "SUPPLYCHAINPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "supplychainpolicyv2023"
+  },
+  "SUPPLY_CHAIN_2023": {
+    "aliases": [
+      "SUPPLY_CHAIN_MANAGEMENT_POLICY"
+    ],
+    "code": "SUPPLY_CHAIN_2023",
+    "id": "SUPPLY_CHAIN_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Supply Chain Management Policy"
+  },
+  "TEACHINGLEARNINGPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "TEACHINGLEARNINGPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "teachinglearningpolicyv2023"
+  },
+  "TEACHING_PRACTICE_2024": {
+    "aliases": [
+      "TEACHING_PRACTICE_POLICY"
+    ],
+    "code": "TEACHING_PRACTICE_2024",
+    "id": "TEACHING_PRACTICE_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Teaching Practice Policy"
+  },
+  "TRANSFORMATION_2023": {
+    "aliases": [
+      "TRANSFORMATION_POLICY"
+    ],
+    "code": "TRANSFORMATION_2023",
+    "id": "TRANSFORMATION_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Transformation Policy"
+  },
+  "TRAVEL_SUBSISTENCE_2024": {
+    "aliases": [
+      "TRAVEL_AND_SUBSISTENCE_POLICY"
+    ],
+    "code": "TRAVEL_SUBSISTENCE_2024",
+    "id": "TRAVEL_SUBSISTENCE_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Travel and Subsistence Policy"
+  },
+  "TUITION_FEES_2023": {
+    "aliases": [
+      "TUITION_FEES_POLICY"
+    ],
+    "code": "TUITION_FEES_2023",
+    "id": "TUITION_FEES_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Tuition Fees Policy"
+  },
+  "VEHICLEFLEETPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "VEHICLEFLEETPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "vehiclefleetpolicyv2023"
+  },
+  "VISITORPOLICYV2023": {
+    "aliases": [],
+    "code": null,
+    "id": "VISITORPOLICYV2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "stub-from-clauses",
+    "title": "visitorpolicyv2023"
+  },
+  "VISITORS_2024": {
+    "aliases": [
+      "VISITORS_POLICY"
+    ],
+    "code": "VISITORS_2024",
+    "id": "VISITORS_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Visitors Policy"
+  },
+  "WOMEN_ADV_2024": {
+    "aliases": [
+      "WOMEN_ADVANCEMENT_POLICY"
+    ],
+    "code": "WOMEN_ADV_2024",
+    "id": "WOMEN_ADV_2024",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Women Advancement Policy"
+  },
+  "WORKPLACE_CONDUCT_2023": {
+    "aliases": [
+      "WORKPLACE_CONDUCT_POLICY"
+    ],
+    "code": "WORKPLACE_CONDUCT_2023",
+    "id": "WORKPLACE_CONDUCT_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Workplace Conduct Policy"
+  },
+  "YOUTH_DEVELOPMENT_2023": {
+    "aliases": [
+      "YOUTH_DEVELOPMENT_POLICY"
+    ],
+    "code": "YOUTH_DEVELOPMENT_2023",
+    "id": "YOUTH_DEVELOPMENT_2023",
+    "must_pass": false,
+    "severity": "med",
+    "source": "normalized",
+    "title": "Youth Development Policy"
+  }
+}
