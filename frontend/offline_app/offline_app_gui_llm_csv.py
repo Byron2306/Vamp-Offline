@@ -563,15 +563,34 @@ class OfflineApp(tk.Tk):
         # and, critically, so each panel retains a minimum size instead of collapsing
         # and disappearing on smaller displays.
         self.configure(bg=self._colors["bg"])
+        # Use a Tk PanedWindow (instead of ttk) so we can enforce a minimum size
+        # per pane via the built-in ``minsize`` option. ttk's variant does not
+        # recognize ``minsize`` and would raise a TclError on some Python/Tk
+        # installations.
+        self.main_split = tk.PanedWindow(
+            self,
+            orient="vertical",
+            sashrelief="flat",
+            bg=self._colors["bg"],
+            bd=0,
+            sashwidth=6,
+            sashpad=2,
+            handlepad=2,
+        )
         self.main_split = ttk.PanedWindow(self, orient="vertical")
         self.main_split.grid(row=0, column=0, sticky="nsew")
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
+        self._pane_minsizes: List[Tuple[tk.Frame, int]] = []
+
         self.top_panel = tk.Frame(self.main_split, bg=self._colors["bg"], height=260)
         self.middle_panel = tk.Frame(self.main_split, bg=self._colors["bg"])
         self.bottom_panel = tk.Frame(self.main_split, bg=self._colors["bg"])
 
+        self._add_pane_with_minsize(self.top_panel, 240)
+        self._add_pane_with_minsize(self.middle_panel, 220)
+        self._add_pane_with_minsize(self.bottom_panel, 220)
         self.main_split.add(self.top_panel, weight=1, minsize=240)
         self.main_split.add(self.middle_panel, weight=3, minsize=220)
         self.main_split.add(self.bottom_panel, weight=2, minsize=220)
@@ -582,6 +601,35 @@ class OfflineApp(tk.Tk):
 
         self.bind("<Escape>", lambda e: self._stop_scan())
         self._refresh_button_states()
+
+    def _add_pane_with_minsize(self, pane: tk.Frame, minsize: int) -> None:
+        """Add a pane and apply a minsize when supported by the Tk build.
+
+        Some Windows Python/Tk distributions omit the ``-minsize`` option on
+        ``panedwindow add``. We attempt to set the minsize via ``paneconfigure``
+        and, if that also fails, fall back to raising the overall window
+        minimum height so panes do not disappear.
+        """
+
+        self.main_split.add(pane)
+        try:
+            self.main_split.paneconfigure(pane, minsize=minsize)
+        except tk.TclError:
+            self._pane_minsizes.append((pane, minsize))
+            if not getattr(self, "_pane_minsize_bound", False):
+                self._pane_minsize_bound = True
+                self.main_split.bind("<Configure>", self._enforce_pane_minsizes, add="+")
+
+    def _enforce_pane_minsizes(self, _event: Optional[tk.Event] = None) -> None:
+        if not self._pane_minsizes:
+            return
+
+        min_total = sum(minsize for _, minsize in self._pane_minsizes)
+        current_width = max(self.winfo_width(), self.winfo_reqwidth())
+        try:
+            self.minsize(current_width, min_total)
+        except Exception:
+            pass
 
     # ---------------------------
     # Styles
