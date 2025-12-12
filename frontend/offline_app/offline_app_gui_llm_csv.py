@@ -577,6 +577,7 @@ class OfflineApp(tk.Tk):
             sashpad=2,
             handlepad=2,
         )
+        self.main_split = ttk.PanedWindow(self, orient="vertical")
         self.main_split.grid(row=0, column=0, sticky="nsew")
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -590,6 +591,9 @@ class OfflineApp(tk.Tk):
         self._add_pane_with_minsize(self.top_panel, 240)
         self._add_pane_with_minsize(self.middle_panel, 220)
         self._add_pane_with_minsize(self.bottom_panel, 220)
+        self.main_split.add(self.top_panel, weight=1, minsize=240)
+        self.main_split.add(self.middle_panel, weight=3, minsize=220)
+        self.main_split.add(self.bottom_panel, weight=2, minsize=220)
 
         self._build_top_dashboard()
         self._build_middle_table()
