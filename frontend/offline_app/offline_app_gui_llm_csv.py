@@ -44,6 +44,10 @@ import queue
 import threading
 import time
 import traceback
+try:
+    import requests
+except Exception:
+    requests = None
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -1297,6 +1301,16 @@ class OfflineApp(tk.Tk):
                 elif kind == "log":
                     _, text = msg
                     self._log(text)
+                elif kind == "status":
+                    _, text = msg
+                    self._set_status(text)
+                elif kind == "call":
+                    fn = msg[1]
+                    args = msg[2:]
+                    try:
+                        fn(*args)
+                    except Exception:
+                        pass
         except queue.Empty:
             pass
         self.after(80, self._drain_ui_queue)
@@ -1673,34 +1687,76 @@ class OfflineApp(tk.Tk):
             )
             return
 
+        self.ai_enrich_running = True
+        self.pa_ai_ready = False
+        self._refresh_button_states()
+
         def _worker() -> None:
+            log_messages: List[str] = []
+            status_message = "AI enrichment complete"
+            success = False
             try:
-                self._set_status("Contacting AI for PA enrichment…")
+                self.ui_queue.put(("status", "Contacting AI for PA enrichment…"))
+                self.ui_queue.put(("log", "Contacting AI for PA enrichment…"))
                 enrich_pa_with_ai(self.profile, self.pa_skeleton_rows)
                 if generate_initial_pa is None:
                     raise RuntimeError("backend/contracts/pa_excel.py not available")
                 out = generate_initial_pa(self.profile, OFFLINE_RESULTS_DIR)
                 self.pa_initial_path = Path(out)
                 self.pa_ai_path = Path(out)
-                self.pa_ai_ready = True
                 self.session_state["pa_initial_path"] = str(self.pa_initial_path)
-                self._log("AI PA generated")
-                self._log(f"✅ AI-enriched PA generated at: {self.pa_initial_path}")
-                self._set_status("AI enrichment complete")
+                log_messages.append("AI PA generated")
+                log_messages.append(f"✅ AI-enriched PA generated at: {self.pa_initial_path}")
+                status_message = "AI enrichment complete"
+                success = True
             except Exception as e:
-                self.pa_ai_ready = False
-                self._log("AI enrichment failed—manual edit required")
-                self._log(f"❌ AI enrichment error: {e}")
-                self._log(traceback.format_exc())
-                self._set_status("AI enrichment failed—manual edit required")
-            self._rebuild_expectations()
-            _play_sound("vamp.wav")
-            self._refresh_expectations_snapshot()
-            self._refresh_kpa_breakdown()
-            self._render_contract_health()
-            self._refresh_button_states()
+                timeout_exceptions: Tuple[type, ...] = ()
+                if requests is not None:
+                    timeout_exceptions = (
+                        requests.Timeout,
+                        requests.exceptions.Timeout,
+                        requests.exceptions.ReadTimeout,
+                        requests.exceptions.ConnectTimeout,
+                    )
+
+                timeout_like = (
+                    isinstance(e, timeout_exceptions) if timeout_exceptions else False
+                ) or "timeout" in str(e).lower()
+                if timeout_like:
+                    status_message = "Timeout — manual edit required"
+                    log_messages.append("⚠️ AI enrichment timed out—manual edit required")
+                else:
+                    status_message = "AI enrichment failed—manual edit required"
+                    log_messages.append("AI enrichment failed—manual edit required")
+                    log_messages.append(f"❌ AI enrichment error: {e}")
+            finally:
+                self.after(
+                    0,
+                    lambda: self._finalize_ai_enrichment(
+                        status_message,
+                        log_messages,
+                        success,
+                    ),
+                )
 
         threading.Thread(target=_worker, daemon=True).start()
+
+    def _finalize_ai_enrichment(
+        self, status_message: str, log_messages: List[str], success: bool
+    ) -> None:
+        for msg in log_messages:
+            self._log(msg)
+        self._set_status(status_message)
+        self.pa_ai_ready = success
+        if not success:
+            self.pa_ai_path = None
+        self.ai_enrich_running = False
+        self._rebuild_expectations()
+        _play_sound("vamp.wav")
+        self._refresh_expectations_snapshot()
+        self._refresh_kpa_breakdown()
+        self._render_contract_health()
+        self._refresh_button_states()
 
     def _export_pa_excel(self) -> None:
         if not self.pa_skeleton_ready:
