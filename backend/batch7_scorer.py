@@ -108,6 +108,7 @@ class ArtefactScore:
     evidence_type: str
     matched_kpis: List[MatchedKPI]
     completion_estimate: float
+    credibility_weight: float
     llm_recommended_rating: int
     llm_recommended_tier: str
     final_rating: int
@@ -315,6 +316,7 @@ def score_artefact(
             evidence_type=ctx.evidence_classification.evidence_type,
             matched_kpis=[],
             completion_estimate=0.0,
+            credibility_weight=ctx.evidence_classification.credibility_weight,
             llm_recommended_rating=2,
             llm_recommended_tier="Needs Review",
             final_rating=2,
@@ -331,6 +333,7 @@ def score_artefact(
             evidence_type=ctx.evidence_classification.evidence_type,
             matched_kpis=[],
             completion_estimate=0.0,
+            credibility_weight=ctx.evidence_classification.credibility_weight,
             llm_recommended_rating=2,
             llm_recommended_tier="Needs Review",
             final_rating=2,
@@ -349,6 +352,7 @@ def score_artefact(
             evidence_type=ctx.evidence_classification.evidence_type,
             matched_kpis=[],
             completion_estimate=0.0,
+            credibility_weight=ctx.evidence_classification.credibility_weight,
             llm_recommended_rating=2,
             llm_recommended_tier="Needs Review",
             final_rating=2,
@@ -365,6 +369,7 @@ def score_artefact(
             evidence_type=pass_a.evidence_type,
             matched_kpis=[],
             completion_estimate=0.0,
+            credibility_weight=ctx.evidence_classification.credibility_weight,
             llm_recommended_rating=2,
             llm_recommended_tier="Needs Review",
             final_rating=2,
@@ -383,6 +388,7 @@ def score_artefact(
             evidence_type=pass_a.evidence_type,
             matched_kpis=[],
             completion_estimate=0.0,
+            credibility_weight=ctx.evidence_classification.credibility_weight,
             llm_recommended_rating=2,
             llm_recommended_tier="Needs Review",
             final_rating=2,
@@ -435,6 +441,7 @@ def score_artefact(
         evidence_type=pass_a.evidence_type,
         matched_kpis=matched_kpis,
         completion_estimate=completion_estimate,
+        credibility_weight=ctx.evidence_classification.credibility_weight,
         llm_recommended_rating=recommended_rating,
         llm_recommended_tier=recommended_tier,
         final_rating=final_rating,
