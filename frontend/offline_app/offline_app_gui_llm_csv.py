@@ -493,7 +493,13 @@ class OfflineApp(tk.Tk):
         self.pa_final_path: Optional[Path] = None
         self.current_evidence_folder: Optional[Path] = None
         self.evidence_folder: Optional[Path] = None
+
+        # --- UI/worker state flags (MUST exist before any _refresh_button_states calls) ---
+        self.ta_import_running = False
+        self.pa_generate_running = False
+        self.ai_enrich_running = False
         self.scan_running = False
+        self.stop_requested = False
 
         self.ta_valid = False
         self.ta_validation_errors: List[str] = []
@@ -605,12 +611,12 @@ class OfflineApp(tk.Tk):
             self.btn_import_ta.configure(state=("normal" if has_profile else "disabled"))
 
         if hasattr(self, "btn_gen_skeleton"):
-            self.btn_gen_skeleton.configure(state=("normal" if self.ta_valid else "disabled"))
+            self.btn_gen_skeleton.configure(state=("normal" if getattr(self, "ta_valid", False) else "disabled"))
         if hasattr(self, "btn_gen_ai"):
-            self.btn_gen_ai.configure(state=("normal" if self.pa_skeleton_ready else "disabled"))
+            self.btn_gen_ai.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
 
         if hasattr(self, "btn_export_pa"):
-            self.btn_export_pa.configure(state=("normal" if self.pa_skeleton_ready else "disabled"))
+            self.btn_export_pa.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
 
         if hasattr(self, "start_btn"):
             evidence_folder = getattr(self, "evidence_folder", None) or self.current_evidence_folder
@@ -1696,8 +1702,11 @@ class OfflineApp(tk.Tk):
     def _rebuild_expectations(self) -> None:
         if not self._ensure_profile():
             return
-        if build_staff_expectations is None:
-            self._log("⚠️ expectation_engine.build_staff_expectations not available.")
+        if not callable(build_staff_expectations):
+            self._log(
+                "ℹ️ Expectations engine not installed; using TA->Profile summary only."
+            )
+            self.expectations = self._summary_from_profile_only()
             return
         if not self.task_agreement_path:
             # It's okay: user might have a PA but no TA yet; we still can attempt with None.
@@ -1706,22 +1715,47 @@ class OfflineApp(tk.Tk):
             ta_path = str(self.task_agreement_path) if self.task_agreement_path else ""
             pa_path_obj = self.pa_initial_path or self.pa_skeleton_path
             pa_path = str(pa_path_obj) if pa_path_obj else None
-            self.expectations = build_staff_expectations(self.profile.staff_id, ta_path, pa_path)
+            exp = build_staff_expectations(self.profile.staff_id, ta_path, pa_path)
+            self.expectations = exp or {}
             self._log("✅ Expectations JSON rebuilt (for contextual scoring).")
         except Exception as e:
             self._log(f"⚠️ Could not rebuild expectations: {e}")
+            self.expectations = self._summary_from_profile_only()
+
+    def _summary_from_profile_only(self) -> dict:
+        p = self.staff_profile
+        if not p:
+            return {}
+        kpa_summary: Dict[str, Any] = {}
+        for k in p.kpas:
+            kpa_summary[f"{k.code} – {k.name}"] = {
+                "weight": k.weight,
+                "hours": k.hours,
+                "key_expectations": [kpi.description for kpi in (k.kpis or [])][:12],
+            }
+        return {"kpa_summary": kpa_summary}
 
     def _refresh_expectations_snapshot(self) -> None:
         snap = ""
-        if self.profile and load_staff_expectations is not None:
-            try:
-                self.expectations = load_staff_expectations(self.profile.staff_id) or {}
-                # Compact friendly snapshot (not full raw)
-                snap = json.dumps(self.expectations, ensure_ascii=False, indent=2)[:6000]
-            except Exception as e:
-                snap = f"(Could not load expectations: {e})"
-        elif self.profile:
-            snap = "Import Task Agreement / Generate PA to populate expectations."
+        if self.profile:
+            if callable(load_staff_expectations):
+                try:
+                    self.expectations = load_staff_expectations(self.profile.staff_id) or {}
+                    # Compact friendly snapshot (not full raw)
+                    snap = json.dumps(self.expectations, ensure_ascii=False, indent=2)[:6000]
+                except Exception as e:
+                    snap = f"(Could not load expectations: {e})"
+            else:
+                self._log(
+                    "ℹ️ Expectations engine not installed; TA summary will still display once TA is imported."
+                )
+                if not self.expectations:
+                    self.expectations = self._summary_from_profile_only()
+                snap = (
+                    json.dumps(self.expectations, ensure_ascii=False, indent=2)[:6000]
+                    if self.expectations
+                    else "Import Task Agreement / Generate PA to populate expectations."
+                )
         else:
             snap = "Import Task Agreement / Generate PA to populate expectations."
 
