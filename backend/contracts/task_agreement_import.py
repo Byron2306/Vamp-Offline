@@ -58,7 +58,8 @@ def _build_ta_context(kpa_code: str, summary: Dict[str, Any]) -> Dict[str, Any]:
         context.setdefault("norm_hours", norm_hours)
 
     category_map: Dict[str, List[str]] = {
-        "KPA1": ["teaching", "supervision"],
+        "KPA1": ["teaching", "supervision", "teaching_practice_windows"],
+        "KPA2": ["ohs"],
         "KPA3": ["research"],
         "KPA4": ["leadership"],
         "KPA5": ["social"],

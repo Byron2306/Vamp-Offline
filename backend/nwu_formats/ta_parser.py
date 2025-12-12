@@ -109,6 +109,34 @@ def _is_numeric(value: object) -> bool:
         return False
 
 
+def _build_kpa_context_from_summary(summary: Dict[str, Any], kpa_code: str) -> Dict[str, Any]:
+    """Map expectation_engine TA summary fields into a KPA context payload."""
+
+    context: Dict[str, Any] = {}
+    kpa_summary = summary.get("kpa_summary", {}) or {}
+    if kpa_code in kpa_summary and isinstance(kpa_summary[kpa_code], dict):
+        context.update(kpa_summary[kpa_code])
+
+    norm_hours = summary.get("norm_hours")
+    if norm_hours:
+        context.setdefault("norm_hours", norm_hours)
+
+    category_map: Dict[str, List[str]] = {
+        "KPA1": ["teaching", "supervision", "teaching_practice_windows"],
+        "KPA2": ["ohs"],
+        "KPA3": ["research"],
+        "KPA4": ["leadership"],
+        "KPA5": ["social"],
+    }
+
+    for key in category_map.get(kpa_code, []):
+        value = summary.get(key)
+        if value:
+            context[key] = value
+
+    return context
+
+
 def parse_nwu_ta(path_to_xlsx: str) -> PerformanceContract:
     """Parse NWU Task Agreement grand totals into a PerformanceContract."""
     validation_errors: List[str] = []
@@ -202,6 +230,7 @@ def parse_nwu_ta(path_to_xlsx: str) -> PerformanceContract:
 
         # Attach teaching modules from Addendum B if available
         modules: List[str] = []
+        summary: Dict[str, Any] = {}
         try:
             from backend.expectation_engine import parse_task_agreement  # type: ignore
 
@@ -209,9 +238,11 @@ def parse_nwu_ta(path_to_xlsx: str) -> PerformanceContract:
             modules = summary.get("teaching_modules") or []
         except Exception:
             modules = []
+            summary = {}
     except Exception as exc:
         validation_errors.append(f"Unexpected parsing error: {exc}")
         modules = []
+        summary = {}
 
     if not section_totals:
         validation_errors.append("No GRAND TOTAL section rows found in sheet")
@@ -220,6 +251,14 @@ def parse_nwu_ta(path_to_xlsx: str) -> PerformanceContract:
         kpa2 = kpas["KPA2"]
         kpa2.context = kpa2.context or {}
         kpa2.context["modules"] = modules
+
+    # Attach TA context buckets when available
+    if summary:
+        for code, kpa in kpas.items():
+            context = getattr(kpa, "context", {}) or {}
+            merged = dict(context)
+            merged.update(_build_kpa_context_from_summary(summary, code))
+            kpa.context = merged
 
     total_weight = sum(kpa.weight_pct for kpa in kpas.values())
     if abs(total_weight - 100.0) >= 0.5:
@@ -252,6 +291,7 @@ def parse_nwu_ta(path_to_xlsx: str) -> PerformanceContract:
             "grand_totals": snapshot_rows,
             "section_totals": section_totals,
             "modules": modules,
+            "ta_parse_report": summary.get("ta_parse_report", {}),
         },
     )
 
