@@ -143,7 +143,9 @@ def _save_snapshot(contract: PerformanceContract) -> Path:
     base_dir = Path(__file__).resolve().parents[1] / "data" / "contracts"
     base_dir.mkdir(parents=True, exist_ok=True)
 
-    safe_staff = str(contract.staff_id).replace("/", "-").replace("\", "-") or "unknown_staff"
+    safe_staff = (
+        str(contract.staff_id).replace("/", "-").replace("\\", "-") or "unknown_staff"
+    )
     safe_year = str(contract.cycle_year) or "unknown_year"
     out_path = base_dir / f"{safe_staff}_{safe_year}_TA.json"
 
