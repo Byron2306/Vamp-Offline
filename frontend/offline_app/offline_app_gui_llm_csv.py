@@ -40,6 +40,7 @@ import datetime as _dt
 import hashlib
 import json
 import os
+import queue
 import threading
 import time
 import traceback
@@ -199,15 +200,13 @@ KPA_OPTIONS: List[Tuple[str, str]] = [
 ]
 
 TABLE_COLUMNS = [
+    "time",
     "filename",
-    "evidence_type",
-    "kpa_codes",
-    "kpi_labels",
-    "status",
-    "final_rating",
-    "final_tier",
-    "confidence",
-    "impact_summary",
+    "kpa",
+    "rating",
+    "tier",
+    "brain_notes",
+    "ai_impact",
 ]
 
 CSV_COLUMNS = [
@@ -493,7 +492,13 @@ class OfflineApp(tk.Tk):
         self.pa_final_path: Optional[Path] = None
         self.current_evidence_folder: Optional[Path] = None
         self.evidence_folder: Optional[Path] = None
+
+        # --- UI/worker state flags (MUST exist before any _refresh_button_states calls) ---
+        self.ta_import_running = False
+        self.pa_generate_running = False
+        self.ai_enrich_running = False
         self.scan_running = False
+        self.stop_requested = False
 
         self.ta_valid = False
         self.ta_validation_errors: List[str] = []
@@ -518,6 +523,10 @@ class OfflineApp(tk.Tk):
         self.filter_type_var = tk.StringVar(value="All")
 
         self.selected_detail: Dict[str, Any] = {}
+
+        # UI handoff queue to keep worker threads away from Tk operations
+        self.ui_queue: "queue.Queue[Tuple[Any, ...]]" = queue.Queue()
+        self.after(80, self._drain_ui_queue)
 
         self._scan_thread: Optional[threading.Thread] = None
         self._stop_flag = threading.Event()
@@ -605,12 +614,12 @@ class OfflineApp(tk.Tk):
             self.btn_import_ta.configure(state=("normal" if has_profile else "disabled"))
 
         if hasattr(self, "btn_gen_skeleton"):
-            self.btn_gen_skeleton.configure(state=("normal" if self.ta_valid else "disabled"))
+            self.btn_gen_skeleton.configure(state=("normal" if getattr(self, "ta_valid", False) else "disabled"))
         if hasattr(self, "btn_gen_ai"):
-            self.btn_gen_ai.configure(state=("normal" if self.pa_skeleton_ready else "disabled"))
+            self.btn_gen_ai.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
 
         if hasattr(self, "btn_export_pa"):
-            self.btn_export_pa.configure(state=("normal" if self.pa_skeleton_ready else "disabled"))
+            self.btn_export_pa.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
 
         if hasattr(self, "start_btn"):
             evidence_folder = getattr(self, "evidence_folder", None) or self.current_evidence_folder
@@ -854,7 +863,11 @@ class OfflineApp(tk.Tk):
         for c in TABLE_COLUMNS:
             label = c.replace("_", " ").title()
             self.tree.heading(c, text=label, command=lambda col=c: self._sort_tree(col, False))
-            width = 220 if c == "impact_summary" else 140
+            width = 120
+            if c == "filename":
+                width = 220
+            elif c in {"brain_notes", "ai_impact"}:
+                width = 200
             self.tree.column(c, width=width, anchor="w")
         self.tree.grid(row=2, column=0, sticky="nsew", padx=10, pady=(0, 8))
         yscroll = ttk.Scrollbar(panel, orient="vertical", command=self.tree.yview)
@@ -1068,30 +1081,26 @@ class OfflineApp(tk.Tk):
             row=0, column=0, sticky="w", padx=12, pady=(10, 6)
         )
 
-        columns = ["kpa", "weight", "hours", "tasks"]
-        self.kpa_tree = ttk.Treeview(
-            p,
-            columns=columns,
-            show="headings",
-            height=6,
+        frame = tk.Frame(p, bg=self._colors["panel"])
+        frame.grid(row=1, column=0, sticky="nsew", padx=12, pady=(0, 10))
+        frame.grid_columnconfigure(0, weight=1)
+        frame.grid_columnconfigure(1, weight=1)
+
+        left = ttk.LabelFrame(frame, text="Year Expectations", padding=8)
+        left.grid(row=0, column=0, sticky="nsew", padx=(0, 6))
+        left.columnconfigure(0, weight=1)
+        left.rowconfigure(0, weight=1)
+
+        right = ttk.LabelFrame(
+            frame, text="KPA Hours/Weight Breakdown + Tasks Summary", padding=8
         )
-        for cid, label, width in [
-            ("kpa", "KPA", 80),
-            ("weight", "Weight %", 90),
-            ("hours", "Hours", 90),
-            ("tasks", "Tasks Summary", 320),
-        ]:
-            self.kpa_tree.heading(cid, text=label)
-            self.kpa_tree.column(cid, anchor="w", width=width)
-        self.kpa_tree.grid(row=1, column=0, sticky="ew", padx=12, pady=(0, 6))
-        yscroll = ttk.Scrollbar(p, orient="vertical", command=self.kpa_tree.yview)
-        self.kpa_tree.configure(yscrollcommand=yscroll.set)
-        yscroll.grid(row=1, column=1, sticky="ns", pady=(0, 6))
-        self.kpa_tree.bind("<<TreeviewSelect>>", self._on_kpa_selected)
+        right.grid(row=0, column=1, sticky="nsew", padx=(6, 0))
+        right.columnconfigure(0, weight=1)
+        right.rowconfigure(0, weight=1)
 
         self.expectations_text = tk.Text(
-            p,
-            height=9,
+            left,
+            height=12,
             wrap="word",
             bg="#0f0f17",
             fg=self._colors["fg"],
@@ -1100,9 +1109,34 @@ class OfflineApp(tk.Tk):
             highlightbackground=self._colors["accent"],
             font=(self.cinzel_family, 10),
         )
-        self.expectations_text.grid(row=2, column=0, sticky="ew", padx=12, pady=(0, 10))
+        self.expectations_text.grid(row=0, column=0, sticky="nsew")
+        scroll_left = ttk.Scrollbar(left, orient="vertical", command=self.expectations_text.yview)
+        self.expectations_text.configure(yscrollcommand=scroll_left.set)
+        scroll_left.grid(row=0, column=1, sticky="ns")
         self.expectations_text.insert("1.0", "Import Task Agreement / Generate PA to populate expectations.")
         self.expectations_text.config(state="disabled")
+
+        self.kpa_breakdown_text = tk.Text(
+            right,
+            height=12,
+            wrap="word",
+            bg="#0f0f17",
+            fg=self._colors["fg"],
+            insertbackground=self._colors["fg"],
+            highlightthickness=1,
+            highlightbackground=self._colors["accent"],
+            font=(self.cinzel_family, 10),
+        )
+        self.kpa_breakdown_text.grid(row=0, column=0, sticky="nsew")
+        scroll_right = ttk.Scrollbar(
+            right, orient="vertical", command=self.kpa_breakdown_text.yview
+        )
+        self.kpa_breakdown_text.configure(yscrollcommand=scroll_right.set)
+        scroll_right.grid(row=0, column=1, sticky="ns")
+        self.kpa_breakdown_text.insert(
+            "1.0", "KPA hours/weighting breakdown will display after TA/PA import."
+        )
+        self.kpa_breakdown_text.config(state="disabled")
 
     def _build_scan_panel(self, row: int) -> None:
         p = self._panel(self.center)
@@ -1189,8 +1223,10 @@ class OfflineApp(tk.Tk):
 
         # ---- Table pane
         table_frame = tk.Frame(self.bottom, bg=self._colors["bg"])
+        table_frame.rowconfigure(0, weight=1)
+        table_frame.columnconfigure(0, weight=1)
         table_panel = self._panel(table_frame)
-        table_panel.pack(fill="both", expand=True, padx=12, pady=(10, 6))
+        table_panel.grid(row=0, column=0, sticky="nsew", padx=12, pady=(10, 6))
         table_panel.columnconfigure(0, weight=1)
         table_panel.rowconfigure(1, weight=1)
 
@@ -1200,8 +1236,14 @@ class OfflineApp(tk.Tk):
 
         self.tree = ttk.Treeview(table_panel, columns=TABLE_COLUMNS, show="headings", height=10)
         for c in TABLE_COLUMNS:
-            self.tree.heading(c, text=c.replace("_", " ").title())
-            self.tree.column(c, width=140 if c != "file" else 260, anchor="w")
+            heading = c.replace("_", " ").title()
+            width = 120
+            if c == "filename":
+                width = 220
+            elif c in {"brain_notes", "ai_impact"}:
+                width = 200
+            self.tree.heading(c, text=heading)
+            self.tree.column(c, width=width, anchor="w")
         self.tree.grid(row=1, column=0, sticky="nsew", padx=12, pady=(0, 10))
 
         yscroll = ttk.Scrollbar(table_panel, orient="vertical", command=self.tree.yview)
@@ -1239,6 +1281,26 @@ class OfflineApp(tk.Tk):
     # ---------------------------
     # Logging / status
     # ---------------------------
+    def _drain_ui_queue(self) -> None:
+        try:
+            while True:
+                msg = self.ui_queue.get_nowait()
+                kind = msg[0]
+                if kind == "row_add":
+                    _, row_id, values = msg
+                    if hasattr(self, "tree"):
+                        self.tree.insert("", "end", iid=row_id, values=values)
+                elif kind == "row_update":
+                    _, row_id, values = msg
+                    if hasattr(self, "tree") and self.tree.exists(row_id):
+                        self.tree.item(row_id, values=values)
+                elif kind == "log":
+                    _, text = msg
+                    self._log(text)
+        except queue.Empty:
+            pass
+        self.after(80, self._drain_ui_queue)
+
     def _log(self, msg: str) -> None:
         run_id = getattr(self, "current_run_id", None) or "no-run"
 
@@ -1275,18 +1337,25 @@ class OfflineApp(tk.Tk):
                 continue
             detail_id = row.get("detail_id")
             tags = (row.get("status"),)
-            values = [
-                row.get("filename", ""),
-                row.get("evidence_type", ""),
-                row.get("kpa_codes", ""),
-                row.get("kpi_labels", ""),
-                row.get("status", ""),
-                row.get("rating", ""),
-                row.get("tier_label", ""),
-                row.get("confidence", ""),
-                row.get("impact_summary", ""),
-            ]
+            values = self._table_values_for_row(row)
             self.tree.insert("", "end", iid=detail_id, values=values, tags=tags)
+
+    def _table_values_for_row(self, row: Dict[str, Any]) -> List[Any]:
+        ts = row.get("timestamp") or _now_ts()
+        kpa = row.get("kpa_codes") or row.get("kpa_code") or ""
+        ai_status = row.get("ai_impact_status")
+        if not ai_status:
+            ai_status = "OK" if row.get("impact_summary") else (row.get("status_reason") or row.get("status") or "")
+        brain_notes = row.get("status_reason") or row.get("kpi_labels") or ""
+        return [
+            ts,
+            row.get("filename", ""),
+            kpa,
+            row.get("rating", ""),
+            row.get("tier_label", ""),
+            brain_notes,
+            ai_status,
+        ]
 
     def _sort_tree(self, col: str, reverse: bool) -> None:
         if not hasattr(self, "tree"):
@@ -1696,8 +1765,11 @@ class OfflineApp(tk.Tk):
     def _rebuild_expectations(self) -> None:
         if not self._ensure_profile():
             return
-        if build_staff_expectations is None:
-            self._log("⚠️ expectation_engine.build_staff_expectations not available.")
+        if not callable(build_staff_expectations):
+            self._log(
+                "ℹ️ Expectations engine not installed; using TA->Profile summary only."
+            )
+            self.expectations = self._summary_from_profile_only()
             return
         if not self.task_agreement_path:
             # It's okay: user might have a PA but no TA yet; we still can attempt with None.
@@ -1706,22 +1778,47 @@ class OfflineApp(tk.Tk):
             ta_path = str(self.task_agreement_path) if self.task_agreement_path else ""
             pa_path_obj = self.pa_initial_path or self.pa_skeleton_path
             pa_path = str(pa_path_obj) if pa_path_obj else None
-            self.expectations = build_staff_expectations(self.profile.staff_id, ta_path, pa_path)
+            exp = build_staff_expectations(self.profile.staff_id, ta_path, pa_path)
+            self.expectations = exp or {}
             self._log("✅ Expectations JSON rebuilt (for contextual scoring).")
         except Exception as e:
             self._log(f"⚠️ Could not rebuild expectations: {e}")
+            self.expectations = self._summary_from_profile_only()
+
+    def _summary_from_profile_only(self) -> dict:
+        p = self.staff_profile
+        if not p:
+            return {}
+        kpa_summary: Dict[str, Any] = {}
+        for k in p.kpas:
+            kpa_summary[f"{k.code} – {k.name}"] = {
+                "weight": k.weight,
+                "hours": k.hours,
+                "key_expectations": [kpi.description for kpi in (k.kpis or [])][:12],
+            }
+        return {"kpa_summary": kpa_summary}
 
     def _refresh_expectations_snapshot(self) -> None:
         snap = ""
-        if self.profile and load_staff_expectations is not None:
-            try:
-                self.expectations = load_staff_expectations(self.profile.staff_id) or {}
-                # Compact friendly snapshot (not full raw)
-                snap = json.dumps(self.expectations, ensure_ascii=False, indent=2)[:6000]
-            except Exception as e:
-                snap = f"(Could not load expectations: {e})"
-        elif self.profile:
-            snap = "Import Task Agreement / Generate PA to populate expectations."
+        if self.profile:
+            if callable(load_staff_expectations):
+                try:
+                    self.expectations = load_staff_expectations(self.profile.staff_id) or {}
+                    # Compact friendly snapshot (not full raw)
+                    snap = json.dumps(self.expectations, ensure_ascii=False, indent=2)[:6000]
+                except Exception as e:
+                    snap = f"(Could not load expectations: {e})"
+            else:
+                self._log(
+                    "ℹ️ Expectations engine not installed; TA summary will still display once TA is imported."
+                )
+                if not self.expectations:
+                    self.expectations = self._summary_from_profile_only()
+                snap = (
+                    json.dumps(self.expectations, ensure_ascii=False, indent=2)[:6000]
+                    if self.expectations
+                    else "Import Task Agreement / Generate PA to populate expectations."
+                )
         else:
             snap = "Import Task Agreement / Generate PA to populate expectations."
 
@@ -1730,127 +1827,54 @@ class OfflineApp(tk.Tk):
             self.expectations_text.delete("1.0", "end")
             self.expectations_text.insert("1.0", snap)
             self.expectations_text.config(state="disabled")
+        self._render_kpa_breakdown(self.expectations)
 
-    def _render_kpa_breakdown_table(self) -> None:
-        if not hasattr(self, "kpa_tree"):
-            return
-        for iid in self.kpa_tree.get_children():
-            self.kpa_tree.delete(iid)
-
-        if not self.contract or "kpas" not in self.contract:
+    def _render_kpa_breakdown(self, summary: Optional[Dict[str, Any]]) -> None:
+        if not hasattr(self, "kpa_breakdown_text"):
             return
 
-        for kpa in self.contract["kpas"]:
-            code = kpa.get("code", "")
-            weight = kpa.get("weight_pct", 0.0)
-            hours = kpa.get("hours", 0.0)
-            tasks = self._summarize_kpa_tasks(kpa)
+        kpa_summary: Dict[str, Any] = {}
+        if isinstance(summary, dict):
+            kpa_summary = summary.get("kpa_summary") or {}
 
-            self.kpa_tree.insert("", "end", values=(code, f"{weight:.2f}", f"{hours:.2f}", tasks))
+        if not kpa_summary and self.profile:
+            self.expectations = self.expectations or self._summary_from_profile_only()
+            kpa_summary = self.expectations.get("kpa_summary") or {}
 
-    def _summarize_kpa_tasks(self, kpa: Dict[str, Any]) -> str:
-        ctx = kpa.get("context") or kpa.get("ta_context") or {}
-        if not ctx:
-            return "No TA tasks extracted (check TA import)"
-
-        parts: List[str] = []
-
-        teaching_windows = ctx.get("teaching_practice") or ctx.get("teaching_practice_windows") or []
-        if teaching_windows:
-            windows = []
-            for w in teaching_windows:
-                month = w.get("month") or w.get("label") or ""
-                hrs = w.get("hours") or w.get("hrs") or w.get("hours_total") or 0
-                windows.append(f"{month} ({hrs}h)".strip())
-            if windows:
-                parts.append("Teaching practice: " + ", ".join(windows))
-
-        supervision = ctx.get("supervision") or ctx.get("supervision_count")
-        if supervision:
-            try:
-                count = supervision if isinstance(supervision, (int, float)) else supervision.get("count")
-            except Exception:
-                count = supervision
-            if count:
-                parts.append(f"Supervision: {count} students")
-
-        modules = ctx.get("modules") or []
-        if modules:
-            display = ", ".join(modules[:2])
-            if len(modules) > 2:
-                display += f" +{len(modules) - 2} more"
-            parts.append("Modules: " + display)
-
-        roles = ctx.get("roles") or []
-        if roles:
-            role_display = ", ".join(str(r) for r in roles[:2])
-            if len(roles) > 2:
-                role_display += f" +{len(roles) - 2} more"
-            parts.append("Roles: " + role_display)
-
-        research_items = ctx.get("research") or ctx.get("research_items")
-        if research_items:
-            try:
-                count = len(research_items) if isinstance(research_items, list) else int(research_items)
-            except Exception:
-                count = research_items
-            parts.append(f"Research items: {count}")
-
-        ohs_items = ctx.get("ohs") or ctx.get("ohs_items")
-        if ohs_items:
-            try:
-                count = len(ohs_items) if isinstance(ohs_items, list) else int(ohs_items)
-            except Exception:
-                count = ohs_items
-            parts.append(f"OHS items: {count}")
-
-        if not parts:
-            return "No TA tasks extracted (check TA import)"
-
-        summary = "; ".join(parts)
-        return summary[:137] + "..." if len(summary) > 140 else summary
-
-    def _on_kpa_selected(self, _event=None) -> None:
-        if not hasattr(self, "kpa_tree"):
-            return
-        sel = self.kpa_tree.selection()
-        if not sel or not self.contract:
-            return
-        iid = sel[0]
-        values = self.kpa_tree.item(iid, "values")
-        if not values:
-            return
-        code = values[0]
-        chosen = None
-        for k in self.contract.get("kpas", []):
-            if k.get("code") == code:
-                chosen = k
-                break
-        if not chosen:
-            return
-        ctx = chosen.get("context") or chosen.get("ta_context") or {}
         lines: List[str] = []
-        for bucket, label in [
-            ("teaching_practice", "Teaching practice"),
-            ("teaching_practice_windows", "Teaching practice"),
-            ("supervision", "Supervision"),
-            ("modules", "Modules"),
-            ("roles", "Roles"),
-            ("research", "Research"),
-            ("ohs", "OHS"),
-        ]:
-            val = ctx.get(bucket)
-            if not val:
-                continue
-            lines.append(f"{label}: {val}")
+        for kpa_label, details in kpa_summary.items():
+            weight = details.get("weight", "–") if isinstance(details, dict) else "–"
+            hours = details.get("hours", "–") if isinstance(details, dict) else "–"
+            try:
+                weight = f"{float(weight):.2f}"
+            except Exception:
+                weight = weight or "–"
+            try:
+                hours = f"{float(hours):.2f}"
+            except Exception:
+                hours = hours or "–"
+
+            lines.append(f"{kpa_label}")
+            lines.append(f"  Hours: {hours} | Weight: {weight}%")
+
+            tasks = []
+            if isinstance(details, dict):
+                tasks = (details.get("key_expectations") or details.get("tasks") or [])
+            if tasks:
+                lines.append("  Tasks extracted (top 10):")
+                for task in tasks[:10]:
+                    lines.append(f"   • {task}")
+            else:
+                lines.append("  Tasks extracted (top 10): –")
+            lines.append("")
 
         if not lines:
-            lines.append("No TA tasks extracted (check TA import)")
+            lines.append("KPA hours/weighting breakdown will display after TA/PA import.")
 
-        self.expectations_text.config(state="normal")
-        self.expectations_text.delete("1.0", "end")
-        self.expectations_text.insert("1.0", "\n".join(lines))
-        self.expectations_text.config(state="disabled")
+        self.kpa_breakdown_text.config(state="normal")
+        self.kpa_breakdown_text.delete("1.0", "end")
+        self.kpa_breakdown_text.insert("1.0", "\n".join(lines))
+        self.kpa_breakdown_text.config(state="disabled")
 
     def _refresh_kpa_breakdown(self) -> None:
         if hasattr(self, "kpa_health_tree"):
@@ -1887,7 +1911,7 @@ class OfflineApp(tk.Tk):
                 self.modules_var.set("Teaching modules: " + "; ".join(modules))
             else:
                 self.modules_var.set("Teaching modules: –")
-        self._render_kpa_breakdown_table()
+        self._render_kpa_breakdown(self.expectations)
         self._update_contract_status()
 
     def _update_contract_status(self) -> None:
@@ -2130,6 +2154,20 @@ class OfflineApp(tk.Tk):
                     self._log("🛑 Scan stopped by user.")
                     break
 
+                timestamp = _now_ts()
+                self._detail_counter += 1
+                detail_id = f"row-{self._detail_counter}"
+                placeholder = {
+                    "timestamp": timestamp,
+                    "filename": path.name,
+                    "kpa_code": "",
+                    "rating": "…",
+                    "tier_label": "…",
+                    "status_reason": "Scoring…",
+                    "ai_impact_status": "…",
+                }
+                self.ui_queue.put(("row_add", detail_id, self._table_values_for_row(placeholder)))
+
                 use_ollama = bool(self.use_ollama_score_var.get())
                 prefer_llm_rating = bool(self.prefer_llm_rating_var.get())
                 row, ctx, impact = process_artefact(
@@ -2147,13 +2185,17 @@ class OfflineApp(tk.Tk):
                     brain_fn=brain_score_evidence,
                 )
 
-                self._detail_counter += 1
-                detail_id = f"row-{self._detail_counter}"
+                row["timestamp"] = timestamp
                 row["detail_id"] = detail_id
                 self.rows.append(row)
                 detail = {"row": row, "ctx": ctx, "impact": impact}
                 self.detail_rows[detail_id] = detail
-                self.after(0, self._apply_filters)
+                interim = dict(row)
+                interim["ai_impact_status"] = "…"
+                self.ui_queue.put(("row_update", detail_id, self._table_values_for_row(interim)))
+                ai_status = ctx.get("llm_status") or ("OK" if impact else row.get("status_reason") or row.get("status", ""))
+                row["ai_impact_status"] = ai_status
+                self.ui_queue.put(("row_update", detail_id, self._table_values_for_row(row)))
 
                 if impact:
                     self._log(f"{path.name} → {impact}")
