@@ -111,10 +111,11 @@ except Exception:
     load_staff_expectations = None
 
 try:
-    from backend.vamp_master import ingest_paths, extract_text_for  # type: ignore
+    from backend.vamp_master import generate_run_id, ingest_paths, extract_text_for  # type: ignore
 except Exception:
     ingest_paths = None
     extract_text_for = None
+    generate_run_id = lambda: f"run-fallback-{hashlib.sha1(os.urandom(8)).hexdigest()[:8]}"  # type: ignore
 
 try:
     from backend.nwu_brain_scorer import brain_score_evidence  # type: ignore
@@ -163,7 +164,32 @@ KPA_OPTIONS: List[Tuple[str, str]] = [
     ("KPA5", "Social Responsiveness"),
 ]
 
-TABLE_COLUMNS = ["file", "month", "kpa_code", "kpa_name", "rating", "rating_label", "tier_label"]
+TABLE_COLUMNS = [
+    "file",
+    "month",
+    "kpa_code",
+    "kpa_name",
+    "rating",
+    "rating_label",
+    "tier_label",
+    "status",
+]
+
+CSV_COLUMNS = [
+    "run_id",
+    "filename",
+    "file_path",
+    "file",
+    "month",
+    "kpa_code",
+    "kpa_name",
+    "rating",
+    "rating_label",
+    "tier_label",
+    "status",
+    "extract_status",
+    "extract_error",
+]
 
 
 def _now_ts() -> str:
@@ -219,6 +245,135 @@ def _guess_evidence_type(path: Path) -> str:
     return s.lstrip(".") or "other"
 
 
+def _default_ctx(kpa_hint: str) -> Dict[str, Any]:
+    ctx: Dict[str, Any] = {
+        "primary_kpa_code": kpa_hint or "",
+        "primary_kpa_name": "",
+        "tier_label": "Developmental",
+        "rating": None,
+        "rating_label": "Unrated",
+        "impact_summary": "",
+        "raw_llm_json": {},
+        "values_hits": [],
+    }
+    return ctx
+
+
+def _normalize_ctx(ctx: Optional[Dict[str, Any]], kpa_hint: str) -> Dict[str, Any]:
+    base = _default_ctx(kpa_hint)
+    merged = base.copy()
+    if ctx:
+        merged.update(ctx)
+    merged.setdefault("primary_kpa_code", kpa_hint or "")
+    merged.setdefault("primary_kpa_name", "")
+    merged.setdefault("tier_label", "Developmental")
+    merged.setdefault("rating", None)
+    merged.setdefault("rating_label", "Unrated")
+    merged.setdefault("impact_summary", "")
+    merged.setdefault("raw_llm_json", {})
+    merged.setdefault("values_hits", [])
+    return merged
+
+
+def process_artefact(
+    *,
+    path: Path,
+    month_bucket: str,
+    run_id: str,
+    profile: Any,
+    contract_context: str,
+    kpa_hint: str,
+    use_ollama: bool,
+    prefer_llm_rating: bool,
+    log: Optional[Any] = None,
+    extract_fn=extract_text_for,
+    contextual_fn=contextual_score,
+    brain_fn=brain_score_evidence,
+) -> Tuple[Dict[str, Any], Dict[str, Any], str]:
+    """Process a single artefact into a CSV/UI row.
+
+    Extraction/scoring functions are injectable for testing.
+    """
+
+    logger = log or (lambda *args, **kwargs: None)
+    extract_status = "ok"
+    extract_error = ""
+    extracted_text = ""
+
+    if extract_fn is None:
+        extract_status = "failed"
+        extract_error = "text extractor unavailable"
+        logger(f"{path.name} → ❌ Failed to extract text: {extract_error}")
+    else:
+        try:
+            extracted_text = extract_fn(path) or ""
+            if not extracted_text.strip():
+                extract_status = "empty"
+                extract_error = "no text extracted"
+        except Exception as e:
+            extract_status = "failed"
+            extract_error = str(e)
+            logger(f"{path.name} → ❌ Failed to extract text: {e}")
+
+    ctx: Dict[str, Any] = _default_ctx(kpa_hint)
+    scoring_available = False
+    scoring_error = False
+
+    if extract_status == "ok":
+        if use_ollama and contextual_fn is not None:
+            scoring_available = True
+            try:
+                ctx = contextual_fn(
+                    evidence_text=extracted_text,
+                    contract_context=contract_context,
+                    kpa_hint_code=kpa_hint,
+                    staff_id=getattr(profile, "staff_id", ""),
+                    source_path=path,
+                    prefer_llm_rating=prefer_llm_rating,
+                )
+            except Exception as ex:
+                scoring_error = True
+                logger(f"{path.name} → ⚠️ Contextual scoring error (fallback to brain): {ex}")
+                ctx = {}
+        if (not ctx or not ctx.get("primary_kpa_code")) and brain_fn is not None:
+            scoring_available = True
+            try:
+                ctx = brain_fn(path=path, full_text=extracted_text, kpa_hint_code=kpa_hint) or ctx
+                ctx.setdefault("impact_summary", "")
+                ctx.setdefault("raw_llm_json", {})
+            except Exception as ex:
+                scoring_error = True
+                logger(f"{path.name} → ❌ Brain scoring error: {ex}")
+        ctx = _normalize_ctx(ctx, kpa_hint)
+    else:
+        ctx = _normalize_ctx(ctx, kpa_hint)
+
+    if extract_status != "ok" or scoring_error:
+        status = "needs_review"
+    elif scoring_available:
+        status = "scored"
+    else:
+        status = "unscorable"
+
+    row = {
+        "run_id": run_id,
+        "filename": path.name,
+        "file_path": str(path),
+        "file": path.name,
+        "month": month_bucket,
+        "kpa_code": str(ctx.get("primary_kpa_code") or "").strip(),
+        "kpa_name": str(ctx.get("primary_kpa_name") or "").strip() or "Unknown",
+        "rating": "" if ctx.get("rating") is None else ctx.get("rating"),
+        "rating_label": str(ctx.get("rating_label") or "").strip() or "Unrated",
+        "tier_label": str(ctx.get("tier_label") or "").strip() or "Developmental",
+        "status": status,
+        "extract_status": extract_status,
+        "extract_error": extract_error,
+    }
+    impact = (ctx.get("impact_summary") or ctx.get("contextual_response") or "").strip()
+    return row, ctx, impact
+
+
 def _sha1(path: Path) -> str:
     h = hashlib.sha1()
     with path.open("rb") as f:
@@ -248,6 +403,7 @@ class OfflineApp(tk.Tk):
 
         self._scan_thread: Optional[threading.Thread] = None
         self._stop_flag = threading.Event()
+        self.current_run_id: str = generate_run_id()
 
         # Styling
         self._colors = {
@@ -631,9 +787,11 @@ class OfflineApp(tk.Tk):
     # Logging / status
     # ---------------------------
     def _log(self, msg: str) -> None:
+        run_id = getattr(self, "current_run_id", None) or "no-run"
+
         def _do():
             self.log.config(state="normal")
-            self.log.insert("end", f"▶ [{_now_ts()}] {msg}\n")
+            self.log.insert("end", f"▶ [{run_id}] [{_now_ts()}] {msg}\n")
             self.log.see("end")
             self.log.config(state="disabled")
         self.after(0, _do)
@@ -821,9 +979,10 @@ class OfflineApp(tk.Tk):
             messagebox.showinfo("Scan running", "A scan is already running.")
             return
 
+        self.current_run_id = generate_run_id()
         self._stop_flag.clear()
         self._set_status("Scanning...")
-        self._log("⏳ Starting scan...")
+        self._log(f"⏳ Starting scan... run_id={self.current_run_id}")
         _play_sound("vamp.wav")
 
         self._scan_thread = threading.Thread(target=self._scan_worker, daemon=True)
@@ -934,82 +1093,30 @@ class OfflineApp(tk.Tk):
                     self._log("🛑 Scan stopped by user.")
                     break
 
-                # 1) Extract text
-                text = ""
-                try:
-                    if extract_text_for is None:
-                        raise RuntimeError("backend.vamp_master.extract_text_for not available")
-                    text = extract_text_for(path) or ""
-                except Exception as ex:
-                    self._log(f"{path.name} → ❌ Failed to extract text: {ex}")
-                    continue
-
-                # 2) Contextual scoring (preferred) OR brain-only fallback
                 use_ollama = bool(self.use_ollama_score_var.get())
                 prefer_llm_rating = bool(self.prefer_llm_rating_var.get())
+                row, ctx, impact = process_artefact(
+                    path=path,
+                    month_bucket=month_bucket,
+                    run_id=self.current_run_id,
+                    profile=profile,
+                    contract_context=contract_context,
+                    kpa_hint=kpa_hint or "",
+                    use_ollama=use_ollama,
+                    prefer_llm_rating=prefer_llm_rating,
+                    log=self._log,
+                    extract_fn=extract_text_for,
+                    contextual_fn=contextual_score,
+                    brain_fn=brain_score_evidence,
+                )
 
-                ctx: Dict[str, Any] = {}
-                if use_ollama and contextual_score is not None:
-                    try:
-                        ctx = contextual_score(
-                            evidence_text=text,
-                            contract_context=contract_context,
-                            kpa_hint_code=kpa_hint,
-                            staff_id=profile.staff_id,
-                            source_path=path,
-                            prefer_llm_rating=prefer_llm_rating,
-                        )
-                    except Exception as ex:
-                        self._log(f"{path.name} → ⚠️ Contextual scoring error (fallback to brain): {ex}")
-                        ctx = {}
-                if not ctx:
-                    # Brain-only fallback
-                    if brain_score_evidence is None:
-                        ctx = {
-                            "primary_kpa_code": kpa_hint or "",
-                            "primary_kpa_name": "",
-                            "tier_label": "Developmental",
-                            "rating": None,
-                            "rating_label": "Unrated",
-                            "impact_summary": "",
-                            "raw_llm_json": {},
-                            "values_hits": [],
-                        }
-                    else:
-                        try:
-                            ctx = brain_score_evidence(path=path, full_text=text, kpa_hint_code=kpa_hint) or {}
-                            ctx.setdefault("impact_summary", "")
-                            ctx.setdefault("raw_llm_json", {})
-                        except Exception as ex:
-                            self._log(f"{path.name} → ❌ Brain scoring error: {ex}")
-                            ctx = {
-                                "primary_kpa_code": kpa_hint or "",
-                                "primary_kpa_name": "",
-                                "tier_label": "Developmental",
-                                "rating": None,
-                                "rating_label": "Unrated",
-                                "impact_summary": "",
-                                "raw_llm_json": {},
-                                "values_hits": [],
-                            }
-
-                # 3) Update UI table
-                row = {
-                    "file": path.name,
-                    "month": month_bucket,
-                    "kpa_code": str(ctx.get("primary_kpa_code") or "").strip(),
-                    "kpa_name": str(ctx.get("primary_kpa_name") or "").strip() or "Unknown",
-                    "rating": "" if ctx.get("rating") is None else ctx.get("rating"),
-                    "rating_label": str(ctx.get("rating_label") or "").strip() or "Unrated",
-                    "tier_label": str(ctx.get("tier_label") or "").strip() or "Developmental",
-                }
                 self.rows.append(row)
                 self.after(0, lambda r=row: self.tree.insert("", "end", values=[r.get(c, "") for c in TABLE_COLUMNS]))
 
-                # 4) Log impact summary
-                impact = (ctx.get("impact_summary") or ctx.get("contextual_response") or "").strip()
                 if impact:
                     self._log(f"{path.name} → {impact}")
+                elif row.get("status") == "needs_review":
+                    self._log(f"{path.name} → needs review (no impact summary)")
                 else:
                     self._log(f"{path.name} → (no impact summary)")
 
@@ -1046,19 +1153,25 @@ class OfflineApp(tk.Tk):
                             "values_hits": values_hits_str,
                             "evidence_type": _guess_evidence_type(path),
                             "raw_llm_json": raw_llm_json_str,
+                            "run_id": self.current_run_id,
+                            "status": row.get("status", ""),
+                            "extract_status": row.get("extract_status", ""),
+                            "extract_error": row.get("extract_error", ""),
                         }
                         append_evidence_row(profile.staff_id, profile.cycle_year, evidence_row)
                     except Exception as ex:
                         self._log(f"⚠️ Could not write evidence_store row: {ex}")
 
             # 6) Session CSV summary
-            out_path = OFFLINE_RESULTS_DIR / f"contextual_results_{profile.staff_id}_{profile.cycle_year}_{month_bucket}.csv"
+            out_path = OFFLINE_RESULTS_DIR / (
+                f"contextual_results_{profile.staff_id}_{profile.cycle_year}_{month_bucket}_{self.current_run_id}.csv"
+            )
             try:
                 with out_path.open("w", newline="", encoding="utf-8") as f:
-                    w = csv.DictWriter(f, fieldnames=TABLE_COLUMNS)
+                    w = csv.DictWriter(f, fieldnames=CSV_COLUMNS)
                     w.writeheader()
                     for r in self.rows:
-                        w.writerow({k: r.get(k, "") for k in TABLE_COLUMNS})
+                        w.writerow({k: r.get(k, "") for k in CSV_COLUMNS})
                 self._log(f"✅ Contextual results written to: {out_path}")
             except Exception as ex:
                 self._log(f"⚠️ Could not write session CSV: {ex}")
@@ -1089,10 +1202,10 @@ class OfflineApp(tk.Tk):
         out = OFFLINE_RESULTS_DIR / f"evidence_summary_{profile.staff_id}_{profile.cycle_year}_{month_bucket}.csv"
         try:
             with out.open("w", newline="", encoding="utf-8") as f:
-                w = csv.DictWriter(f, fieldnames=TABLE_COLUMNS)
+                w = csv.DictWriter(f, fieldnames=CSV_COLUMNS)
                 w.writeheader()
                 for r in self.rows:
-                    w.writerow({k: r.get(k, "") for k in TABLE_COLUMNS})
+                    w.writerow({k: r.get(k, "") for k in CSV_COLUMNS})
             self._log(f"✅ Exported: {out}")
             _open_file(out.parent)
         except Exception as e:
