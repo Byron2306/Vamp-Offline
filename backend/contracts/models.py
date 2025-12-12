@@ -30,6 +30,11 @@ class KPI:
     outputs: str = """"""  # basic quantitative measures staff or AI can fill in
     outcomes: str = """"""  # values- and impact-focused outcomes (to be filled over time)
     values_tags: List[str] = field(default_factory=list)
+    measure: str = ""
+    target: str = ""
+    due: str = ""
+    evidence_types: List[str] = field(default_factory=list)
+    generated_by_ai: bool = False
     active: bool = True
     weight: float = 0.0  # % weight within its KPA (optional, not enforced yet)
     hours: float = 0.0

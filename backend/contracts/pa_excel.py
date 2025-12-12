@@ -20,6 +20,34 @@ KPA_DEFINITIONS: Dict[str, str] = {
 }
 
 
+def _render_kpi_cell(kpi: Any) -> str:
+    """Combine KPI description with measurable details for export."""
+
+    description = (getattr(kpi, "description", "") or "").strip()
+    details: List[str] = []
+
+    measure = (getattr(kpi, "measure", "") or "").strip()
+    target = (getattr(kpi, "target", "") or "").strip()
+    due = (getattr(kpi, "due", "") or "").strip()
+    evidence_types = getattr(kpi, "evidence_types", []) or []
+
+    if measure:
+        details.append(f"Measure: {measure}")
+    if target:
+        details.append(f"Target: {target}")
+    if due:
+        details.append(f"Due: {due}")
+    evidence_text = "; ".join(str(e).strip() for e in evidence_types if str(e).strip())
+    if evidence_text:
+        details.append(f"Evidence: {evidence_text}")
+
+    if details:
+        suffix = "; ".join(details)
+        return f"{description} ({suffix})" if description else suffix
+
+    return description
+
+
 def _rows_for_profile(profile: StaffProfile) -> List[List[Any]]:
     """
     Flatten profile KPAs/KPIs into rows:
@@ -34,11 +62,12 @@ def _rows_for_profile(profile: StaffProfile) -> List[List[Any]]:
             continue
 
         for kpi in kpa.kpis:
+            kpi_cell = _render_kpi_cell(kpi)
             rows.append(
                 [
                     kpa_name,
                     (kpi.outputs or "").strip(),
-                    (kpi.description or "").strip(),
+                    kpi_cell,
                     kpi.weight if kpi.weight is not None else 0.0,
                     kpi.hours if kpi.hours is not None else 0.0,
                     (kpi.outcomes or "").strip(),

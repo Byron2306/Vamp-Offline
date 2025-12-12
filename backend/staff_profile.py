@@ -21,6 +21,11 @@ class KPI:
     description: str = ""
     outputs: str = ""
     outcomes: str = ""
+    measure: str = ""
+    target: str = ""
+    due: str = ""
+    evidence_types: List[str] = field(default_factory=list)
+    generated_by_ai: bool = False
     weight: Optional[float] = None
     hours: Optional[float] = None
     active: bool = True
