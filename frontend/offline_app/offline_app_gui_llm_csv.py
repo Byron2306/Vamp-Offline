@@ -493,7 +493,13 @@ class OfflineApp(tk.Tk):
         self.pa_final_path: Optional[Path] = None
         self.current_evidence_folder: Optional[Path] = None
         self.evidence_folder: Optional[Path] = None
+
+        # --- UI/worker state flags (MUST exist before any _refresh_button_states calls) ---
+        self.ta_import_running = False
+        self.pa_generate_running = False
+        self.ai_enrich_running = False
         self.scan_running = False
+        self.stop_requested = False
 
         self.ta_valid = False
         self.ta_validation_errors: List[str] = []
@@ -605,12 +611,12 @@ class OfflineApp(tk.Tk):
             self.btn_import_ta.configure(state=("normal" if has_profile else "disabled"))
 
         if hasattr(self, "btn_gen_skeleton"):
-            self.btn_gen_skeleton.configure(state=("normal" if self.ta_valid else "disabled"))
+            self.btn_gen_skeleton.configure(state=("normal" if getattr(self, "ta_valid", False) else "disabled"))
         if hasattr(self, "btn_gen_ai"):
-            self.btn_gen_ai.configure(state=("normal" if self.pa_skeleton_ready else "disabled"))
+            self.btn_gen_ai.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
 
         if hasattr(self, "btn_export_pa"):
-            self.btn_export_pa.configure(state=("normal" if self.pa_skeleton_ready else "disabled"))
+            self.btn_export_pa.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
 
         if hasattr(self, "start_btn"):
             evidence_folder = getattr(self, "evidence_folder", None) or self.current_evidence_folder
