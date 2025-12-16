@@ -12,6 +12,9 @@ from backend.contracts.task_agreement_import import import_task_agreement_excel
 from backend.vamp_master import extract_text_for, generate_run_id
 from backend.expectation_engine import parse_task_agreement
 
+# Test constants
+WEIGHT_TOLERANCE = 1.0  # Allow 1% tolerance for total weight validation
+
 
 class TestIntegration:
     """Integration tests for end-to-end workflows."""
@@ -69,14 +72,10 @@ class TestIntegration:
                 assert kpa.ta_context is not None
                 assert "hours" in kpa.ta_context or "weight_pct" in kpa.ta_context
 
-    def test_evidence_extraction(self):
+    def test_evidence_extraction(self, tmp_path):
         """Test text extraction from various file types."""
-        # Create test evidence directory
-        test_dir = Path("data/test_evidence_integration")
-        test_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Create a test text file
-        txt_file = test_dir / "test_evidence.txt"
+        # Create a test text file in temporary directory
+        txt_file = tmp_path / "test_evidence.txt"
         txt_content = "This is a teaching rubric for module BSTE312. It assesses student learning outcomes."
         txt_file.write_text(txt_content)
         
@@ -86,10 +85,6 @@ class TestIntegration:
         assert result.extract_status == "ok"
         assert txt_content in result.extracted_text
         assert len(result.extracted_text) > 0
-        
-        # Clean up
-        txt_file.unlink()
-        test_dir.rmdir()
 
     def test_run_id_generation(self):
         """Test that run IDs are generated correctly."""
@@ -161,7 +156,7 @@ class TestIntegration:
         
         # Verify total weight is approximately 100%
         total_weight = sum(kpa.weight for kpa in profile.kpas if kpa.weight)
-        assert abs(total_weight - 100.0) < 1.0  # Allow 1% tolerance
+        assert abs(total_weight - 100.0) < WEIGHT_TOLERANCE
 
     def test_kpi_structure(self):
         """Test that KPI structures work correctly."""

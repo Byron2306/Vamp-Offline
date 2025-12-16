@@ -20,7 +20,9 @@ class TestMainEntry:
         # Try to import - this will fail if there are syntax errors or missing dependencies
         try:
             import run_offline
-            assert True  # If we get here, the import succeeded
+            # Import succeeded - verify the module is loaded
+            assert run_offline is not None
+            assert hasattr(run_offline, '__file__')
         except ModuleNotFoundError as e:
             # tkinter is expected to be missing in headless environments
             if 'tkinter' in str(e).lower():
