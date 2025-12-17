@@ -10,6 +10,8 @@ VAMP (Validation, Assessment, and Management Platform) Offline is a comprehensiv
 - **Deterministic Scoring**: Score evidence using NWU brain scorer with KPA routing and tier detection
 - **Evidence Aggregation**: Aggregate evidence across KPIs and KPAs with completion tracking
 - **PA Report Generation**: Generate standardized PA Excel reports
+- **🎙️ Voice Cloning (NEW)**: AI voice responses using OpenVoice V2 - VAMP can speak to you!
+- **Web GUI**: Modern web interface with real-time evidence scanning and AI guidance
 - **Offline GUI**: Tkinter-based graphical interface for evidence scanning and scoring
 
 ## Installation
@@ -40,7 +42,20 @@ pip install python-docx python-pptx
 
 ## Quick Start
 
-### Running the GUI Application
+### 🌐 Web Interface (Recommended)
+
+```bash
+python run_web.py
+```
+
+Open http://localhost:5000 in your browser for:
+- Modern web interface with real-time updates
+- AI-powered guidance and chat
+- **🎙️ Voice responses** - VAMP speaks to you! ([Setup Guide](VOICE_QUICK_START.md))
+- Interactive evidence scanning
+- Visual performance tracking
+
+### 🖥️ Desktop GUI Application
 
 ```bash
 python run_offline.py

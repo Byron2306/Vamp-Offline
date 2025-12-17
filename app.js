@@ -183,7 +183,10 @@ if (vampBtn) {
     vampBusy("Consulting the archives…");
 
     try {
-      const res = await fetch("/api/vamp/ask", {
+      // Use voice-enabled endpoint if voice is available
+      const endpoint = voiceEnabled ? "/api/vamp/ask-voice" : "/api/vamp/ask";
+      
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -195,8 +198,15 @@ if (vampBtn) {
       if (!res.ok) throw new Error("VAMP unavailable");
 
       const data = await res.json();
-      vampSpeak(data.answer || "I have nothing further to add.");
+      const answer = data.answer || "I have nothing further to add.";
+      
+      vampSpeak(answer);
       log(`Ask-VAMP: ${q.substring(0, 50)}...`);
+      
+      // Play voice response if available
+      if (data.audio_url) {
+        playVoiceResponse(data.audio_url);
+      }
     } catch (e) {
       vampSpeak(
         "I am unable to reach my cognitive core. Please ensure Ollama is running."
@@ -1446,6 +1456,247 @@ $("evidenceMonthFilter")?.addEventListener("change", () => {
 });
 
 /* ============================================================
+   VOICE FUNCTIONALITY
+============================================================ */
+
+let voiceEnabled = false;
+let currentAudio = null;
+
+async function checkVoiceStatus() {
+  try {
+    const resp = await fetch('/api/voice/status');
+    const data = await resp.json();
+    
+    if (data.available && data.is_trained) {
+      voiceEnabled = true;
+      log("✓ Voice cloning ready");
+    } else if (data.available && !data.is_trained) {
+      log("⚠ Voice available but not trained. Upload voice samples to train.");
+    } else {
+      log("ℹ Voice cloning not available");
+    }
+    
+    // Update voice status display if on voice tab
+    updateVoiceStatusDisplay(data);
+    
+    return data;
+  } catch (e) {
+    console.error("Voice status check failed:", e);
+    return null;
+  }
+}
+
+function updateVoiceStatusDisplay(data) {
+  const statusContent = $("voiceStatusContent");
+  if (!statusContent) return;
+  
+  if (!data || !data.available) {
+    statusContent.innerHTML = `
+      <p style="color:var(--red);">❌ Voice cloning not available</p>
+      <p style="color:var(--text);font-size:0.9em;margin-top:8px;">
+        Install dependencies: pip install torch torchaudio soundfile scipy git+https://github.com/myshell-ai/OpenVoice.git
+      </p>
+    `;
+  } else if (data.is_trained) {
+    statusContent.innerHTML = `
+      <p style="color:var(--green);">✅ Voice model trained and ready</p>
+      <p style="color:var(--text);font-size:0.9em;margin-top:8px;">
+        Device: ${data.device || 'Unknown'}<br>
+        Voice: ${data.config?.voice_name || 'Default'}<br>
+        Training files: ${data.training_files_available}<br>
+        Trained: ${data.config?.last_trained || 'Unknown'}
+      </p>
+    `;
+  } else {
+    statusContent.innerHTML = `
+      <p style="color:var(--yellow);">⚠️ Voice system available but not trained</p>
+      <p style="color:var(--text);font-size:0.9em;margin-top:8px;">
+        Device: ${data.device || 'Unknown'}<br>
+        Training files available: ${data.training_files_available}<br>
+        Upload voice samples and train the model to enable voice responses.
+      </p>
+    `;
+  }
+}
+
+function playVoiceResponse(audioUrl) {
+  if (!audioUrl) return;
+  
+  // Stop any currently playing audio
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  
+  // Create and play new audio
+  currentAudio = new Audio(audioUrl);
+  currentAudio.play().catch(err => {
+    console.error("Audio playback failed:", err);
+  });
+  
+  // Cleanup when done
+  currentAudio.addEventListener('ended', () => {
+    currentAudio = null;
+    vampIdle();
+  });
+}
+
+async function uploadVoiceSample(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  try {
+    const resp = await fetch('/api/voice/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await resp.json();
+    if (data.success) {
+      log(`✓ Uploaded voice sample: ${data.filename}`);
+      return true;
+    } else {
+      log(`✗ Upload failed: ${data.error}`);
+      return false;
+    }
+  } catch (e) {
+    log(`✗ Upload error: ${e.message}`);
+    return false;
+  }
+}
+
+async function trainVoice() {
+  const statusDiv = $("voiceTrainStatus");
+  if (statusDiv) statusDiv.innerHTML = '<p style="color:var(--yellow);">⏳ Training voice model...</p>';
+  
+  vampBusy("Training voice...");
+  
+  try {
+    const resp = await fetch('/api/voice/train', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ voice_name: 'vamp_voice' })
+    });
+    
+    const data = await resp.json();
+    if (data.success) {
+      log(`✓ Voice trained successfully using ${data.samples_used} samples`);
+      voiceEnabled = true;
+      
+      if (statusDiv) {
+        statusDiv.innerHTML = `
+          <p style="color:var(--green);">✅ Voice training complete!</p>
+          <p style="color:var(--text);font-size:0.9em;">
+            Samples used: ${data.samples_used}<br>
+            Trained: ${data.trained_at}
+          </p>
+        `;
+      }
+      
+      // Refresh voice status
+      checkVoiceStatus();
+      
+      vampSpeak("Hello! My voice has been successfully trained.");
+      return true;
+    } else {
+      log(`✗ Training failed: ${data.error}`);
+      if (statusDiv) statusDiv.innerHTML = `<p style="color:var(--red);">❌ Training failed: ${data.error}</p>`;
+      vampIdle();
+      return false;
+    }
+  } catch (e) {
+    log(`✗ Training error: ${e.message}`);
+    if (statusDiv) statusDiv.innerHTML = `<p style="color:var(--red);">❌ Error: ${e.message}</p>`;
+    vampIdle();
+    return false;
+  }
+}
+
+// Voice tab event handlers
+if ($("uploadVoiceSampleBtn")) {
+  $("uploadVoiceSampleBtn").addEventListener("click", async () => {
+    const input = $("voiceSampleInput");
+    const statusDiv = $("voiceUploadStatus");
+    
+    if (!input.files || input.files.length === 0) {
+      if (statusDiv) statusDiv.innerHTML = '<p style="color:var(--red);">Please select voice sample files first.</p>';
+      return;
+    }
+    
+    if (statusDiv) statusDiv.innerHTML = '<p style="color:var(--yellow);">⏳ Uploading voice samples...</p>';
+    
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (let i = 0; i < input.files.length; i++) {
+      const file = input.files[i];
+      const success = await uploadVoiceSample(file);
+      if (success) successCount++;
+      else failCount++;
+    }
+    
+    if (statusDiv) {
+      if (failCount === 0) {
+        statusDiv.innerHTML = `<p style="color:var(--green);">✅ Uploaded ${successCount} voice sample(s)</p>`;
+      } else {
+        statusDiv.innerHTML = `<p style="color:var(--yellow);">⚠️ Uploaded ${successCount}, failed ${failCount}</p>`;
+      }
+    }
+    
+    // Clear file input
+    input.value = '';
+    
+    // Refresh voice status
+    checkVoiceStatus();
+  });
+}
+
+if ($("trainVoiceBtn")) {
+  $("trainVoiceBtn").addEventListener("click", trainVoice);
+}
+
+if ($("testVoiceBtn")) {
+  $("testVoiceBtn").addEventListener("click", async () => {
+    const testText = $("voiceTestText")?.value?.trim();
+    const playerDiv = $("voiceTestPlayer");
+    
+    if (!testText) {
+      if (playerDiv) playerDiv.innerHTML = '<p style="color:var(--red);">Please enter text to synthesize.</p>';
+      return;
+    }
+    
+    if (playerDiv) playerDiv.innerHTML = '<p style="color:var(--yellow);">⏳ Generating speech...</p>';
+    
+    try {
+      const resp = await fetch('/api/voice/synthesize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: testText })
+      });
+      
+      const data = await resp.json();
+      if (data.success) {
+        if (playerDiv) {
+          playerDiv.innerHTML = `
+            <p style="color:var(--green);">✅ Speech generated</p>
+            <audio controls style="width:100%;margin-top:8px;">
+              <source src="${data.audio_url}" type="audio/wav">
+            </audio>
+          `;
+        }
+        log("✓ Test voice generated");
+      } else {
+        if (playerDiv) playerDiv.innerHTML = `<p style="color:var(--red);">❌ Failed: ${data.error}</p>`;
+        log(`✗ Test voice failed: ${data.error}`);
+      }
+    } catch (e) {
+      if (playerDiv) playerDiv.innerHTML = `<p style="color:var(--red);">❌ Error: ${e.message}</p>`;
+      log(`✗ Test voice error: ${e.message}`);
+    }
+  });
+}
+
+/* ============================================================
    INIT
 ============================================================ */
 
@@ -1459,6 +1710,9 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Connect event stream for real-time updates
   connectEventStream();
+  
+  // Check voice status
+  checkVoiceStatus();
   
   // Add keyboard shortcuts
   document.addEventListener("keydown", (e) => {

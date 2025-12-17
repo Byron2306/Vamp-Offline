@@ -1480,6 +1480,179 @@ def generate_report():
         return jsonify({"error": str(e)}), 500
 
 # ============================================================
+# VOICE CLONING API
+# ============================================================
+
+try:
+    from backend.llm.voice_cloner import get_voice_cloner, text_to_speech as tts_convert
+    VOICE_CLONER_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Voice cloner not available: {e}")
+    VOICE_CLONER_AVAILABLE = False
+    get_voice_cloner = None
+    tts_convert = None
+
+@app.route('/api/voice/status', methods=['GET'])
+def voice_status():
+    """Get voice cloner status"""
+    try:
+        if not VOICE_CLONER_AVAILABLE:
+            return jsonify({
+                "available": False,
+                "error": "Voice cloner not installed"
+            })
+        
+        cloner = get_voice_cloner()
+        status = cloner.status()
+        return jsonify(status)
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/voice/train', methods=['POST'])
+def voice_train():
+    """Train voice model with uploaded samples"""
+    try:
+        if not VOICE_CLONER_AVAILABLE:
+            return jsonify({"error": "Voice cloner not available"}), 503
+        
+        data = request.json
+        voice_name = data.get('voice_name', 'vamp_voice')
+        
+        # Get uploaded files from training directory
+        cloner = get_voice_cloner()
+        training_files = cloner.get_training_files()
+        
+        if not training_files:
+            return jsonify({
+                "error": "No training files found. Please upload voice samples first."
+            }), 400
+        
+        # Train the voice
+        result = cloner.train_voice(training_files, voice_name)
+        return jsonify(result)
+    
+    except Exception as e:
+        print(f"Voice training error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/voice/upload', methods=['POST'])
+def voice_upload():
+    """Upload voice training samples"""
+    try:
+        if not VOICE_CLONER_AVAILABLE:
+            return jsonify({"error": "Voice cloner not available"}), 503
+        
+        if 'file' not in request.files:
+            return jsonify({"error": "No file uploaded"}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "Empty filename"}), 400
+        
+        # Get training directory
+        cloner = get_voice_cloner()
+        filename = secure_filename(file.filename)
+        filepath = cloner.training_dir / filename
+        
+        # Save the file
+        file.save(str(filepath))
+        
+        return jsonify({
+            "success": True,
+            "filename": filename,
+            "path": str(filepath)
+        })
+    
+    except Exception as e:
+        print(f"Voice upload error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/voice/synthesize', methods=['POST'])
+def voice_synthesize():
+    """Convert text to speech with cloned voice"""
+    try:
+        if not VOICE_CLONER_AVAILABLE:
+            return jsonify({"error": "Voice cloner not available"}), 503
+        
+        data = request.json
+        text = data.get('text')
+        
+        if not text:
+            return jsonify({"error": "No text provided"}), 400
+        
+        # Generate speech
+        audio_path = tts_convert(text)
+        
+        if audio_path is None:
+            return jsonify({"error": "Speech generation failed"}), 500
+        
+        # Return audio file info
+        return jsonify({
+            "success": True,
+            "audio_url": f"/api/voice/audio/{audio_path.name}",
+            "filename": audio_path.name
+        })
+    
+    except Exception as e:
+        print(f"Voice synthesis error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/voice/audio/<filename>')
+def voice_audio(filename):
+    """Serve generated audio files"""
+    try:
+        if not VOICE_CLONER_AVAILABLE:
+            return jsonify({"error": "Voice cloner not available"}), 503
+        
+        cloner = get_voice_cloner()
+        audio_path = cloner.cache_dir / filename
+        
+        if not audio_path.exists():
+            return jsonify({"error": "Audio file not found"}), 404
+        
+        return send_from_directory(str(cloner.cache_dir), filename)
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/vamp/ask-voice', methods=['POST'])
+def ask_vamp_voice():
+    """
+    Ask VAMP for AI guidance with voice response
+    """
+    try:
+        data = request.json
+        question = data.get('question')
+        context = data.get('context', {})
+        
+        if not question:
+            return jsonify({"error": "No question provided"}), 400
+        
+        # Query Ollama for text response
+        answer = query_ollama(question, context)
+        
+        # Generate voice if available
+        audio_url = None
+        if VOICE_CLONER_AVAILABLE:
+            try:
+                audio_path = tts_convert(answer)
+                if audio_path:
+                    audio_url = f"/api/voice/audio/{audio_path.name}"
+            except Exception as voice_error:
+                print(f"Voice generation failed (non-fatal): {voice_error}")
+        
+        return jsonify({
+            "answer": answer,
+            "audio_url": audio_url,
+            "has_voice": audio_url is not None
+        })
+    
+    except Exception as e:
+        print(f"Ask VAMP error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# ============================================================
 # SERVER-SENT EVENTS
 # ============================================================
 

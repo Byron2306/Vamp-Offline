@@ -87,6 +87,7 @@
     <div class="tab" data-tab="expectations">Expectations</div>
     <div class="tab" data-tab="evidence">Evidence Log</div>
     <div class="tab" data-tab="reports">Reports</div>
+    <div class="tab" data-tab="voice">Voice Settings</div>
     <div class="tab" data-tab="logs">Logs</div>
   </div>
 
@@ -326,6 +327,71 @@
       <div class="box" style="margin-top:16px;">
         <div class="box-h">PA Generation Output</div>
         <div class="evidence" id="reportBox">Click "Generate Final PA" to create your Performance Agreement document.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOICE SETTINGS -->
+  <section class="panel" id="tab-voice">
+    <div class="card">
+      <div class="card-h">
+        <div>
+          <div class="card-title">🎙️ Voice Settings</div>
+          <div class="muted">Configure OpenVoice V2 voice cloning for VAMP</div>
+        </div>
+      </div>
+
+      <!-- Voice Status -->
+      <div class="box info" id="voiceStatusBox">
+        <div class="box-h">Voice Status</div>
+        <div id="voiceStatusContent">Checking voice system...</div>
+      </div>
+
+      <!-- Upload Voice Samples -->
+      <div class="box" style="margin-top:16px;">
+        <div class="box-h">📤 Upload Voice Samples</div>
+        <p style="margin-bottom:12px;color:var(--text);">
+          Upload 3-5 audio files (WAV, MP3, FLAC) with clear speech from the voice you want to clone.
+          Each file should be 5-30 seconds of clear, high-quality speech.
+        </p>
+        <input type="file" id="voiceSampleInput" accept=".wav,.mp3,.flac,.m4a,.ogg" multiple style="margin-bottom:12px;"/>
+        <button class="btn" id="uploadVoiceSampleBtn">Upload Voice Sample(s)</button>
+        <div id="voiceUploadStatus" style="margin-top:8px;"></div>
+      </div>
+
+      <!-- Train Voice -->
+      <div class="box warning" style="margin-top:16px;">
+        <div class="box-h">🎯 Train Voice Model</div>
+        <p style="margin-bottom:12px;color:var(--text);">
+          After uploading voice samples, click below to train the voice cloning model.
+          This may take a few minutes.
+        </p>
+        <button class="btn glow" id="trainVoiceBtn">Train Voice Model</button>
+        <div id="voiceTrainStatus" style="margin-top:8px;"></div>
+      </div>
+
+      <!-- Voice Test -->
+      <div class="box success" style="margin-top:16px;">
+        <div class="box-h">🔊 Test Voice</div>
+        <p style="margin-bottom:12px;color:var(--text);">
+          Test the cloned voice with sample text.
+        </p>
+        <textarea id="voiceTestText" rows="3" placeholder="Enter text to test voice synthesis..." style="width:100%;margin-bottom:12px;">Hello! This is VAMP, your Virtual Academic Management Partner. I'm here to help you with your performance management.</textarea>
+        <button class="btn glow" id="testVoiceBtn">Generate Test Speech</button>
+        <div id="voiceTestPlayer" style="margin-top:12px;"></div>
+      </div>
+
+      <!-- Voice Info -->
+      <div class="box" style="margin-top:16px;">
+        <div class="box-h">ℹ️ About Voice Cloning</div>
+        <p style="color:var(--text);line-height:1.6;">
+          <strong>OpenVoice V2</strong> (MIT License) allows VAMP to speak with a natural, cloned voice.<br><br>
+          <strong>Requirements:</strong><br>
+          • 3-5 audio samples of clear speech (5-30 seconds each)<br>
+          • GPU recommended for faster processing (CPU works but is slower)<br>
+          • Training takes 1-5 minutes depending on hardware<br><br>
+          <strong>Privacy:</strong> All voice processing happens locally. Voice models never leave your system.
+        </p>
       </div>
     </div>
   </section>

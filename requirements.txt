@@ -22,3 +22,10 @@ chardet>=5.0.0
 # OCR support for scanned documents and images
 pytesseract>=0.3.10
 pdf2image>=1.16.0
+
+# Voice cloning with OpenVoice V2 (MIT License)
+torch>=2.0.0
+torchaudio>=2.0.0
+soundfile>=0.12.0
+scipy>=1.10.0
+git+https://github.com/myshell-ai/OpenVoice.git
