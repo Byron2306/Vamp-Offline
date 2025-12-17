@@ -75,71 +75,95 @@ def map_evidence_to_tasks(
     kpa_code: str,
     meta: Dict[str, Any],
     mapped_by: str = "rules:v1",
+    max_links: int = 3,
 ) -> List[Dict[str, Any]]:
-    """Create evidence_task links for evidence_id; return mapped task summaries."""
+    """Create evidence_task links for evidence_id; return mapped task summaries.
+
+    Robust + conservative mapping:
+    - Filter candidates by month (+ KPA when available).
+    - Score by token overlap between evidence signal and task(title+hints).
+    - Link only the top-N above a threshold (avoids mapping every task).
+    - Safe fallbacks when classification is weak.
+    """
     month = _parse_month(month_bucket)
     if not month:
         return []
 
-    # Candidate tasks: tasks expanded per-month -> window_start prefix matches.
-    # If kpa_code is missing/blank, fall back to all-KPA candidates for the month
-    # and map based on hint matches (robust behaviour when classification is uncertain).
     kpa_code_norm = str(kpa_code or "").strip()
-    task_rows = store.list_tasks_for_window(
-        int(year),
-        [month],
-        kpa_code=(kpa_code_norm or None),
-    )
+    task_rows = store.list_tasks_for_window(int(year), [month], kpa_code=(kpa_code_norm or None))
     if not task_rows and not kpa_code_norm:
         task_rows = store.list_tasks_for_window(int(year), [month], kpa_code=None)
-    signal = _text_signal(meta)
+    if not task_rows:
+        return []
 
-    mapped: List[Dict[str, Any]] = []
-    # First pass: map by hints (or by month/KPA default mapping).
+    signal = _text_signal(meta)
+    signal_tokens = set(re.findall(r"[a-z0-9]{3,}", signal))
+
+    def _tokens_for_task(row: Dict[str, Any]) -> Tuple[set[str], List[str]]:
+        try:
+            hints_payload = json.loads(row.get("hints_json") or "{}")
+        except Exception:
+            hints_payload = {}
+        hints = hints_payload.get("hints") or []
+        hint_terms = [str(h).strip().lower() for h in hints if str(h).strip()]
+        blob = " ".join([row.get("title") or ""] + hint_terms)
+        return set(re.findall(r"[a-z0-9]{3,}", blob.lower())), hint_terms
+
+    scored: List[Tuple[float, Dict[str, Any], int, int]] = []
     for t in task_rows:
         try:
-            hints_payload = {}
-            try:
-                hints_payload = json.loads(t["hints_json"] or "{}")
-            except Exception:
-                hints_payload = {}
-            hints = hints_payload.get("hints") or []
-            # Base confidence depends on whether KPA was known.
-            conf = 0.35 if kpa_code_norm else 0.20
-            if hints and isinstance(hints, list):
-                hits = 0
-                for h in hints:
-                    hs = str(h).strip().lower()
-                    if hs and hs in signal:
-                        hits += 1
-                if hits:
-                    conf = min(0.95, 0.35 + 0.15 * hits)
-                else:
-                    # If KPA is known, keep a low-but-present mapping to the month/KPA task.
-                    # If KPA is unknown, avoid spamming mappings without signals.
-                    conf = 0.45 if kpa_code_norm else 0.0
-
-            if conf <= 0.0:
+            row = dict(t)
+            task_tokens, hint_terms = _tokens_for_task(row)
+            if not task_tokens:
                 continue
 
-            store.upsert_mapping(evidence_id, t["task_id"], mapped_by=mapped_by, confidence=float(conf))
+            overlap = signal_tokens.intersection(task_tokens)
+            overlap_ratio = len(overlap) / max(1, len(task_tokens))
+
+            hint_hits = 0
+            for term in hint_terms:
+                if term and term in signal:
+                    hint_hits += 1
+
+            base = 0.30 if kpa_code_norm else 0.15
+            conf = base + 0.55 * overlap_ratio + min(0.30, 0.10 * hint_hits)
+            scored.append((float(conf), row, hint_hits, len(overlap)))
+        except Exception:
+            continue
+
+    scored.sort(key=lambda x: (x[0], x[2], x[3]), reverse=True)
+    threshold = 0.35 if kpa_code_norm else 0.45
+
+    mapped: List[Dict[str, Any]] = []
+    for conf, row, _, _ in scored[: max_links * 2]:
+        if len(mapped) >= max_links:
+            break
+        if conf < threshold:
+            continue
+        try:
+            conf = float(min(conf, 0.95))
+            store.upsert_mapping(evidence_id, row["task_id"], mapped_by=mapped_by, confidence=conf)
             mapped.append(
-                {
-                    "task_id": t["task_id"],
-                    "kpa_code": t["kpa_code"],
-                    "title": t["title"],
-                    "confidence": float(conf),
-                }
+                {"task_id": row["task_id"], "kpa_code": row["kpa_code"], "title": row["title"], "confidence": conf}
             )
         except Exception:
             continue
 
-    # If KPA is unknown and no mappings were produced (e.g., no hint hits),
-    # create a single conservative fallback mapping to the generic KPA1 monthly task.
+    if not mapped and kpa_code_norm:
+        # Safe fallback: map to first task in month/KPA (single link only).
+        try:
+            pick = dict(task_rows[0])
+            store.upsert_mapping(evidence_id, pick["task_id"], mapped_by=mapped_by + ":fallback", confidence=0.35)
+            mapped.append(
+                {"task_id": pick["task_id"], "kpa_code": pick["kpa_code"], "title": pick["title"], "confidence": 0.35}
+            )
+        except Exception:
+            pass
+
     if not mapped and not kpa_code_norm:
+        # Conservative fallback: one KPA1 mapping.
         try:
             all_rows = store.list_tasks_for_window(int(year), [month], kpa_code=None)
-            # Prefer KPA1 first, else take the first task in the month.
             pick = None
             for r in all_rows:
                 if str(r.get("kpa_code") or "") == "KPA1":
@@ -148,14 +172,10 @@ def map_evidence_to_tasks(
             if pick is None and all_rows:
                 pick = all_rows[0]
             if pick is not None:
-                store.upsert_mapping(evidence_id, pick["task_id"], mapped_by=mapped_by + ":fallback", confidence=0.25)
+                pick_d = dict(pick)
+                store.upsert_mapping(evidence_id, pick_d["task_id"], mapped_by=mapped_by + ":fallback", confidence=0.25)
                 mapped.append(
-                    {
-                        "task_id": pick["task_id"],
-                        "kpa_code": pick["kpa_code"],
-                        "title": pick["title"],
-                        "confidence": 0.25,
-                    }
+                    {"task_id": pick_d["task_id"], "kpa_code": pick_d["kpa_code"], "title": pick_d["title"], "confidence": 0.25}
                 )
         except Exception:
             pass

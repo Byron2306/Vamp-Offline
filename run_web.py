@@ -34,6 +34,14 @@ except ImportError as e:
     build_expectations_from_ta = None
 
 try:
+    from task_map import _hid
+    TASK_MAP_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import task_map: {e}")
+    TASK_MAP_AVAILABLE = False
+    _hid = None
+
+try:
     from backend.nwu_brain_scorer import brain_score_evidence
     BRAIN_SCORER_AVAILABLE = True
 except ImportError as e:
@@ -378,7 +386,54 @@ def get_progress():
         expected_task_ids = [r["task_id"] for r in task_rows]
         missing_ids = {t.get("task_id") for t in (progress.get("missing_tasks") or []) if isinstance(t, dict)}
         completed_ids = set([tid for tid in expected_task_ids if tid not in missing_ids])
-        task_completion = {tid: True for tid in completed_ids}
+        
+        # Map hashed task IDs back to original task IDs for frontend compatibility
+        task_completion = {}
+        expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{year}.json"
+        if expectations_file.exists() and TASK_MAP_AVAILABLE:
+            try:
+                with open(expectations_file, 'r') as f:
+                    expectations_data = json.load(f)
+                
+                # Create mapping from hashed ID back to original ID (support 'id' or 'task_id')
+                # We will expose ONLY the hashed DB task IDs so the frontend uses canonical IDs.
+                for task in expectations_data.get('tasks', []):
+                    original_id = task.get('id') or task.get('task_id')
+                    months_list = task.get('months') or task.get('month') or []
+                    if isinstance(months_list, (int, str)):
+                        months_list = [months_list]
+                    if original_id and months_list:
+                        for m in months_list:
+                            try:
+                                month_int = int(m)
+                                hashed_id = _hid(staff_id, str(year), str(original_id), f"{month_int:02d}")
+                                if hashed_id in completed_ids:
+                                    # Expose only hashed IDs (canonical DB ids)
+                                    task_completion[hashed_id] = True
+                            except (ValueError, TypeError):
+                                continue
+            except Exception as e:
+                print(f"Error mapping task IDs: {e}")
+                # Fallback to hashed IDs
+                task_completion = {tid: True for tid in completed_ids}
+        else:
+            # Fallback to hashed IDs if expectations not available
+            task_completion = {tid: True for tid in completed_ids}
+
+        # Ensure only canonical DB task_ids are exposed to the frontend.
+        # Some legacy code paths used original expectation IDs; filter those out
+        # so the UI only receives hashed (DB) task identifiers.
+        try:
+            allowed_ids = set(expected_task_ids) | set(completed_ids)
+            # Keep only keys that are known canonical IDs
+            task_completion = {k: v for k, v in task_completion.items() if k in allowed_ids}
+            # Ensure any completed canonical IDs are present
+            for tid in completed_ids:
+                if tid not in task_completion:
+                    task_completion[tid] = True
+        except Exception:
+            # If anything goes wrong, fall back to the existing mapping
+            task_completion = {tid: True for tid in completed_ids}
 
         # Evidence list for Evidence Log (include top mapped task)
         evidence_rows = store.list_evidence(staff_id, int(year), month_bucket=month if month else None)
@@ -514,25 +569,67 @@ def get_expectations():
         if expectations_file.exists():
             with open(expectations_file, 'r') as f:
                 expectations_data = json.load(f)
-            
+
+            # Add hashed task IDs to match progress system
+            if TASK_MAP_AVAILABLE and 'tasks' in expectations_data:
+                task_index: Dict[str, Dict[str, Any]] = {}
+                for task in expectations_data['tasks']:
+                    task_id = task.get('task_id') or task.get('id')
+                    if not task_id:
+                        continue
+                    task_index[task_id] = task
+
+                    if 'id' in task and 'months' in task:
+                        # Generate hashed IDs for each month this task appears in
+                        task['hashed_ids'] = {}
+                        for month in task.get('months', []):
+                            try:
+                                month_int = int(month)
+                                hashed_id = _hid(staff_id, str(year), str(task['id']), f"{month_int:02d}")
+                                task['hashed_ids'][str(month)] = hashed_id
+                            except (ValueError, TypeError):
+                                continue
+
+                # Update by_month structure to use hashed IDs
+                if 'by_month' in expectations_data:
+                    for month_key, month_data in expectations_data['by_month'].items():
+                        if not isinstance(month_data, dict):
+                            continue
+                        month_tasks = month_data.get('tasks') or []
+                        parts = month_key.split('-')
+                        month_num = parts[1] if len(parts) > 1 else None
+                        month_lookup = str(int(month_num)) if month_num else None
+
+                        for task in month_tasks:
+                            base_task = task_index.get(task.get('task_id')) if task.get('task_id') else None
+                            hashed_id = None
+                            if base_task and month_lookup and 'hashed_ids' in base_task:
+                                hashed_id = base_task['hashed_ids'].get(month_lookup)
+
+                            task['id'] = hashed_id or task.get('task_id')
+                            # Normalize field names for UI
+                            if 'title' not in task and 'output' in task:
+                                task['title'] = task['output']
+                            task['minimum_count'] = task.get('min_required') or task.get('minimum_count') or 1
+                            task['stretch_count'] = task.get('stretch_target') or task.get('stretch_count') or task['minimum_count']
+
             # Return the full expectations structure with tasks and by_month
             return jsonify(expectations_data)
-        
-        else:
-            # Return mock data for development
-            mock_expectations = generate_mock_expectations()
-            mock_kpa_summary = {
-                "Teaching & Learning": {"total": 4, "completed": 2, "progress": 50},
-                "Research": {"total": 3, "completed": 1, "progress": 33},
-                "Community Engagement": {"total": 2, "completed": 0, "progress": 0}
-            }
-            
-            return jsonify({
-                "expectations": mock_expectations,
-                "kpa_summary": mock_kpa_summary,
-                "tasks": mock_expectations,
-                "by_month": {}
-            })
+
+        # Return mock data for development if no expectations file was found
+        mock_expectations = generate_mock_expectations()
+        mock_kpa_summary = {
+            "Teaching & Learning": {"total": 4, "completed": 2, "progress": 50},
+            "Research": {"total": 3, "completed": 1, "progress": 33},
+            "Community Engagement": {"total": 2, "completed": 0, "progress": 0}
+        }
+
+        return jsonify({
+            "expectations": mock_expectations,
+            "kpa_summary": mock_kpa_summary,
+            "tasks": mock_expectations,
+            "by_month": {}
+        })
     
     except Exception as e:
         print(f"Expectations error: {e}")
@@ -624,6 +721,24 @@ def check_month_completion():
         from progress_store import ProgressStore
         
         store = ProgressStore()
+
+        # Prefer canonical tasks from the DB for this staff/month so that hashed/DB task_ids
+        # used by asserted/targeted mappings are matched correctly.
+        try:
+            month_num = int(month.split('-')[1])
+            db_rows = store.list_tasks_for_window(int(year), [month_num], kpa_code=None)
+            # Always use DB-derived month tasks (canonical task_ids)
+            month_tasks = []
+            for r in db_rows:
+                month_tasks.append({
+                    'id': r['task_id'],
+                    'kpa_code': r.get('kpa_code'),
+                    'title': r.get('title'),
+                    'minimum_count': r.get('min_required') or r.get('min_required') or r.get('min_required', 0)
+                })
+        except Exception:
+            # If DB lookup fails, fall back to expectations file contents already loaded
+            pass
         
         # Get evidence mapped to tasks for this month
         evidence_count = 0
@@ -668,18 +783,25 @@ def check_month_completion():
         tasks_total = len(month_tasks)
         
         for task in month_tasks:
-            task_id = task.get('id')
-            min_required = task.get('minimum_count', 0)
+            # Normalize task identifier fields coming from different expectation file formats
+            task_id = task.get('id') or task.get('task_id') or task.get('hashed_id') or task.get('task')
+            # Normalize minimum required field (various names used in expectations payloads)
+            min_required = task.get('minimum_count') or task.get('min_required') or task.get('minimum_count') or 0
+            try:
+                min_required = int(min_required or 0)
+            except Exception:
+                min_required = 0
+
             task_evidence_count = evidence_by_task.get(task_id, 0)
             task_met = task_evidence_count >= min_required
-            
+
             if task_met:
                 tasks_met += 1
-            
+
             task_status.append({
                 'task_id': task_id,
-                'kpa_code': task.get('kpa_code', 'Unknown'),
-                'title': task.get('title', 'Task'),
+                'kpa_code': task.get('kpa_code') or task.get('kpa') or 'Unknown',
+                'title': task.get('title') or task.get('output') or task.get('task') or 'Task',
                 'evidence_count': task_evidence_count,
                 'minimum_required': min_required,
                 'met': task_met
@@ -699,14 +821,29 @@ def check_month_completion():
             'task_status': task_status
         }
         
+        # Try to get AI analysis, but don't fail if Ollama is unavailable
+        # Provide default messages that work without AI
         if complete:
-            ai_prompt = f"The staff member has met all {tasks_met}/{tasks_total} required tasks for {month} with {evidence_count} evidence items. Provide encouragement and suggest they prepare for next month."
+            ai_response = f"Great work! All {tasks_met} required tasks for {month} have been completed with {evidence_count} evidence items."
         else:
-            tasks_incomplete = [t for t in required_tasks if not t['met']]
-            incomplete_details = ", ".join([f"{t['kpa_code']}: {t['title']} ({t['evidence_count']}/{t['minimum_required']})" for t in tasks_incomplete[:3]])
-            ai_prompt = f"The staff member has only met {tasks_met}/{tasks_total} tasks for {month}. Incomplete tasks: {incomplete_details}. Provide constructive guidance on what evidence they should focus on."
+            ai_response = f"Progress update: {tasks_met} of {tasks_total} tasks complete. Focus on uploading evidence for the remaining {tasks_total - tasks_met} tasks."
         
-        ai_response = query_ollama(ai_prompt, ai_context)
+        # Try Ollama enhancement (optional)
+        try:
+            if complete:
+                ai_prompt = f"The staff member has met all {tasks_met}/{tasks_total} required tasks for {month} with {evidence_count} evidence items. Provide brief encouragement (2 sentences max)."
+            else:
+                tasks_incomplete = [t for t in required_tasks if not t['met']]
+                incomplete_details = ", ".join([f"{t['kpa_code']}: {t['title']} ({t['evidence_count']}/{t['minimum_required']})" for t in tasks_incomplete[:3]])
+                ai_prompt = f"The staff member has only met {tasks_met}/{tasks_total} tasks for {month}. Incomplete tasks: {incomplete_details}. Provide brief constructive guidance (2 sentences max)."
+            
+            ollama_response = query_ollama(ai_prompt, ai_context)
+            # Only use Ollama response if it doesn't contain error messages
+            if ollama_response and not any(err in ollama_response for err in ["Cannot reach", "unavailable", "error occurred"]):
+                ai_response = ollama_response
+        except Exception as ollama_error:
+            print(f"Ollama unavailable for AI review: {ollama_error}")
+            # Keep the default fallback message set above
         
         # Build detailed per-task summary with visual indicators
         task_summary_lines = []
@@ -751,6 +888,7 @@ def scan_upload():
         target_task_id = request.form.get('target_task_id') or None
         use_brain = request.form.get('use_brain') == 'true'
         use_contextual = request.form.get('use_contextual') == 'true'
+        asserted_mapping = request.form.get('asserted_mapping') == 'true'  # User pre-locked evidence to task
         
         results = []
         
@@ -778,8 +916,19 @@ def scan_upload():
                     file_text = f"File: {filename}"
                     extraction_method = "failed"
                 
-                # AI Classification using Ollama
-                if use_contextual:
+                # AI Classification using Ollama (skip if asserted mapping)
+                if asserted_mapping and target_task_id:
+                    # User asserted this evidence belongs to the target task
+                    # Skip AI classification entirely, use minimal classification
+                    classification = {
+                        "kpa": "Asserted",
+                        "task": "User-selected task",
+                        "tier": "N/A",
+                        "impact_summary": "Evidence directly linked to task by user (asserted relevance)",
+                        "confidence": 1.0
+                    }
+                    use_brain = False  # Skip brain scorer too
+                elif use_contextual:
                     try:
                         classification = classify_with_ollama(filename, file_text)
                     except Exception as e:
@@ -874,14 +1023,20 @@ def scan_upload():
                     # Initialize progress store
                     store = ProgressStore()
                     
-                    # Ensure tasks exist for this staff/year
-                    expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{month[:4]}.json"
-                    if expectations_file.exists():
-                        with open(expectations_file, 'r') as f:
-                            expectations = json.load(f)
-                        ensure_tasks(store, staff_id=staff_id, year=int(month[:4]), expectations=expectations)
-                    else:
-                        ensure_tasks(store, staff_id=staff_id, year=int(month[:4]), expectations=None)
+                    # Ensure we have a per-month task catalog before mapping.
+                    # Without this, mapping may silently produce 0 links (no candidates).
+                    try:
+                        expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{month[:4]}.json"
+                        expectations_data = None
+                        if expectations_file.exists():
+                            with open(expectations_file, 'r', encoding='utf-8') as f:
+                                expectations_data = json.load(f)
+                        ensure_tasks(store, staff_id=staff_id, year=int(month[:4]), expectations=expectations_data)
+                    except Exception:
+                        try:
+                            ensure_tasks(store, staff_id=staff_id, year=int(month[:4]), expectations=None)
+                        except Exception:
+                            pass
                     
                     # Generate evidence ID (avoid collisions when filenames repeat)
                     # Use content sha1 prefix to be unique-per-content and idempotent on re-scan.
@@ -943,12 +1098,37 @@ def scan_upload():
                     # Targeted mapping (high confidence) - apply AFTER generic mapping to avoid overwrite
                     if target_task_id:
                         try:
+                            # Mark as asserted if user explicitly locked evidence to task
+                            mapped_by_value = "web_scan:targeted:asserted" if asserted_mapping else "web_scan:targeted"
                             store.upsert_mapping(
                                 evidence_id,
                                 target_task_id,
-                                mapped_by="web_scan:targeted",
+                                mapped_by=mapped_by_value,
                                 confidence=0.95,
                             )
+                            # Ensure UI acknowledges mapping immediately (scan results use mapped_tasks length)
+                            try:
+                                # Get the actual task title from the store
+                                task_title = "Targeted task"
+                                try:
+                                    for r in store.list_tasks_for_window(int(month[:4]), [int(month.split('-')[1])], kpa_code=None):
+                                        if r["task_id"] == target_task_id:
+                                            task_title = r.get("title", "Targeted task")
+                                            break
+                                except Exception:
+                                    pass
+                                
+                                mapped_tasks.append(
+                                    {
+                                        "task_id": target_task_id,
+                                        "kpa_code": kpa_code,
+                                        "title": task_title,
+                                        "confidence": 0.95,
+                                        "relevance_source": "asserted" if asserted_mapping else "targeted",
+                                    }
+                                )
+                            except Exception:
+                                pass
                         except Exception:
                             pass
                     
@@ -969,7 +1149,8 @@ def scan_upload():
                     "confidence": classification["confidence"],
                     "status": "Classified" if classification["confidence"] >= 0.6 else "Needs Review",
                     "evidence_id": evidence_id,
-                    "mapped_tasks": len(mapped_tasks)
+                    "mapped_tasks": mapped_tasks,  # Full array with task IDs, titles, and confidence
+                    "mapped_count": len(mapped_tasks)  # Keep count for backward compatibility
                 }
                 
                 results.append(result)
@@ -1345,4 +1526,6 @@ if __name__ == '__main__':
     print("\nPress Ctrl+C to stop")
     print("=" * 60)
     
-    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
+    # Run without the debug auto-reloader for stable testing sessions.
+    # Keep threaded=True for concurrency; explicit `use_reloader=False` prevents restarts.
+    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False, threaded=True)

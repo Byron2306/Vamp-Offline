@@ -23,8 +23,8 @@ from datetime import datetime, date
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-BASE_DIR = Path(__file__).resolve().parents[1]  # backend/
-DATA_DIR = BASE_DIR / "data"
+BASE_DIR = Path(__file__).resolve().parent  # Root of project where progress_store.py is located
+DATA_DIR = BASE_DIR / "backend" / "data"
 PROGRESS_DIR = DATA_DIR / "progress"
 PROGRESS_DIR.mkdir(parents=True, exist_ok=True)
 DEFAULT_DB_PATH = PROGRESS_DIR / "progress.db"
