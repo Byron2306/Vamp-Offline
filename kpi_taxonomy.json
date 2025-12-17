@@ -1,0 +1,109 @@
+{
+  "Assessment & Feedback": {
+    "keywords": [
+      "assessment",
+      "moderation",
+      "mark",
+      "feedback",
+      "rubric",
+      "exam",
+      "test"
+    ]
+  },
+  "Curriculum Delivery": {
+    "keywords": [
+      "lecture",
+      "lesson",
+      "teaching",
+      "delivery",
+      "tutorial",
+      "seminar",
+      "efundi",
+      "lms",
+      "site"
+    ]
+  },
+  "Student Support": {
+    "keywords": [
+      "consultation",
+      "mentoring",
+      "support",
+      "advising",
+      "supervision"
+    ]
+  },
+  "Quality Assurance": {
+    "keywords": [
+      "quality",
+      "review",
+      "evaluation",
+      "audit",
+      "external",
+      "internal moderation"
+    ]
+  },
+  "Research Dissemination": {
+    "keywords": [
+      "paper",
+      "article",
+      "publication",
+      "journal",
+      "conference",
+      "presentation",
+      "poster"
+    ]
+  },
+  "Research Pipeline": {
+    "keywords": [
+      "proposal",
+      "draft",
+      "submit",
+      "revision",
+      "review",
+      "resubmit",
+      "abstract"
+    ]
+  },
+  "Grant & Funding": {
+    "keywords": [
+      "grant",
+      "funding",
+      "proposal",
+      "irims"
+    ]
+  },
+  "Leadership & Governance": {
+    "keywords": [
+      "committee",
+      "meeting",
+      "chair",
+      "governance",
+      "management",
+      "director",
+      "coordination"
+    ]
+  },
+  "Social Responsiveness": {
+    "keywords": [
+      "community",
+      "engagement",
+      "outreach",
+      "stakeholder",
+      "partnership",
+      "service learning"
+    ]
+  },
+  "OHS Compliance": {
+    "keywords": [
+      "ohs",
+      "safety",
+      "risk",
+      "incident",
+      "drill",
+      "training"
+    ]
+  },
+  "General": {
+    "keywords": []
+  }
+}
