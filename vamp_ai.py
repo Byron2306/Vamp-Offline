@@ -42,6 +42,14 @@ def build_prompt(question: str, context: Dict[str, Any]) -> str:
         ctx_lines.append(f"Current stage: {context['stage']}")
     if context.get("scan_month"):
         ctx_lines.append(f"Current month bucket: {context['scan_month']}")
+    if context.get("month"):
+        ctx_lines.append(f"Month being analyzed: {context['month']}")
+    if context.get("tasks"):
+        ctx_lines.append(f"Tasks for this period: {context['tasks']}")
+    if context.get("evidence_count"):
+        ctx_lines.append(f"Evidence items uploaded: {context['evidence_count']}")
+    if context.get("required"):
+        ctx_lines.append(f"Minimum required evidence: {context['required']}")
 
     ctx_block = "\n".join(ctx_lines) if ctx_lines else "No additional context."
 
@@ -51,8 +59,14 @@ def build_prompt(question: str, context: Dict[str, Any]) -> str:
 Context:
 {ctx_block}
 
-User question:
+User question or task:
 {question}
+
+When analyzing monthly expectations:
+- Be specific about which KPAs need attention
+- Suggest concrete evidence types (e.g., "Upload assessment rubrics for KPA1")
+- Celebrate progress when expectations are met
+- Provide realistic timelines for catching up if behind
 
 Respond clearly and helpfully.
 """

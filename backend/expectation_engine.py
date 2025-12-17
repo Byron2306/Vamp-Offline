@@ -558,6 +558,214 @@ def parse_task_agreement(excel_path: str, director_level: bool = False) -> Dict[
 
 
 # ----------------------------
+# Build full expectations from TA
+# ----------------------------
+
+def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, Any]) -> Dict[str, Any]:
+    """Build comprehensive expectations structure from TA summary.
+    
+    Generates monthly tasks for all 5 KPAs with lead/lag indicators and evidence hints.
+    """
+    kpa_summary = ta_summary.get("kpa_summary", {})
+    teaching = ta_summary.get("teaching", [])
+    research = ta_summary.get("research", [])
+    leadership = ta_summary.get("leadership", [])
+    social = ta_summary.get("social", [])
+    ohs = ta_summary.get("ohs", [])
+    practice_windows = ta_summary.get("teaching_practice_windows", [])
+    
+    # Ensure all 5 KPAs exist in summary (add missing ones with zero hours)
+    standard_kpas = {
+        "KPA1": "Teaching and Learning (including supervision)",
+        "KPA2": "Occupational Health & Safety",
+        "KPA3": "Personal Research, Innovation and/or Creative Outputs",
+        "KPA4": "Academic Leadership and Administration",
+        "KPA5": "Social Responsiveness (Community Engagement / Industry)"
+    }
+    
+    for code, name in standard_kpas.items():
+        if code not in kpa_summary:
+            kpa_summary[code] = {"name": name, "hours": 0.0, "weight_pct": 0.0}
+    
+    # Generate monthly tasks for each KPA
+    tasks: List[Dict[str, Any]] = []
+    task_counter = 1
+    
+    # KPA1: Teaching (monthly + milestone tasks)
+    kpa1_hours = kpa_summary.get("KPA1", {}).get("hours", 0.0)
+    if kpa1_hours > 0:
+        for month in range(1, 13):
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA1",
+                "kpa_name": "Teaching and Learning",
+                "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+                "cadence": "monthly",
+                "months": [month],
+                "minimum_count": 2,
+                "stretch_count": 4,
+                "evidence_hints": ["lecture", "assessment", "efundi", "lms", "class", "tutorial", "marks"],
+                "outputs": "; ".join(teaching[:3]) if teaching else "Teaching activities as per TA"
+            })
+            task_counter += 1
+        
+        # Add semester milestones
+        tasks.append({
+            "id": f"task_{task_counter:03d}",
+            "kpa_code": "KPA1",
+            "kpa_name": "Teaching and Learning",
+            "title": "Mid-year marks submission",
+            "cadence": "milestone",
+            "months": [6],
+            "minimum_count": 1,
+            "stretch_count": 1,
+            "evidence_hints": ["marks", "gradebook", "submission", "assessment"],
+            "outputs": "Semester 1 assessment completion"
+        })
+        task_counter += 1
+        
+        tasks.append({
+            "id": f"task_{task_counter:03d}",
+            "kpa_code": "KPA1",
+            "kpa_name": "Teaching and Learning",
+            "title": "Year-end marks and moderation",
+            "cadence": "milestone",
+            "months": [11],
+            "minimum_count": 1,
+            "stretch_count": 1,
+            "evidence_hints": ["moderation", "marks", "exam", "final"],
+            "outputs": "Year-end assessment completion and moderation"
+        })
+        task_counter += 1
+    
+    # KPA2: OHS (quarterly)
+    for month in [2, 5, 8, 11]:
+        tasks.append({
+            "id": f"task_{task_counter:03d}",
+            "kpa_code": "KPA2",
+            "kpa_name": "Occupational Health & Safety",
+            "title": "OHS compliance check",
+            "cadence": "quarterly",
+            "months": [month],
+            "minimum_count": 1,
+            "stretch_count": 1,
+            "evidence_hints": ["ohs", "safety", "compliance", "training", "popia", "dalro"],
+            "outputs": "; ".join(ohs[:2]) if ohs else "OHS compliance activities"
+        })
+        task_counter += 1
+    
+    # KPA3: Research (monthly + milestones)
+    kpa3_hours = kpa_summary.get("KPA3", {}).get("hours", 0.0)
+    if kpa3_hours > 0:
+        for month in range(1, 13):
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA3",
+                "kpa_name": "Research, Innovation & Creative Outputs",
+                "title": "Research progress (writing, ethics, submissions)",
+                "cadence": "monthly",
+                "months": [month],
+                "minimum_count": 1,
+                "stretch_count": 3,
+                "evidence_hints": ["draft", "manuscript", "ethics", "grant", "submission", "review", "publication"],
+                "outputs": "; ".join(research[:2]) if research else "Research activities as per TA"
+            })
+            task_counter += 1
+        
+        # Research milestones
+        tasks.append({
+            "id": f"task_{task_counter:03d}",
+            "kpa_code": "KPA3",
+            "kpa_name": "Research, Innovation & Creative Outputs",
+            "title": "Mid-year research milestone",
+            "cadence": "milestone",
+            "months": [6],
+            "minimum_count": 1,
+            "stretch_count": 1,
+            "evidence_hints": ["ethics", "submission", "grant", "acceptance"],
+            "outputs": "Research submission or ethics approval"
+        })
+        task_counter += 1
+        
+        tasks.append({
+            "id": f"task_{task_counter:03d}",
+            "kpa_code": "KPA3",
+            "kpa_name": "Research, Innovation & Creative Outputs",
+            "title": "Year-end research output",
+            "cadence": "milestone",
+            "months": [11],
+            "minimum_count": 1,
+            "stretch_count": 1,
+            "evidence_hints": ["publication", "accepted", "doi", "journal"],
+            "outputs": "Research publication or acceptance"
+        })
+        task_counter += 1
+    
+    # KPA4: Leadership (monthly)
+    kpa4_hours = kpa_summary.get("KPA4", {}).get("hours", 0.0)
+    if kpa4_hours > 0:
+        for month in range(1, 13):
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA4",
+                "kpa_name": "Academic Leadership & Administration",
+                "title": "Leadership activities (meetings, committees, administration)",
+                "cadence": "monthly",
+                "months": [month],
+                "minimum_count": 1,
+                "stretch_count": 2,
+                "evidence_hints": ["meeting", "minutes", "committee", "chair", "agenda", "administration"],
+                "outputs": "; ".join(leadership[:2]) if leadership else "Leadership activities as per TA"
+            })
+            task_counter += 1
+    
+    # KPA5: Social Responsiveness (quarterly)
+    kpa5_hours = kpa_summary.get("KPA5", {}).get("hours", 0.0)
+    if kpa5_hours > 0:
+        for month in [3, 6, 9, 12]:
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA5",
+                "kpa_name": "Social Responsiveness",
+                "title": "Community engagement / industry involvement",
+                "cadence": "quarterly",
+                "months": [month],
+                "minimum_count": 1,
+                "stretch_count": 2,
+                "evidence_hints": ["community", "engagement", "outreach", "school", "workshop", "industry"],
+                "outputs": "; ".join(social[:2]) if social else "Community engagement activities"
+            })
+            task_counter += 1
+    
+    # Build lead/lag indicators per KPA
+    lead_lag = {
+        "KPA1": {"lead": "Teaching delivery", "lag": "Assessment completion"},
+        "KPA2": {"lead": "Training completion", "lag": "Compliance verification"},
+        "KPA3": {"lead": "Research activities", "lag": "Publications/outputs"},
+        "KPA4": {"lead": "Meeting attendance", "lag": "Administrative deliverables"},
+        "KPA5": {"lead": "Engagement activities", "lag": "Impact reports"}
+    }
+    
+    # Build by_month structure for UI
+    by_month: Dict[str, List[Dict[str, Any]]] = {}
+    for month in range(1, 13):
+        month_key = f"{year}-{month:02d}"
+        by_month[month_key] = [t for t in tasks if month in t.get("months", [])]
+    
+    return {
+        "ok": True,
+        "staff_id": staff_id,
+        "year": year,
+        "kpa_summary": kpa_summary,
+        "tasks": tasks,
+        "by_month": by_month,
+        "lead_lag": lead_lag,
+        "task_count": len(tasks),
+        "months": [f"{year}-{m:02d}" for m in range(1, 13)]
+    }
+
+
+# ----------------------------
 # CLI utility for manual inspection
 # ----------------------------
 if __name__ == "__main__":

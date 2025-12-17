@@ -813,3 +813,107 @@ html, body {
   gap: 8px;
   margin: 0 16px;
 }
+
+/* ============================================================
+   COLLAPSIBLE KPA SECTIONS (for Monthly Expectations)
+============================================================ */
+
+.kpa-section {
+  margin-bottom: 16px;
+  border: 1px solid var(--border-dark);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-panel);
+}
+
+.kpa-header {
+  background: linear-gradient(180deg, var(--bg-panel), var(--bg-card));
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.kpa-header:hover {
+  background: var(--bg-panel);
+}
+
+.kpa-header strong {
+  color: var(--red-main);
+  font-family: 'Cinzel', serif;
+  letter-spacing: 1px;
+}
+
+.expand-icon {
+  font-size: 18px;
+  color: var(--grey-dim);
+  transition: transform 0.2s;
+}
+
+.kpa-body {
+  background: var(--bg-black);
+  padding: 16px;
+}
+
+.month-section {
+  margin-bottom: 12px;
+  padding: 8px;
+  background: var(--bg-card);
+  border-radius: 4px;
+}
+
+.month-section strong {
+  color: var(--grey-muted);
+  font-size: 13px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  background: var(--bg-panel);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.task-item:hover {
+  background: rgba(200, 0, 50, 0.05);
+}
+
+.task-item input[type="checkbox"] {
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+.task-item label {
+  flex: 1;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--grey-text);
+}
+
+.task-item label span {
+  color: var(--grey-dim);
+  font-size: 12px;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 11px;
+  background: rgba(200, 0, 50, 0.15);
+  border: 1px solid var(--border-red);
+  color: var(--red-main);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-small:hover {
+  background: rgba(200, 0, 50, 0.3);
+  box-shadow: 0 0 8px var(--red-soft);
+}

@@ -24,30 +24,23 @@ except ImportError as e:
     StaffProfile = None
 
 try:
-    from backend.contracts.task_agreement_import import parse_task_agreement
-    TASK_AGREEMENT_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: Could not import task_agreement_import: {e}")
-    TASK_AGREEMENT_AVAILABLE = False
-    parse_task_agreement = None
-
-try:
-    from backend.expectation_engine import ExpectationEngine
+    from backend.expectation_engine import parse_task_agreement, build_expectations_from_ta
     EXPECTATION_ENGINE_AVAILABLE = True
 except ImportError as e:
-    print(f"Warning: Could not import ExpectationEngine: {e}")
+    print(f"Warning: Could not import expectation_engine: {e}")
     EXPECTATION_ENGINE_AVAILABLE = False
-    ExpectationEngine = None
+    parse_task_agreement = None
+    build_expectations_from_ta = None
 
 try:
-    from backend.batch7_scorer import NWUBrainScorer
+    from backend.nwu_brain_scorer import brain_score_evidence
     BRAIN_SCORER_AVAILABLE = True
 except ImportError as e:
-    print(f"Warning: Could not import NWUBrainScorer: {e}")
+    print(f"Warning: Could not import brain_score_evidence: {e}")
     BRAIN_SCORER_AVAILABLE = False
-    NWUBrainScorer = None
+    brain_score_evidence = None
 
-print("Running in mock mode for unavailable backend modules")
+print(f"Expectation engine available: {EXPECTATION_ENGINE_AVAILABLE}")
 
 # Flask setup
 app = Flask(__name__, static_folder='.')
@@ -126,11 +119,21 @@ Provide helpful, professional guidance. Keep responses concise and actionable.""
 
 @app.route('/')
 def serve_index():
-    return send_from_directory('.', 'index.html')
+    response = send_from_directory('.', 'index.html')
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @app.route('/<path:path>')
 def serve_static(path):
-    return send_from_directory('.', path)
+    response = send_from_directory('.', path)
+    # Prevent caching for JS and HTML files
+    if path.endswith(('.js', '.html')):
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
 
 # ============================================================
 # PROFILE ENROLMENT
@@ -201,50 +204,84 @@ def enrol_profile():
 @app.route('/api/ta/import', methods=['POST'])
 def import_task_agreement():
     """
-    Import Task Agreement from uploaded Excel file
+    Import Task Agreement from uploaded Excel file OR use existing contract
     """
     try:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file uploaded"}), 400
-        
-        file = request.files['file']
         staff_id = request.form.get('staff_id')
         cycle_year = request.form.get('cycle_year')
         
         if not staff_id or not cycle_year:
             return jsonify({"error": "Missing staff_id or cycle_year"}), 400
         
+        # First check if contract already exists (faster)
+        contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{cycle_year}.json"
+        
+        if contract_file.exists():
+            # Use existing contract
+            with open(contract_file, 'r') as f:
+                ta_summary = json.load(f)
+            
+            if EXPECTATION_ENGINE_AVAILABLE and build_expectations_from_ta:
+                expectations = build_expectations_from_ta(staff_id, int(cycle_year), ta_summary)
+                
+                # Save expectations
+                expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{cycle_year}.json"
+                expectations_file.parent.mkdir(parents=True, exist_ok=True)
+                
+                with open(expectations_file, 'w') as f:
+                    json.dump(expectations, f, indent=2)
+                
+                return jsonify({
+                    "status": "success",
+                    "tasks_count": len(expectations.get('tasks', [])),
+                    "kpas_count": len(expectations.get('kpa_summary', {})),
+                    "message": f"Generated {len(expectations.get('tasks', []))} tasks from existing contract"
+                })
+        
+        # If no contract, parse from uploaded file
+        if 'file' not in request.files:
+            return jsonify({"error": "No file uploaded and no existing contract found"}), 400
+        
+        file = request.files['file']
+        
         # Save file
         filename = secure_filename(file.filename)
         filepath = UPLOAD_FOLDER / filename
         file.save(str(filepath))
         
-        # Parse Task Agreement
-        if TASK_AGREEMENT_AVAILABLE:
+        # Parse Task Agreement and build expectations
+        if EXPECTATION_ENGINE_AVAILABLE and parse_task_agreement and build_expectations_from_ta:
             try:
-                # Try with just filepath (check function signature)
-                contract_data = parse_task_agreement(str(filepath))
+                # Parse the TA
+                ta_summary = parse_task_agreement(str(filepath))
                 
-                # Add staff info if not in contract
-                if 'staff_id' not in contract_data:
-                    contract_data['staff_id'] = staff_id
-                if 'cycle_year' not in contract_data:
-                    contract_data['cycle_year'] = int(cycle_year)
+                # Build expectations from TA
+                expectations = build_expectations_from_ta(staff_id, int(cycle_year), ta_summary)
                 
-                # Save contract
-                contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{cycle_year}.json"
-                contract_file.parent.mkdir(parents=True, exist_ok=True)
+                # Save expectations
+                expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{cycle_year}.json"
+                expectations_file.parent.mkdir(parents=True, exist_ok=True)
                 
-                with open(contract_file, 'w') as f:
-                    json.dump(contract_data, f, indent=2)
+                with open(expectations_file, 'w') as f:
+                    json.dump(expectations, f, indent=2)
+                
+                # Also save TA summary
+                ta_file = CONTRACTS_FOLDER / f"ta_summary_{staff_id}_{cycle_year}.json"
+                ta_file.parent.mkdir(parents=True, exist_ok=True)
+                
+                with open(ta_file, 'w') as f:
+                    json.dump(ta_summary, f, indent=2)
                 
                 return jsonify({
                     "status": "success",
-                    "tasks_count": len(contract_data.get('tasks', [])),
-                    "contract_path": str(contract_file)
+                    "tasks_count": len(expectations.get('tasks', [])),
+                    "kpas_count": len(expectations.get('kpa_summary', {})),
+                    "expectations_path": str(expectations_file)
                 })
             except Exception as parse_error:
-                print(f"TA parsing failed: {parse_error}. Using mock data.")
+                print(f"TA parsing failed: {parse_error}")
+                import traceback
+                traceback.print_exc()
         else:
             print("TA parser not available. Using mock data.")
             return jsonify({
@@ -259,8 +296,144 @@ def import_task_agreement():
         return jsonify({"error": str(e)}), 500
 
 # ============================================================
-# EXPECTATIONS
+# EXPECTATIONS & PROGRESS
 # ============================================================
+
+@app.route('/api/progress', methods=['GET'])
+def get_progress():
+    """
+    Get task completion progress for staff/year/month
+    """
+    try:
+        staff_id = request.args.get('staff_id')
+        year = request.args.get('year')
+        month = request.args.get('month')  # Optional, e.g., "2025-01"
+        
+        if not staff_id or not year:
+            return jsonify({"error": "Missing staff_id or year"}), 400
+        
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).parent))
+        from progress_store import ProgressStore
+        from mapper import ensure_tasks
+        
+        store = ProgressStore()
+        
+        # Ensure tasks exist
+        expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{year}.json"
+        if expectations_file.exists():
+            with open(expectations_file, 'r') as f:
+                expectations = json.load(f)
+            ensure_tasks(store, staff_id=staff_id, year=int(year), expectations=expectations)
+        
+        # Get completed tasks for this staff/year
+        # For now, return empty progress as compute_window_progress signature may vary
+        progress = {
+            "total_tasks": 0,
+            "completed_count": 0,
+            "completed_tasks": [],
+            "missing_tasks": []
+        }
+        
+        # Try to get window progress if month specified
+        if month:
+            try:
+                month_int = int(month.split('-')[1])
+                progress = store.compute_window_progress(staff_id, int(year), [month_int])
+            except Exception as e:
+                print(f"Window progress error: {e}")
+        else:
+            try:
+                progress = store.compute_window_progress(staff_id, int(year), list(range(1, 13)))
+            except Exception as e:
+                print(f"Window progress error: {e}")
+        
+        # Get evidence for this staff/year
+        evidence_rows = store.list_evidence(staff_id, int(year), month_bucket=month if month else None)
+        evidence_list = []
+        for ev in evidence_rows:
+            evidence_list.append({
+                "evidence_id": ev["evidence_id"],
+                "month_bucket": ev["month_bucket"],
+                "kpa_code": ev["kpa_code"],
+                "file_path": ev["file_path"],
+                "rating": ev["rating"]
+            })
+        
+        # Get task completion map
+        task_completion = {}
+        for task_info in progress.get("completed_tasks", []):
+            task_id = task_info.get("task_id")
+            if task_id:
+                task_completion[task_id] = True
+        
+        return jsonify({
+            "progress": progress,
+            "evidence": evidence_list,
+            "task_completion": task_completion,
+            "stats": {
+                "total_tasks": progress.get("total_tasks", 0),
+                "completed_tasks": progress.get("completed_count", 0),
+                "evidence_count": len(evidence_list)
+            }
+        })
+    
+    except Exception as e:
+        print(f"Progress error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/expectations/rebuild', methods=['POST'])
+def rebuild_expectations():
+    """
+    Rebuild expectations from existing contract
+    """
+    try:
+        data = request.json or {}
+        staff_id = data.get('staff_id')
+        year = data.get('year')
+        
+        if not staff_id or not year:
+            return jsonify({"error": "Missing staff_id or year"}), 400
+        
+        # Load contract
+        contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{year}.json"
+        
+        if not contract_file.exists():
+            return jsonify({"error": "Contract not found. Import TA first."}), 404
+        
+        with open(contract_file, 'r') as f:
+            contract_data = json.load(f)
+        
+        # Build expectations
+        if EXPECTATION_ENGINE_AVAILABLE and build_expectations_from_ta:
+            expectations = build_expectations_from_ta(staff_id, int(year), contract_data)
+            
+            # Save expectations
+            expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{year}.json"
+            expectations_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(expectations_file, 'w') as f:
+                json.dump(expectations, f, indent=2)
+            
+            return jsonify({
+                "status": "success",
+                "tasks_count": len(expectations.get('tasks', [])),
+                "kpas_count": len(expectations.get('kpa_summary', {})),
+                "message": f"Rebuilt {len(expectations.get('tasks', []))} tasks"
+            })
+        else:
+            return jsonify({"error": "Expectation engine not available"}), 500
+    
+    except Exception as e:
+        print(f"Rebuild error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/api/expectations', methods=['GET'])
 def get_expectations():
@@ -274,44 +447,15 @@ def get_expectations():
         if not staff_id or not year:
             return jsonify({"error": "Missing parameters"}), 400
         
-        # Try to load contract
-        contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{year}.json"
+        # Try to load expectations file
+        expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{year}.json"
         
-        if contract_file.exists():
-            with open(contract_file, 'r') as f:
-                contract_data = json.load(f)
+        if expectations_file.exists():
+            with open(expectations_file, 'r') as f:
+                expectations_data = json.load(f)
             
-            # Generate expectations from contract
-            if EXPECTATION_ENGINE_AVAILABLE:
-                try:
-                    engine = ExpectationEngine(contract_data)
-                    expectations = engine.generate_expectations()
-                except Exception as e:
-                    print(f"ExpectationEngine error: {e}. Using mock data.")
-                    expectations = generate_mock_expectations()
-            else:
-                expectations = generate_mock_expectations()
-            
-            # Calculate KPA summary
-            kpa_summary = {}
-            for exp in expectations:
-                kpa = exp.get('kpa', 'Unknown')
-                if kpa not in kpa_summary:
-                    kpa_summary[kpa] = {"total": 0, "completed": 0, "progress": 0}
-                
-                kpa_summary[kpa]["total"] += 1
-                if exp.get('progress', 0) >= 100:
-                    kpa_summary[kpa]["completed"] += 1
-            
-            # Calculate progress percentages
-            for kpa_data in kpa_summary.values():
-                if kpa_data["total"] > 0:
-                    kpa_data["progress"] = int((kpa_data["completed"] / kpa_data["total"]) * 100)
-            
-            return jsonify({
-                "expectations": expectations,
-                "kpa_summary": kpa_summary
-            })
+            # Return the full expectations structure with tasks and by_month
+            return jsonify(expectations_data)
         
         else:
             # Return mock data for development
@@ -324,7 +468,9 @@ def get_expectations():
             
             return jsonify({
                 "expectations": mock_expectations,
-                "kpa_summary": mock_kpa_summary
+                "kpa_summary": mock_kpa_summary,
+                "tasks": mock_expectations,
+                "by_month": {}
             })
     
     except Exception as e:
@@ -383,6 +529,90 @@ def generate_mock_expectations():
             "progress": 0
         }
     ]
+
+@app.route('/api/expectations/check-month', methods=['POST'])
+def check_month_completion():
+    """
+    Check if a month's expectations have been met based on uploaded evidence
+    Uses VAMP AI to analyze completion status
+    """
+    try:
+        data = request.json
+        staff_id = data.get('staff_id')
+        month = data.get('month')  # Format: "2025-01"
+        
+        if not staff_id or not month:
+            return jsonify({"error": "Missing staff_id or month"}), 400
+        
+        year = month.split('-')[0]
+        
+        # Load expectations for this month
+        contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{year}.json"
+        expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{year}.json"
+        
+        month_tasks = []
+        if expectations_file.exists():
+            with open(expectations_file, 'r') as f:
+                exp_data = json.load(f)
+                by_month = exp_data.get('by_month', {})
+                month_tasks = by_month.get(month, [])
+        
+        # Load evidence for this month
+        evidence_file = EVIDENCE_FOLDER / f"evidence_{staff_id}_{year}.csv"
+        evidence_count = 0
+        evidence_by_kpa = {}
+        
+        if evidence_file.exists():
+            import csv
+            with open(evidence_file, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if row.get('month_bucket', '').startswith(month):
+                        evidence_count += 1
+                        kpa = row.get('kpa_code', 'Unknown')
+                        evidence_by_kpa[kpa] = evidence_by_kpa.get(kpa, 0) + 1
+        
+        # Calculate completion
+        total_required = sum(task.get('minimum_count', 0) for task in month_tasks)
+        complete = evidence_count >= total_required
+        
+        # Build AI analysis prompt
+        ai_context = {
+            'staff_id': staff_id,
+            'month': month,
+            'tasks': len(month_tasks),
+            'evidence_count': evidence_count,
+            'required': total_required
+        }
+        
+        if complete:
+            ai_prompt = f"The staff member has uploaded {evidence_count} evidence items for {month}, meeting the minimum requirement of {total_required}. Provide encouragement and suggest they prepare for next month."
+        else:
+            missing = total_required - evidence_count
+            ai_prompt = f"The staff member has only uploaded {evidence_count} of {total_required} required evidence items for {month}. They are missing {missing} items. Provide constructive guidance on what evidence types they should focus on."
+        
+        ai_response = query_ollama(ai_prompt, ai_context)
+        
+        # Build detailed summary
+        task_summary = []
+        for task in month_tasks:
+            kpa = task.get('kpa_code', 'Unknown')
+            task_evidence = evidence_by_kpa.get(kpa, 0)
+            task_required = task.get('minimum_count', 0)
+            task_summary.append(f"{kpa}: {task_evidence}/{task_required} items")
+        
+        return jsonify({
+            "complete": complete,
+            "evidence_count": evidence_count,
+            "required": total_required,
+            "message": ai_response,
+            "summary": "\n".join(task_summary) if task_summary else "No tasks for this month",
+            "missing": f"Upload {total_required - evidence_count} more evidence items" if not complete else ""
+        })
+    
+    except Exception as e:
+        print(f"Month check error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 # ============================================================
 # EVIDENCE SCANNING
@@ -450,16 +680,101 @@ def scan_upload():
                         "confidence": 0.75
                     }
                 
+                # Map KPA name to KPA code
+                kpa_map = {
+                    "teaching": "KPA1", "teaching & learning": "KPA1", "teaching and learning": "KPA1",
+                    "ohs": "KPA2", "occupational health": "KPA2",
+                    "research": "KPA3", "innovation": "KPA3",
+                    "leadership": "KPA4", "academic leadership": "KPA4", "administration": "KPA4",
+                    "social": "KPA5", "community": "KPA5", "social responsiveness": "KPA5"
+                }
+                kpa_code = "KPA1"  # default
+                kpa_lower = classification["kpa"].lower()
+                for key, code in kpa_map.items():
+                    if key in kpa_lower:
+                        kpa_code = code
+                        break
+                
+                # Store in progress database
+                evidence_id = None
+                mapped_tasks = []
+                try:
+                    import sys
+                    from pathlib import Path
+                    sys.path.insert(0, str(Path(__file__).parent))
+                    from progress_store import ProgressStore
+                    from mapper import ensure_tasks, map_evidence_to_tasks
+                    import hashlib
+                    
+                    # Initialize progress store
+                    store = ProgressStore()
+                    
+                    # Ensure tasks exist for this staff/year
+                    expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{month[:4]}.json"
+                    if expectations_file.exists():
+                        with open(expectations_file, 'r') as f:
+                            expectations = json.load(f)
+                        ensure_tasks(store, staff_id=staff_id, year=int(month[:4]), expectations=expectations)
+                    else:
+                        ensure_tasks(store, staff_id=staff_id, year=int(month[:4]), expectations=None)
+                    
+                    # Generate evidence ID
+                    evidence_id = f"ev_{staff_id}_{month}_{hashlib.md5(filename.encode()).hexdigest()[:8]}"
+                    sha1 = hashlib.sha1(file_text.encode()).hexdigest()
+                    
+                    # Insert evidence
+                    store.insert_evidence(
+                        evidence_id=evidence_id,
+                        sha1=sha1,
+                        staff_id=staff_id,
+                        year=int(month[:4]),
+                        month_bucket=month,
+                        kpa_code=kpa_code,
+                        rating=classification["tier"],
+                        tier=classification["tier"],
+                        file_path=str(filepath),
+                        meta={
+                            "filename": filename,
+                            "impact_summary": classification["impact_summary"],
+                            "confidence": classification["confidence"],
+                            "task": classification["task"]
+                        }
+                    )
+                    
+                    # Map evidence to tasks
+                    mapped_tasks = map_evidence_to_tasks(
+                        store,
+                        evidence_id=evidence_id,
+                        staff_id=staff_id,
+                        year=int(month[:4]),
+                        month_bucket=month,
+                        kpa_code=kpa_code,
+                        meta={
+                            "filename": filename,
+                            "impact_summary": classification["impact_summary"],
+                            "evidence_type": classification["task"]
+                        },
+                        mapped_by="web_scan:v1"
+                    )
+                    
+                except Exception as db_error:
+                    print(f"Progress store error for {filename}: {db_error}")
+                    import traceback
+                    traceback.print_exc()
+                
                 # Store result
                 result = {
                     "date": datetime.now().strftime("%Y-%m-%d"),
                     "file": filename,
                     "kpa": classification["kpa"],
+                    "kpa_code": kpa_code,
                     "task": classification["task"],
                     "tier": classification["tier"],
                     "impact_summary": classification["impact_summary"],
                     "confidence": classification["confidence"],
-                    "status": "Classified" if classification["confidence"] >= 0.6 else "Needs Review"
+                    "status": "Classified" if classification["confidence"] >= 0.6 else "Needs Review",
+                    "evidence_id": evidence_id,
+                    "mapped_tasks": len(mapped_tasks)
                 }
                 
                 results.append(result)
@@ -732,24 +1047,43 @@ def ai_guidance():
 @app.route('/api/report/generate', methods=['GET'])
 def generate_report():
     """
-    Generate Performance Agreement report
+    Generate Performance Agreement report matching Excel format
     """
     try:
         staff_id = request.args.get('staff_id')
-        period = request.args.get('period', 'final')
+        year = request.args.get('year')
         
-        # Mock report generation
-        report_path = f"reports/PA_{staff_id}_{period}_{datetime.now().strftime('%Y%m%d')}.xlsx"
+        if not staff_id or not year:
+            return jsonify({"error": "Missing staff_id or year"}), 400
         
-        return jsonify({
-            "status": "success",
-            "path": report_path,
-            "kpas_count": 5,
-            "tasks_count": 12,
-            "evidence_count": 24
-        })
+        # Load contract data
+        contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{year}.json"
+        if not contract_file.exists():
+            return jsonify({"error": "Contract not found"}), 404
+        
+        with open(contract_file, 'r') as f:
+            contract_data = json.load(f)
+        
+        # Generate PA report
+        from backend.contracts.pa_report_generator import generate_pa_report, export_pa_to_excel
+        
+        pa_data = generate_pa_report(contract_data, staff_id, int(year))
+        
+        # Optionally export to Excel
+        export_excel = request.args.get('export', 'false').lower() == 'true'
+        if export_excel:
+            output_dir = Path("backend/data/performance_agreements")
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_file = output_dir / f"PA_{staff_id}_{year}_web.xlsx"
+            export_pa_to_excel(pa_data, output_file)
+            pa_data["excel_path"] = str(output_file)
+        
+        return jsonify(pa_data)
     
     except Exception as e:
+        print(f"PA generation error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 # ============================================================

@@ -135,8 +135,8 @@
     <div class="card">
       <div class="card-h">
         <div>
-          <div class="card-title">Phase A Expectations</div>
-          <div class="muted">Time-bound tasks per KPA.</div>
+          <div class="card-title">Monthly Expectations</div>
+          <div class="muted">Track progress month-by-month across all KPAs.</div>
         </div>
         <div class="right">
           <button class="btn" id="rebuildExpBtn">Rebuild expectations</button>
@@ -145,44 +145,40 @@
 
       <div class="form grid2">
         <div>
-          <label>Month bucket for progress</label>
-          <input id="progMonth" value="2025-01"/>
+          <label>Current Month</label>
+          <select id="currentMonthSelect">
+            <option value="2025-01">January 2025</option>
+            <option value="2025-02">February 2025</option>
+            <option value="2025-03">March 2025</option>
+            <option value="2025-04">April 2025</option>
+            <option value="2025-05">May 2025</option>
+            <option value="2025-06">June 2025</option>
+            <option value="2025-07">July 2025</option>
+            <option value="2025-08">August 2025</option>
+            <option value="2025-09">September 2025</option>
+            <option value="2025-10">October 2025</option>
+            <option value="2025-11">November 2025</option>
+            <option value="2025-12">December 2025</option>
+          </select>
         </div>
         <div class="row" style="align-items:flex-end;">
-          <button class="btn glow" id="refreshProgressBtn">Refresh progress</button>
-          <span class="pill" id="progPill">—</span>
+          <button class="btn glow" id="checkMonthStatusBtn">Check Month Status</button>
+          <span class="pill" id="monthStatusPill">—</span>
         </div>
       </div>
 
-      <!-- KPA Progress Bars -->
-      <div class="kpa-progress-container" id="kpaProgressContainer" style="margin-top:16px;"></div>
-
-      <!-- Expectations Table -->
-      <div class="table-container" style="margin-top:16px;">
-        <table class="vamp-table" id="expectationsTable">
-          <thead>
-            <tr>
-              <th>KPA</th>
-              <th>Task</th>
-              <th>Month</th>
-              <th>Enabler</th>
-              <th>Goal</th>
-              <th>Lead Target</th>
-              <th>Lag Target</th>
-              <th>Weight</th>
-              <th>Progress</th>
-              <th>Ask AI</th>
-            </tr>
-          </thead>
-          <tbody id="expectationsTableBody">
-            <tr><td colspan="10" class="no-data">No expectations loaded. Enrol and import TA first.</td></tr>
-          </tbody>
-        </table>
+      <!-- Monthly KPA Expectations (Collapsible) -->
+      <div id="monthlyExpectationsContainer" style="margin-top:16px;">
+        <div class="muted" style="text-align:center;padding:20px;">
+          Import a Task Agreement to see monthly expectations.
+        </div>
       </div>
 
       <div class="box" style="margin-top:12px;">
-        <div class="box-h">Gaps (minimum compliance)</div>
-        <div class="evidence" id="gapBox">No gaps detected yet.</div>
+        <div class="box-h">AI Month Review</div>
+        <div class="evidence" id="monthReviewBox">
+          Upload evidence for the current month, then click "Check Month Status" to have VAMP assess whether you've met your expectations.
+        </div>
       </div>
     </div>
   </section>
@@ -278,16 +274,38 @@
     <div class="card">
       <div class="card-h">
         <div>
-          <div class="card-title">Reports</div>
-          <div class="muted">Final PA generation.</div>
+          <div class="card-title">Reports & PA Generation</div>
+          <div class="muted">View full expectations and generate Performance Agreement.</div>
         </div>
         <div class="right">
           <button class="btn glow" id="genPABtn">Generate Final PA</button>
         </div>
       </div>
-      <div class="box">
-        <div class="box-h">Output</div>
-        <div class="evidence" id="reportBox"></div>
+
+      <!-- PA Report Table -->
+      <div class="table-container" style="margin-top:16px;">
+        <h3 style="margin-bottom:8px;color:var(--purple);">Performance Agreement Report</h3>
+        <table class="vamp-table" id="paExpectationsTable">
+          <thead>
+            <tr>
+              <th>KPA Name</th>
+              <th>Outputs</th>
+              <th>KPIs</th>
+              <th>Weight (%)</th>
+              <th>Hours</th>
+              <th>Outcomes</th>
+              <th>Active</th>
+            </tr>
+          </thead>
+          <tbody id="paExpectationsTableBody">
+            <tr><td colspan="7" class="no-data">Click "Generate Final PA" to create report.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-h">PA Generation Output</div>
+        <div class="evidence" id="reportBox">Click "Generate Final PA" to create your Performance Agreement document.</div>
       </div>
     </div>
   </section>
@@ -386,6 +404,6 @@
   </div>
 </div>
 
-<script src="./app.js"></script>
+<script src="./app.js?v=20251217"></script>
 </body>
 </html>

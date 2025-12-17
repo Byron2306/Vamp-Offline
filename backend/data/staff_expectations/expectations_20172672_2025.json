@@ -1,0 +1,2149 @@
+{
+  "ok": true,
+  "staff_id": "20172672",
+  "year": 2025,
+  "kpa_summary": {
+    "KPA3": {
+      "name": "Personal Research, Innovation and/or Creative Outputs",
+      "hours": 370.0,
+      "weight_pct": 22.18
+    },
+    "KPA1": {
+      "name": "Teaching and Learning (including supervision)",
+      "hours": 792.99,
+      "weight_pct": 47.54
+    },
+    "KPA5": {
+      "name": "Social Responsiveness (Community Engagement / Industry)",
+      "hours": 30.0,
+      "weight_pct": 1.8
+    },
+    "KPA4": {
+      "name": "Academic Leadership and Administration",
+      "hours": 475.0,
+      "weight_pct": 28.48
+    },
+    "KPA2": {
+      "name": "Occupational Health & Safety",
+      "hours": 0.0,
+      "weight_pct": 0.0,
+      "teaching_modules": [
+        "HISE322",
+        "HISE411"
+      ]
+    }
+  },
+  "tasks": [
+    {
+      "id": "task_001",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        1
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_002",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        2
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_003",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        3
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_004",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        4
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_005",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        5
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_006",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        6
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_007",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        7
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_008",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        8
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_009",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        9
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_010",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        10
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_011",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        11
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_012",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "cadence": "monthly",
+      "months": [
+        12
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "lecture",
+        "assessment",
+        "efundi",
+        "lms",
+        "class",
+        "tutorial",
+        "marks"
+      ],
+      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+    },
+    {
+      "id": "task_013",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Mid-year marks submission",
+      "cadence": "milestone",
+      "months": [
+        6
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "marks",
+        "gradebook",
+        "submission",
+        "assessment"
+      ],
+      "outputs": "Semester 1 assessment completion"
+    },
+    {
+      "id": "task_014",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Year-end marks and moderation",
+      "cadence": "milestone",
+      "months": [
+        11
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "moderation",
+        "marks",
+        "exam",
+        "final"
+      ],
+      "outputs": "Year-end assessment completion and moderation"
+    },
+    {
+      "id": "task_015",
+      "kpa_code": "KPA2",
+      "kpa_name": "Occupational Health & Safety",
+      "title": "OHS compliance check",
+      "cadence": "quarterly",
+      "months": [
+        2
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "ohs",
+        "safety",
+        "compliance",
+        "training",
+        "popia",
+        "dalro"
+      ],
+      "outputs": "OHS compliance activities"
+    },
+    {
+      "id": "task_016",
+      "kpa_code": "KPA2",
+      "kpa_name": "Occupational Health & Safety",
+      "title": "OHS compliance check",
+      "cadence": "quarterly",
+      "months": [
+        5
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "ohs",
+        "safety",
+        "compliance",
+        "training",
+        "popia",
+        "dalro"
+      ],
+      "outputs": "OHS compliance activities"
+    },
+    {
+      "id": "task_017",
+      "kpa_code": "KPA2",
+      "kpa_name": "Occupational Health & Safety",
+      "title": "OHS compliance check",
+      "cadence": "quarterly",
+      "months": [
+        8
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "ohs",
+        "safety",
+        "compliance",
+        "training",
+        "popia",
+        "dalro"
+      ],
+      "outputs": "OHS compliance activities"
+    },
+    {
+      "id": "task_018",
+      "kpa_code": "KPA2",
+      "kpa_name": "Occupational Health & Safety",
+      "title": "OHS compliance check",
+      "cadence": "quarterly",
+      "months": [
+        11
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "ohs",
+        "safety",
+        "compliance",
+        "training",
+        "popia",
+        "dalro"
+      ],
+      "outputs": "OHS compliance activities"
+    },
+    {
+      "id": "task_019",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        1
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_020",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        2
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_021",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        3
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_022",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        4
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_023",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        5
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_024",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        6
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_025",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        7
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_026",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        8
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_027",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        9
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_028",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        10
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_029",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        11
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_030",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Research progress (writing, ethics, submissions)",
+      "cadence": "monthly",
+      "months": [
+        12
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication"
+      ],
+      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+    },
+    {
+      "id": "task_031",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Mid-year research milestone",
+      "cadence": "milestone",
+      "months": [
+        6
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "ethics",
+        "submission",
+        "grant",
+        "acceptance"
+      ],
+      "outputs": "Research submission or ethics approval"
+    },
+    {
+      "id": "task_032",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Year-end research output",
+      "cadence": "milestone",
+      "months": [
+        11
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "publication",
+        "accepted",
+        "doi",
+        "journal"
+      ],
+      "outputs": "Research publication or acceptance"
+    },
+    {
+      "id": "task_033",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        1
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_034",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        2
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_035",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        3
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_036",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        4
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_037",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        5
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_038",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        6
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_039",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        7
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_040",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        8
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_041",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        9
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_042",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        10
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_043",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        11
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_044",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Leadership activities (meetings, committees, administration)",
+      "cadence": "monthly",
+      "months": [
+        12
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "meeting",
+        "minutes",
+        "committee",
+        "chair",
+        "agenda",
+        "administration"
+      ],
+      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+    },
+    {
+      "id": "task_045",
+      "kpa_code": "KPA5",
+      "kpa_name": "Social Responsiveness",
+      "title": "Community engagement / industry involvement",
+      "cadence": "quarterly",
+      "months": [
+        3
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "community",
+        "engagement",
+        "outreach",
+        "school",
+        "workshop",
+        "industry"
+      ],
+      "outputs": "SASHT website management; SASHT webinar coordination"
+    },
+    {
+      "id": "task_046",
+      "kpa_code": "KPA5",
+      "kpa_name": "Social Responsiveness",
+      "title": "Community engagement / industry involvement",
+      "cadence": "quarterly",
+      "months": [
+        6
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "community",
+        "engagement",
+        "outreach",
+        "school",
+        "workshop",
+        "industry"
+      ],
+      "outputs": "SASHT website management; SASHT webinar coordination"
+    },
+    {
+      "id": "task_047",
+      "kpa_code": "KPA5",
+      "kpa_name": "Social Responsiveness",
+      "title": "Community engagement / industry involvement",
+      "cadence": "quarterly",
+      "months": [
+        9
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "community",
+        "engagement",
+        "outreach",
+        "school",
+        "workshop",
+        "industry"
+      ],
+      "outputs": "SASHT website management; SASHT webinar coordination"
+    },
+    {
+      "id": "task_048",
+      "kpa_code": "KPA5",
+      "kpa_name": "Social Responsiveness",
+      "title": "Community engagement / industry involvement",
+      "cadence": "quarterly",
+      "months": [
+        12
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "community",
+        "engagement",
+        "outreach",
+        "school",
+        "workshop",
+        "industry"
+      ],
+      "outputs": "SASHT website management; SASHT webinar coordination"
+    }
+  ],
+  "by_month": {
+    "2025-01": [
+      {
+        "id": "task_001",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          1
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_019",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          1
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_033",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          1
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      }
+    ],
+    "2025-02": [
+      {
+        "id": "task_002",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          2
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_015",
+        "kpa_code": "KPA2",
+        "kpa_name": "Occupational Health & Safety",
+        "title": "OHS compliance check",
+        "cadence": "quarterly",
+        "months": [
+          2
+        ],
+        "minimum_count": 1,
+        "stretch_count": 1,
+        "evidence_hints": [
+          "ohs",
+          "safety",
+          "compliance",
+          "training",
+          "popia",
+          "dalro"
+        ],
+        "outputs": "OHS compliance activities"
+      },
+      {
+        "id": "task_020",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          2
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_034",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          2
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      }
+    ],
+    "2025-03": [
+      {
+        "id": "task_003",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          3
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_021",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          3
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_035",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          3
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      },
+      {
+        "id": "task_045",
+        "kpa_code": "KPA5",
+        "kpa_name": "Social Responsiveness",
+        "title": "Community engagement / industry involvement",
+        "cadence": "quarterly",
+        "months": [
+          3
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "community",
+          "engagement",
+          "outreach",
+          "school",
+          "workshop",
+          "industry"
+        ],
+        "outputs": "SASHT website management; SASHT webinar coordination"
+      }
+    ],
+    "2025-04": [
+      {
+        "id": "task_004",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          4
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_022",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          4
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_036",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          4
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      }
+    ],
+    "2025-05": [
+      {
+        "id": "task_005",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          5
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_016",
+        "kpa_code": "KPA2",
+        "kpa_name": "Occupational Health & Safety",
+        "title": "OHS compliance check",
+        "cadence": "quarterly",
+        "months": [
+          5
+        ],
+        "minimum_count": 1,
+        "stretch_count": 1,
+        "evidence_hints": [
+          "ohs",
+          "safety",
+          "compliance",
+          "training",
+          "popia",
+          "dalro"
+        ],
+        "outputs": "OHS compliance activities"
+      },
+      {
+        "id": "task_023",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          5
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_037",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          5
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      }
+    ],
+    "2025-06": [
+      {
+        "id": "task_006",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          6
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_013",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Mid-year marks submission",
+        "cadence": "milestone",
+        "months": [
+          6
+        ],
+        "minimum_count": 1,
+        "stretch_count": 1,
+        "evidence_hints": [
+          "marks",
+          "gradebook",
+          "submission",
+          "assessment"
+        ],
+        "outputs": "Semester 1 assessment completion"
+      },
+      {
+        "id": "task_024",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          6
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_031",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Mid-year research milestone",
+        "cadence": "milestone",
+        "months": [
+          6
+        ],
+        "minimum_count": 1,
+        "stretch_count": 1,
+        "evidence_hints": [
+          "ethics",
+          "submission",
+          "grant",
+          "acceptance"
+        ],
+        "outputs": "Research submission or ethics approval"
+      },
+      {
+        "id": "task_038",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          6
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      },
+      {
+        "id": "task_046",
+        "kpa_code": "KPA5",
+        "kpa_name": "Social Responsiveness",
+        "title": "Community engagement / industry involvement",
+        "cadence": "quarterly",
+        "months": [
+          6
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "community",
+          "engagement",
+          "outreach",
+          "school",
+          "workshop",
+          "industry"
+        ],
+        "outputs": "SASHT website management; SASHT webinar coordination"
+      }
+    ],
+    "2025-07": [
+      {
+        "id": "task_007",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          7
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_025",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          7
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_039",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          7
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      }
+    ],
+    "2025-08": [
+      {
+        "id": "task_008",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          8
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_017",
+        "kpa_code": "KPA2",
+        "kpa_name": "Occupational Health & Safety",
+        "title": "OHS compliance check",
+        "cadence": "quarterly",
+        "months": [
+          8
+        ],
+        "minimum_count": 1,
+        "stretch_count": 1,
+        "evidence_hints": [
+          "ohs",
+          "safety",
+          "compliance",
+          "training",
+          "popia",
+          "dalro"
+        ],
+        "outputs": "OHS compliance activities"
+      },
+      {
+        "id": "task_026",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          8
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_040",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          8
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      }
+    ],
+    "2025-09": [
+      {
+        "id": "task_009",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          9
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_027",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          9
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_041",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          9
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      },
+      {
+        "id": "task_047",
+        "kpa_code": "KPA5",
+        "kpa_name": "Social Responsiveness",
+        "title": "Community engagement / industry involvement",
+        "cadence": "quarterly",
+        "months": [
+          9
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "community",
+          "engagement",
+          "outreach",
+          "school",
+          "workshop",
+          "industry"
+        ],
+        "outputs": "SASHT website management; SASHT webinar coordination"
+      }
+    ],
+    "2025-10": [
+      {
+        "id": "task_010",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          10
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_028",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          10
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_042",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          10
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      }
+    ],
+    "2025-11": [
+      {
+        "id": "task_011",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          11
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_014",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Year-end marks and moderation",
+        "cadence": "milestone",
+        "months": [
+          11
+        ],
+        "minimum_count": 1,
+        "stretch_count": 1,
+        "evidence_hints": [
+          "moderation",
+          "marks",
+          "exam",
+          "final"
+        ],
+        "outputs": "Year-end assessment completion and moderation"
+      },
+      {
+        "id": "task_018",
+        "kpa_code": "KPA2",
+        "kpa_name": "Occupational Health & Safety",
+        "title": "OHS compliance check",
+        "cadence": "quarterly",
+        "months": [
+          11
+        ],
+        "minimum_count": 1,
+        "stretch_count": 1,
+        "evidence_hints": [
+          "ohs",
+          "safety",
+          "compliance",
+          "training",
+          "popia",
+          "dalro"
+        ],
+        "outputs": "OHS compliance activities"
+      },
+      {
+        "id": "task_029",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          11
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_032",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Year-end research output",
+        "cadence": "milestone",
+        "months": [
+          11
+        ],
+        "minimum_count": 1,
+        "stretch_count": 1,
+        "evidence_hints": [
+          "publication",
+          "accepted",
+          "doi",
+          "journal"
+        ],
+        "outputs": "Research publication or acceptance"
+      },
+      {
+        "id": "task_043",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          11
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      }
+    ],
+    "2025-12": [
+      {
+        "id": "task_012",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "cadence": "monthly",
+        "months": [
+          12
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks"
+        ],
+        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      },
+      {
+        "id": "task_030",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Research progress (writing, ethics, submissions)",
+        "cadence": "monthly",
+        "months": [
+          12
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication"
+        ],
+        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      },
+      {
+        "id": "task_044",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Leadership activities (meetings, committees, administration)",
+        "cadence": "monthly",
+        "months": [
+          12
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration"
+        ],
+        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      },
+      {
+        "id": "task_048",
+        "kpa_code": "KPA5",
+        "kpa_name": "Social Responsiveness",
+        "title": "Community engagement / industry involvement",
+        "cadence": "quarterly",
+        "months": [
+          12
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "community",
+          "engagement",
+          "outreach",
+          "school",
+          "workshop",
+          "industry"
+        ],
+        "outputs": "SASHT website management; SASHT webinar coordination"
+      }
+    ]
+  },
+  "lead_lag": {
+    "KPA1": {
+      "lead": "Teaching delivery",
+      "lag": "Assessment completion"
+    },
+    "KPA2": {
+      "lead": "Training completion",
+      "lag": "Compliance verification"
+    },
+    "KPA3": {
+      "lead": "Research activities",
+      "lag": "Publications/outputs"
+    },
+    "KPA4": {
+      "lead": "Meeting attendance",
+      "lag": "Administrative deliverables"
+    },
+    "KPA5": {
+      "lead": "Engagement activities",
+      "lag": "Impact reports"
+    }
+  },
+  "task_count": 48,
+  "months": [
+    "2025-01",
+    "2025-02",
+    "2025-03",
+    "2025-04",
+    "2025-05",
+    "2025-06",
+    "2025-07",
+    "2025-08",
+    "2025-09",
+    "2025-10",
+    "2025-11",
+    "2025-12"
+  ]
+}

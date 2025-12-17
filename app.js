@@ -267,11 +267,18 @@ $("taUploadBtn")?.addEventListener("click", async () => {
       $("taPill").classList.remove("bad");
       $("taPill").classList.add("ok");
       $("stagePill").textContent = "Stage: TA imported";
-      vampSpeak("Your agreed work has been fully understood.");
-      log(`TA imported: ${data.tasks_count || 0} tasks found`);
+      const tasksCount = data.tasks_count || 0;
+      vampSpeak(`Your agreed work has been fully understood. ${tasksCount} tasks extracted.`);
+      log(`TA imported: ${tasksCount} tasks found`);
       
       // Auto-load expectations
       setTimeout(() => loadExpectations(), 500);
+      
+      // If less than 10 tasks, something went wrong - try rebuild
+      if (tasksCount < 10) {
+        log("Warning: Low task count. Attempting rebuild...");
+        setTimeout(() => $("rebuildExpBtn")?.click(), 1000);
+      }
     } else {
       vampSpeak("I could not interpret the Task Agreement.");
       log("TA import failed: " + (await res.text()));
@@ -286,6 +293,9 @@ $("taUploadBtn")?.addEventListener("click", async () => {
    EXPECTATIONS TAB — TABLE RENDERING
 ============================================================ */
 
+// Global task completion map
+let taskCompletionMap = {};
+
 async function loadExpectations() {
   vampBusy("Loading expectations…");
   
@@ -295,96 +305,288 @@ async function loadExpectations() {
     if (!res.ok) throw new Error("Failed to load expectations");
     
     const data = await res.json();
-    currentExpectations = data.expectations || [];
+    console.log("Expectations data received:", data);
     
-    renderExpectationsTable(currentExpectations);
-    renderKPAProgress(data.kpa_summary || {});
+    // Use tasks array from the response
+    const tasks = data.tasks || data.expectations || [];
+    currentExpectations = tasks;
+    
+    console.log("Tasks count:", tasks.length);
+    console.log("By month keys:", Object.keys(data.by_month || {}));
+    console.log("KPA summary:", data.kpa_summary);
+    
+    // Load progress/completion status
+    await loadProgress();
+    
+    renderMonthlyExpectations(data.by_month || {}, tasks);
+    renderPAExpectationsTable(tasks);
     
     $("chipExp").textContent = "Expectations ✓";
     $("chipExp").classList.remove("bad");
     $("chipExp").classList.add("ok");
     
-    vampSpeak(`Loaded ${currentExpectations.length} expectations across ${Object.keys(data.kpa_summary || {}).length} KPAs.`);
-    log(`Expectations loaded: ${currentExpectations.length} tasks`);
+    const kpaCount = Object.keys(data.kpa_summary || {}).length;
+    const completedCount = Object.keys(taskCompletionMap).length;
+    vampSpeak(`Loaded ${tasks.length} tasks across ${kpaCount} KPAs. ${completedCount} tasks completed.`);
+    log(`Expectations loaded: ${tasks.length} tasks, ${kpaCount} KPAs, ${completedCount} completed`);
   } catch (e) {
     vampSpeak("Could not load expectations. Import a Task Agreement first.");
     log("Expectations error: " + e.message);
+    console.error("Expectations error:", e);
   }
 }
 
-function renderExpectationsTable(expectations) {
-  const tbody = $("expectationsTableBody");
+async function loadProgress() {
+  try {
+    const res = await fetch(`/api/progress?staff_id=${$("staffId").value}&year=${$("cycleYear").value}`);
+    if (res.ok) {
+      const progressData = await res.json();
+      taskCompletionMap = progressData.task_completion || {};
+      console.log("Progress loaded:", progressData.stats);
+    }
+  } catch (e) {
+    console.warn("Could not load progress:", e);
+    taskCompletionMap = {};
+  }
+}
+
+function renderMonthlyExpectations(byMonth, allTasks) {
+  const container = $("monthlyExpectationsContainer");
+  const monthSelect = $("currentMonthSelect");
+  if (!container || !monthSelect) return;
+  
+  if (Object.keys(byMonth).length === 0) {
+    container.innerHTML = '<div class="muted" style="text-align:center;padding:20px;">Import a Task Agreement to see monthly expectations.</div>';
+    return;
+  }
+  
+  // Store for later use
+  window.currentByMonth = byMonth;
+  window.currentAllTasks = allTasks;
+  
+  // Initial render for current month
+  renderMonthView(monthSelect.value);
+  
+  // Update when month changes
+  monthSelect.addEventListener("change", () => {
+    renderMonthView(monthSelect.value);
+  });
+}
+
+function renderMonthView(monthKey) {
+  const container = $("monthlyExpectationsContainer");
+  if (!container || !window.currentByMonth) return;
+  
+  container.innerHTML = "";
+  
+  const tasks = window.currentByMonth[monthKey] || [];
+  
+  if (tasks.length === 0) {
+    container.innerHTML = `<div class="muted" style="text-align:center;padding:20px;">No expectations for this month.</div>`;
+    return;
+  }
+  
+  // Group tasks by KPA
+  const kpaGroups = {};
+  tasks.forEach(task => {
+    const code = task.kpa_code || 'KPA1';
+    if (!kpaGroups[code]) {
+      kpaGroups[code] = {
+        code: code,
+        name: task.kpa_name || code,
+        tasks: []
+      };
+    }
+    kpaGroups[code].tasks.push(task);
+  });
+  
+  // Render each KPA section
+  const monthName = new Date(monthKey + "-01").toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  
+  const headerDiv = document.createElement("div");
+  headerDiv.style.cssText = "margin-bottom:16px;padding:12px;background:var(--panel);border-radius:8px;";
+  headerDiv.innerHTML = `
+    <h3 style="margin:0;color:var(--purple);">${monthName} Expectations</h3>
+    <div style="color:var(--grey-muted);font-size:12px;margin-top:4px;">
+      ${tasks.length} tasks across ${Object.keys(kpaGroups).length} KPAs
+    </div>
+  `;
+  container.appendChild(headerDiv);
+  
+  // Sort KPAs by code
+  const sortedKPAs = Object.entries(kpaGroups).sort((a, b) => a[0].localeCompare(b[0]));
+  
+  sortedKPAs.forEach(([code, kpaData]) => {
+    const kpaSection = document.createElement("div");
+    kpaSection.style.cssText = "margin-bottom:16px;border:1px solid var(--grey-dim);border-radius:8px;overflow:hidden;";
+    
+    // KPA Header
+    const kpaHeader = document.createElement("div");
+    kpaHeader.style.cssText = "background:var(--purple);color:white;padding:12px 16px;font-weight:bold;";
+    kpaHeader.innerHTML = `${code}: ${kpaData.name}`;
+    
+    // Tasks for this KPA
+    const tasksList = document.createElement("div");
+    tasksList.style.cssText = "padding:12px;background:var(--panel-dark);";
+    
+    kpaData.tasks.forEach(task => {
+      const taskItem = document.createElement("div");
+      taskItem.style.cssText = "display:flex;align-items:flex-start;padding:10px;margin-bottom:8px;background:var(--panel);border-radius:4px;border-left:3px solid var(--purple);";
+      
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = `task-${task.id}`;
+      checkbox.style.cssText = "margin-right:12px;margin-top:4px;";
+      checkbox.dataset.taskId = task.id;
+      
+      const label = document.createElement("label");
+      label.htmlFor = `task-${task.id}`;
+      label.style.cssText = "flex:1;cursor:pointer;";
+      label.innerHTML = `
+        <div style="font-weight:bold;margin-bottom:4px;">${task.title}</div>
+        <div style="font-size:11px;color:var(--grey-muted);">
+          <span style="margin-right:12px;">📅 ${task.cadence}</span>
+          <span style="margin-right:12px;">🎯 Required: ${task.minimum_count}</span>
+          <span>⭐ Stretch: ${task.stretch_count}</span>
+        </div>
+        ${task.outputs ? `<div style="font-size:10px;color:var(--grey-dim);margin-top:4px;">Outputs: ${task.outputs}</div>` : ''}
+      `;
+      
+      const aiBtn = document.createElement("button");
+      aiBtn.className = "btn-small";
+      aiBtn.textContent = "🤖 AI";
+      aiBtn.onclick = () => openAIGuidance(task.id);
+      
+      taskItem.appendChild(checkbox);
+      taskItem.appendChild(label);
+      taskItem.appendChild(aiBtn);
+      
+      tasksList.appendChild(taskItem);
+    });
+    
+    kpaSection.appendChild(kpaHeader);
+    kpaSection.appendChild(tasksList);
+    container.appendChild(kpaSection);
+  });
+}
+
+function renderPAExpectationsTable(tasks) {
+  const tbody = $("paExpectationsTableBody");
   if (!tbody) return;
   
   tbody.innerHTML = "";
   
-  if (expectations.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" class="no-data">No expectations loaded. Import Task Agreement first.</td></tr>';
+  if (tasks.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="no-data">No expectations loaded. Import Task Agreement first.</td></tr>';
     return;
   }
   
-  expectations.forEach(exp => {
+  tasks.forEach(task => {
     const row = document.createElement("tr");
-    
-    const progress = exp.progress || 0;
-    const progressClass = progress >= 80 ? 'confidence-high' : progress >= 50 ? 'confidence-medium' : 'confidence-low';
+    const months = (task.months || []).join(", ");
+    const hints = (task.evidence_hints || []).join(", ");
+    const outputs = task.outputs || "N/A";
     
     row.innerHTML = `
-      <td>${exp.kpa || 'N/A'}</td>
-      <td>${exp.task || 'N/A'}</td>
-      <td>${exp.month || 'N/A'}</td>
-      <td>${exp.enabler || 'N/A'}</td>
-      <td>${exp.goal || 'N/A'}</td>
-      <td>${exp.lead_target || 'N/A'}</td>
-      <td>${exp.lag_target || 'N/A'}</td>
-      <td>${exp.weight || 0}%</td>
-      <td>
-        <div class="task-progress-bar">
-          <div class="task-progress-fill" style="width:${progress}%"></div>
-        </div>
-        <span class="${progressClass}" style="margin-left:8px;">${progress}%</span>
-      </td>
-      <td>
-        <button class="btn-small" onclick="openAIGuidance('${exp.id || exp.task}')">🤖 Ask AI</button>
-      </td>
+      <td>${task.kpa_code || 'N/A'}</td>
+      <td>${task.title || 'N/A'}</td>
+      <td>${months}</td>
+      <td>${task.cadence || 'N/A'}</td>
+      <td>${task.minimum_count || 0}</td>
+      <td>${task.stretch_count || 0}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${outputs}</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;">${hints}</td>
     `;
     
     tbody.appendChild(row);
   });
 }
 
-function renderKPAProgress(kpaSummary) {
-  const container = $("kpaProgressContainer");
-  if (!container) return;
+$("rebuildExpBtn")?.addEventListener("click", async () => {
+  vampBusy("Rebuilding expectations from contract...");
   
-  container.innerHTML = "";
-  
-  Object.entries(kpaSummary).forEach(([kpa, data]) => {
-    const progress = data.progress || 0;
-    const completed = data.completed || 0;
-    const total = data.total || 0;
+  try {
+    const res = await fetch("/api/expectations/rebuild", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        staff_id: $("staffId").value,
+        year: $("cycleYear").value
+      })
+    });
     
-    const div = document.createElement("div");
-    div.className = "kpa-progress";
-    div.title = `${completed} of ${total} tasks completed`;
+    if (!res.ok) throw new Error("Rebuild failed");
     
-    div.innerHTML = `
-      <div class="kpa-progress-label">
-        <div class="kpa-progress-name">${kpa}</div>
-        <div class="kpa-progress-stats">${completed} / ${total} tasks</div>
-      </div>
-      <div class="kpa-progress-bar-container">
-        <div class="kpa-progress-bar" style="width:${progress}%"></div>
-        <div class="kpa-progress-text">${progress}%</div>
-      </div>
-    `;
+    const data = await res.json();
+    vampSpeak(`Rebuilt ${data.tasks_count} tasks across ${data.kpas_count} KPAs.`);
+    log(`Expectations rebuilt: ${data.tasks_count} tasks`);
     
-    container.appendChild(div);
-  });
-}
+    // Reload expectations
+    setTimeout(() => loadExpectations(), 500);
+  } catch (e) {
+    vampSpeak("Could not rebuild expectations.");
+    log("Rebuild error: " + e.message);
+    console.error("Rebuild error:", e);
+  }
+});
 
-$("rebuildExpBtn")?.addEventListener("click", () => loadExpectations());
-$("refreshProgressBtn")?.addEventListener("click", () => loadExpectations());
+$("checkMonthStatusBtn")?.addEventListener("click", () => checkMonthStatus());
+
+async function checkMonthStatus() {
+  const monthKey = $("currentMonthSelect").value;
+  const staffId = $("staffId").value;
+  
+  vampBusy("Analyzing month completion status…");
+  
+  try {
+    const res = await fetch("/api/expectations/check-month", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        staff_id: staffId,
+        month: monthKey
+      })
+    });
+    
+    if (!res.ok) throw new Error("Month check failed");
+    
+    const data = await res.json();
+    
+    const statusPill = $("monthStatusPill");
+    const reviewBox = $("monthReviewBox");
+    
+    if (data.complete) {
+      statusPill.textContent = "Complete ✓";
+      statusPill.className = "pill ok";
+      reviewBox.innerHTML = `
+        <div style="color:#8ff0b2;font-weight:bold;margin-bottom:8px;">✓ Month Complete</div>
+        <div>${data.message || 'All expectations for this month have been met.'}</div>
+        <div style="margin-top:12px;padding:12px;background:var(--panel);border-radius:4px;">
+          <strong>Summary:</strong><br/>
+          ${data.summary || 'Evidence uploaded meets or exceeds minimum requirements.'}
+        </div>
+      `;
+      vampSpeak(`${monthKey} is complete! All expectations met.`);
+    } else {
+      statusPill.textContent = "Incomplete ⚠️";
+      statusPill.className = "pill bad";
+      reviewBox.innerHTML = `
+        <div style="color:#ff6b9d;font-weight:bold;margin-bottom:8px;">⚠️ Month Incomplete</div>
+        <div>${data.message || 'Some expectations are not yet met.'}</div>
+        <div style="margin-top:12px;padding:12px;background:var(--panel);border-radius:4px;">
+          <strong>Missing:</strong><br/>
+          ${data.missing || 'Upload more evidence to meet minimum requirements.'}
+        </div>
+      `;
+      vampSpeak("This month needs more evidence to meet expectations.");
+    }
+    
+    log(`Month ${monthKey} status: ${data.complete ? 'Complete' : 'Incomplete'}`);
+  } catch (e) {
+    vampSpeak("Could not check month status.");
+    log("Month check error: " + e.message);
+  }
+}
 
 /* ============================================================
    SCAN FLOW — FILE UPLOAD & AI CLASSIFICATION
@@ -429,6 +631,14 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
     vampSpeak(`Scan complete. ${currentScanResults.length} items classified.`);
     scanLog(`Scan complete: ${currentScanResults.length} items processed`);
     log(`Scan complete: ${files.length} files → ${currentScanResults.length} evidence items`);
+    
+    // Count how many tasks were mapped
+    const mappedCount = currentScanResults.reduce((sum, r) => sum + (r.mapped_tasks || 0), 0);
+    if (mappedCount > 0) {
+      vampSpeak(`${mappedCount} task mappings created. Refreshing expectations...`);
+      // Reload progress and expectations to show updated checkboxes
+      setTimeout(() => loadExpectations(), 1000);
+    }
     
     // Auto-refresh evidence tab
     loadEvidence();
@@ -563,31 +773,59 @@ $("genPABtn")?.addEventListener("click", async () => {
   vampBusy("Forging your Performance Agreement…");
 
   try {
-    const res = await fetch(`/api/report/generate?staff_id=${$("staffId").value}&period=final`);
+    const res = await fetch(`/api/report/generate?staff_id=${$("staffId").value}&year=${$("cycleYear").value}&export=true`);
     
     if (!res.ok) throw new Error("Report generation failed");
     
     const data = await res.json();
 
+    // Render PA in table format
+    renderPAReportTable(data);
+    
     const reportBox = $("reportBox");
     if (reportBox) {
       reportBox.innerHTML = `
-        <div class="pill ok" style="margin-bottom:10px;">Generated: ${data.path || 'report.xlsx'}</div>
+        <div class="pill ok" style="margin-bottom:10px;">✓ PA Generated: ${data.title || 'Performance Agreement'}</div>
         <div style="color:var(--grey-muted);font-size:12px;">
-          ✓ ${data.kpas_count || 0} KPAs included<br/>
-          ✓ ${data.tasks_count || 0} tasks documented<br/>
-          ✓ ${data.evidence_count || 0} evidence items attached
+          ✓ ${data.rows?.length || 0} KPAs included<br/>
+          ${data.excel_path ? `✓ Saved to: ${data.excel_path.split('/').pop()}` : ''}
         </div>
       `;
     }
     
     vampSpeak("Your Performance Agreement is complete.");
-    log(`Report generated: ${data.path}`);
+    log(`PA generated: ${data.rows?.length || 0} KPAs`);
   } catch (e) {
     vampSpeak("The report could not be generated.");
     log("Report error: " + e.message);
   }
 });
+
+function renderPAReportTable(paData) {
+  const tbody = $("paExpectationsTableBody");
+  if (!tbody) return;
+  
+  tbody.innerHTML = "";
+  
+  if (!paData.rows || paData.rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="no-data">No PA data. Import TA first.</td></tr>';
+    return;
+  }
+  
+  paData.rows.forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong style="color:var(--purple);">${row.kpa_name}</strong></td>
+      <td style="white-space:pre-wrap;font-size:11px;">${row.outputs || '-'}</td>
+      <td style="white-space:pre-wrap;font-size:11px;">${row.kpis || '-'}</td>
+      <td>${row.weight.toFixed(2)}%</td>
+      <td>${row.hours.toFixed(1)}</td>
+      <td style="white-space:pre-wrap;font-size:10px;">${row.outcomes || '-'}</td>
+      <td style="text-align:center;">${row.active}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
 /* ============================================================
    MODALS — AI GUIDANCE & CLASSIFICATION RESOLUTION

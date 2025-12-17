@@ -14,8 +14,12 @@ import re
 import uuid
 from typing import Any, Dict, List, Optional, Tuple
 
-from .progress_store import ProgressStore, TaskRow
-from .task_map import default_tasks_for_year, tasks_from_expectations
+try:
+    from .progress_store import ProgressStore, TaskRow
+    from .task_map import default_tasks_for_year, tasks_from_expectations
+except ImportError:
+    from progress_store import ProgressStore, TaskRow
+    from task_map import default_tasks_for_year, tasks_from_expectations
 
 
 def _parse_month(month_bucket: str) -> Optional[int]:

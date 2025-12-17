@@ -12,7 +12,10 @@ import hashlib
 import json
 from typing import Any, Dict, List
 
-from .progress_store import TaskRow, _month_range
+try:
+    from .progress_store import TaskRow, _month_range
+except ImportError:
+    from progress_store import TaskRow, _month_range
 
 
 def _hid(*parts: str) -> str:
