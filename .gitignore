@@ -1,9 +1,31 @@
+# Python
 # Python cache files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
 
 # Virtual environments
 venv/
@@ -15,6 +37,7 @@ ENV/
 .idea/
 *.swp
 *.swo
+*~
 
 # Test cache
 .pytest_cache/
@@ -30,6 +53,14 @@ dist/
 .DS_Store
 Thumbs.db
 
+# Uploads and temporary files
+uploads/
+*.log
+
+# Test and coverage
+.pytest_cache/
+.coverage
+htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
