@@ -4,4 +4,11 @@ dependencies:
   - flake8
   - pip
   - pip:
-      - any-pypi-dependencies
+      - requests
+      - pillow
+      - pdf2image
+      - pytesseract
+      - pikepdf
+      - pdfplumber
+      - openpyxl
+      - chardet
