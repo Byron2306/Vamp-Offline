@@ -154,11 +154,35 @@
         </div>
       </div>
 
-      <div class="kpa-cards" id="kpaCards" style="margin-top:12px;"></div>
+      <!-- KPA Progress Bars -->
+      <div class="kpa-progress-container" id="kpaProgressContainer" style="margin-top:16px;"></div>
+
+      <!-- Expectations Table -->
+      <div class="table-container" style="margin-top:16px;">
+        <table class="vamp-table" id="expectationsTable">
+          <thead>
+            <tr>
+              <th>KPA</th>
+              <th>Task</th>
+              <th>Month</th>
+              <th>Enabler</th>
+              <th>Goal</th>
+              <th>Lead Target</th>
+              <th>Lag Target</th>
+              <th>Weight</th>
+              <th>Progress</th>
+              <th>Ask AI</th>
+            </tr>
+          </thead>
+          <tbody id="expectationsTableBody">
+            <tr><td colspan="10" class="no-data">No expectations loaded. Enrol and import TA first.</td></tr>
+          </tbody>
+        </table>
+      </div>
 
       <div class="box" style="margin-top:12px;">
         <div class="box-h">Gaps (minimum compliance)</div>
-        <div class="evidence" id="gapBox"></div>
+        <div class="evidence" id="gapBox">No gaps detected yet.</div>
       </div>
     </div>
   </section>
@@ -168,8 +192,8 @@
     <div class="card">
       <div class="card-h">
         <div>
-          <div class="card-title">Scanner</div>
-          <div class="muted">Folder scan → classify → store.</div>
+          <div class="card-title">Evidence Scanner</div>
+          <div class="muted">Upload files → AI classification → store.</div>
         </div>
         <div class="right">
           <span class="pill" id="scanStatus">Idle</span>
@@ -178,33 +202,56 @@
 
       <div class="form grid2">
         <div>
-          <label>Folder path</label>
-          <input id="scanFolder"/>
+          <label>Select Files (multi-select)</label>
+          <input type="file" id="scanFiles" multiple accept=".pdf,.docx,.txt,.xlsx,.pptx"/>
         </div>
         <div>
           <label>Month bucket</label>
           <input id="scanMonth" value="2025-01"/>
           <div class="row" style="margin-top:6px;">
-            <label class="chk"><input type="checkbox" id="scanUseBrain" checked/> Use scorer</label>
-            <label class="chk"><input type="checkbox" id="scanUseContextual" checked/> Use contextual</label>
+            <label class="chk"><input type="checkbox" id="scanUseBrain" checked/> Use NWU Brain</label>
+            <label class="chk"><input type="checkbox" id="scanUseContextual" checked/> Use Ollama</label>
           </div>
         </div>
       </div>
 
       <div class="row" style="margin-top:12px;">
-        <button class="btn glow" id="scanStartBtn">Start scan</button>
+        <button class="btn glow" id="scanUploadBtn">Upload & Scan Files</button>
         <button class="btn" id="scanStopBtn">Stop</button>
         <button class="btn" id="scanRefreshEvidenceBtn">Refresh evidence</button>
+        <span class="pill" id="scanProgress" style="margin-left:10px;">—</span>
       </div>
 
-      <div class="split">
+      <!-- Scan Results Table -->
+      <div class="table-container" style="margin-top:16px;">
+        <table class="vamp-table" id="scanResultsTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>File</th>
+              <th>KPA</th>
+              <th>Task</th>
+              <th>Tier</th>
+              <th>Impact Summary</th>
+              <th>Confidence</th>
+              <th>Status</th>
+              <th>Resolve</th>
+            </tr>
+          </thead>
+          <tbody id="scanResultsTableBody">
+            <tr><td colspan="9" class="no-data">No scans performed yet. Upload files to begin.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="split" style="margin-top:16px;">
         <div class="box">
           <div class="box-h">Activity log</div>
-          <pre class="log" id="scanLog"></pre>
+          <pre class="log" id="scanLog">Ready to scan evidence files…</pre>
         </div>
         <div class="box">
-          <div class="box-h">Evidence (latest)</div>
-          <div class="evidence" id="evidenceList"></div>
+          <div class="box-h">Classification insights</div>
+          <div class="evidence" id="scanInsights">Upload files to see AI analysis.</div>
         </div>
       </div>
     </div>
@@ -258,6 +305,85 @@
     </div>
   </section>
 
+</div>
+
+<!-- ─────────────────────────────────────────────
+     MODALS
+───────────────────────────────────────────── -->
+
+<!-- AI Guidance Modal -->
+<div id="aiGuidanceModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>AI Guidance</h2>
+      <button class="modal-close" onclick="closeModal('aiGuidanceModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <label>Task Context</label>
+        <div id="aiTaskContext" class="modal-info"></div>
+      </div>
+      <div class="modal-section">
+        <label>Your Question</label>
+        <textarea id="aiGuidanceInput" rows="3" placeholder="Ask VAMP for guidance on this task…"></textarea>
+      </div>
+      <div class="modal-section" id="aiGuidanceResponse" style="display:none;">
+        <label>VAMP's Guidance</label>
+        <div class="modal-response"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('aiGuidanceModal')">Cancel</button>
+      <button class="btn glow" id="submitGuidanceBtn">Ask VAMP</button>
+    </div>
+  </div>
+</div>
+
+<!-- Resolve Classification Modal -->
+<div id="resolveModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Resolve Classification</h2>
+      <button class="modal-close" onclick="closeModal('resolveModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <label>File</label>
+        <div id="resolveFileName" class="modal-info"></div>
+      </div>
+      <div class="modal-section">
+        <label>AI's Initial Classification</label>
+        <div id="resolveInitialClass" class="modal-info warning"></div>
+      </div>
+      <div class="modal-section">
+        <label>Select Correct KPA</label>
+        <select id="resolveKpaSelect" class="modal-select">
+          <option value="">-- Choose KPA --</option>
+          <option value="teaching_learning">Teaching & Learning</option>
+          <option value="research">Research</option>
+          <option value="community_engagement">Community Engagement</option>
+          <option value="innovation_impact">Innovation & Impact</option>
+          <option value="leadership_management">Leadership & Management</option>
+        </select>
+      </div>
+      <div class="modal-section">
+        <label>Explain the Link</label>
+        <textarea id="resolveExplanation" rows="4" placeholder="Describe how this evidence relates to the chosen KPA…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('resolveModal')">Cancel</button>
+      <button class="btn glow" id="submitResolveBtn">Resolve & Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- VAMP Thinking Overlay -->
+<div id="vampThinking" class="vamp-overlay" style="display:none;">
+  <div class="vamp-overlay-content">
+    <div class="vamp-spinner"></div>
+    <div class="vamp-overlay-text" id="vampThinkingText">Analysing…</div>
+  </div>
 </div>
 
 <script src="./app.js"></script>
