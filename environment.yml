@@ -3,6 +3,7 @@ dependencies:
   - python=3.10
   - flake8
   - pip
+  -pandas
   - pip:
       - requests
       - pillow
