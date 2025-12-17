@@ -16,12 +16,13 @@ import requests
 
 # Import VAMP backend modules
 try:
-    from backend.staff_profile import StaffProfile
+    from backend.staff_profile import StaffProfile, create_or_load_profile
     STAFF_PROFILE_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: Could not import StaffProfile: {e}")
     STAFF_PROFILE_AVAILABLE = False
     StaffProfile = None
+    create_or_load_profile = None
 
 try:
     from backend.expectation_engine import parse_task_agreement, build_expectations_from_ta
@@ -54,7 +55,8 @@ EVIDENCE_FOLDER = DATA_FOLDER / "evidence"
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama2")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
+OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "180"))
 
 # Global state
 profiles = {}
@@ -97,7 +99,7 @@ Provide helpful, professional guidance. Keep responses concise and actionable.""
                 "prompt": enhanced_prompt,
                 "stream": False
             },
-            timeout=60
+            timeout=OLLAMA_TIMEOUT
         )
         
         if response.status_code == 200:
@@ -155,11 +157,31 @@ def enrol_profile():
         # Create or load profile
         if STAFF_PROFILE_AVAILABLE:
             try:
-                # Try with all parameters
-                profile = StaffProfile(
-                    staff_id=staff_id,
-                    cycle_year=int(cycle_year)
-                )
+                name = data.get('name') or 'Unknown'
+                position = data.get('position') or 'Academic'
+                faculty = data.get('faculty') or ''
+                manager = data.get('manager') or ''
+
+                # Prefer helper that also loads existing contract JSON
+                if create_or_load_profile is not None:
+                    profile = create_or_load_profile(
+                        staff_id=staff_id,
+                        name=name,
+                        position=position,
+                        cycle_year=int(cycle_year),
+                        faculty=faculty,
+                        line_manager=manager,
+                    )
+                else:
+                    profile = StaffProfile(
+                        staff_id=staff_id,
+                        name=name,
+                        position=position,
+                        cycle_year=int(cycle_year),
+                        faculty=faculty,
+                        line_manager=manager,
+                        kpas=[],
+                    )
             except Exception as e:
                 print(f"StaffProfile creation error: {e}. Using mock profile.")
                 profile = {
@@ -327,54 +349,93 @@ def get_progress():
                 expectations = json.load(f)
             ensure_tasks(store, staff_id=staff_id, year=int(year), expectations=expectations)
         
-        # Get completed tasks for this staff/year
-        # For now, return empty progress as compute_window_progress signature may vary
-        progress = {
-            "total_tasks": 0,
-            "completed_count": 0,
-            "completed_tasks": [],
-            "missing_tasks": []
-        }
-        
-        # Try to get window progress if month specified
+        # Determine month window
+        months: List[int]
         if month:
-            try:
-                month_int = int(month.split('-')[1])
-                progress = store.compute_window_progress(staff_id, int(year), [month_int])
-            except Exception as e:
-                print(f"Window progress error: {e}")
+            months = [int(month.split('-')[1])]
         else:
-            try:
-                progress = store.compute_window_progress(staff_id, int(year), list(range(1, 13)))
-            except Exception as e:
-                print(f"Window progress error: {e}")
+            months = list(range(1, 13))
+
+        # Compute window progress (ProgressStore returns ints, not lists)
+        progress: Dict[str, Any] = {}
         
-        # Get evidence for this staff/year
+        try:
+            progress = store.compute_window_progress(staff_id, int(year), months)
+        except Exception as e:
+            print(f"Window progress error: {e}")
+            progress = {
+                "staff_id": staff_id,
+                "year": int(year),
+                "months": months,
+                "expected_tasks": 0,
+                "completed_tasks": 0,
+                "missing_tasks": [],
+                "by_kpa": {},
+            }
+        
+        # Derive completion map (expected - missing) for the window
+        task_rows = store.list_tasks_for_window(int(year), months)
+        expected_task_ids = [r["task_id"] for r in task_rows]
+        missing_ids = {t.get("task_id") for t in (progress.get("missing_tasks") or []) if isinstance(t, dict)}
+        completed_ids = set([tid for tid in expected_task_ids if tid not in missing_ids])
+        task_completion = {tid: True for tid in completed_ids}
+
+        # Evidence list for Evidence Log (include top mapped task)
         evidence_rows = store.list_evidence(staff_id, int(year), month_bucket=month if month else None)
         evidence_list = []
         for ev in evidence_rows:
+            evd = dict(ev)
+            meta = {}
+            try:
+                meta = json.loads(evd.get("meta_json") or "{}")
+            except Exception:
+                meta = {}
+
+            top_task_title = None
+            top_task_id = None
+            top_conf = None
+            try:
+                mappings = store.list_mappings_for_evidence(evd["evidence_id"])
+                if mappings:
+                    top_task_id = mappings[0]["task_id"]
+                    top_task_title = mappings[0]["title"]
+                    top_conf = float(mappings[0]["confidence"])
+            except Exception:
+                pass
+
+            file_path = evd.get("file_path")
+            filename = meta.get("filename") or (Path(file_path).name if file_path else None)
+
             evidence_list.append({
-                "evidence_id": ev["evidence_id"],
-                "month_bucket": ev["month_bucket"],
-                "kpa_code": ev["kpa_code"],
-                "file_path": ev["file_path"],
-                "rating": ev["rating"]
+                "evidence_id": evd["evidence_id"],
+                "date": meta.get("date") or meta.get("timestamp") or "",
+                "filename": filename or "",
+                "kpa": evd.get("kpa_code") or "",
+                "month": evd.get("month_bucket") or "",
+                "task": top_task_title or meta.get("task") or "",
+                "task_id": top_task_id or meta.get("target_task_id") or "",
+                "tier": evd.get("tier") or meta.get("tier") or "",
+                "impact_summary": meta.get("impact_summary") or "",
+                "confidence": top_conf if top_conf is not None else float(meta.get("confidence") or 0.0),
+                "rating": evd.get("rating") or "",
+                "file_path": file_path or "",
             })
         
-        # Get task completion map
-        task_completion = {}
-        for task_info in progress.get("completed_tasks", []):
-            task_id = task_info.get("task_id")
-            if task_id:
-                task_completion[task_id] = True
-        
         return jsonify({
-            "progress": progress,
+            "progress": {
+                "staff_id": staff_id,
+                "year": int(year),
+                "months": months,
+                "total_tasks": int(progress.get("expected_tasks", 0)),
+                "completed_count": int(progress.get("completed_tasks", 0)),
+                "missing_tasks": progress.get("missing_tasks", []),
+                "by_kpa": progress.get("by_kpa", {}),
+            },
             "evidence": evidence_list,
             "task_completion": task_completion,
             "stats": {
-                "total_tasks": progress.get("total_tasks", 0),
-                "completed_tasks": progress.get("completed_count", 0),
+                "total_tasks": int(progress.get("expected_tasks", 0)),
+                "completed_tasks": int(progress.get("completed_tasks", 0)),
                 "evidence_count": len(evidence_list)
             }
         })
@@ -630,19 +691,14 @@ def scan_upload():
         files = request.files.getlist('files')
         staff_id = request.form.get('staff_id')
         month = request.form.get('month')
+        target_task_id = request.form.get('target_task_id') or None
         use_brain = request.form.get('use_brain') == 'true'
         use_contextual = request.form.get('use_contextual') == 'true'
         
         results = []
         
-        # Initialize scorers
-        brain_scorer = None
-        if use_brain and BRAIN_SCORER_AVAILABLE:
-            try:
-                brain_scorer = NWUBrainScorer()
-            except Exception as e:
-                print(f"Brain scorer initialization failed: {e}")
-                brain_scorer = None
+        # Brain scorer is function-based (no NWUBrainScorer class)
+        brain_enabled = bool(use_brain and BRAIN_SCORER_AVAILABLE and brain_score_evidence is not None)
         
         for idx, file in enumerate(files, 1):
             try:
@@ -679,8 +735,17 @@ def scan_upload():
                         "impact_summary": "Documented teaching evidence",
                         "confidence": 0.75
                     }
+
+                # Deterministic NWU Brain scoring (optional)
+                brain_ctx = None
+                if brain_enabled:
+                    try:
+                        brain_ctx = brain_score_evidence(path=Path(filepath), full_text=file_text, kpa_hint_code=None)
+                    except Exception as e:
+                        print(f"Brain scorer failed for {filename}: {e}")
+                        brain_ctx = None
                 
-                # Map KPA name to KPA code
+                # Map KPA name to KPA code (from brain first, else from Ollama classification)
                 kpa_map = {
                     "teaching": "KPA1", "teaching & learning": "KPA1", "teaching and learning": "KPA1",
                     "ohs": "KPA2", "occupational health": "KPA2",
@@ -688,12 +753,16 @@ def scan_upload():
                     "leadership": "KPA4", "academic leadership": "KPA4", "administration": "KPA4",
                     "social": "KPA5", "community": "KPA5", "social responsiveness": "KPA5"
                 }
-                kpa_code = "KPA1"  # default
-                kpa_lower = classification["kpa"].lower()
-                for key, code in kpa_map.items():
-                    if key in kpa_lower:
-                        kpa_code = code
-                        break
+                kpa_code = None
+                if brain_ctx and brain_ctx.get("primary_kpa_code"):
+                    kpa_code = str(brain_ctx.get("primary_kpa_code"))
+                if not kpa_code:
+                    kpa_code = "KPA1"  # default
+                    kpa_lower = classification.get("kpa", "").lower()
+                    for key, code in kpa_map.items():
+                        if key in kpa_lower:
+                            kpa_code = code
+                            break
                 
                 # Store in progress database
                 evidence_id = None
@@ -722,6 +791,19 @@ def scan_upload():
                     evidence_id = f"ev_{staff_id}_{month}_{hashlib.md5(filename.encode()).hexdigest()[:8]}"
                     sha1 = hashlib.sha1(file_text.encode()).hexdigest()
                     
+                    # If a target task was provided, prefer its KPA and map directly
+                    if target_task_id:
+                        try:
+                            task_row = None
+                            for r in store.list_tasks_for_window(int(month[:4]), [int(month.split('-')[1])], kpa_code=None):
+                                if r["task_id"] == target_task_id:
+                                    task_row = r
+                                    break
+                            if task_row is not None:
+                                kpa_code = task_row["kpa_code"]
+                        except Exception:
+                            pass
+
                     # Insert evidence
                     store.insert_evidence(
                         evidence_id=evidence_id,
@@ -730,14 +812,18 @@ def scan_upload():
                         year=int(month[:4]),
                         month_bucket=month,
                         kpa_code=kpa_code,
-                        rating=classification["tier"],
-                        tier=classification["tier"],
+                        rating=(brain_ctx.get("rating_label") if brain_ctx else classification.get("tier")),
+                        tier=(brain_ctx.get("tier_label") if brain_ctx else classification.get("tier")),
                         file_path=str(filepath),
                         meta={
                             "filename": filename,
+                            "date": datetime.utcnow().date().isoformat(),
+                            "timestamp": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
                             "impact_summary": classification["impact_summary"],
                             "confidence": classification["confidence"],
-                            "task": classification["task"]
+                            "task": classification["task"],
+                            "target_task_id": target_task_id or "",
+                            "brain": brain_ctx or {},
                         }
                     )
                     
@@ -756,6 +842,18 @@ def scan_upload():
                         },
                         mapped_by="web_scan:v1"
                     )
+
+                    # Targeted mapping (high confidence) - apply AFTER generic mapping to avoid overwrite
+                    if target_task_id:
+                        try:
+                            store.upsert_mapping(
+                                evidence_id,
+                                target_task_id,
+                                mapped_by="web_scan:targeted",
+                                confidence=0.95,
+                            )
+                        except Exception:
+                            pass
                     
                 except Exception as db_error:
                     print(f"Progress store error for {filename}: {db_error}")

@@ -24,6 +24,7 @@ let currentProfile = null;
 let currentExpectations = [];
 let currentScanResults = [];
 let currentResolveItem = null;
+let currentScanTargetTaskId = null;
 
 /* ============================================================
    VAMP AGENT CONTROL — VIDEO STATE MANAGEMENT
@@ -456,10 +457,33 @@ function renderMonthView(monthKey) {
       aiBtn.className = "btn-small";
       aiBtn.textContent = "🤖 AI";
       aiBtn.onclick = () => openAIGuidance(task.id);
+
+      const scanBtn = document.createElement("button");
+      scanBtn.className = "btn-small";
+      scanBtn.textContent = "📎 Scan";
+      scanBtn.style.marginLeft = "8px";
+      scanBtn.onclick = () => {
+        currentScanTargetTaskId = task.id;
+        const targetInput = $("scanTargetTaskId");
+        if (targetInput) targetInput.value = task.id;
+
+        const targetLabel = $("scanTargetTaskLabel");
+        const targetText = $("scanTargetTaskText");
+        if (targetText) targetText.textContent = task.title;
+        if (targetLabel) targetLabel.style.display = "block";
+
+        const scanMonth = $("scanMonth");
+        if (scanMonth) scanMonth.value = monthKey;
+
+        const section = $("scanEvidenceSection");
+        if (section) section.style.display = "block";
+        vampSpeak("Upload evidence for the selected task.");
+      };
       
       taskItem.appendChild(checkbox);
       taskItem.appendChild(label);
       taskItem.appendChild(aiBtn);
+      taskItem.appendChild(scanBtn);
       
       tasksList.appendChild(taskItem);
     });
@@ -611,6 +635,11 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
   fd.append("month", $("scanMonth").value);
   fd.append("use_brain", $("scanUseBrain").checked);
   fd.append("use_contextual", $("scanUseContextual").checked);
+
+  const targetTaskId = $("scanTargetTaskId")?.value;
+  if (targetTaskId) {
+    fd.append("target_task_id", targetTaskId);
+  }
   
   try {
     const res = await fetch("/api/scan/upload", {
@@ -646,6 +675,13 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
     // Close scan section after successful scan
     const section = $("scanEvidenceSection");
     if (section) section.style.display = "none";
+
+    // Clear targeted scan state
+    currentScanTargetTaskId = null;
+    const targetInput = $("scanTargetTaskId");
+    if (targetInput) targetInput.value = "";
+    const targetLabel = $("scanTargetTaskLabel");
+    if (targetLabel) targetLabel.style.display = "none";
   } catch (e) {
     vampSpeak("Scan failed. Please check the server logs.");
     $("scanStatus").textContent = "Error";
@@ -1041,8 +1077,13 @@ $("closeScanSection")?.addEventListener("click", () => {
 
 async function loadEvidenceLog(monthFilter = 'all') {
   try {
-    const staffId = $("staffId")?.value || '20172672';
-    const year = $("cycleYear")?.value || '2025';
+    const staffId = $("staffId")?.value;
+    const year = $("cycleYear")?.value;
+
+    if (!staffId || !year) {
+      vampSpeak("Please enrol your profile first.");
+      return;
+    }
     
     const res = await fetch(`/api/progress?staff_id=${staffId}&year=${year}`);
     if (!res.ok) throw new Error("Could not load evidence log");
