@@ -4,14 +4,14 @@
 
 @font-face {
   font-family: 'Cloister';
-  src: url('./assets/CloisterBlackLight-axjg.ttf') format('truetype');
+  src: url('./CloisterBlackLight-axjg.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Cinzel';
-  src: url('./assets/Cinzel-VariableFont_wght.ttf') format('truetype');
+  src: url('./Cinzel-VariableFont_wght.ttf') format('truetype');
   font-weight: 200 900;
   font-style: normal;
 }
@@ -48,9 +48,10 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--bg-black);
+  background: linear-gradient(180deg, #030003, #090407);
   color: var(--grey-text);
-  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+  /* Use Cinzel and Cloister across the UI */
+  font-family: 'Cinzel', 'Cloister', serif;
 }
 
 /* ============================================================
@@ -172,6 +173,61 @@ html, body {
   text-shadow: 0 0 14px var(--red-glow);
 }
 
+/* Stronger Cloister presence: apply to major headings and UI accents */
+.card-title,
+.tab,
+.month-label,
+.month-badge {
+  font-family: 'Cloister', serif;
+}
+
+/* Neon / Tron-style pulsing */
+@keyframes neonPulse {
+  0% { box-shadow: 0 0 6px rgba(200,0,50,0.25), 0 0 24px rgba(200,0,50,0.08); transform: translateY(0); }
+  50% { box-shadow: 0 0 18px rgba(255,60,120,0.45), 0 0 48px rgba(255,60,120,0.12); transform: translateY(-2px); }
+  100% { box-shadow: 0 0 6px rgba(200,0,50,0.25), 0 0 24px rgba(200,0,50,0.08); transform: translateY(0); }
+}
+
+.vamp-video-frame, .vamp-dialogue, .pill, .btn.glow {
+  animation: neonPulse 2.4s ease-in-out infinite;
+}
+
+/* Stronger blood-drop pulse for timeline months */
+.month-badge .blood-drop {
+  display:flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:50%;background:linear-gradient(180deg,#2a0006,#500012);color:#fff;
+  box-shadow: 0 0 6px rgba(200,0,50,0.2);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.month-badge.done .blood-drop {
+  animation: neonPulse 1.6s ease-in-out infinite;
+  transform: scale(1.08);
+}
+
+/* Tron scanline overlay */
+.vamp-video-frame::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 100% 6px;
+  mix-blend-mode: overlay;
+}
+
+/* Month badge neon border */
+.month-badge {
+  padding:8px 10px;border-radius:8px;border:1px solid rgba(255,80,110,0.08);
+  background: linear-gradient(180deg,#07020a,#14030a);
+  color: var(--grey-text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+
+/* Pulse vignette on top bar and active tab */
+.topbar { box-shadow: 0 0 30px rgba(200,0,50,0.35), inset 0 0 40px rgba(0,0,0,0.6); }
+.tab.active { box-shadow: 0 6px 32px rgba(255,40,90,0.12); border-color: rgba(255,40,90,0.28); }
+
+/* Make headings use Cloister Black weight if available */
+.vamp-name, .card-title, .tab.active, .month-label { font-weight: 700; }
+
 .vamp-role {
   font-family: 'Cinzel', serif;
   letter-spacing: 1.2px;
@@ -267,6 +323,14 @@ html, body {
 
 .container {
   padding: 18px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.05), transparent);
+  border-top: 1px solid rgba(255,255,255,0.02);
+}
+
+/* Bottom area: ensure panels and footer feel dark and vampy */
+.panel {
+  background: linear-gradient(180deg, #070305, #050204);
+  padding-bottom: 28px;
 }
 
 .tabs {
@@ -277,13 +341,19 @@ html, body {
 
 .tab {
   cursor: pointer;
-  padding: 8px 14px;
-  border: 1px solid var(--border-dark);
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(20,8,12,0.2));
+  color: var(--grey-text);
+  font-weight: 600;
 }
 
 .tab.active {
-  border-color: var(--border-red);
-  box-shadow: 0 0 10px var(--red-soft);
+  border-color: rgba(200,0,50,0.28);
+  background: linear-gradient(180deg, #2a0006, #120409);
+  box-shadow: 0 6px 22px rgba(200,0,50,0.12);
+  color: #fff;
 }
 
 .panel {
@@ -295,8 +365,8 @@ html, body {
 }
 
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-dark);
+  background: linear-gradient(180deg, #0b0609, #090406);
+  border: 1px solid rgba(255,255,255,0.04);
   padding: 14px;
   margin-bottom: 16px;
 }
@@ -342,7 +412,7 @@ html, body {
   border: 1px solid var(--border-dark);
   color: var(--grey-text);
   padding: 8px 10px;
-  font-family: system-ui, sans-serif;
+  font-family: inherit;
 }
 
 .form input:focus,
@@ -398,6 +468,168 @@ html, body {
   border-top: 1px solid var(--border-dark);
   margin: 16px 0;
 }
+
+/* ============================================================
+   YEAR TIMELINE + BLOOD DROP ICON
+============================================================ */
+.year-timeline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.month-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #0c0710, #0a0610);
+  border: 1px solid var(--border-dark);
+  cursor: pointer;
+  color: var(--grey-muted);
+  font-size: 12px;
+  transition: all 0.18s ease;
+}
+
+.month-badge:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(200,0,50,0.08);
+  color: var(--grey-text);
+}
+
+.month-badge.done {
+  background: linear-gradient(180deg, rgba(140,200,120,0.06), rgba(80,200,120,0.02));
+  border-color: rgba(80,200,120,0.12);
+  color: var(--grey-text);
+}
+
+.blood-drop {
+  width: 12px;
+  height: 12px;
+  display:inline-block;
+  background: radial-gradient(circle at 30% 20%, #ff6b8a, #c0002f 60%);
+  clip-path: path('M6 0 C9 2.5 11 5.5 11 8.5 C11 11 8.5 12.5 6 12.5 C3.5 12.5 1 11 1 8.5 C1 5.5 3 2.5 6 0 Z');
+  box-shadow: 0 0 8px var(--red-glow);
+}
+
+.month-badge .month-name { font-weight:600; font-size:12px; }
+
+/* ============================================================
+   Subtle glow & pulse animations for a classy vamp UI
+============================================================ */
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 6px rgba(200,0,50,0.06), 0 0 0 0 rgba(200,0,50,0.02); }
+  50% { box-shadow: 0 0 20px rgba(200,0,50,0.14), 0 0 28px 6px rgba(200,0,50,0.04); }
+  100% { box-shadow: 0 0 6px rgba(200,0,50,0.06), 0 0 0 0 rgba(200,0,50,0.02); }
+}
+
+@keyframes nameShimmer {
+  0% { text-shadow: 0 0 8px rgba(200,0,50,0.12); transform: translateY(0); }
+  50% { text-shadow: 0 0 18px rgba(200,0,50,0.25); transform: translateY(-2px); }
+  100% { text-shadow: 0 0 8px rgba(200,0,50,0.12); transform: translateY(0); }
+}
+
+/* Topbar subtle breathing glow */
+.topbar {
+  animation: glowPulse 6s ease-in-out infinite;
+}
+
+/* Active tab has a gentle pulse */
+.tab.active {
+  animation: glowPulse 5.5s ease-in-out infinite;
+}
+
+/* Glowing primary buttons */
+.btn.glow {
+  position: relative;
+}
+.btn.glow::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 10px;
+  pointer-events: none;
+  box-shadow: 0 12px 40px rgba(200,0,50,0.04);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.btn.glow:hover::after { opacity: 1; }
+
+/* Vamp name shimmer */
+.vamp-name {
+  animation: nameShimmer 6s ease-in-out infinite;
+}
+
+/* Month badge done state glint */
+.month-badge.done {
+  position: relative;
+}
+.month-badge.done::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,120,140,0.9), rgba(200,0,50,0.6) 40%, transparent 60%);
+  filter: blur(6px);
+  opacity: 0.85;
+  transform: scale(1);
+  transition: transform 0.3s ease;
+}
+.month-badge:hover::after { transform: scale(1.05); }
+
+/* Subtle animated background vignette */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 20% 10%, rgba(200,0,50,0.04), transparent 15%), radial-gradient(circle at 80% 90%, rgba(0,0,0,0.18), transparent 20%);
+  mix-blend-mode: overlay;
+  opacity: 0.9;
+  z-index: 0;
+}
+
+
+
+/* Year timeline styles */
+.year-timeline {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.year-month {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 64px;
+  padding: 6px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  border: 1px solid var(--border-dark);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.year-month:hover { transform: translateY(-4px); box-shadow: 0 6px 14px rgba(0,0,0,0.6); }
+.month-label { font-size: 12px; color: var(--grey-muted); margin-top:6px; }
+.month-count { font-weight:700; color: var(--grey-text); font-size:13px; margin-top:4px; }
+
+/* Blood drop icon using emoji for theme-safe rendering */
+.blood-drop {
+  font-size: 20px;
+  line-height: 20px;
+  color: var(--red-main);
+  text-shadow: 0 0 8px var(--red-glow);
+}
+
+.month-complete { border-color: rgba(80,200,120,0.6); box-shadow: 0 0 8px rgba(80,200,120,0.06); }
+.month-incomplete { border-color: rgba(255,107,157,0.25); }
 
 /* ============================================================
    TABLES

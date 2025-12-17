@@ -14,7 +14,7 @@
 ───────────────────────────────────────────── -->
 <div class="topbar">
   <div class="brand">
-    <img src="./assets/NWU-holding-shape-digital-white.png"
+    <img src="./NWU-holding-shape-digital-white.png"
          alt="NWU"
          style="width:40px;height:40px;filter:drop-shadow(0 0 6px rgba(255,0,60,.6));"/>
     <div>
@@ -30,7 +30,7 @@
   </div>
 
   <div class="right" style="margin-left:auto;">
-    <audio id="vampSound" src="./assets/vamp.wav" preload="auto"></audio>
+    <audio id="vampSound" src="./vamp.wav" preload="auto"></audio>
     <span class="pill" id="stagePill">Stage: Awaiting enrolment</span>
   </div>
 </div>
@@ -40,13 +40,13 @@
 ───────────────────────────────────────────── -->
 <section id="vamp-agent">
 
-  <div class="vamp-video-frame">
-    <video id="vamp-video"
-           src="./assets/vampire.mp4"
-           preload="auto"
-           muted
-           playsinline>
-    </video>
+    <div class="vamp-video-frame">
+      <video id="vamp-video"
+        src="./vampire.mp4"
+        preload="auto"
+        muted
+        playsinline>
+      </video>
     <div class="vamp-glow"></div>
   </div>
 
@@ -126,6 +126,15 @@
         <button class="btn glow" id="taUploadBtn">Import TA</button>
         <span class="pill" id="taPill">No TA imported</span>
       </div>
+
+      <!-- Year timeline: visual progress across months -->
+      <div id="yearTimelineContainer" style="margin-top:12px;">
+        <div class="card-title">Year Progress</div>
+        <div class="muted">Visual overview of months completed. Click a month to focus.</div>
+        <div id="yearTimeline" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <!-- Timeline months will be injected here by app.js -->
+        </div>
+      </div>
     </div>
   </section>
 
@@ -164,6 +173,11 @@
             <div class="row" style="margin-top:6px;">
               <label class="chk"><input type="checkbox" id="scanUseBrain" checked/> Use NWU Brain</label>
               <label class="chk"><input type="checkbox" id="scanUseContextual" checked/> Use Ollama</label>
+            </div>
+            <div class="row" style="margin-top:6px;">
+              <label class="chk" title="When enabled, bypasses AI classification and directly links evidence to selected task with 100% confidence">
+                <input type="checkbox" id="scanLockToTask"/> 🔒 Lock to selected task (asserted relevance)
+              </label>
             </div>
           </div>
         </div>

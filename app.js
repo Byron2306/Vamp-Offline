@@ -74,6 +74,7 @@ function clearTargetedScanState() {
 ============================================================ */
 
 const vampVideo = $("vamp-video");
+const vampSound = $("vampSound");
 const vampBubbles = $("vamp-bubbles");
 const vampInput = $("ask-vamp-input");
 const vampBtn = $("ask-vamp-btn");
@@ -95,6 +96,10 @@ function vampIdle(text = "Awaiting instruction…") {
     vampVideo.pause();
     vampVideo.currentTime = 0;
   }
+  try {
+    vampSound?.pause();
+    if (vampSound) vampSound.currentTime = 0;
+  } catch (e) {}
   hideVampOverlay();
   pushBubble(text, "idle");
 }
@@ -105,6 +110,7 @@ function vampBusy(text = "Analysing…") {
     vampVideo.pause();
     vampVideo.currentTime = 0;
   }
+  try { vampSound?.pause(); } catch(e) {}
   showVampOverlay(text);
 }
 
@@ -115,6 +121,13 @@ function vampSpeak(text) {
     vampVideo.currentTime = 0;
     vampVideo.play().catch(() => {});
   }
+  // Play vamp audio when speaking
+  try {
+    if (vampSound) {
+      vampSound.currentTime = 0;
+      vampSound.play().catch(() => {});
+    }
+  } catch (e) {}
   hideVampOverlay();
   pushBubble(text, "speak");
   
@@ -354,6 +367,34 @@ async function loadExpectations() {
     // Use tasks array from the response
     const tasks = data.tasks || data.expectations || [];
     currentExpectations = tasks;
+
+    // Normalize per-month tasks to prefer hashed DB task IDs when provided
+    try {
+      const taskIndex = {};
+      (tasks || []).forEach(t => {
+        const key = t.task_id || t.id;
+        if (key) taskIndex[key] = t;
+      });
+
+      const byMonth = data.by_month || {};
+      Object.keys(byMonth).forEach(monthKey => {
+        const monthEntry = byMonth[monthKey];
+        const monthTasks = Array.isArray(monthEntry) ? monthEntry : (monthEntry.tasks || []);
+        monthTasks.forEach(t => {
+          const baseId = t.task_id || t.id;
+          const base = taskIndex[baseId];
+              if (base && base.hashed_ids) {
+                // Only use canonical hashed IDs supplied by the backend.
+                const m = monthKey.split('-')[1];
+                if (base.hashed_ids[m]) {
+                  t.id = base.hashed_ids[m];
+                }
+              }
+        });
+      });
+    } catch (e) {
+      console.warn('Could not normalize hashed task ids:', e);
+    }
     
     console.log("Tasks count:", tasks.length);
     console.log("By month keys:", Object.keys(data.by_month || {}));
@@ -361,6 +402,8 @@ async function loadExpectations() {
     
     // Load progress/completion status
     await loadProgress();
+    // Render the year timeline based on progress data
+    await updateYearTimeline();
     
     renderMonthlyExpectations(data.by_month || {}, tasks);
     renderPAExpectationsTable(tasks);
@@ -394,6 +437,86 @@ async function loadProgress() {
   }
 }
 
+// Update year timeline UI with per-month completion counts
+async function updateYearTimeline() {
+  const container = $("yearTimeline");
+  const staffId = $("staffId").value;
+  const year = $("cycleYear").value;
+  if (!container || !staffId || !year) return;
+
+  container.innerHTML = '';
+
+  // Fetch progress per month in parallel
+  const months = Array.from({length:12}, (_,i) => i+1);
+  const requests = months.map(m => {
+    const mm = String(m).padStart(2,'0');
+    const monthKey = `${year}-${mm}`;
+    return fetch(`/api/progress?staff_id=${staffId}&year=${year}&month=${monthKey}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => ({ monthKey, data: d }))
+      .catch(() => ({ monthKey, data: null }));
+  });
+
+  const results = await Promise.all(requests);
+
+  results.forEach(res => {
+    const { monthKey, data } = res;
+    const label = new Date(monthKey + '-01').toLocaleDateString('en-US', { month: 'short' });
+    const monthEl = document.createElement('div');
+    monthEl.className = 'month-badge';
+    monthEl.dataset.month = monthKey;
+
+    const drop = document.createElement('div');
+    drop.className = 'blood-drop';
+    drop.textContent = '🩸';
+
+    const count = document.createElement('div');
+    count.className = 'month-count';
+    let completed = 0;
+    let total = 0;
+    let evidenceCount = 0;
+    if (data && data.progress) {
+      completed = parseInt(data.progress.completed_count || 0, 10);
+      total = parseInt(data.progress.total_tasks || 0, 10);
+      evidenceCount = parseInt((data.stats && data.stats.evidence_count) || 0, 10);
+    }
+
+    count.textContent = total > 0 ? `${completed}/${total}` : `${evidenceCount} ev`;
+
+    // Mark complete if tasks met or evidence exists
+    if ((total > 0 && completed >= total) || (total === 0 && evidenceCount > 0)) {
+      monthEl.classList.add('done');
+      monthEl.title = `${label}: complete`;
+    } else {
+      monthEl.title = `${label}: incomplete`;
+    }
+
+    const lbl = document.createElement('div');
+    lbl.className = 'month-label';
+    lbl.textContent = label;
+
+    monthEl.appendChild(drop);
+    const nameWrap = document.createElement('div');
+    nameWrap.style.display = 'flex';
+    nameWrap.style.flexDirection = 'column';
+    nameWrap.appendChild(lbl);
+    monthEl.appendChild(count);
+    monthEl.appendChild(nameWrap);
+
+    monthEl.addEventListener('click', () => {
+      const select = $("currentMonthSelect");
+      if (select) select.value = monthKey;
+      // Render expectations and reload evidence for the selected month
+      renderMonthView(monthKey);
+      loadEvidence(monthKey);
+      // Also update the month status using the check-month endpoint
+      checkMonthStatus();
+    });
+
+    container.appendChild(monthEl);
+  });
+}
+
 function renderMonthlyExpectations(byMonth, allTasks) {
   const container = $("monthlyExpectationsContainer");
   const monthSelect = $("currentMonthSelect");
@@ -413,7 +536,10 @@ function renderMonthlyExpectations(byMonth, allTasks) {
   
   // Update when month changes
   monthSelect.addEventListener("change", () => {
-    renderMonthView(monthSelect.value);
+    const mk = monthSelect.value;
+    renderMonthView(mk);
+    // reload evidence log for selected month
+    loadEvidence(mk);
   });
 }
 
@@ -727,6 +853,12 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
     fd.append("target_task_id", targetTaskId);
   }
   
+  // Lock-to-task mode: bypass AI mapping, treat as asserted relevance
+  const lockToTask = $("scanLockToTask")?.checked;
+  if (lockToTask && targetTaskId) {
+    fd.append("asserted_mapping", "true");
+  }
+  
   try {
     const res = await fetch("/api/scan/upload", {
       method: "POST",
@@ -748,15 +880,27 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
     log(`Scan complete: ${files.length} files → ${currentScanResults.length} evidence items`);
     
     // Count how many tasks were mapped
-    const mappedCount = currentScanResults.reduce((sum, r) => sum + (r.mapped_tasks || 0), 0);
+    const mappedCount = currentScanResults.reduce((sum, r) => {
+      const tasks = r.mapped_tasks;
+      if (Array.isArray(tasks)) return sum + tasks.length;
+      return sum + (r.mapped_count || 0);
+    }, 0);
     if (mappedCount > 0) {
       vampSpeak(`${mappedCount} task mappings created. Refreshing expectations...`);
       // Reload progress and expectations to show updated checkboxes
       setTimeout(() => loadExpectations(), 1000);
     }
     
-    // Auto-refresh evidence log
-    loadEvidenceLog();
+    // Auto-refresh evidence log for the current month
+    try {
+      const monthKey = $("currentMonthSelect")?.value;
+      loadEvidence(monthKey);
+    } catch (e) {
+      loadEvidence();
+    }
+
+    // Refresh the timeline UI
+    updateYearTimeline();
     
     // Close + restore scan section after successful scan
     restoreScanPanelHome({ hide: true });
@@ -787,6 +931,27 @@ function renderScanResults(results) {
     const confidenceClass = confidence >= 0.7 ? 'confidence-high' : confidence >= 0.5 ? 'confidence-medium' : 'confidence-low';
     const needsResolve = confidence < 0.6;
     
+    // Format mapped tasks display
+    const mappedTasks = item.mapped_tasks || [];
+    const mappedCount = Array.isArray(mappedTasks) ? mappedTasks.length : (item.mapped_count || 0);
+    let mappedTasksHtml = `<span style="color:var(--grey-muted);">${mappedCount} tasks</span>`;
+    
+    if (Array.isArray(mappedTasks) && mappedTasks.length > 0) {
+      const taskList = mappedTasks.map(t => 
+        `<div style="font-size:10px;color:var(--text);">• ${t.task_id}: ${t.title} (${(t.confidence * 100).toFixed(0)}%)</div>`
+      ).join('');
+      mappedTasksHtml = `
+        <div style="cursor:pointer;" title="Click to expand" onclick="this.querySelector('.task-details').style.display=this.querySelector('.task-details').style.display==='none'?'block':'none';">
+          <span style="color:var(--green);font-weight:bold;">🔗 ${mappedCount}</span>
+          <div class="task-details" style="display:none;margin-top:4px;padding:4px;background:var(--panel-dark);border-radius:2px;">
+            ${taskList}
+          </div>
+        </div>
+      `;
+    } else if (mappedCount === 0) {
+      mappedTasksHtml = '<span style="color:var(--red);">⚠️ 0</span>';
+    }
+    
     row.innerHTML = `
       <td>${item.date || new Date().toLocaleDateString()}</td>
       <td>${item.file || 'N/A'}</td>
@@ -795,7 +960,7 @@ function renderScanResults(results) {
       <td>${item.tier || 'N/A'}</td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${item.impact_summary || 'N/A'}</td>
       <td class="${confidenceClass}">${(confidence * 100).toFixed(0)}%</td>
-      <td>${item.status || 'Pending'}</td>
+      <td>${mappedTasksHtml}</td>
       <td>
         ${needsResolve ? `<button class="btn-small" onclick="openResolveModal(${idx})">🔧 Resolve</button>` : '<span style="color:#8ff0b2;">✓</span>'}
       </td>
@@ -822,63 +987,103 @@ $("scanRefreshEvidenceBtn")?.addEventListener("click", () => loadEvidence());
    EVIDENCE TAB
 ============================================================ */
 
-async function loadEvidence() {
+async function loadEvidence(monthKey = null) {
   vampBusy("Loading stored evidence…");
-  
+
   try {
-    const res = await fetch(`/api/evidence?staff_id=${$("staffId").value}`);
-    
-    if (!res.ok) throw new Error("Failed to load evidence");
-    
-    const data = await res.json();
-    const evidence = data.evidence || [];
-    
-    const container = $("evidenceTable");
-    if (!container) return;
-    
-    if (evidence.length === 0) {
-      container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--grey-dim);">No evidence stored yet. Scan files to begin.</div>';
+    let data = null;
+
+    if (monthKey) {
+      // Use the progress endpoint to fetch evidence for a specific month
+      const year = $("cycleYear").value;
+      const staff = $("staffId").value;
+      const res = await fetch(`/api/progress?staff_id=${staff}&year=${year}&month=${monthKey}`);
+      if (!res.ok) throw new Error("Failed to load evidence for month");
+      data = await res.json();
+      data = data.evidence ? { evidence: data.evidence } : { evidence: [] };
     } else {
-      container.innerHTML = `
-        <div style="margin-bottom:10px;font-size:13px;color:var(--grey-muted);">
-          Total evidence items: ${evidence.length}
-        </div>
-        <table class="vamp-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>File</th>
-              <th>KPA</th>
-              <th>Task</th>
-              <th>Impact</th>
-              <th>Confidence</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${evidence.map(e => {
-              const conf = e.confidence || 0;
-              const confClass = conf >= 0.7 ? 'confidence-high' : conf >= 0.5 ? 'confidence-medium' : 'confidence-low';
-              return `
-                <tr>
-                  <td>${e.date || 'N/A'}</td>
-                  <td>${e.file || 'N/A'}</td>
-                  <td>${e.kpa || 'N/A'}</td>
-                  <td>${e.task || 'N/A'}</td>
-                  <td style="max-width:250px;">${e.impact || 'N/A'}</td>
-                  <td class="${confClass}">${(conf * 100).toFixed(0)}%</td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-      `;
+      const res = await fetch(`/api/evidence?staff_id=${$("staffId").value}`);
+      if (!res.ok) throw new Error("Failed to load evidence");
+      data = await res.json();
     }
-    
+
+    const evidence = data.evidence || [];
+
+    // Prefer the dedicated evidence log table body if present (avoids legacy container mismatches)
+    const tableBody = $("evidenceLogTableBody");
+    const legacyContainer = $("evidenceTable");
+
+    // Render into the table body if available
+    if (tableBody) {
+      if (evidence.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="8" class="no-data">No evidence stored yet. Use "Scan Evidence" in the Expectations tab.</td></tr>';
+      } else {
+        tableBody.innerHTML = evidence.map(e => {
+          const conf = e.confidence || 0;
+          const confClass = conf >= 0.7 ? 'confidence-high' : conf >= 0.5 ? 'confidence-medium' : 'confidence-low';
+          return `
+            <tr>
+              <td>${e.date || 'N/A'}</td>
+              <td>${e.filename || e.file || 'N/A'}</td>
+              <td>${e.kpa || 'N/A'}</td>
+              <td>${e.task || 'N/A'}</td>
+              <td>${e.month || ''}</td>
+              <td>${e.tier || 'N/A'}</td>
+              <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${e.impact_summary || 'N/A'}</td>
+              <td class="${confClass}">${(conf * 100).toFixed(0)}%</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    } else if (legacyContainer) {
+      // Fallback: render a simpler table into legacy container
+      if (evidence.length === 0) {
+        legacyContainer.innerHTML = '<div style="padding:20px;text-align:center;color:var(--grey-dim);">No evidence stored yet. Scan files to begin.</div>';
+      } else {
+        legacyContainer.innerHTML = `
+          <div style="margin-bottom:10px;font-size:13px;color:var(--grey-muted);">
+            Total evidence items: ${evidence.length}
+          </div>
+          <table class="vamp-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>File</th>
+                <th>KPA</th>
+                <th>Task</th>
+                <th>Impact</th>
+                <th>Confidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${evidence.map(e => {
+                const conf = e.confidence || 0;
+                const confClass = conf >= 0.7 ? 'confidence-high' : conf >= 0.5 ? 'confidence-medium' : 'confidence-low';
+                return `
+                  <tr>
+                    <td>${e.date || 'N/A'}</td>
+                    <td>${e.filename || e.file || 'N/A'}</td>
+                    <td>${e.kpa || 'N/A'}</td>
+                    <td>${e.task || 'N/A'}</td>
+                    <td style="max-width:250px;">${e.impact_summary || 'N/A'}</td>
+                    <td class="${confClass}">${(conf * 100).toFixed(0)}%</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    }
+
     vampIdle();
     log(`Evidence loaded: ${evidence.length} items`);
   } catch (e) {
     vampSpeak("Could not load evidence.");
     log("Evidence error: " + e.message);
+  } finally {
+    // Ensure we always return to idle state even if the DOM didn't match or an error occurred
+    try { if (currentVampState !== 'idle') vampIdle(); } catch (e) {}
   }
 }
 
