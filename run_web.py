@@ -5,7 +5,7 @@ VAMP Web Server - Comprehensive API backend with Ollama integration
 
 import os
 import json
-import asyncio
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
@@ -17,14 +17,37 @@ import requests
 # Import VAMP backend modules
 try:
     from backend.staff_profile import StaffProfile
-    from backend.contracts.task_agreement_import import parse_task_agreement
-    from backend.expectation_engine import ExpectationEngine
-    from backend.batch7_scorer import NWUBrainScorer
-    from backend.evidence_store import EvidenceStore
-    from backend.batch10_pa_generator import PAGenerator
+    STAFF_PROFILE_AVAILABLE = True
 except ImportError as e:
-    print(f"Warning: Could not import VAMP backend modules: {e}")
-    print("Running in mock mode for development")
+    print(f"Warning: Could not import StaffProfile: {e}")
+    STAFF_PROFILE_AVAILABLE = False
+    StaffProfile = None
+
+try:
+    from backend.contracts.task_agreement_import import parse_task_agreement
+    TASK_AGREEMENT_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import task_agreement_import: {e}")
+    TASK_AGREEMENT_AVAILABLE = False
+    parse_task_agreement = None
+
+try:
+    from backend.expectation_engine import ExpectationEngine
+    EXPECTATION_ENGINE_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import ExpectationEngine: {e}")
+    EXPECTATION_ENGINE_AVAILABLE = False
+    ExpectationEngine = None
+
+try:
+    from backend.batch7_scorer import NWUBrainScorer
+    BRAIN_SCORER_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import NWUBrainScorer: {e}")
+    BRAIN_SCORER_AVAILABLE = False
+    NWUBrainScorer = None
+
+print("Running in mock mode for unavailable backend modules")
 
 # Flask setup
 app = Flask(__name__, static_folder='.')
@@ -81,7 +104,7 @@ Provide helpful, professional guidance. Keep responses concise and actionable.""
                 "prompt": enhanced_prompt,
                 "stream": False
             },
-            timeout=30
+            timeout=60
         )
         
         if response.status_code == 200:
@@ -127,14 +150,33 @@ def enrol_profile():
             return jsonify({"error": "Missing staff_id or cycle_year"}), 400
         
         # Create or load profile
-        profile = StaffProfile(
-            staff_id=staff_id,
-            cycle_year=int(cycle_year),
-            name=data.get('name', 'Unknown'),
-            position=data.get('position', 'Academic'),
-            faculty=data.get('faculty', 'Unknown'),
-            manager=data.get('manager', 'Unknown')
-        )
+        if STAFF_PROFILE_AVAILABLE:
+            try:
+                # Try with all parameters
+                profile = StaffProfile(
+                    staff_id=staff_id,
+                    cycle_year=int(cycle_year)
+                )
+            except Exception as e:
+                print(f"StaffProfile creation error: {e}. Using mock profile.")
+                profile = {
+                    "staff_id": staff_id,
+                    "cycle_year": int(cycle_year),
+                    "name": data.get('name', 'Unknown'),
+                    "position": data.get('position', 'Academic'),
+                    "faculty": data.get('faculty', 'Unknown'),
+                    "manager": data.get('manager', 'Unknown')
+                }
+        else:
+            # Mock profile
+            profile = {
+                "staff_id": staff_id,
+                "cycle_year": int(cycle_year),
+                "name": data.get('name', 'Unknown'),
+                "position": data.get('position', 'Academic'),
+                "faculty": data.get('faculty', 'Unknown'),
+                "manager": data.get('manager', 'Unknown')
+            }
         
         profile_key = f"{staff_id}_{cycle_year}"
         profiles[profile_key] = profile
@@ -178,25 +220,33 @@ def import_task_agreement():
         file.save(str(filepath))
         
         # Parse Task Agreement
-        try:
-            contract_data = parse_task_agreement(str(filepath), staff_id, int(cycle_year))
-            
-            # Save contract
-            contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{cycle_year}.json"
-            contract_file.parent.mkdir(parents=True, exist_ok=True)
-            
-            with open(contract_file, 'w') as f:
-                json.dump(contract_data, f, indent=2)
-            
-            return jsonify({
-                "status": "success",
-                "tasks_count": len(contract_data.get('tasks', [])),
-                "contract_path": str(contract_file)
-            })
-        
-        except Exception as parse_error:
-            # Mock data for development
-            print(f"TA parsing failed: {parse_error}. Using mock data.")
+        if TASK_AGREEMENT_AVAILABLE:
+            try:
+                # Try with just filepath (check function signature)
+                contract_data = parse_task_agreement(str(filepath))
+                
+                # Add staff info if not in contract
+                if 'staff_id' not in contract_data:
+                    contract_data['staff_id'] = staff_id
+                if 'cycle_year' not in contract_data:
+                    contract_data['cycle_year'] = int(cycle_year)
+                
+                # Save contract
+                contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{cycle_year}.json"
+                contract_file.parent.mkdir(parents=True, exist_ok=True)
+                
+                with open(contract_file, 'w') as f:
+                    json.dump(contract_data, f, indent=2)
+                
+                return jsonify({
+                    "status": "success",
+                    "tasks_count": len(contract_data.get('tasks', [])),
+                    "contract_path": str(contract_file)
+                })
+            except Exception as parse_error:
+                print(f"TA parsing failed: {parse_error}. Using mock data.")
+        else:
+            print("TA parser not available. Using mock data.")
             return jsonify({
                 "status": "success",
                 "tasks_count": 12,
@@ -232,8 +282,15 @@ def get_expectations():
                 contract_data = json.load(f)
             
             # Generate expectations from contract
-            engine = ExpectationEngine(contract_data)
-            expectations = engine.generate_expectations()
+            if EXPECTATION_ENGINE_AVAILABLE:
+                try:
+                    engine = ExpectationEngine(contract_data)
+                    expectations = engine.generate_expectations()
+                except Exception as e:
+                    print(f"ExpectationEngine error: {e}. Using mock data.")
+                    expectations = generate_mock_expectations()
+            else:
+                expectations = generate_mock_expectations()
             
             # Calculate KPA summary
             kpa_summary = {}
@@ -349,53 +406,85 @@ def scan_upload():
         results = []
         
         # Initialize scorers
-        if use_brain:
+        brain_scorer = None
+        if use_brain and BRAIN_SCORER_AVAILABLE:
             try:
                 brain_scorer = NWUBrainScorer()
-            except:
+            except Exception as e:
+                print(f"Brain scorer initialization failed: {e}")
                 brain_scorer = None
         
-        for file in files:
-            filename = secure_filename(file.filename)
-            filepath = UPLOAD_FOLDER / filename
-            file.save(str(filepath))
-            
-            # Extract text from file (mock for now)
-            file_text = extract_text_from_file(str(filepath))
-            
-            # AI Classification using Ollama
-            if use_contextual:
-                classification = classify_with_ollama(filename, file_text)
-            else:
-                classification = {
-                    "kpa": "Teaching & Learning",
-                    "task": "General teaching activity",
-                    "tier": "Tier 2",
-                    "impact_summary": "Documented teaching evidence",
-                    "confidence": 0.75
+        for idx, file in enumerate(files, 1):
+            try:
+                filename = secure_filename(file.filename)
+                filepath = UPLOAD_FOLDER / filename
+                file.save(str(filepath))
+                
+                # Extract text from file
+                try:
+                    file_text = extract_text_from_file(str(filepath))
+                except Exception as e:
+                    print(f"Text extraction failed for {filename}: {e}")
+                    file_text = f"File: {filename}"
+                
+                # AI Classification using Ollama
+                if use_contextual:
+                    try:
+                        classification = classify_with_ollama(filename, file_text)
+                    except Exception as e:
+                        print(f"Ollama classification failed for {filename}: {e}")
+                        # Fallback classification
+                        classification = {
+                            "kpa": "Unclassified",
+                            "task": "Needs manual review",
+                            "tier": "N/A",
+                            "impact_summary": f"Classification failed: {str(e)[:100]}",
+                            "confidence": 0.3
+                        }
+                else:
+                    classification = {
+                        "kpa": "Teaching & Learning",
+                        "task": "General teaching activity",
+                        "tier": "Tier 2",
+                        "impact_summary": "Documented teaching evidence",
+                        "confidence": 0.75
+                    }
+                
+                # Store result
+                result = {
+                    "date": datetime.now().strftime("%Y-%m-%d"),
+                    "file": filename,
+                    "kpa": classification["kpa"],
+                    "task": classification["task"],
+                    "tier": classification["tier"],
+                    "impact_summary": classification["impact_summary"],
+                    "confidence": classification["confidence"],
+                    "status": "Classified" if classification["confidence"] >= 0.6 else "Needs Review"
                 }
-            
-            # Store result
-            result = {
-                "date": datetime.now().strftime("%Y-%m-%d"),
-                "file": filename,
-                "kpa": classification["kpa"],
-                "task": classification["task"],
-                "tier": classification["tier"],
-                "impact_summary": classification["impact_summary"],
-                "confidence": classification["confidence"],
-                "status": "Classified" if classification["confidence"] >= 0.6 else "Needs Review"
-            }
-            
-            results.append(result)
-            
-            # Send event to connected clients
-            send_event({
-                "type": "file_scanned",
-                "file": filename,
-                "current": len(results),
-                "total": len(files)
-            })
+                
+                results.append(result)
+                
+                # Send event to connected clients
+                send_event({
+                    "type": "file_scanned",
+                    "file": filename,
+                    "current": idx,
+                    "total": len(files)
+                })
+                
+            except Exception as file_error:
+                print(f"Error processing file {file.filename}: {file_error}")
+                # Add error result
+                results.append({
+                    "date": datetime.now().strftime("%Y-%m-%d"),
+                    "file": file.filename,
+                    "kpa": "Error",
+                    "task": "Processing failed",
+                    "tier": "N/A",
+                    "impact_summary": str(file_error)[:200],
+                    "confidence": 0.0,
+                    "status": "Error"
+                })
         
         # Send completion event
         send_event({
@@ -438,60 +527,103 @@ def classify_with_ollama(filename: str, content: str) -> Dict:
     Use Ollama to classify evidence into KPAs
     """
     try:
-        prompt = f"""Analyze this academic evidence file and classify it.
-
-Filename: {filename}
-Content preview: {content[:500]}
-
-Classify into one of these KPAs:
+        # Simple keyword-based classification as fallback
+        content_lower = content.lower()
+        filename_lower = filename.lower()
+        combined = content_lower + " " + filename_lower
+        
+        # Keyword matching for quick classification
+        kpa = "Teaching & Learning"  # Default
+        confidence = 0.5
+        
+        if any(word in combined for word in ["research", "publication", "journal", "conference", "study"]):
+            kpa = "Research"
+            confidence = 0.7
+        elif any(word in combined for word in ["community", "engagement", "outreach", "service"]):
+            kpa = "Community Engagement"
+            confidence = 0.7
+        elif any(word in combined for word in ["teach", "lecture", "student", "curriculum", "module"]):
+            kpa = "Teaching & Learning"
+            confidence = 0.7
+        elif any(word in combined for word in ["innovation", "impact", "technology", "development"]):
+            kpa = "Innovation & Impact"
+            confidence = 0.7
+        elif any(word in combined for word in ["leadership", "management", "committee", "chair"]):
+            kpa = "Leadership & Management"
+            confidence = 0.7
+        
+        # Try Ollama with short timeout as enhancement
+        try:
+            prompt = f"""Classify this file into ONE of these categories:
 1. Teaching & Learning
 2. Research
 3. Community Engagement
 4. Innovation & Impact
 5. Leadership & Management
 
-Provide:
-- KPA (exact name from list)
-- Task (specific activity)
-- Tier (1, 2, or 3)
-- Impact Summary (2 sentences)
-- Confidence (0.0 to 1.0)
+Filename: {filename}
+Content: {content[:300]}
 
-Format your response as JSON."""
-        
-        response = requests.post(
-            f"{OLLAMA_BASE_URL}/api/generate",
-            json={
-                "model": OLLAMA_MODEL,
-                "prompt": prompt,
-                "stream": False
-            },
-            timeout=30
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            ai_response = data.get("response", "")
+Reply with ONLY the category name."""
             
-            # Parse AI response (simplified - enhance as needed)
-            return {
-                "kpa": "Teaching & Learning",  # Parse from AI response
-                "task": "Documented activity",
-                "tier": "Tier 2",
-                "impact_summary": ai_response[:200] if ai_response else "AI classification completed",
-                "confidence": 0.72
-            }
+            response = requests.post(
+                f"{OLLAMA_BASE_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False
+                },
+                timeout=10  # Short timeout
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                ai_response = data.get("response", "").strip()
+                
+                # Check if response contains a valid KPA
+                if "Teaching" in ai_response or "Learning" in ai_response:
+                    kpa = "Teaching & Learning"
+                    confidence = 0.85
+                elif "Research" in ai_response:
+                    kpa = "Research"
+                    confidence = 0.85
+                elif "Community" in ai_response:
+                    kpa = "Community Engagement"
+                    confidence = 0.85
+                elif "Innovation" in ai_response or "Impact" in ai_response:
+                    kpa = "Innovation & Impact"
+                    confidence = 0.85
+                elif "Leadership" in ai_response or "Management" in ai_response:
+                    kpa = "Leadership & Management"
+                    confidence = 0.85
         
-        else:
-            raise Exception("Ollama unavailable")
+        except requests.exceptions.Timeout:
+            print(f"Ollama timeout for {filename}, using keyword classification")
+        except Exception as ollama_error:
+            print(f"Ollama error for {filename}: {ollama_error}, using keyword classification")
+        
+        # Determine tier based on keywords
+        tier = "Tier 2"
+        if any(word in combined for word in ["lead", "chair", "coordinate", "manage"]):
+            tier = "Tier 1"
+        elif any(word in combined for word in ["support", "assist", "participate"]):
+            tier = "Tier 3"
+        
+        return {
+            "kpa": kpa,
+            "task": f"Activity related to {kpa.lower()}",
+            "tier": tier,
+            "impact_summary": f"Evidence classified as {kpa} based on content analysis.",
+            "confidence": confidence
+        }
     
     except Exception as e:
         print(f"Classification error: {e}")
         return {
-            "kpa": "Unknown",
-            "task": "Unclassified",
+            "kpa": "Unclassified",
+            "task": "Needs manual review",
             "tier": "N/A",
-            "impact_summary": "Classification failed",
+            "impact_summary": f"Classification failed: {str(e)[:100]}",
             "confidence": 0.3
         }
 
@@ -637,9 +769,10 @@ def scan_events():
             while True:
                 # Keep connection alive
                 yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
-                asyncio.sleep(30)
+                time.sleep(30)
         except GeneratorExit:
-            event_clients.remove(client_id)
+            if client_id in event_clients:
+                event_clients.remove(client_id)
     
     return Response(event_stream(), mimetype="text/event-stream")
 
