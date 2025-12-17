@@ -1,0 +1,7 @@
+name: vamp-offline-env
+dependencies:
+  - python=3.10
+  - flake8
+  - pip
+  - pip:
+      - any-pypi-dependencies
