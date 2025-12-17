@@ -618,57 +618,114 @@ def check_month_completion():
                 by_month = exp_data.get('by_month', {})
                 month_tasks = by_month.get(month, [])
         
-        # Load evidence for this month
-        evidence_file = EVIDENCE_FOLDER / f"evidence_{staff_id}_{year}.csv"
+        # Use progress store to get accurate per-task evidence counts
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent))
+        from progress_store import ProgressStore
+        
+        store = ProgressStore()
+        
+        # Get evidence mapped to tasks for this month
         evidence_count = 0
-        evidence_by_kpa = {}
+        evidence_by_task = {}
+        task_status = []
         
-        if evidence_file.exists():
-            import csv
-            with open(evidence_file, 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    if row.get('month_bucket', '').startswith(month):
-                        evidence_count += 1
-                        kpa = row.get('kpa_code', 'Unknown')
-                        evidence_by_kpa[kpa] = evidence_by_kpa.get(kpa, 0) + 1
+        # Query evidence for this staff/year/month from progress store
+        try:
+            con = store._connect()
+            cur = con.cursor()
+            
+            # Get unique evidence count
+            cur.execute("""
+                SELECT COUNT(DISTINCT e.evidence_id)
+                FROM evidence e
+                WHERE e.staff_id = ? AND e.year = ? AND e.month_bucket LIKE ?
+            """, (staff_id, int(year), f"{month}%"))
+            evidence_count = cur.fetchone()[0]
+            
+            # Get evidence mapped to tasks (with distinct evidence per task)
+            cur.execute("""
+                SELECT et.task_id, COUNT(DISTINCT et.evidence_id) as count
+                FROM evidence e
+                JOIN evidence_task et ON e.evidence_id = et.evidence_id
+                WHERE e.staff_id = ? AND e.year = ? AND e.month_bucket LIKE ?
+                GROUP BY et.task_id
+            """, (staff_id, int(year), f"{month}%"))
+            
+            for row in cur:
+                task_id = row[0]
+                count = row[1]
+                evidence_by_task[task_id] = count
+            
+            con.close()
+        except Exception as e:
+            print(f"Error querying evidence: {e}")
+            import traceback
+            traceback.print_exc()
         
-        # Calculate completion
-        total_required = sum(task.get('minimum_count', 0) for task in month_tasks)
-        complete = evidence_count >= total_required
+        # Calculate per-task completion
+        tasks_met = 0
+        tasks_total = len(month_tasks)
+        
+        for task in month_tasks:
+            task_id = task.get('id')
+            min_required = task.get('minimum_count', 0)
+            task_evidence_count = evidence_by_task.get(task_id, 0)
+            task_met = task_evidence_count >= min_required
+            
+            if task_met:
+                tasks_met += 1
+            
+            task_status.append({
+                'task_id': task_id,
+                'kpa_code': task.get('kpa_code', 'Unknown'),
+                'title': task.get('title', 'Task'),
+                'evidence_count': task_evidence_count,
+                'minimum_required': min_required,
+                'met': task_met
+            })
+        
+        # Month is complete if all tasks with min_required > 0 are met
+        required_tasks = [t for t in task_status if t['minimum_required'] > 0]
+        complete = all(t['met'] for t in required_tasks) if required_tasks else (evidence_count > 0)
         
         # Build AI analysis prompt
         ai_context = {
             'staff_id': staff_id,
             'month': month,
-            'tasks': len(month_tasks),
+            'tasks_total': tasks_total,
+            'tasks_met': tasks_met,
             'evidence_count': evidence_count,
-            'required': total_required
+            'task_status': task_status
         }
         
         if complete:
-            ai_prompt = f"The staff member has uploaded {evidence_count} evidence items for {month}, meeting the minimum requirement of {total_required}. Provide encouragement and suggest they prepare for next month."
+            ai_prompt = f"The staff member has met all {tasks_met}/{tasks_total} required tasks for {month} with {evidence_count} evidence items. Provide encouragement and suggest they prepare for next month."
         else:
-            missing = total_required - evidence_count
-            ai_prompt = f"The staff member has only uploaded {evidence_count} of {total_required} required evidence items for {month}. They are missing {missing} items. Provide constructive guidance on what evidence types they should focus on."
+            tasks_incomplete = [t for t in required_tasks if not t['met']]
+            incomplete_details = ", ".join([f"{t['kpa_code']}: {t['title']} ({t['evidence_count']}/{t['minimum_required']})" for t in tasks_incomplete[:3]])
+            ai_prompt = f"The staff member has only met {tasks_met}/{tasks_total} tasks for {month}. Incomplete tasks: {incomplete_details}. Provide constructive guidance on what evidence they should focus on."
         
         ai_response = query_ollama(ai_prompt, ai_context)
         
-        # Build detailed summary
-        task_summary = []
-        for task in month_tasks:
-            kpa = task.get('kpa_code', 'Unknown')
-            task_evidence = evidence_by_kpa.get(kpa, 0)
-            task_required = task.get('minimum_count', 0)
-            task_summary.append(f"{kpa}: {task_evidence}/{task_required} items")
+        # Build detailed per-task summary with visual indicators
+        task_summary_lines = []
+        for ts in task_status:
+            if ts['minimum_required'] > 0:
+                status_icon = "✓" if ts['met'] else "⚠"
+                task_summary_lines.append(
+                    f"{status_icon} {ts['kpa_code']}: {ts['title'][:50]} ({ts['evidence_count']}/{ts['minimum_required']} items)"
+                )
         
         return jsonify({
             "complete": complete,
+            "tasks_met": tasks_met,
+            "tasks_total": tasks_total,
             "evidence_count": evidence_count,
-            "required": total_required,
             "message": ai_response,
-            "summary": "\n".join(task_summary) if task_summary else "No tasks for this month",
-            "missing": f"Upload {total_required - evidence_count} more evidence items" if not complete else ""
+            "summary": "\n".join(task_summary_lines) if task_summary_lines else "No tasks for this month",
+            "task_status": task_status,
+            "missing": f"{tasks_total - tasks_met} tasks still need evidence" if not complete else ""
         })
     
     except Exception as e:
@@ -706,12 +763,20 @@ def scan_upload():
                 filepath = UPLOAD_FOLDER / filename
                 file.save(str(filepath))
                 
-                # Extract text from file
+                # Extract text from file with detailed logging
+                file_text = ""
+                extraction_method = "unknown"
                 try:
                     file_text = extract_text_from_file(str(filepath))
+                    text_length = len(file_text.strip())
+                    extraction_method = "vamp_master" if text_length > 50 else "minimal"
+                    print(f"[SCAN] {filename}: extracted {text_length} chars via {extraction_method}")
                 except Exception as e:
-                    print(f"Text extraction failed for {filename}: {e}")
+                    print(f"[SCAN ERROR] Text extraction failed for {filename}: {e}")
+                    import traceback
+                    traceback.print_exc()
                     file_text = f"File: {filename}"
+                    extraction_method = "failed"
                 
                 # AI Classification using Ollama
                 if use_contextual:
@@ -736,22 +801,54 @@ def scan_upload():
                         "confidence": 0.75
                     }
 
-                # Deterministic NWU Brain scoring (optional)
+                # Deterministic NWU Brain scoring (prioritize this for accuracy)
                 brain_ctx = None
                 if brain_enabled:
                     try:
                         brain_ctx = brain_score_evidence(path=Path(filepath), full_text=file_text, kpa_hint_code=None)
+                        # Update classification with brain scorer results if more confident
+                        if brain_ctx:
+                            # Brain scorer provides deterministic KPA routing
+                            old_kpa = classification.get("kpa")
+                            classification["kpa"] = brain_ctx.get("primary_kpa_name", classification.get("kpa"))
+                            classification["tier"] = brain_ctx.get("tier_label", classification.get("tier"))
+                            
+                            # Boost confidence significantly when brain scorer has high route scores
+                            kpa_scores = brain_ctx.get("kpa_route_scores", {})
+                            max_score = max(kpa_scores.values()) if kpa_scores else 0
+                            old_conf = classification.get("confidence", 0.5)
+                            
+                            if max_score >= 2.0:
+                                classification["confidence"] = 0.85
+                            elif max_score >= 1.0:
+                                classification["confidence"] = 0.70
+                            else:
+                                classification["confidence"] = max(0.55, old_conf)
+                            
+                            # Log brain scorer decision
+                            print(f"[BRAIN] {filename}: {brain_ctx.get('primary_kpa_code')} "
+                                  f"(score={max_score:.1f}, conf={classification['confidence']:.2f}, "
+                                  f"tier={classification['tier']})")
+                            if old_kpa != classification["kpa"]:
+                                print(f"[BRAIN] KPA changed: {old_kpa} → {classification['kpa']}")
+                            
+                            # Enhance impact summary with brain insights
+                            values_hits = brain_ctx.get("values_hits", [])
+                            if values_hits:
+                                classification["impact_summary"] += f" | Demonstrates: {', '.join(values_hits[:3])}"
                     except Exception as e:
-                        print(f"Brain scorer failed for {filename}: {e}")
+                        print(f"[BRAIN ERROR] Brain scorer failed for {filename}: {e}")
+                        import traceback
+                        traceback.print_exc()
                         brain_ctx = None
                 
                 # Map KPA name to KPA code (from brain first, else from Ollama classification)
                 kpa_map = {
                     "teaching": "KPA1", "teaching & learning": "KPA1", "teaching and learning": "KPA1",
-                    "ohs": "KPA2", "occupational health": "KPA2",
-                    "research": "KPA3", "innovation": "KPA3",
+                    "ohs": "KPA2", "occupational health": "KPA2", "occupational health & safety": "KPA2",
+                    "research": "KPA3", "innovation": "KPA3", "research & innovation": "KPA3",
                     "leadership": "KPA4", "academic leadership": "KPA4", "administration": "KPA4",
-                    "social": "KPA5", "community": "KPA5", "social responsiveness": "KPA5"
+                    "social": "KPA5", "community": "KPA5", "social responsiveness": "KPA5", "engagement": "KPA5"
                 }
                 kpa_code = None
                 if brain_ctx and brain_ctx.get("primary_kpa_code"):
@@ -769,7 +866,6 @@ def scan_upload():
                 mapped_tasks = []
                 try:
                     import sys
-                    from pathlib import Path
                     sys.path.insert(0, str(Path(__file__).parent))
                     from progress_store import ProgressStore
                     from mapper import ensure_tasks, map_evidence_to_tasks
@@ -913,28 +1009,45 @@ def scan_upload():
         return jsonify({"error": str(e)}), 500
 
 def extract_text_from_file(filepath: str) -> str:
-    """Extract text from various file types"""
-    # Simplified extraction - extend as needed
-    ext = Path(filepath).suffix.lower()
-    
-    if ext == '.txt':
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-            return f.read()
-    
-    elif ext == '.pdf':
-        try:
-            import PyPDF2
-            with open(filepath, 'rb') as f:
-                reader = PyPDF2.PdfReader(f)
-                text = ""
-                for page in reader.pages:
-                    text += page.extract_text()
-                return text
-        except:
-            return f"PDF file: {Path(filepath).name}"
-    
-    else:
-        return f"File: {Path(filepath).name}"
+    """
+    Robust text extraction from various file types with OCR fallback.
+    Supports: PDF, DOCX, XLSX, PPTX, TXT, MD, CSV, and images (PNG, JPG, TIFF, etc.)
+    """
+    try:
+        from backend.vamp_master import extract_text_for
+        result = extract_text_for(Path(filepath))
+        
+        # Log extraction issues
+        if result.extract_status != "ok":
+            print(f"[EXTRACTION] {filepath}: status={result.extract_status}, error={result.extract_error}")
+        
+        return result.extracted_text or f"File: {Path(filepath).name}"
+    except Exception as e:
+        print(f"[EXTRACTION ERROR] {filepath}: {e}")
+        # Fallback to basic extraction
+        ext = Path(filepath).suffix.lower()
+        
+        if ext == '.txt':
+            try:
+                with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                    return f.read()
+            except:
+                pass
+        
+        elif ext == '.pdf':
+            try:
+                import PyPDF2
+                with open(filepath, 'rb') as f:
+                    reader = PyPDF2.PdfReader(f)
+                    text = ""
+                    for page in reader.pages:
+                        text += page.extract_text() or ""
+                    if text.strip():
+                        return text
+            except Exception as pdf_err:
+                print(f"[PDF FALLBACK ERROR] {filepath}: {pdf_err}")
+        
+        return f"File: {Path(filepath).name} (extraction failed)"
 
 def classify_with_ollama(filename: str, content: str) -> Dict:
     """

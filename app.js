@@ -646,30 +646,49 @@ async function checkMonthStatus() {
     const statusPill = $("monthStatusPill");
     const reviewBox = $("monthReviewBox");
     
+    // Build visual per-task progress display
+    const taskStatusHtml = (data.task_status || [])
+      .filter(t => t.minimum_required > 0)
+      .map(t => {
+        const progress = Math.min(100, (t.evidence_count / t.minimum_required) * 100);
+        const statusClass = t.met ? 'ok' : 'bad';
+        const statusIcon = t.met ? '✓' : '⚠';
+        return `
+          <div style="margin-bottom:12px;padding:8px;background:var(--panel);border-radius:4px;border-left:3px solid ${t.met ? 'var(--green)' : 'var(--red)'};">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <span style="font-weight:600;color:var(--text);">${statusIcon} ${t.kpa_code}: ${t.title}</span>
+              <span class="pill ${statusClass}">${t.evidence_count}/${t.minimum_required}</span>
+            </div>
+            <div style="width:100%;height:6px;background:var(--panel-dark);border-radius:3px;overflow:hidden;">
+              <div style="width:${progress}%;height:100%;background:${t.met ? 'var(--green)' : 'var(--purple)'};transition:width 0.3s;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    
     if (data.complete) {
-      statusPill.textContent = "Complete ✓";
+      statusPill.textContent = `Complete ✓ (${data.tasks_met}/${data.tasks_total})`;
       statusPill.className = "pill ok";
       reviewBox.innerHTML = `
-        <div style="color:#8ff0b2;font-weight:bold;margin-bottom:8px;">✓ Month Complete</div>
-        <div>${data.message || 'All expectations for this month have been met.'}</div>
-        <div style="margin-top:12px;padding:12px;background:var(--panel);border-radius:4px;">
-          <strong>Summary:</strong><br/>
-          ${data.summary || 'Evidence uploaded meets or exceeds minimum requirements.'}
-        </div>
+        <div style="color:#8ff0b2;font-weight:bold;margin-bottom:12px;">✓ Month Complete</div>
+        <div style="margin-bottom:12px;">${data.message || 'All expectations for this month have been met.'}</div>
+        <div style="font-weight:600;margin-bottom:8px;">Task Progress:</div>
+        ${taskStatusHtml || '<div class="muted">No task details available</div>'}
       `;
-      vampSpeak(`${monthKey} is complete! All expectations met.`);
+      vampSpeak(`${monthKey} is complete! All ${data.tasks_met} tasks met.`);
     } else {
-      statusPill.textContent = "Incomplete ⚠️";
+      statusPill.textContent = `Incomplete ⚠️ (${data.tasks_met}/${data.tasks_total})`;
       statusPill.className = "pill bad";
       reviewBox.innerHTML = `
-        <div style="color:#ff6b9d;font-weight:bold;margin-bottom:8px;">⚠️ Month Incomplete</div>
-        <div>${data.message || 'Some expectations are not yet met.'}</div>
-        <div style="margin-top:12px;padding:12px;background:var(--panel);border-radius:4px;">
-          <strong>Missing:</strong><br/>
-          ${data.missing || 'Upload more evidence to meet minimum requirements.'}
+        <div style="color:#ff6b9d;font-weight:bold;margin-bottom:12px;">⚠️ Month Incomplete</div>
+        <div style="margin-bottom:12px;">${data.message || 'Some expectations are not yet met.'}</div>
+        <div style="padding:8px;background:var(--panel);border-radius:4px;margin-bottom:12px;color:var(--red);">
+          <strong>Missing:</strong> ${data.missing || 'Upload more evidence to meet requirements.'}
         </div>
+        <div style="font-weight:600;margin-bottom:8px;">Task Progress:</div>
+        ${taskStatusHtml || '<div class="muted">No task details available</div>'}
       `;
-      vampSpeak("This month needs more evidence to meet expectations.");
+      vampSpeak(`This month needs more evidence. ${data.tasks_met} of ${data.tasks_total} tasks complete.`);
     }
     
     log(`Month ${monthKey} status: ${data.complete ? 'Complete' : 'Incomplete'}`);
