@@ -1,0 +1,307 @@
+/* ============================================================
+   FONTS — IDENTITY (Cloister + Cinzel)
+============================================================ */
+
+@font-face {
+  font-family: 'Cloister';
+  src: url('./assets/CloisterBlackLight-axjg.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Cinzel';
+  src: url('./assets/Cinzel-VariableFont_wght.ttf') format('truetype');
+  font-weight: 200 900;
+  font-style: normal;
+}
+
+/* ============================================================
+   ROOT THEME
+============================================================ */
+
+:root {
+  --bg-black: #050307;
+  --bg-panel: #0b070d;
+  --bg-card: #0f0b14;
+
+  --red-main: #c0002f;
+  --red-glow: rgba(200, 0, 50, 0.7);
+  --red-soft: rgba(200, 0, 50, 0.25);
+
+  --grey-text: #e0d8df;
+  --grey-muted: #a39aa3;
+  --grey-dim: #6d6770;
+
+  --border-dark: rgba(255,255,255,0.06);
+  --border-red: rgba(200,0,50,0.35);
+}
+
+/* ============================================================
+   BASE RESET
+============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-black);
+  color: var(--grey-text);
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+/* ============================================================
+   TOPBAR
+============================================================ */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-red);
+  background: linear-gradient(
+    180deg,
+    #0b060f,
+    #050307
+  );
+  box-shadow: 0 0 20px rgba(200,0,50,0.25);
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.title {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  letter-spacing: 1.5px;
+  color: var(--grey-text);
+}
+
+.muted {
+  color: var(--grey-muted);
+  font-size: 12px;
+}
+
+/* ============================================================
+   PILL / STATUS
+============================================================ */
+
+.pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid var(--border-dark);
+}
+
+.pill.bad {
+  border-color: var(--red-soft);
+  color: #ff8a9a;
+}
+
+.pill.ok {
+  border-color: rgba(80,200,120,.5);
+  color: #8ff0b2;
+}
+
+/* ============================================================
+   VAMP AGENT
+============================================================ */
+
+#vamp-agent {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 22px;
+  margin: 22px;
+  padding: 22px;
+  background: radial-gradient(
+    circle at top,
+    rgba(200,0,50,0.12),
+    transparent 55%
+  );
+  border: 1px solid var(--border-red);
+  box-shadow:
+    0 0 40px rgba(200,0,50,0.35),
+    inset 0 0 60px rgba(0,0,0,0.75);
+}
+
+.vamp-video-frame {
+  position: relative;
+  border: 1px solid var(--border-red);
+  overflow: hidden;
+  background: #020102;
+}
+
+.vamp-video-frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter:
+    brightness(0.85)
+    contrast(1.15)
+    saturate(0.85);
+}
+
+.vamp-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 20%,
+      rgba(200,0,50,0.25),
+      transparent 65%);
+}
+
+.vamp-dialogue {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.vamp-name {
+  font-family: 'Cloister', serif;
+  font-size: 38px;
+  letter-spacing: 2px;
+  margin: 0;
+  color: var(--red-main);
+  text-shadow: 0 0 14px var(--red-glow);
+}
+
+.vamp-role {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 1.2px;
+  font-size: 13px;
+  color: var(--grey-muted);
+}
+
+/* ============================================================
+   VAMP BUBBLES
+============================================================ */
+
+.vamp-bubbles {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.vamp-bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    #160912,
+    #0b060f
+  );
+  border: 1px solid var(--border-red);
+  box-shadow: 0 0 12px rgba(200,0,50,0.25);
+  animation: bubbleFloat 0.3s ease-out;
+}
+
+.vamp-bubble.idle {
+  opacity: 0.7;
+}
+
+@keyframes bubbleFloat {
+  from {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   ASK VAMP
+============================================================ */
+
+.ask-vamp {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-top: auto;
+}
+
+#ask-vamp-input {
+  background: #060308;
+  border: 1px solid var(--border-red);
+  color: var(--grey-text);
+  padding: 10px;
+  resize: none;
+  font-family: system-ui, sans-serif;
+}
+
+#ask-vamp-input::placeholder {
+  color: var(--grey-dim);
+}
+
+#ask-vamp-btn {
+  background: linear-gradient(
+    180deg,
+    #7a001e,
+    #400010
+  );
+  color: #fff;
+  border: 1px solid var(--border-red);
+  padding: 10px 16px;
+  cursor: pointer;
+  box-shadow: 0 0 12px var(--red-glow);
+}
+
+#ask-vamp-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* ============================================================
+   EXISTING UI SUPPORT (cards, tabs, etc.)
+============================================================ */
+
+.container {
+  padding: 18px;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.tab {
+  cursor: pointer;
+  padding: 8px 14px;
+  border: 1px solid var(--border-dark);
+}
+
+.tab.active {
+  border-color: var(--border-red);
+  box-shadow: 0 0 10px var(--red-soft);
+}
+
+.panel {
+  display: none;
+}
+
+.panel.active {
+  display: block;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dark);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+/* keep legacy classes visually consistent */
+.btn.glow {
+  box-shadow: 0 0 10px var(--red-glow);
+}

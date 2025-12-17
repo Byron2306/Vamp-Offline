@@ -1,204 +1,171 @@
 from __future__ import annotations
 
 import json
-import textwrap
-from dataclasses import replace
-from typing import Any, Dict, Iterable, List, Sequence
+from pathlib import Path
+from typing import Any, Dict, List, Sequence
 
+from openpyxl import load_workbook
+
+from backend.contracts.pa_generator import DEFAULT_KPA_NAMES, PA_ORDER
 from backend.llm.ollama_client import extract_json_object, query_ollama
-from backend.staff_profile import KPA, KPI, StaffProfile, staff_is_director_level
+from backend.staff_profile import StaffProfile
 
 
 def _normalise(text: str) -> str:
     return " ".join((text or "").lower().split())
 
 
-def _skeleton_lookup(rows: Sequence[Sequence[Any]] | None) -> Dict[str, Dict[str, Any]]:
-    lookup: Dict[str, Dict[str, Any]] = {}
-    if not rows:
-        return lookup
-    for row in rows:
-        if not row:
-            continue
-        name = _normalise(str(row[0] if len(row) > 0 else ""))
-        if not name:
-            continue
-        lookup[name] = {
-            "outcomes": str(row[5]).strip() if len(row) > 5 and row[5] is not None else "",
-            "weight": row[3] if len(row) > 3 else None,
-            "hours": row[4] if len(row) > 4 else None,
-        }
-    return lookup
+def _infer_kpa_code(name: str, idx: int) -> str:
+    name_norm = _normalise(name)
+    for code, label in DEFAULT_KPA_NAMES.items():
+        if code.lower() in name_norm:
+            return code
+        if _normalise(label) in name_norm:
+            return code
+    if name_norm.startswith("kpa") and len(name_norm) >= 4 and name_norm[3].isdigit():
+        return name_norm[:4].upper()
+    if idx < len(PA_ORDER):
+        return PA_ORDER[idx][0]
+    return f"KPA{idx + 1}"
 
 
-def _contract_payload(profile: StaffProfile, skeleton_rows: Sequence[Sequence[Any]] | None) -> Dict[str, Any]:
-    skeleton_map = _skeleton_lookup(skeleton_rows)
-    payload: Dict[str, Any] = {
-        "staff": {
-            "id": profile.staff_id,
-            "name": profile.name,
-            "position": profile.position,
-            "cycle_year": profile.cycle_year,
-            "staff_level": "director" if staff_is_director_level(profile) else "academic",
-        },
-        "kpas": [],
-    }
-
-    for kpa in profile.kpas:
-        key = _normalise(kpa.name)
-        skeleton = skeleton_map.get(key, {})
-        ta_context = kpa.ta_context or {}
-        payload["kpas"].append(
-            {
-                "code": kpa.code,
-                "name": kpa.name,
-                "weight_pct": ta_context.get("weight_pct", kpa.weight),
-                "hours": ta_context.get("hours", kpa.hours),
-                "ta_context": ta_context,
-                "skeleton_outcomes": skeleton.get("outcomes", ""),
-                "existing_kpis": [kp.description for kp in kpa.kpis],
-            }
-        )
-    return payload
-
-
-def _build_prompt(profile: StaffProfile, skeleton_rows: Sequence[Sequence[Any]] | None) -> str:
-    payload = _contract_payload(profile, skeleton_rows)
-    payload_json = json.dumps(payload, ensure_ascii=False, indent=2)
-    prompt = f"""
-    You are enriching a Performance Agreement after the Task Agreement skeleton exists.
-    Use the Task Agreement context and skeleton outcomes to propose measurable outputs, KPIs, and refined outcomes per KPA.
-
-    Staff level: {payload['staff']['staff_level']} (keep hours and weight_pct exactly as provided; do not invent new allocations).
-
-    Contract snapshot (JSON):
-    {payload_json}
-
-    Rules:
-    - Use only the KPA codes provided. Do not add or remove KPAs.
-    - Align outputs and outcomes directly to the TA context (modules, research, leadership, OHS, social responsiveness, etc.).
-    - KPIs must be measurable with clear measure/target/due fields and relevant evidence_types.
-    - Prefer concrete quantities or deadlines over generic "3" targets.
-    - Mark generated content with generated_by_ai=true at both KPA and KPI levels.
-    - Keep existing hours/weight_pct unchanged; you are not allowed to redistribute them.
-
-    Respond ONLY with valid JSON in this shape:
-    {{
-      "kpas": [
-        {{
-          "code": "KPA1",
-          "outputs": ["..."],
-          "kpis": [{{"kpi": "...", "measure": "...", "target": "...", "due": "...", "evidence_types": ["..."], "generated_by_ai": true}}],
-          "outcomes": ["..."],
-          "generated_by_ai": true
-        }}
-      ]
-    }}
-    No narration before or after the JSON.
-    """
-    return textwrap.dedent(prompt).strip()
-
-
-def _choose_block(kpa: KPA, plan: Dict[str, Any]) -> Dict[str, Any]:
-    blocks: Iterable[Dict[str, Any]] = plan.get("kpas", []) or []
-    for block in blocks:
-        if _normalise(str(block.get("code", ""))) == _normalise(kpa.code):
-            return block
-        if _normalise(str(block.get("name", ""))) == _normalise(kpa.name):
-            return block
-    return {}
-
-
-def _as_list(value: Any) -> List[str]:
-    if value is None:
-        return []
+def _list_to_text(value: Any) -> str:
     if isinstance(value, list):
-        return [str(v).strip() for v in value if str(v).strip()]
-    return [str(value).strip()] if str(value).strip() else []
+        return "\n".join(str(v).strip() for v in value if str(v).strip())
+    return str(value).strip()
 
 
-def _apply_plan(profile: StaffProfile, plan: Dict[str, Any], skeleton_rows: Sequence[Sequence[Any]] | None) -> List[KPA]:
-    skeleton_map = _skeleton_lookup(skeleton_rows)
-    updated_kpas: List[KPA] = []
+def load_pa_skeleton(path: Path) -> List[Dict[str, Any]]:
+    wb = load_workbook(path)
+    if "pa-report" not in wb.sheetnames:
+        raise ValueError("Skeleton PA missing 'pa-report' sheet")
+    ws = wb["pa-report"]
 
-    for kpa in profile.kpas:
-        clone = replace(
-            kpa,
-            context=dict(kpa.context or {}),
-            ta_context=dict(kpa.ta_context or {}),
-            kpis=list(kpa.kpis or []),
-        )
-        block = _choose_block(kpa, plan)
-        if not block:
-            updated_kpas.append(clone)
+    headers = [cell.value or "" for cell in ws[2]]
+    rows: List[Dict[str, Any]] = []
+    for idx, cells in enumerate(ws.iter_rows(min_row=3, max_col=len(headers)), start=0):
+        kpa_name = str(cells[0].value or "").strip()
+        if not kpa_name:
             continue
-
-        outputs = _as_list(block.get("outputs"))
-        outcomes = _as_list(block.get("outcomes"))
-        kpis_raw = block.get("kpis") or []
-
-        bullet_outputs = "\n".join(f"• {o}" for o in outputs)
-        bullet_outcomes = "\n".join(f"• {o}" for o in outcomes)
-
-        kpi_count = max(1, len(kpis_raw))
-        per_kpi_weight = float(clone.weight or 0.0) / kpi_count
-        per_kpi_hours = float(clone.hours or 0.0) / kpi_count
-
-        new_kpis: List[KPI] = []
-        for raw in kpis_raw:
-            measure = str(raw.get("measure", "")).strip()
-            target = str(raw.get("target", "")).strip()
-            due = str(raw.get("due", "")).strip()
-            evidence_types = _as_list(raw.get("evidence_types"))
-
-            description = str(raw.get("kpi") or raw.get("description") or "").strip()
-            details = [f"Measure: {measure}" if measure else "", f"Target: {target}" if target else "", f"Due: {due}" if due else ""]
-            evidence_note = "; ".join(evidence_types)
-            if evidence_note:
-                details.append(f"Evidence: {evidence_note}")
-            suffix_bits = [d for d in details if d]
-            if suffix_bits:
-                suffix = "; ".join(suffix_bits)
-                description = f"{description} ({suffix})" if description else suffix
-
-            new_kpis.append(
-                KPI(
-                    description=description,
-                    outputs=bullet_outputs,
-                    outcomes=bullet_outcomes,
-                    measure=measure,
-                    target=target,
-                    due=due,
-                    evidence_types=evidence_types,
-                    generated_by_ai=bool(raw.get("generated_by_ai", True)),
-                    weight=per_kpi_weight,
-                    hours=per_kpi_hours,
-                    active=True,
-                )
-            )
-
-        if new_kpis:
-            clone.kpis = new_kpis
-            clone.context["generated_by_ai"] = bool(block.get("generated_by_ai", True))
-            clone.context["ai_outputs"] = outputs
-            clone.context["ai_outcomes"] = outcomes or [skeleton_map.get(_normalise(kpa.name), {}).get("outcomes", "")]
-
-        updated_kpas.append(clone)
-
-    return updated_kpas
+        row: Dict[str, Any] = {headers[i]: cells[i].value for i in range(len(headers))}
+        row["KPA"] = _infer_kpa_code(kpa_name, idx)
+        row["KPA Name"] = kpa_name
+        rows.append(row)
+    return rows
 
 
-def enrich_pa_with_ai(profile: StaffProfile, skeleton_rows: Sequence[Sequence[Any]] | None) -> Dict[str, Any]:
-    if not profile.kpas:
-        raise ValueError("Profile contains no KPAs to enrich")
+def _derive_ai_path(skeleton_path: Path) -> Path:
+    stem = skeleton_path.stem
+    if "_skeleton" in stem:
+        stem = stem.replace("_skeleton", "_ai")
+    else:
+        stem = f"{stem}_ai"
+    return skeleton_path.with_name(f"{stem}{skeleton_path.suffix}")
 
+
+def save_pa(rows: Sequence[Dict[str, Any]], skeleton_path: Path) -> Path:
+    wb = load_workbook(skeleton_path)
+    if "pa-report" not in wb.sheetnames:
+        raise ValueError("Skeleton PA missing 'pa-report' sheet")
+    ws = wb["pa-report"]
+
+    headers = [cell.value or "" for cell in ws[2]]
+    header_index = {h: idx for idx, h in enumerate(headers)}
+
+    for offset, row in enumerate(rows, start=0):
+        excel_row = 3 + offset
+        for key in ("Outputs", "KPIs", "Outcomes"):
+            if key not in header_index:
+                continue
+            value = row.get(key, "") if isinstance(row, dict) else ""
+            ws.cell(row=excel_row, column=header_index[key] + 1).value = _list_to_text(value)
+
+    out_path = _derive_ai_path(skeleton_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    wb.save(out_path)
+    return out_path
+
+
+def _plan_to_mapping(plan: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    if not isinstance(plan, dict):
+        return {}
+    if "kpas" not in plan:
+        return {k: v for k, v in plan.items() if isinstance(v, dict)}
+
+    mapping: Dict[str, Dict[str, Any]] = {}
+    for block in plan.get("kpas", []) or []:
+        code = str(block.get("code") or block.get("kpa") or block.get("id") or "").strip().upper()
+        if not code:
+            continue
+        mapping[code] = {
+            "outputs": block.get("outputs") or [],
+            "kpis": block.get("kpis") or [],
+            "outcomes": block.get("outcomes") or [],
+        }
+    return mapping
+
+
+def _build_prompt(profile: StaffProfile, rows: Sequence[Dict[str, Any]]) -> str:
+    kpa_lines: List[str] = []
+    for row in rows:
+        kpa_lines.append(
+            f"- {row.get('KPA')}: {row.get('KPA Name', '')} | hours={row.get('Hours', '')} | weight={row.get('Weight', '')}"
+        )
+        outcomes = _list_to_text(row.get("Outcomes", ""))
+        if outcomes:
+            kpa_lines.append(f"  outcomes: {outcomes}")
+    summary = "\n".join(kpa_lines)
+
+    prompt = f"""
+You are enriching an existing NWU Performance Agreement skeleton. The PA already contains one row per KPA on the 'pa-report' sheet.
+Only enrich text fields; never add or remove rows and never change hours/weight.
+
+Staff ID: {profile.staff_id}
+Year: {profile.cycle_year}
+KPA summary:
+{summary}
+
+Rules:
+- Keep the existing KPA codes exactly as provided.
+- Provide concise Outputs, measurable KPIs, and optional refined Outcomes for each KPA.
+- Do NOT create new KPAs, KPIs, or alter hours/weight allocations.
+- Return JSON ONLY in this shape (no narration):
+{{
+  "KPA1": {{"outputs": ["..."], "kpis": ["..."], "outcomes": ["..."]}},
+  "KPA2": {{"outputs": ["..."], "kpis": ["..."], "outcomes": ["..."]}}
+}}
+"""
+    return prompt.strip()
+
+
+def get_ai_json(profile: StaffProfile, skeleton_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     prompt = _build_prompt(profile, skeleton_rows)
     raw = query_ollama(prompt, format="json")
     plan = extract_json_object(raw)
-    if "kpas" not in plan:
-        raise ValueError("AI response missing 'kpas' list")
+    if plan == "AI_FAILED":
+        return {}
+    return _plan_to_mapping(plan)
 
-    updated_kpas = _apply_plan(profile, plan, skeleton_rows)
-    profile.kpas = updated_kpas
-    profile.save()
-    return plan
+
+def enrich_pa_with_ai(profile: StaffProfile, skeleton_path: Path, *, log=None) -> Path:
+    rows = load_pa_skeleton(skeleton_path)
+    ai_plan = get_ai_json(profile, rows)
+
+    if not ai_plan:
+        if log:
+            log("ℹ️ AI_FAILED – keeping skeleton unchanged.")
+        return skeleton_path
+
+    for row in rows:
+        kpa_code = row.get("KPA")
+        ai_block = ai_plan.get(str(kpa_code)) if kpa_code is not None else None
+        if not ai_block:
+            continue
+        row["Outputs"] = ai_block.get("outputs", row.get("Outputs", ""))
+        row["KPIs"] = ai_block.get("kpis", row.get("KPIs", ""))
+        row["Outcomes"] = ai_block.get("outcomes", row.get("Outcomes", ""))
+
+    out_path = save_pa(rows, skeleton_path)
+    if log:
+        log(f"✅ AI enrichment applied: {out_path}")
+    return out_path

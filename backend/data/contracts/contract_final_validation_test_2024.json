@@ -1,0 +1,56 @@
+{
+  "staff_id": "final_validation_test",
+  "name": "Final Validation User",
+  "position": "Lecturer",
+  "cycle_year": 2024,
+  "faculty": "Test Faculty",
+  "line_manager": "",
+  "kpas": [
+    {
+      "code": "KPA1",
+      "name": "Teaching and Learning",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {}
+    },
+    {
+      "code": "KPA2",
+      "name": "Occupational Health and Safety",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {}
+    },
+    {
+      "code": "KPA3",
+      "name": "Research and Innovation / Creative Outputs",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {}
+    },
+    {
+      "code": "KPA4",
+      "name": "Academic Leadership and Management",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {}
+    },
+    {
+      "code": "KPA5",
+      "name": "Social Responsiveness / Community and Industry Engagement",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {}
+    }
+  ],
+  "flags": []
+}

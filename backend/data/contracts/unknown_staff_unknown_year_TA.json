@@ -1,0 +1,359 @@
+{
+  "staff_id": "unknown_staff",
+  "cycle_year": "unknown_year",
+  "total_weight_pct": 99.64341324838647,
+  "valid": true,
+  "kpas": {
+    "KPA1": {
+      "code": "KPA1",
+      "name": "Personal Research, Innovation and/or Creative Outputs",
+      "hours": 100.0,
+      "weight_pct": 5.943112526892585,
+      "outputs": [],
+      "kpis": [],
+      "outcomes": [],
+      "active": true,
+      "context": {
+        "name": "Teaching and Learning (including supervision)",
+        "hours": 1257.62,
+        "weight_pct": 78.57,
+        "norm_hours": 1728.0,
+        "teaching": [
+          "BSTE312 205",
+          "BSTE322 125",
+          "BSTE412 125",
+          "BSTE422 125",
+          "BSTD512 10",
+          "LABD522 10",
+          "BSTE312",
+          "BSTE322",
+          "BSTE522",
+          "Premoderation of assignment BSTE312",
+          "Premoderation of assignment BSTE322",
+          "Premoderation of assignment BSTE412",
+          "Premoderation of assignment BSTE422",
+          "Premoderation of assignment BSTD512",
+          "Premoderation of assignment LABD522"
+        ],
+        "supervision": [
+          "Maarman PH MED"
+        ],
+        "teaching_practice_windows": [
+          "April",
+          "July"
+        ]
+      },
+      "source_sheet": "Task Agreement Form",
+      "row_number": 65,
+      "status": "OK",
+      "validation_note": null
+    },
+    "KPA2": {
+      "code": "KPA2",
+      "name": "Teaching and Learning, including Higher Degree Supervision",
+      "hours": 1337.62,
+      "weight_pct": 79.13967503060705,
+      "outputs": [],
+      "kpis": [],
+      "outcomes": [],
+      "active": true,
+      "context": {
+        "modules": [
+          "BSTE312",
+          "BSTE412",
+          "BSTE322",
+          "BSTE422",
+          "BSTD512",
+          "LABD522"
+        ],
+        "name": "Occupational Health & Safety",
+        "hours": 0.0,
+        "weight_pct": 0.0,
+        "teaching_modules": [
+          "BSTE312",
+          "BSTE412",
+          "BSTE322",
+          "BSTE422",
+          "BSTD512",
+          "LABD522"
+        ],
+        "norm_hours": 1728.0
+      },
+      "source_sheet": "Task Agreement Form",
+      "row_number": 321,
+      "status": "OK",
+      "validation_note": null
+    },
+    "KPA3": {
+      "code": "KPA3",
+      "name": "Academic Leadership, Management and Administration",
+      "hours": 40.0,
+      "weight_pct": 2.3772450107570338,
+      "outputs": [],
+      "kpis": [],
+      "outcomes": [],
+      "active": true,
+      "context": {
+        "name": "Personal Research, Innovation and/or Creative Outputs",
+        "hours": 100.0,
+        "weight_pct": 6.25,
+        "norm_hours": 1728.0,
+        "research": [
+          "Article writing on Promotion of Entrepreneurship",
+          "Article writing on teaching business studies in rural schools",
+          "Attendance of research colloquiums, writing schools, workshops (eg. Ethics, Integrity, Turnitin): Maximum of 60 hours",
+          "BSTE322,BSTD522",
+          "Attend graduation ceremony first semester and second semester"
+        ]
+      },
+      "source_sheet": "Task Agreement Form",
+      "row_number": 330,
+      "status": "OK",
+      "validation_note": null
+    },
+    "KPA4": {
+      "code": "KPA4",
+      "name": "Social Responsiveness and Industry Involvement",
+      "hours": 203.0,
+      "weight_pct": 12.064518429591947,
+      "outputs": [],
+      "kpis": [],
+      "outcomes": [],
+      "active": true,
+      "context": {
+        "name": "Academic Leadership and Administration",
+        "hours": 203.0,
+        "weight_pct": 12.68,
+        "norm_hours": 1728.0,
+        "leadership": [
+          "Research Focus Area/Unit Management Committee meetings: \nMaximum of 20 hours",
+          "Mentorship meetings: 8 hours",
+          "School Management Committee: 24 hours",
+          "Subject Group meetings: 22 hours",
+          "School meetings and functions: 10 hours",
+          "Faculty Forums: Maximum of 6 hours",
+          "Professional development (in accordance with PDP): Maximum of 10 hours"
+        ]
+      },
+      "source_sheet": "Task Agreement Form",
+      "row_number": 389,
+      "status": "OK",
+      "validation_note": null
+    },
+    "KPA5": {
+      "code": "KPA5",
+      "name": "OHS",
+      "hours": 2.0,
+      "weight_pct": 0.1188622505378517,
+      "outputs": [],
+      "kpis": [],
+      "outcomes": [],
+      "active": true,
+      "context": {
+        "name": "Social Responsiveness (Community Engagement / Industry)",
+        "hours": 40.0,
+        "weight_pct": 2.5,
+        "norm_hours": 1728.0,
+        "social": [
+          "Student Training Entrepreneurship Programme"
+        ]
+      },
+      "source_sheet": "Task Agreement Form",
+      "row_number": 394,
+      "status": "OK",
+      "validation_note": null
+    }
+  },
+  "status": "OK",
+  "validation_errors": [],
+  "snapshot": {
+    "sheet": "Task Agreement Form",
+    "grand_totals": [
+      {
+        "section": 1,
+        "sheet": "Task Agreement Form",
+        "row_number": 65,
+        "label": "GRAND TOTAL: SECTION 1",
+        "hours_raw": 100,
+        "weight_raw": 5.943112526892585,
+        "hours": 100.0,
+        "weight_pct": 5.943112526892585
+      },
+      {
+        "section": 2,
+        "sheet": "Task Agreement Form",
+        "row_number": 321,
+        "label": "GRAND TOTAL: SECTION 2",
+        "hours_raw": 1337.62,
+        "weight_raw": 79.13967503060705,
+        "hours": 1337.62,
+        "weight_pct": 79.13967503060705
+      },
+      {
+        "section": 3,
+        "sheet": "Task Agreement Form",
+        "row_number": 330,
+        "label": "GRAND TOTAL: SECTION 3",
+        "hours_raw": 40,
+        "weight_raw": 2.3772450107570338,
+        "hours": 40.0,
+        "weight_pct": 2.3772450107570338
+      },
+      {
+        "section": 4,
+        "sheet": "Task Agreement Form",
+        "row_number": 389,
+        "label": "GRAND TOTAL: SECTION 4",
+        "hours_raw": 203,
+        "weight_raw": 12.064518429591947,
+        "hours": 203.0,
+        "weight_pct": 12.064518429591947
+      },
+      {
+        "section": 5,
+        "sheet": "Task Agreement Form",
+        "row_number": 394,
+        "label": "GRAND TOTAL: SECTION 5",
+        "hours_raw": 2,
+        "weight_raw": 0.1188622505378517,
+        "hours": 2.0,
+        "weight_pct": 0.1188622505378517
+      },
+      {
+        "section": 6,
+        "sheet": "Task Agreement Form",
+        "row_number": 398,
+        "label": "GRAND TOTAL: SECTION 6",
+        "hours_raw": 0,
+        "weight_raw": 0,
+        "hours": 0.0,
+        "weight_pct": 0.0
+      }
+    ],
+    "section_totals": [
+      {
+        "section": 1,
+        "sheet": "Task Agreement Form",
+        "row_number": 65,
+        "label": "GRAND TOTAL: SECTION 1",
+        "hours_raw": 100,
+        "weight_raw": 5.943112526892585,
+        "hours": 100.0,
+        "weight_pct": 5.943112526892585
+      },
+      {
+        "section": 2,
+        "sheet": "Task Agreement Form",
+        "row_number": 321,
+        "label": "GRAND TOTAL: SECTION 2",
+        "hours_raw": 1337.62,
+        "weight_raw": 79.13967503060705,
+        "hours": 1337.62,
+        "weight_pct": 79.13967503060705
+      },
+      {
+        "section": 3,
+        "sheet": "Task Agreement Form",
+        "row_number": 330,
+        "label": "GRAND TOTAL: SECTION 3",
+        "hours_raw": 40,
+        "weight_raw": 2.3772450107570338,
+        "hours": 40.0,
+        "weight_pct": 2.3772450107570338
+      },
+      {
+        "section": 4,
+        "sheet": "Task Agreement Form",
+        "row_number": 389,
+        "label": "GRAND TOTAL: SECTION 4",
+        "hours_raw": 203,
+        "weight_raw": 12.064518429591947,
+        "hours": 203.0,
+        "weight_pct": 12.064518429591947
+      },
+      {
+        "section": 5,
+        "sheet": "Task Agreement Form",
+        "row_number": 394,
+        "label": "GRAND TOTAL: SECTION 5",
+        "hours_raw": 2,
+        "weight_raw": 0.1188622505378517,
+        "hours": 2.0,
+        "weight_pct": 0.1188622505378517
+      },
+      {
+        "section": 6,
+        "sheet": "Task Agreement Form",
+        "row_number": 398,
+        "label": "GRAND TOTAL: SECTION 6",
+        "hours_raw": 0,
+        "weight_raw": 0,
+        "hours": 0.0,
+        "weight_pct": 0.0
+      }
+    ],
+    "modules": [
+      "BSTE312",
+      "BSTE412",
+      "BSTE322",
+      "BSTE422",
+      "BSTD512",
+      "LABD522"
+    ],
+    "ta_parse_report": {
+      "1": {
+        "blocks_detected": [
+          "research_block"
+        ],
+        "rows_consumed": 2,
+        "rows_unconsumed": 0,
+        "unconsumed_examples": []
+      },
+      "2": {
+        "blocks_detected": [
+          "committee_roles",
+          "module_table",
+          "research_block",
+          "supervision",
+          "teaching_practice_windows"
+        ],
+        "rows_consumed": 18,
+        "rows_unconsumed": 0,
+        "unconsumed_examples": []
+      },
+      "3": {
+        "blocks_detected": [],
+        "rows_consumed": 1,
+        "rows_unconsumed": 0,
+        "unconsumed_examples": []
+      },
+      "4": {
+        "blocks_detected": [
+          "committee_roles",
+          "research_block"
+        ],
+        "rows_consumed": 10,
+        "rows_unconsumed": 0,
+        "unconsumed_examples": []
+      },
+      "5": {
+        "blocks_detected": [
+          "committee_roles",
+          "ohs_block"
+        ],
+        "rows_consumed": 0,
+        "rows_unconsumed": 0,
+        "unconsumed_examples": []
+      },
+      "6": {
+        "blocks_detected": [],
+        "rows_consumed": 0,
+        "rows_unconsumed": 0,
+        "unconsumed_examples": []
+      }
+    },
+    "norm_hours": 1728.0,
+    "total_hours": 1682.62,
+    "ta_warnings": []
+  }
+}

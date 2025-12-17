@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>VAMP Offline (HTML)</title>
+  <link rel="stylesheet" href="./vamp.css"/>
+</head>
+
+<body>
+
+<!-- ─────────────────────────────────────────────
+     TOP BAR — PRESERVED + NWU BRANDING
+───────────────────────────────────────────── -->
+<div class="topbar">
+  <div class="brand">
+    <img src="./assets/NWU-holding-shape-digital-white.png"
+         alt="NWU"
+         style="width:40px;height:40px;filter:drop-shadow(0 0 6px rgba(255,0,60,.6));"/>
+    <div>
+      <div class="title">VAMP Offline</div>
+      <div class="muted">Virtual Academic Management Partner — NWU</div>
+    </div>
+  </div>
+
+  <div class="chips" id="statusChips">
+    <span class="pill bad" id="chipProfile">Profile ❌</span>
+    <span class="pill bad" id="chipTA">TA ❌</span>
+    <span class="pill bad" id="chipExp">Expectations ❌</span>
+  </div>
+
+  <div class="right" style="margin-left:auto;">
+    <audio id="vampSound" src="./assets/vamp.wav" preload="auto"></audio>
+    <span class="pill" id="stagePill">Stage: Awaiting enrolment</span>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────
+     VAMP AGENT — CENTRAL, ALWAYS PRESENT
+───────────────────────────────────────────── -->
+<section id="vamp-agent">
+
+  <div class="vamp-video-frame">
+    <video id="vamp-video"
+           src="./assets/vampire.mp4"
+           preload="auto"
+           muted
+           playsinline>
+    </video>
+    <div class="vamp-glow"></div>
+  </div>
+
+  <div class="vamp-dialogue">
+
+    <div class="vamp-identity">
+      <h1 class="vamp-name">VAMP</h1>
+      <div class="vamp-role">Your Performance Guide</div>
+    </div>
+
+    <!-- Floating dialogue bubbles -->
+    <div id="vamp-bubbles" class="vamp-bubbles">
+      <div class="vamp-bubble idle">
+        Awaiting instruction…
+      </div>
+    </div>
+
+    <!-- ALWAYS AVAILABLE Ask-VAMP -->
+    <div class="ask-vamp">
+      <textarea id="ask-vamp-input"
+                placeholder="Ask VAMP for guidance, clarification, or support…"
+                rows="2"></textarea>
+      <button id="ask-vamp-btn" class="btn glow">
+        Ask VAMP
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────
+     ORIGINAL APP CONTAINER — PRESERVED VERBATIM
+───────────────────────────────────────────── -->
+<div class="container">
+
+  <div class="tabs">
+    <div class="tab active" data-tab="enrol">Enrolment</div>
+    <div class="tab" data-tab="expectations">Expectations</div>
+    <div class="tab" data-tab="scan">Scan</div>
+    <div class="tab" data-tab="evidence">Evidence</div>
+    <div class="tab" data-tab="reports">Reports</div>
+    <div class="tab" data-tab="logs">Logs</div>
+  </div>
+
+  <!-- ENROLMENT -->
+  <section class="panel active" id="tab-enrol">
+    <div class="card">
+      <div class="card-h">
+        <div>
+          <div class="card-title">Staff Enrolment</div>
+          <div class="muted">Create/load your profile. This unlocks all actions.</div>
+        </div>
+        <div class="right">
+          <span class="pill" id="profilePill">No profile loaded</span>
+        </div>
+      </div>
+
+      <div class="form grid3">
+        <div><label>Staff ID</label><input id="staffId"/></div>
+        <div><label>Cycle year</label><input id="cycleYear" value="2025"/></div>
+        <div><label>Name</label><input id="name"/></div>
+        <div><label>Position</label><input id="position"/></div>
+        <div><label>Faculty</label><input id="faculty"/></div>
+        <div><label>Manager</label><input id="manager"/></div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn glow" id="enrolBtn">Enrol / Load</button>
+        <button class="btn" id="refreshStatusBtn">Refresh status</button>
+      </div>
+
+      <hr class="sep"/>
+
+      <div class="card-title">Task Agreement Import</div>
+      <div class="muted">Upload your NWU Task Agreement (.xlsx).</div>
+      <div class="row" style="margin-top:10px;">
+        <input type="file" id="taFile" accept=".xlsx"/>
+        <button class="btn glow" id="taUploadBtn">Import TA</button>
+        <span class="pill" id="taPill">No TA imported</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPECTATIONS -->
+  <section class="panel" id="tab-expectations">
+    <div class="card">
+      <div class="card-h">
+        <div>
+          <div class="card-title">Phase A Expectations</div>
+          <div class="muted">Time-bound tasks per KPA.</div>
+        </div>
+        <div class="right">
+          <button class="btn" id="rebuildExpBtn">Rebuild expectations</button>
+        </div>
+      </div>
+
+      <div class="form grid2">
+        <div>
+          <label>Month bucket for progress</label>
+          <input id="progMonth" value="2025-01"/>
+        </div>
+        <div class="row" style="align-items:flex-end;">
+          <button class="btn glow" id="refreshProgressBtn">Refresh progress</button>
+          <span class="pill" id="progPill">—</span>
+        </div>
+      </div>
+
+      <div class="kpa-cards" id="kpaCards" style="margin-top:12px;"></div>
+
+      <div class="box" style="margin-top:12px;">
+        <div class="box-h">Gaps (minimum compliance)</div>
+        <div class="evidence" id="gapBox"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCAN -->
+  <section class="panel" id="tab-scan">
+    <div class="card">
+      <div class="card-h">
+        <div>
+          <div class="card-title">Scanner</div>
+          <div class="muted">Folder scan → classify → store.</div>
+        </div>
+        <div class="right">
+          <span class="pill" id="scanStatus">Idle</span>
+        </div>
+      </div>
+
+      <div class="form grid2">
+        <div>
+          <label>Folder path</label>
+          <input id="scanFolder"/>
+        </div>
+        <div>
+          <label>Month bucket</label>
+          <input id="scanMonth" value="2025-01"/>
+          <div class="row" style="margin-top:6px;">
+            <label class="chk"><input type="checkbox" id="scanUseBrain" checked/> Use scorer</label>
+            <label class="chk"><input type="checkbox" id="scanUseContextual" checked/> Use contextual</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn glow" id="scanStartBtn">Start scan</button>
+        <button class="btn" id="scanStopBtn">Stop</button>
+        <button class="btn" id="scanRefreshEvidenceBtn">Refresh evidence</button>
+      </div>
+
+      <div class="split">
+        <div class="box">
+          <div class="box-h">Activity log</div>
+          <pre class="log" id="scanLog"></pre>
+        </div>
+        <div class="box">
+          <div class="box-h">Evidence (latest)</div>
+          <div class="evidence" id="evidenceList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVIDENCE -->
+  <section class="panel" id="tab-evidence">
+    <div class="card">
+      <div class="card-h">
+        <div>
+          <div class="card-title">Evidence</div>
+          <div class="muted">Stored evidence rows.</div>
+        </div>
+        <div class="right">
+          <button class="btn glow" id="evidenceReloadBtn">Reload</button>
+        </div>
+      </div>
+      <div class="evidence" id="evidenceTable"></div>
+    </div>
+  </section>
+
+  <!-- REPORTS -->
+  <section class="panel" id="tab-reports">
+    <div class="card">
+      <div class="card-h">
+        <div>
+          <div class="card-title">Reports</div>
+          <div class="muted">Final PA generation.</div>
+        </div>
+        <div class="right">
+          <button class="btn glow" id="genPABtn">Generate Final PA</button>
+        </div>
+      </div>
+      <div class="box">
+        <div class="box-h">Output</div>
+        <div class="evidence" id="reportBox"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGS -->
+  <section class="panel" id="tab-logs">
+    <div class="card">
+      <div class="card-h">
+        <div>
+          <div class="card-title">Logs</div>
+          <div class="muted">Client-side log console.</div>
+        </div>
+      </div>
+      <pre class="log" id="appLog"></pre>
+    </div>
+  </section>
+
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>
