@@ -12,3 +12,5 @@ dependencies:
       - pdfplumber
       - openpyxl
       - chardet
+      - flask
+      - flask-cors
