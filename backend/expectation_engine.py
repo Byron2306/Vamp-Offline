@@ -590,6 +590,104 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
     # Generate monthly tasks for each KPA
     tasks: List[Dict[str, Any]] = []
     task_counter = 1
+
+    def _kpa_default_evidence(kpa_code: str) -> List[str]:
+        if kpa_code == "KPA1":
+            return [
+                "lesson plan / teaching plan",
+                "lecture slides / notes",
+                "LMS (eFundi) screenshots or exports",
+                "assessment brief / rubric",
+                "mark sheet / gradebook export",
+                "moderation report / internal moderation evidence",
+                "student feedback / reflection",
+            ]
+        if kpa_code == "KPA2":
+            return [
+                "OHS checklist / inspection evidence",
+                "training certificate",
+                "compliance communication",
+                "incident/near-miss report (if applicable)",
+            ]
+        if kpa_code == "KPA3":
+            return [
+                "manuscript draft / tracked changes",
+                "submission confirmation / email",
+                "ethics application / approval",
+                "grant application pack",
+                "conference submission / acceptance",
+                "research report / progress log",
+            ]
+        if kpa_code == "KPA4":
+            return [
+                "meeting agenda / minutes",
+                "committee report / decision memo",
+                "planning document",
+                "QA / review notes",
+                "emails confirming actions/approvals",
+            ]
+        if kpa_code == "KPA5":
+            return [
+                "event programme / flyer",
+                "attendance register",
+                "stakeholder correspondence",
+                "MoU / engagement letter",
+                "reflection / impact note",
+            ]
+        return ["supporting document", "screenshot / export", "email confirmation"]
+
+    def _what_to_do(kpa_code: str, title: str, outputs: str) -> str:
+        t = (title or "").lower()
+        if kpa_code == "KPA1":
+            if "prep" in t:
+                return "Prepare module materials, update LMS (eFundi), and confirm schedules/readings."
+            if "start" in t:
+                return "Launch the semester: onboarding/orientation, first lectures, and initial assessments."
+            if "mid-term" in t or "mid term" in t:
+                return "Run mid-term assessments and provide feedback/interventions where needed."
+            if "exams" in t or "exam" in t:
+                return "Set/invigilate assessments, mark scripts, and submit grades according to deadlines."
+            if "marks" in t or "moderation" in t or "quality assurance" in t:
+                return "Finalise marks, complete moderation/QA, and store evidence of compliance and quality."
+            return "Deliver teaching activities and capture evidence of delivery, assessment, and learner support."
+        if kpa_code == "KPA2":
+            return "Complete the compliance activity and retain proof (checklists, certificates, or emails)."
+        if kpa_code == "KPA3":
+            if "ethics" in t:
+                return "Prepare and submit ethics documentation or track approval progress."
+            if "grant" in t or "nrf" in t or "rating" in t:
+                return "Prepare and submit the application package; keep submission confirmations."
+            if "publication" in t or "manuscript" in t:
+                return "Draft/revise a manuscript and progress it through submission or review stages."
+            if "supervision" in t:
+                return "Hold supervision meetings, track milestones, and file progress notes."
+            return "Advance research outputs and keep artefacts showing progress and submissions."
+        if kpa_code == "KPA4":
+            return "Complete the admin/leadership activity and retain minutes, reports, and approvals."
+        if kpa_code == "KPA5":
+            return "Deliver the engagement activity and retain proof of participation and impact."
+        return outputs or "Complete the activity and retain supporting evidence."
+
+    def _evidence_required(kpa_code: str, evidence_hints: List[str], outputs: str) -> str:
+        base = _kpa_default_evidence(kpa_code)
+        # Keep hints readable; avoid dumping huge module strings as a single 'hint'
+        hints = [h for h in (evidence_hints or []) if isinstance(h, str) and len(h.strip()) > 0]
+        # De-dup while preserving order
+        seen: set[str] = set()
+        combined: List[str] = []
+        for item in base + hints:
+            norm = item.strip()
+            if not norm:
+                continue
+            key = norm.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            combined.append(norm)
+        if outputs:
+            combined.insert(0, f"Output evidence: {outputs}")
+        # Limit length for UI readability
+        return "; ".join(combined[:10])
     
     # KPA1: Teaching (NWU 2025 Academic Calendar aligned)
     kpa1_hours = kpa_summary.get("KPA1", {}).get("hours", 0.0)
@@ -634,7 +732,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "minimum_count": 3 if month in [2,3,4,5,8,9,10,11] else 2,  # Higher expectations during teaching months
                 "stretch_count": 5 if month in [2,3,4,5,8,9,10,11] else 3,
                 "evidence_hints": ["lecture", "assessment", "efundi", "lms", "class", "tutorial", "marks", teaching_modules_str],
-                "outputs": f"{task_description} | Modules: {teaching_modules_str}"
+                "outputs": f"{task_description} | Modules: {teaching_modules_str}",
+                "what_to_do": _what_to_do("KPA1", task_title, task_description),
+                "evidence_required": _evidence_required(
+                    "KPA1",
+                    ["lecture", "assessment", "efundi", "lms", "class", "tutorial", "marks"],
+                    f"{task_description} | Modules: {teaching_modules_str}",
+                ),
             })
             task_counter += 1
         
@@ -649,7 +753,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "minimum_count": 1,
             "stretch_count": 1,
             "evidence_hints": ["marks", "gradebook", "submission", "assessment", "semester 1", teaching_modules_str],
-            "outputs": f"Semester 1 assessment completion for {teaching_modules_str}"
+            "outputs": f"Semester 1 assessment completion for {teaching_modules_str}",
+            "what_to_do": _what_to_do("KPA1", f"Semester 1 marks submission deadline - {teaching_modules_str}", ""),
+            "evidence_required": _evidence_required(
+                "KPA1",
+                ["marks", "gradebook", "submission", "assessment", "semester 1"],
+                f"Semester 1 assessment completion for {teaching_modules_str}",
+            ),
         })
         task_counter += 1
         
@@ -663,7 +773,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "minimum_count": 1,
             "stretch_count": 1,
             "evidence_hints": ["moderation", "marks", "exam", "final", "year-end", teaching_modules_str],
-            "outputs": f"Year-end assessment completion and moderation for {teaching_modules_str}"
+            "outputs": f"Year-end assessment completion and moderation for {teaching_modules_str}",
+            "what_to_do": _what_to_do("KPA1", f"Year-end marks and moderation - {teaching_modules_str}", ""),
+            "evidence_required": _evidence_required(
+                "KPA1",
+                ["moderation", "marks", "exam", "final", "year-end"],
+                f"Year-end assessment completion and moderation for {teaching_modules_str}",
+            ),
         })
         task_counter += 1
         
@@ -678,7 +794,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "minimum_count": 2,
             "stretch_count": 4,
             "evidence_hints": ["moderation", "peer review", "quality", "evaluation", teaching_modules_str],
-            "outputs": f"Module evaluation and improvement for {teaching_modules_str}"
+            "outputs": f"Module evaluation and improvement for {teaching_modules_str}",
+            "what_to_do": _what_to_do("KPA1", f"Module quality assurance - {teaching_modules_str}", ""),
+            "evidence_required": _evidence_required(
+                "KPA1",
+                ["moderation", "peer review", "quality", "evaluation"],
+                f"Module evaluation and improvement for {teaching_modules_str}",
+            ),
         })
         task_counter += 1
     
@@ -694,7 +816,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "minimum_count": 1,
             "stretch_count": 1,
             "evidence_hints": ["ohs", "safety", "compliance", "training", "popia", "dalro"],
-            "outputs": "; ".join(ohs[:2]) if ohs else "OHS compliance activities"
+            "outputs": "; ".join(ohs[:2]) if ohs else "OHS compliance activities",
+            "what_to_do": _what_to_do("KPA2", "OHS compliance check", ""),
+            "evidence_required": _evidence_required(
+                "KPA2",
+                ["ohs", "safety", "compliance", "training", "popia", "dalro"],
+                "; ".join(ohs[:2]) if ohs else "OHS compliance activities",
+            ),
         })
         task_counter += 1
     
@@ -729,7 +857,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "minimum_count": 2 if month in [3,6,9,11] else 1,  # Higher expectations in key months
                 "stretch_count": 4 if month in [3,6,9,11] else 3,
                 "evidence_hints": ["draft", "manuscript", "ethics", "grant", "submission", "review", "publication", "conference", "nrf"],
-                "outputs": f"{focus_area} | " + ("; ".join(research[:2]) if research else "Research activities as per TA")
+                "outputs": f"{focus_area} | " + ("; ".join(research[:2]) if research else "Research activities as per TA"),
+                "what_to_do": _what_to_do("KPA3", focus_area, ""),
+                "evidence_required": _evidence_required(
+                    "KPA3",
+                    ["draft", "manuscript", "ethics", "grant", "submission", "review", "publication", "conference", "nrf"],
+                    f"{focus_area} | " + ("; ".join(research[:2]) if research else "Research activities as per TA"),
+                ),
             })
             task_counter += 1
         
@@ -744,7 +878,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "minimum_count": 1,
             "stretch_count": 2,
             "evidence_hints": ["nrf", "grant", "rating", "application", "submission"],
-            "outputs": "NRF funding application or rating improvement"
+            "outputs": "NRF funding application or rating improvement",
+            "what_to_do": _what_to_do("KPA3", "NRF grant application / Rating submission", ""),
+            "evidence_required": _evidence_required(
+                "KPA3",
+                ["nrf", "grant", "rating", "application", "submission"],
+                "NRF funding application or rating improvement",
+            ),
         })
         task_counter += 1
         
@@ -758,7 +898,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "minimum_count": 1,
             "stretch_count": 2,
             "evidence_hints": ["publication", "conference", "acceptance", "submission", "doi"],
-            "outputs": "Research publication submission or conference acceptance"
+            "outputs": "Research publication submission or conference acceptance",
+            "what_to_do": _what_to_do("KPA3", "Mid-year research output (publication/conference)", ""),
+            "evidence_required": _evidence_required(
+                "KPA3",
+                ["publication", "conference", "acceptance", "submission", "doi"],
+                "Research publication submission or conference acceptance",
+            ),
         })
         task_counter += 1
         
@@ -772,7 +918,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "minimum_count": 1,
             "stretch_count": 2,
             "evidence_hints": ["publication", "accepted", "doi", "journal", "accredited", "subsidy"],
-            "outputs": "Accredited research publication for subsidy purposes"
+            "outputs": "Accredited research publication for subsidy purposes",
+            "what_to_do": _what_to_do("KPA3", "Year-end research output (accredited publication)", ""),
+            "evidence_required": _evidence_required(
+                "KPA3",
+                ["publication", "accepted", "doi", "journal", "accredited", "subsidy"],
+                "Accredited research publication for subsidy purposes",
+            ),
         })
         task_counter += 1
         
@@ -787,7 +939,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "minimum_count": 4,
             "stretch_count": 8,
             "evidence_hints": ["supervision", "postgraduate", "masters", "phd", "meeting", "progress report"],
-            "outputs": "Postgraduate student supervision and progress monitoring"
+            "outputs": "Postgraduate student supervision and progress monitoring",
+            "what_to_do": _what_to_do("KPA3", "Postgraduate supervision meetings & progress tracking", ""),
+            "evidence_required": _evidence_required(
+                "KPA3",
+                ["supervision", "postgraduate", "masters", "phd", "meeting", "progress report"],
+                "Postgraduate student supervision and progress monitoring",
+            ),
         })
         task_counter += 1
     
@@ -822,7 +980,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "minimum_count": 2 if month in [3,6,9,12] else 1,  # Higher expectations in key governance months
                 "stretch_count": 4 if month in [3,6,9,12] else 2,
                 "evidence_hints": ["meeting", "minutes", "committee", "chair", "agenda", "administration", "senate", "faculty board"],
-                "outputs": f"{focus_area} | " + ("; ".join(leadership[:2]) if leadership else "Leadership activities as per TA")
+                "outputs": f"{focus_area} | " + ("; ".join(leadership[:2]) if leadership else "Leadership activities as per TA"),
+                "what_to_do": _what_to_do("KPA4", focus_area, ""),
+                "evidence_required": _evidence_required(
+                    "KPA4",
+                    ["meeting", "minutes", "committee", "chair", "agenda", "administration", "senate", "faculty board"],
+                    f"{focus_area} | " + ("; ".join(leadership[:2]) if leadership else "Leadership activities as per TA"),
+                ),
             })
             task_counter += 1
         
@@ -837,7 +1001,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "minimum_count": 1,
             "stretch_count": 1,
             "evidence_hints": ["performance review", "mid-year", "staff development", "mentoring"],
-            "outputs": "Staff performance reviews and development planning"
+            "outputs": "Staff performance reviews and development planning",
+            "what_to_do": _what_to_do("KPA4", "Mid-year performance reviews & staff development", ""),
+            "evidence_required": _evidence_required(
+                "KPA4",
+                ["performance review", "mid-year", "staff development", "mentoring"],
+                "Staff performance reviews and development planning",
+            ),
         })
         task_counter += 1
         
@@ -851,7 +1021,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "minimum_count": 2,
             "stretch_count": 4,
             "evidence_hints": ["accreditation", "quality assurance", "programme review", "heqc", "cheps"],
-            "outputs": "Programme accreditation documentation and quality reviews"
+            "outputs": "Programme accreditation documentation and quality reviews",
+            "what_to_do": _what_to_do("KPA4", "Programme accreditation & quality assurance", ""),
+            "evidence_required": _evidence_required(
+                "KPA4",
+                ["accreditation", "quality assurance", "programme review", "heqc", "cheps"],
+                "Programme accreditation documentation and quality reviews",
+            ),
         })
         task_counter += 1
     
@@ -869,7 +1045,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "minimum_count": 1,
                 "stretch_count": 2,
                 "evidence_hints": ["community", "engagement", "outreach", "school", "workshop", "industry"],
-                "outputs": "; ".join(social[:2]) if social else "Community engagement activities"
+                "outputs": "; ".join(social[:2]) if social else "Community engagement activities",
+                "what_to_do": _what_to_do("KPA5", "Community engagement / industry involvement", ""),
+                "evidence_required": _evidence_required(
+                    "KPA5",
+                    ["community", "engagement", "outreach", "school", "workshop", "industry"],
+                    "; ".join(social[:2]) if social else "Community engagement activities",
+                ),
             })
             task_counter += 1
     

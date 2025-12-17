@@ -26,6 +26,49 @@ let currentScanResults = [];
 let currentResolveItem = null;
 let currentScanTargetTaskId = null;
 
+// Scan panel DOM home (so we can move it inline under a month/KPA and restore safely)
+let scanPanelHome = null;
+
+function rememberScanPanelHome() {
+  if (scanPanelHome) return;
+  const section = $("scanEvidenceSection");
+  if (!section || !section.parentNode) return;
+  scanPanelHome = {
+    parent: section.parentNode,
+    nextSibling: section.nextSibling
+  };
+}
+
+function restoreScanPanelHome({ hide = true } = {}) {
+  const section = $("scanEvidenceSection");
+  if (!section || !scanPanelHome?.parent) return;
+
+  const { parent, nextSibling } = scanPanelHome;
+  if (nextSibling && nextSibling.parentNode === parent) {
+    parent.insertBefore(section, nextSibling);
+  } else {
+    parent.appendChild(section);
+  }
+
+  if (hide) section.style.display = "none";
+}
+
+function attachScanPanelTo(hostEl) {
+  const section = $("scanEvidenceSection");
+  if (!section || !hostEl) return;
+  rememberScanPanelHome();
+  hostEl.appendChild(section);
+  section.style.display = "block";
+}
+
+function clearTargetedScanState() {
+  currentScanTargetTaskId = null;
+  const targetInput = $("scanTargetTaskId");
+  if (targetInput) targetInput.value = "";
+  const targetLabel = $("scanTargetTaskLabel");
+  if (targetLabel) targetLabel.style.display = "none";
+}
+
 /* ============================================================
    VAMP AGENT CONTROL — VIDEO STATE MANAGEMENT
 ============================================================ */
@@ -377,6 +420,10 @@ function renderMonthlyExpectations(byMonth, allTasks) {
 function renderMonthView(monthKey) {
   const container = $("monthlyExpectationsContainer");
   if (!container || !window.currentByMonth) return;
+
+  // If the scan panel was previously moved inside the month container,
+  // restore it before wiping the container to avoid losing it.
+  restoreScanPanelHome({ hide: true });
   
   container.innerHTML = "";
   
@@ -425,6 +472,13 @@ function renderMonthView(monthKey) {
     const kpaHeader = document.createElement("div");
     kpaHeader.style.cssText = "background:var(--purple);color:white;padding:12px 16px;font-weight:bold;";
     kpaHeader.innerHTML = `${code}: ${kpaData.name}`;
+
+    // Host container where the scan panel can be moved inline for this KPA
+    const scanHost = document.createElement("div");
+    scanHost.id = `scanHost-${monthKey}-${code}`;
+    scanHost.dataset.month = monthKey;
+    scanHost.dataset.kpa = code;
+    scanHost.style.cssText = "padding:12px;background:var(--panel-dark);";
     
     // Tasks for this KPA
     const tasksList = document.createElement("div");
@@ -439,10 +493,19 @@ function renderMonthView(monthKey) {
       checkbox.id = `task-${task.id}`;
       checkbox.style.cssText = "margin-right:12px;margin-top:4px;";
       checkbox.dataset.taskId = task.id;
+      checkbox.checked = !!taskCompletionMap[task.id];
+      checkbox.disabled = true;
       
       const label = document.createElement("label");
       label.htmlFor = `task-${task.id}`;
       label.style.cssText = "flex:1;cursor:pointer;";
+
+      const outputsText = (task.outputs || task.output || "").toString().trim();
+      const whatToDoText = (task.what_to_do || task.description || "").toString().trim();
+      const evidenceReqText = (task.evidence_required || "").toString().trim();
+      const hintsArr = Array.isArray(task.evidence_hints) ? task.evidence_hints : [];
+      const hintsText = hintsArr.length ? hintsArr.join(", ") : "";
+
       label.innerHTML = `
         <div style="font-weight:bold;margin-bottom:4px;">${task.title}</div>
         <div style="font-size:11px;color:var(--grey-muted);">
@@ -450,7 +513,10 @@ function renderMonthView(monthKey) {
           <span style="margin-right:12px;">🎯 Required: ${task.minimum_count}</span>
           <span>⭐ Stretch: ${task.stretch_count}</span>
         </div>
-        ${task.outputs ? `<div style="font-size:10px;color:var(--grey-dim);margin-top:4px;">Outputs: ${task.outputs}</div>` : ''}
+        ${whatToDoText ? `<div style="font-size:11px;color:var(--grey-dim);margin-top:6px;"><strong>What to do:</strong> ${whatToDoText}</div>` : ''}
+        ${outputsText ? `<div style="font-size:11px;color:var(--grey-dim);margin-top:6px;"><strong>Activity / output:</strong> ${outputsText}</div>` : ''}
+        ${evidenceReqText ? `<div style="font-size:11px;color:var(--grey-dim);margin-top:4px;"><strong>Evidence required:</strong> ${evidenceReqText}</div>` : ''}
+        ${hintsText ? `<div style="font-size:11px;color:var(--grey-dim);margin-top:4px;"><strong>Evidence examples:</strong> ${hintsText}</div>` : ''}
       `;
       
       const aiBtn = document.createElement("button");
@@ -475,8 +541,8 @@ function renderMonthView(monthKey) {
         const scanMonth = $("scanMonth");
         if (scanMonth) scanMonth.value = monthKey;
 
-        const section = $("scanEvidenceSection");
-        if (section) section.style.display = "block";
+        // Move scan panel inline under this KPA section
+        attachScanPanelTo(scanHost);
         vampSpeak("Upload evidence for the selected task.");
       };
       
@@ -489,6 +555,7 @@ function renderMonthView(monthKey) {
     });
     
     kpaSection.appendChild(kpaHeader);
+    kpaSection.appendChild(scanHost);
     kpaSection.appendChild(tasksList);
     container.appendChild(kpaSection);
   });
@@ -672,16 +739,9 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
     // Auto-refresh evidence log
     loadEvidenceLog();
     
-    // Close scan section after successful scan
-    const section = $("scanEvidenceSection");
-    if (section) section.style.display = "none";
-
-    // Clear targeted scan state
-    currentScanTargetTaskId = null;
-    const targetInput = $("scanTargetTaskId");
-    if (targetInput) targetInput.value = "";
-    const targetLabel = $("scanTargetTaskLabel");
-    if (targetLabel) targetLabel.style.display = "none";
+    // Close + restore scan section after successful scan
+    restoreScanPanelHome({ hide: true });
+    clearTargetedScanState();
   } catch (e) {
     vampSpeak("Scan failed. Please check the server logs.");
     $("scanStatus").textContent = "Error";
@@ -1056,19 +1116,35 @@ function connectEventStream() {
 
 $("scanEvidenceBtn")?.addEventListener("click", () => {
   const section = $("scanEvidenceSection");
-  if (section) {
-    section.style.display = section.style.display === "none" ? "block" : "none";
-    if (section.style.display === "block") {
-      vampSpeak("Upload your evidence files and I'll classify them for you.");
-    }
+  if (!section) return;
+
+  const isVisible = section.style.display !== "none";
+  if (isVisible) {
+    restoreScanPanelHome({ hide: true });
+    clearTargetedScanState();
+    return;
   }
+
+  // Prefer showing inline under the first KPA of the currently selected month
+  const monthKey = $("currentMonthSelect")?.value;
+  let host = null;
+  if (monthKey) {
+    host = document.querySelector(`#monthlyExpectationsContainer [id^="scanHost-${monthKey}-"]`);
+  }
+
+  if (host) {
+    attachScanPanelTo(host);
+  } else {
+    rememberScanPanelHome();
+    section.style.display = "block";
+  }
+
+  vampSpeak("Upload your evidence files and I'll classify them for you.");
 });
 
 $("closeScanSection")?.addEventListener("click", () => {
-  const section = $("scanEvidenceSection");
-  if (section) {
-    section.style.display = "none";
-  }
+  restoreScanPanelHome({ hide: true });
+  clearTargetedScanState();
 });
 
 /* ============================================================
@@ -1153,6 +1229,9 @@ document.addEventListener("DOMContentLoaded", () => {
   vampIdle();
   log("VAMP interface initialised.");
   log("System ready. Begin by enrolling your profile.");
+
+  // Capture the scan panel's original DOM location so we can move it inline and restore safely
+  rememberScanPanelHome();
   
   // Connect event stream for real-time updates
   connectEventStream();

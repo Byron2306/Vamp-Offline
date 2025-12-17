@@ -787,9 +787,10 @@ def scan_upload():
                     else:
                         ensure_tasks(store, staff_id=staff_id, year=int(month[:4]), expectations=None)
                     
-                    # Generate evidence ID
-                    evidence_id = f"ev_{staff_id}_{month}_{hashlib.md5(filename.encode()).hexdigest()[:8]}"
-                    sha1 = hashlib.sha1(file_text.encode()).hexdigest()
+                    # Generate evidence ID (avoid collisions when filenames repeat)
+                    # Use content sha1 prefix to be unique-per-content and idempotent on re-scan.
+                    sha1 = hashlib.sha1(file_text.encode(errors="ignore")).hexdigest()
+                    evidence_id = f"ev_{staff_id}_{month}_{sha1[:10]}"
                     
                     # If a target task was provided, prefer its KPA and map directly
                     if target_task_id:

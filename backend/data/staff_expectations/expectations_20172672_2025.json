@@ -38,13 +38,13 @@
       "id": "task_001",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Semester 1 Prep: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         1
       ],
       "minimum_count": 2,
-      "stretch_count": 4,
+      "stretch_count": 3,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -52,21 +52,24 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Module preparation | eFundi setup | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Prepare module materials, update LMS (eFundi), and confirm schedules/readings.",
+      "evidence_required": "Output evidence: Module preparation | eFundi setup | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_002",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Semester 1 Start: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         2
       ],
-      "minimum_count": 2,
-      "stretch_count": 4,
+      "minimum_count": 3,
+      "stretch_count": 5,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -74,21 +77,24 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Orientation week | First lectures | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Launch the semester: onboarding/orientation, first lectures, and initial assessments.",
+      "evidence_required": "Output evidence: Orientation week | First lectures | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_003",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Semester 1 Teaching: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         3
       ],
-      "minimum_count": 2,
-      "stretch_count": 4,
+      "minimum_count": 3,
+      "stretch_count": 5,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -96,21 +102,24 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Regular lectures | Formative assessments | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Deliver teaching activities and capture evidence of delivery, assessment, and learner support.",
+      "evidence_required": "Output evidence: Regular lectures | Formative assessments | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_004",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Semester 1 Mid-term: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         4
       ],
-      "minimum_count": 2,
-      "stretch_count": 4,
+      "minimum_count": 3,
+      "stretch_count": 5,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -118,21 +127,24 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Mid-term assessments | Student feedback | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Run mid-term assessments and provide feedback/interventions where needed.",
+      "evidence_required": "Output evidence: Mid-term assessments | Student feedback | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_005",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Semester 1 Completion: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         5
       ],
-      "minimum_count": 2,
-      "stretch_count": 4,
+      "minimum_count": 3,
+      "stretch_count": 5,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -140,21 +152,24 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Final lectures | Semester tests | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Deliver teaching activities and capture evidence of delivery, assessment, and learner support.",
+      "evidence_required": "Output evidence: Final lectures | Semester tests | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_006",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Semester 1 Exams: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         6
       ],
       "minimum_count": 2,
-      "stretch_count": 4,
+      "stretch_count": 3,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -162,21 +177,24 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Exam invigilation | Marking | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Set/invigilate assessments, mark scripts, and submit grades according to deadlines.",
+      "evidence_required": "Output evidence: Exam invigilation | Marking | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_007",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Mid-Year Break: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         7
       ],
       "minimum_count": 2,
-      "stretch_count": 4,
+      "stretch_count": 3,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -184,21 +202,24 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Semester 2 planning | Module revisions | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Deliver teaching activities and capture evidence of delivery, assessment, and learner support.",
+      "evidence_required": "Output evidence: Semester 2 planning | Module revisions | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_008",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Semester 2 Start: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         8
       ],
-      "minimum_count": 2,
-      "stretch_count": 4,
+      "minimum_count": 3,
+      "stretch_count": 5,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -206,21 +227,24 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Welcome back | Semester 2 lectures begin | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Launch the semester: onboarding/orientation, first lectures, and initial assessments.",
+      "evidence_required": "Output evidence: Welcome back | Semester 2 lectures begin | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_009",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Semester 2 Teaching: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         9
       ],
-      "minimum_count": 2,
-      "stretch_count": 4,
+      "minimum_count": 3,
+      "stretch_count": 5,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -228,21 +252,24 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Regular lectures | Formative assessments | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Deliver teaching activities and capture evidence of delivery, assessment, and learner support.",
+      "evidence_required": "Output evidence: Regular lectures | Formative assessments | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_010",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Semester 2 Mid-term: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         10
       ],
-      "minimum_count": 2,
-      "stretch_count": 4,
+      "minimum_count": 3,
+      "stretch_count": 5,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -250,21 +277,24 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Mid-term assessments | Student feedback | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Run mid-term assessments and provide feedback/interventions where needed.",
+      "evidence_required": "Output evidence: Mid-term assessments | Student feedback | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_011",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Semester 2 Completion: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         11
       ],
-      "minimum_count": 2,
-      "stretch_count": 4,
+      "minimum_count": 3,
+      "stretch_count": 5,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -272,21 +302,24 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Final lectures | Semester tests | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Deliver teaching activities and capture evidence of delivery, assessment, and learner support.",
+      "evidence_required": "Output evidence: Final lectures | Semester tests | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_012",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+      "title": "Year-End Exams: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
       "cadence": "monthly",
       "months": [
         12
       ],
       "minimum_count": 2,
-      "stretch_count": 4,
+      "stretch_count": 3,
       "evidence_hints": [
         "lecture",
         "assessment",
@@ -294,16 +327,19 @@
         "lms",
         "class",
         "tutorial",
-        "marks"
+        "marks",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+      "outputs": "Exam invigilation | Final marking | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Set/invigilate assessments, mark scripts, and submit grades according to deadlines.",
+      "evidence_required": "Output evidence: Exam invigilation | Final marking | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
     },
     {
       "id": "task_013",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Mid-year marks submission",
-      "cadence": "milestone",
+      "title": "Semester 1 marks submission deadline - LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "cadence": "critical_milestone",
       "months": [
         6
       ],
@@ -313,18 +349,22 @@
         "marks",
         "gradebook",
         "submission",
-        "assessment"
+        "assessment",
+        "semester 1",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "Semester 1 assessment completion"
+      "outputs": "Semester 1 assessment completion for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Finalise marks, complete moderation/QA, and store evidence of compliance and quality.",
+      "evidence_required": "Output evidence: Semester 1 assessment completion for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; marks; gradebook"
     },
     {
       "id": "task_014",
       "kpa_code": "KPA1",
       "kpa_name": "Teaching and Learning",
-      "title": "Year-end marks and moderation",
-      "cadence": "milestone",
+      "title": "Year-end marks and moderation - LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "cadence": "critical_milestone",
       "months": [
-        11
+        12
       ],
       "minimum_count": 1,
       "stretch_count": 1,
@@ -332,30 +372,36 @@
         "moderation",
         "marks",
         "exam",
-        "final"
+        "final",
+        "year-end",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "Year-end assessment completion and moderation"
+      "outputs": "Year-end assessment completion and moderation for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Finalise marks, complete moderation/QA, and store evidence of compliance and quality.",
+      "evidence_required": "Output evidence: Year-end assessment completion and moderation for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; moderation; marks"
     },
     {
       "id": "task_015",
-      "kpa_code": "KPA2",
-      "kpa_name": "Occupational Health & Safety",
-      "title": "OHS compliance check",
-      "cadence": "quarterly",
+      "kpa_code": "KPA1",
+      "kpa_name": "Teaching and Learning",
+      "title": "Module quality assurance - LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "cadence": "semester",
       "months": [
-        2
+        6,
+        12
       ],
-      "minimum_count": 1,
-      "stretch_count": 1,
+      "minimum_count": 2,
+      "stretch_count": 4,
       "evidence_hints": [
-        "ohs",
-        "safety",
-        "compliance",
-        "training",
-        "popia",
-        "dalro"
+        "moderation",
+        "peer review",
+        "quality",
+        "evaluation",
+        "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
       ],
-      "outputs": "OHS compliance activities"
+      "outputs": "Module evaluation and improvement for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+      "what_to_do": "Finalise marks, complete moderation/QA, and store evidence of compliance and quality.",
+      "evidence_required": "Output evidence: Module evaluation and improvement for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; moderation; peer review"
     },
     {
       "id": "task_016",
@@ -364,7 +410,7 @@
       "title": "OHS compliance check",
       "cadence": "quarterly",
       "months": [
-        5
+        2
       ],
       "minimum_count": 1,
       "stretch_count": 1,
@@ -376,7 +422,9 @@
         "popia",
         "dalro"
       ],
-      "outputs": "OHS compliance activities"
+      "outputs": "OHS compliance activities",
+      "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+      "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
     },
     {
       "id": "task_017",
@@ -385,6 +433,29 @@
       "title": "OHS compliance check",
       "cadence": "quarterly",
       "months": [
+        5
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "ohs",
+        "safety",
+        "compliance",
+        "training",
+        "popia",
+        "dalro"
+      ],
+      "outputs": "OHS compliance activities",
+      "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+      "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
+    },
+    {
+      "id": "task_018",
+      "kpa_code": "KPA2",
+      "kpa_name": "Occupational Health & Safety",
+      "title": "OHS compliance check",
+      "cadence": "quarterly",
+      "months": [
         8
       ],
       "minimum_count": 1,
@@ -397,10 +468,12 @@
         "popia",
         "dalro"
       ],
-      "outputs": "OHS compliance activities"
+      "outputs": "OHS compliance activities",
+      "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+      "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
     },
     {
-      "id": "task_018",
+      "id": "task_019",
       "kpa_code": "KPA2",
       "kpa_name": "Occupational Health & Safety",
       "title": "OHS compliance check",
@@ -418,35 +491,41 @@
         "popia",
         "dalro"
       ],
-      "outputs": "OHS compliance activities"
-    },
-    {
-      "id": "task_019",
-      "kpa_code": "KPA3",
-      "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
-      "cadence": "monthly",
-      "months": [
-        1
-      ],
-      "minimum_count": 1,
-      "stretch_count": 3,
-      "evidence_hints": [
-        "draft",
-        "manuscript",
-        "ethics",
-        "grant",
-        "submission",
-        "review",
-        "publication"
-      ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      "outputs": "OHS compliance activities",
+      "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+      "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
     },
     {
       "id": "task_020",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
+      "title": "Research planning & ethics applications",
+      "cadence": "monthly",
+      "months": [
+        1
+      ],
+      "minimum_count": 1,
+      "stretch_count": 3,
+      "evidence_hints": [
+        "draft",
+        "manuscript",
+        "ethics",
+        "grant",
+        "submission",
+        "review",
+        "publication",
+        "conference",
+        "nrf"
+      ],
+      "outputs": "Research planning & ethics applications | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Prepare and submit ethics documentation or track approval progress.",
+      "evidence_required": "Output evidence: Research planning & ethics applications | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
+    },
+    {
+      "id": "task_021",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Data collection / Literature review",
       "cadence": "monthly",
       "months": [
         2
@@ -460,21 +539,25 @@
         "grant",
         "submission",
         "review",
-        "publication"
+        "publication",
+        "conference",
+        "nrf"
       ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      "outputs": "Data collection / Literature review | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+      "evidence_required": "Output evidence: Data collection / Literature review | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
     },
     {
-      "id": "task_021",
+      "id": "task_022",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
+      "title": "NRF rating window / Grant applications",
       "cadence": "monthly",
       "months": [
         3
       ],
-      "minimum_count": 1,
-      "stretch_count": 3,
+      "minimum_count": 2,
+      "stretch_count": 4,
       "evidence_hints": [
         "draft",
         "manuscript",
@@ -482,15 +565,19 @@
         "grant",
         "submission",
         "review",
-        "publication"
+        "publication",
+        "conference",
+        "nrf"
       ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      "outputs": "NRF rating window / Grant applications | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Prepare and submit the application package; keep submission confirmations.",
+      "evidence_required": "Output evidence: NRF rating window / Grant applications | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
     },
     {
-      "id": "task_022",
+      "id": "task_023",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
+      "title": "Conference submission deadlines",
       "cadence": "monthly",
       "months": [
         4
@@ -504,15 +591,19 @@
         "grant",
         "submission",
         "review",
-        "publication"
+        "publication",
+        "conference",
+        "nrf"
       ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      "outputs": "Conference submission deadlines | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+      "evidence_required": "Output evidence: Conference submission deadlines | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
     },
     {
-      "id": "task_023",
+      "id": "task_024",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
+      "title": "Mid-year research review preparation",
       "cadence": "monthly",
       "months": [
         5
@@ -526,21 +617,25 @@
         "grant",
         "submission",
         "review",
-        "publication"
+        "publication",
+        "conference",
+        "nrf"
       ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      "outputs": "Mid-year research review preparation | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+      "evidence_required": "Output evidence: Mid-year research review preparation | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
     },
     {
-      "id": "task_024",
+      "id": "task_025",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
+      "title": "Mid-year research output submission",
       "cadence": "monthly",
       "months": [
         6
       ],
-      "minimum_count": 1,
-      "stretch_count": 3,
+      "minimum_count": 2,
+      "stretch_count": 4,
       "evidence_hints": [
         "draft",
         "manuscript",
@@ -548,15 +643,19 @@
         "grant",
         "submission",
         "review",
-        "publication"
+        "publication",
+        "conference",
+        "nrf"
       ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      "outputs": "Mid-year research output submission | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+      "evidence_required": "Output evidence: Mid-year research output submission | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
     },
     {
-      "id": "task_025",
+      "id": "task_026",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
+      "title": "Winter research focus period",
       "cadence": "monthly",
       "months": [
         7
@@ -570,15 +669,19 @@
         "grant",
         "submission",
         "review",
-        "publication"
+        "publication",
+        "conference",
+        "nrf"
       ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      "outputs": "Winter research focus period | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+      "evidence_required": "Output evidence: Winter research focus period | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
     },
     {
-      "id": "task_026",
+      "id": "task_027",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
+      "title": "Manuscript drafting & revisions",
       "cadence": "monthly",
       "months": [
         8
@@ -592,21 +695,25 @@
         "grant",
         "submission",
         "review",
-        "publication"
+        "publication",
+        "conference",
+        "nrf"
       ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      "outputs": "Manuscript drafting & revisions | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Draft/revise a manuscript and progress it through submission or review stages.",
+      "evidence_required": "Output evidence: Manuscript drafting & revisions | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
     },
     {
-      "id": "task_027",
+      "id": "task_028",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
+      "title": "Conference presentations",
       "cadence": "monthly",
       "months": [
         9
       ],
-      "minimum_count": 1,
-      "stretch_count": 3,
+      "minimum_count": 2,
+      "stretch_count": 4,
       "evidence_hints": [
         "draft",
         "manuscript",
@@ -614,15 +721,19 @@
         "grant",
         "submission",
         "review",
-        "publication"
+        "publication",
+        "conference",
+        "nrf"
       ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      "outputs": "Conference presentations | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+      "evidence_required": "Output evidence: Conference presentations | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
     },
     {
-      "id": "task_028",
+      "id": "task_029",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
+      "title": "Year-end publication push",
       "cadence": "monthly",
       "months": [
         10
@@ -636,21 +747,25 @@
         "grant",
         "submission",
         "review",
-        "publication"
+        "publication",
+        "conference",
+        "nrf"
       ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      "outputs": "Year-end publication push | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Draft/revise a manuscript and progress it through submission or review stages.",
+      "evidence_required": "Output evidence: Year-end publication push | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
     },
     {
-      "id": "task_029",
+      "id": "task_030",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
+      "title": "NWU Research Awards submissions",
       "cadence": "monthly",
       "months": [
         11
       ],
-      "minimum_count": 1,
-      "stretch_count": 3,
+      "minimum_count": 2,
+      "stretch_count": 4,
       "evidence_hints": [
         "draft",
         "manuscript",
@@ -658,15 +773,19 @@
         "grant",
         "submission",
         "review",
-        "publication"
+        "publication",
+        "conference",
+        "nrf"
       ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+      "outputs": "NWU Research Awards submissions | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+      "evidence_required": "Output evidence: NWU Research Awards submissions | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
     },
     {
-      "id": "task_030",
+      "id": "task_031",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Research progress (writing, ethics, submissions)",
+      "title": "Annual research reporting",
       "cadence": "monthly",
       "months": [
         12
@@ -680,53 +799,112 @@
         "grant",
         "submission",
         "review",
-        "publication"
+        "publication",
+        "conference",
+        "nrf"
       ],
-      "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
-    },
-    {
-      "id": "task_031",
-      "kpa_code": "KPA3",
-      "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Mid-year research milestone",
-      "cadence": "milestone",
-      "months": [
-        6
-      ],
-      "minimum_count": 1,
-      "stretch_count": 1,
-      "evidence_hints": [
-        "ethics",
-        "submission",
-        "grant",
-        "acceptance"
-      ],
-      "outputs": "Research submission or ethics approval"
+      "outputs": "Annual research reporting | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+      "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+      "evidence_required": "Output evidence: Annual research reporting | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
     },
     {
       "id": "task_032",
       "kpa_code": "KPA3",
       "kpa_name": "Research, Innovation & Creative Outputs",
-      "title": "Year-end research output",
-      "cadence": "milestone",
+      "title": "NRF grant application / Rating submission",
+      "cadence": "critical_milestone",
+      "months": [
+        3
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "nrf",
+        "grant",
+        "rating",
+        "application",
+        "submission"
+      ],
+      "outputs": "NRF funding application or rating improvement",
+      "what_to_do": "Prepare and submit the application package; keep submission confirmations.",
+      "evidence_required": "Output evidence: NRF funding application or rating improvement; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; nrf; grant; rating"
+    },
+    {
+      "id": "task_033",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Mid-year research output (publication/conference)",
+      "cadence": "critical_milestone",
+      "months": [
+        6
+      ],
+      "minimum_count": 1,
+      "stretch_count": 2,
+      "evidence_hints": [
+        "publication",
+        "conference",
+        "acceptance",
+        "submission",
+        "doi"
+      ],
+      "outputs": "Research publication submission or conference acceptance",
+      "what_to_do": "Draft/revise a manuscript and progress it through submission or review stages.",
+      "evidence_required": "Output evidence: Research publication submission or conference acceptance; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; publication; conference; acceptance"
+    },
+    {
+      "id": "task_034",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Year-end research output (accredited publication)",
+      "cadence": "critical_milestone",
       "months": [
         11
       ],
       "minimum_count": 1,
-      "stretch_count": 1,
+      "stretch_count": 2,
       "evidence_hints": [
         "publication",
         "accepted",
         "doi",
-        "journal"
+        "journal",
+        "accredited",
+        "subsidy"
       ],
-      "outputs": "Research publication or acceptance"
+      "outputs": "Accredited research publication for subsidy purposes",
+      "what_to_do": "Draft/revise a manuscript and progress it through submission or review stages.",
+      "evidence_required": "Output evidence: Accredited research publication for subsidy purposes; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; publication; accepted; doi"
     },
     {
-      "id": "task_033",
+      "id": "task_035",
+      "kpa_code": "KPA3",
+      "kpa_name": "Research, Innovation & Creative Outputs",
+      "title": "Postgraduate supervision meetings & progress tracking",
+      "cadence": "semester",
+      "months": [
+        3,
+        6,
+        9,
+        12
+      ],
+      "minimum_count": 4,
+      "stretch_count": 8,
+      "evidence_hints": [
+        "supervision",
+        "postgraduate",
+        "masters",
+        "phd",
+        "meeting",
+        "progress report"
+      ],
+      "outputs": "Postgraduate student supervision and progress monitoring",
+      "what_to_do": "Hold supervision meetings, track milestones, and file progress notes.",
+      "evidence_required": "Output evidence: Postgraduate student supervision and progress monitoring; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; supervision; postgraduate; masters"
+    },
+    {
+      "id": "task_036",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Annual planning & goal setting",
       "cadence": "monthly",
       "months": [
         1
@@ -739,15 +917,19 @@
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Annual planning & goal setting | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Annual planning & goal setting | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_034",
+      "id": "task_037",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Faculty board meetings / School committees",
       "cadence": "monthly",
       "months": [
         2
@@ -760,36 +942,44 @@
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Faculty board meetings / School committees | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Faculty board meetings / School committees | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_035",
+      "id": "task_038",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Budget planning & resource allocation",
       "cadence": "monthly",
       "months": [
         3
       ],
-      "minimum_count": 1,
-      "stretch_count": 2,
+      "minimum_count": 2,
+      "stretch_count": 4,
       "evidence_hints": [
         "meeting",
         "minutes",
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Budget planning & resource allocation | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Budget planning & resource allocation | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_036",
+      "id": "task_039",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Student complaint resolutions / Quality assurance",
       "cadence": "monthly",
       "months": [
         4
@@ -802,15 +992,19 @@
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Student complaint resolutions / Quality assurance | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Student complaint resolutions / Quality assurance | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_037",
+      "id": "task_040",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Mid-year performance reviews (staff)",
       "cadence": "monthly",
       "months": [
         5
@@ -823,36 +1017,44 @@
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Mid-year performance reviews (staff) | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Mid-year performance reviews (staff) | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_038",
+      "id": "task_041",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Senate meetings / Academic planning",
       "cadence": "monthly",
       "months": [
         6
       ],
-      "minimum_count": 1,
-      "stretch_count": 2,
+      "minimum_count": 2,
+      "stretch_count": 4,
       "evidence_hints": [
         "meeting",
         "minutes",
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Senate meetings / Academic planning | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Senate meetings / Academic planning | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_039",
+      "id": "task_042",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Strategic planning sessions",
       "cadence": "monthly",
       "months": [
         7
@@ -865,15 +1067,19 @@
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Strategic planning sessions | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Strategic planning sessions | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_040",
+      "id": "task_043",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Curriculum review & accreditation prep",
       "cadence": "monthly",
       "months": [
         8
@@ -886,36 +1092,44 @@
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Curriculum review & accreditation prep | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Curriculum review & accreditation prep | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_041",
+      "id": "task_044",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Faculty board meetings / Programme evaluations",
       "cadence": "monthly",
       "months": [
         9
       ],
-      "minimum_count": 1,
-      "stretch_count": 2,
+      "minimum_count": 2,
+      "stretch_count": 4,
       "evidence_hints": [
         "meeting",
         "minutes",
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Faculty board meetings / Programme evaluations | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Faculty board meetings / Programme evaluations | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_042",
+      "id": "task_045",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Budget reviews & resource reallocation",
       "cadence": "monthly",
       "months": [
         10
@@ -928,15 +1142,19 @@
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Budget reviews & resource reallocation | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Budget reviews & resource reallocation | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_043",
+      "id": "task_046",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Year-end performance assessments",
       "cadence": "monthly",
       "months": [
         11
@@ -949,33 +1167,85 @@
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Year-end performance assessments | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Year-end performance assessments | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_044",
+      "id": "task_047",
       "kpa_code": "KPA4",
       "kpa_name": "Academic Leadership & Administration",
-      "title": "Leadership activities (meetings, committees, administration)",
+      "title": "Annual reporting & strategic reviews",
       "cadence": "monthly",
       "months": [
         12
       ],
-      "minimum_count": 1,
-      "stretch_count": 2,
+      "minimum_count": 2,
+      "stretch_count": 4,
       "evidence_hints": [
         "meeting",
         "minutes",
         "committee",
         "chair",
         "agenda",
-        "administration"
+        "administration",
+        "senate",
+        "faculty board"
       ],
-      "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+      "outputs": "Annual reporting & strategic reviews | SDL scientific committee 5; Faculty Board: 12 hours",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Annual reporting & strategic reviews | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
     },
     {
-      "id": "task_045",
+      "id": "task_048",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Mid-year performance reviews & staff development",
+      "cadence": "critical_milestone",
+      "months": [
+        5
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "performance review",
+        "mid-year",
+        "staff development",
+        "mentoring"
+      ],
+      "outputs": "Staff performance reviews and development planning",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Staff performance reviews and development planning; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; performance review; mid-year; staff development; mentoring"
+    },
+    {
+      "id": "task_049",
+      "kpa_code": "KPA4",
+      "kpa_name": "Academic Leadership & Administration",
+      "title": "Programme accreditation & quality assurance",
+      "cadence": "semester",
+      "months": [
+        4,
+        10
+      ],
+      "minimum_count": 2,
+      "stretch_count": 4,
+      "evidence_hints": [
+        "accreditation",
+        "quality assurance",
+        "programme review",
+        "heqc",
+        "cheps"
+      ],
+      "outputs": "Programme accreditation documentation and quality reviews",
+      "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+      "evidence_required": "Output evidence: Programme accreditation documentation and quality reviews; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; accreditation; quality assurance; programme review; heqc"
+    },
+    {
+      "id": "task_050",
       "kpa_code": "KPA5",
       "kpa_name": "Social Responsiveness",
       "title": "Community engagement / industry involvement",
@@ -993,10 +1263,12 @@
         "workshop",
         "industry"
       ],
-      "outputs": "SASHT website management; SASHT webinar coordination"
+      "outputs": "SASHT website management; SASHT webinar coordination",
+      "what_to_do": "Deliver the engagement activity and retain proof of participation and impact.",
+      "evidence_required": "Output evidence: SASHT website management; SASHT webinar coordination; event programme / flyer; attendance register; stakeholder correspondence; MoU / engagement letter; reflection / impact note; community; engagement; outreach; school"
     },
     {
-      "id": "task_046",
+      "id": "task_051",
       "kpa_code": "KPA5",
       "kpa_name": "Social Responsiveness",
       "title": "Community engagement / industry involvement",
@@ -1014,10 +1286,12 @@
         "workshop",
         "industry"
       ],
-      "outputs": "SASHT website management; SASHT webinar coordination"
+      "outputs": "SASHT website management; SASHT webinar coordination",
+      "what_to_do": "Deliver the engagement activity and retain proof of participation and impact.",
+      "evidence_required": "Output evidence: SASHT website management; SASHT webinar coordination; event programme / flyer; attendance register; stakeholder correspondence; MoU / engagement letter; reflection / impact note; community; engagement; outreach; school"
     },
     {
-      "id": "task_047",
+      "id": "task_052",
       "kpa_code": "KPA5",
       "kpa_name": "Social Responsiveness",
       "title": "Community engagement / industry involvement",
@@ -1035,10 +1309,12 @@
         "workshop",
         "industry"
       ],
-      "outputs": "SASHT website management; SASHT webinar coordination"
+      "outputs": "SASHT website management; SASHT webinar coordination",
+      "what_to_do": "Deliver the engagement activity and retain proof of participation and impact.",
+      "evidence_required": "Output evidence: SASHT website management; SASHT webinar coordination; event programme / flyer; attendance register; stakeholder correspondence; MoU / engagement letter; reflection / impact note; community; engagement; outreach; school"
     },
     {
-      "id": "task_048",
+      "id": "task_053",
       "kpa_code": "KPA5",
       "kpa_name": "Social Responsiveness",
       "title": "Community engagement / industry involvement",
@@ -1056,7 +1332,9 @@
         "workshop",
         "industry"
       ],
-      "outputs": "SASHT website management; SASHT webinar coordination"
+      "outputs": "SASHT website management; SASHT webinar coordination",
+      "what_to_do": "Deliver the engagement activity and retain proof of participation and impact.",
+      "evidence_required": "Output evidence: SASHT website management; SASHT webinar coordination; event programme / flyer; attendance register; stakeholder correspondence; MoU / engagement letter; reflection / impact note; community; engagement; outreach; school"
     }
   ],
   "by_month": {
@@ -1065,13 +1343,13 @@
         "id": "task_001",
         "kpa_code": "KPA1",
         "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "title": "Semester 1 Prep: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
         "cadence": "monthly",
         "months": [
           1
         ],
         "minimum_count": 2,
-        "stretch_count": 4,
+        "stretch_count": 3,
         "evidence_hints": [
           "lecture",
           "assessment",
@@ -1079,15 +1357,18 @@
           "lms",
           "class",
           "tutorial",
-          "marks"
+          "marks",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
         ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+        "outputs": "Module preparation | eFundi setup | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Prepare module materials, update LMS (eFundi), and confirm schedules/readings.",
+        "evidence_required": "Output evidence: Module preparation | eFundi setup | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
       },
       {
-        "id": "task_019",
+        "id": "task_020",
         "kpa_code": "KPA3",
         "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
+        "title": "Research planning & ethics applications",
         "cadence": "monthly",
         "months": [
           1
@@ -1101,15 +1382,19 @@
           "grant",
           "submission",
           "review",
-          "publication"
+          "publication",
+          "conference",
+          "nrf"
         ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+        "outputs": "Research planning & ethics applications | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Prepare and submit ethics documentation or track approval progress.",
+        "evidence_required": "Output evidence: Research planning & ethics applications | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
       },
       {
-        "id": "task_033",
+        "id": "task_036",
         "kpa_code": "KPA4",
         "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
+        "title": "Annual planning & goal setting",
         "cadence": "monthly",
         "months": [
           1
@@ -1122,9 +1407,13 @@
           "committee",
           "chair",
           "agenda",
-          "administration"
+          "administration",
+          "senate",
+          "faculty board"
         ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+        "outputs": "Annual planning & goal setting | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Annual planning & goal setting | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
       }
     ],
     "2025-02": [
@@ -1132,13 +1421,13 @@
         "id": "task_002",
         "kpa_code": "KPA1",
         "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "title": "Semester 1 Start: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
         "cadence": "monthly",
         "months": [
           2
         ],
-        "minimum_count": 2,
-        "stretch_count": 4,
+        "minimum_count": 3,
+        "stretch_count": 5,
         "evidence_hints": [
           "lecture",
           "assessment",
@@ -1146,12 +1435,15 @@
           "lms",
           "class",
           "tutorial",
-          "marks"
+          "marks",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
         ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+        "outputs": "Orientation week | First lectures | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Launch the semester: onboarding/orientation, first lectures, and initial assessments.",
+        "evidence_required": "Output evidence: Orientation week | First lectures | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
       },
       {
-        "id": "task_015",
+        "id": "task_016",
         "kpa_code": "KPA2",
         "kpa_name": "Occupational Health & Safety",
         "title": "OHS compliance check",
@@ -1169,13 +1461,15 @@
           "popia",
           "dalro"
         ],
-        "outputs": "OHS compliance activities"
+        "outputs": "OHS compliance activities",
+        "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+        "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
       },
       {
-        "id": "task_020",
+        "id": "task_021",
         "kpa_code": "KPA3",
         "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
+        "title": "Data collection / Literature review",
         "cadence": "monthly",
         "months": [
           2
@@ -1189,15 +1483,19 @@
           "grant",
           "submission",
           "review",
-          "publication"
+          "publication",
+          "conference",
+          "nrf"
         ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+        "outputs": "Data collection / Literature review | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+        "evidence_required": "Output evidence: Data collection / Literature review | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
       },
       {
-        "id": "task_034",
+        "id": "task_037",
         "kpa_code": "KPA4",
         "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
+        "title": "Faculty board meetings / School committees",
         "cadence": "monthly",
         "months": [
           2
@@ -1210,9 +1508,13 @@
           "committee",
           "chair",
           "agenda",
-          "administration"
+          "administration",
+          "senate",
+          "faculty board"
         ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+        "outputs": "Faculty board meetings / School committees | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Faculty board meetings / School committees | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
       }
     ],
     "2025-03": [
@@ -1220,13 +1522,13 @@
         "id": "task_003",
         "kpa_code": "KPA1",
         "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "title": "Semester 1 Teaching: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
         "cadence": "monthly",
         "months": [
           3
         ],
-        "minimum_count": 2,
-        "stretch_count": 4,
+        "minimum_count": 3,
+        "stretch_count": 5,
         "evidence_hints": [
           "lecture",
           "assessment",
@@ -1234,21 +1536,24 @@
           "lms",
           "class",
           "tutorial",
-          "marks"
+          "marks",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
         ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+        "outputs": "Regular lectures | Formative assessments | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Deliver teaching activities and capture evidence of delivery, assessment, and learner support.",
+        "evidence_required": "Output evidence: Regular lectures | Formative assessments | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
       },
       {
-        "id": "task_021",
+        "id": "task_022",
         "kpa_code": "KPA3",
         "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
+        "title": "NRF rating window / Grant applications",
         "cadence": "monthly",
         "months": [
           3
         ],
-        "minimum_count": 1,
-        "stretch_count": 3,
+        "minimum_count": 2,
+        "stretch_count": 4,
         "evidence_hints": [
           "draft",
           "manuscript",
@@ -1256,33 +1561,89 @@
           "grant",
           "submission",
           "review",
-          "publication"
+          "publication",
+          "conference",
+          "nrf"
         ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+        "outputs": "NRF rating window / Grant applications | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Prepare and submit the application package; keep submission confirmations.",
+        "evidence_required": "Output evidence: NRF rating window / Grant applications | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
       },
       {
-        "id": "task_035",
-        "kpa_code": "KPA4",
-        "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
-        "cadence": "monthly",
+        "id": "task_032",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "NRF grant application / Rating submission",
+        "cadence": "critical_milestone",
         "months": [
           3
         ],
         "minimum_count": 1,
         "stretch_count": 2,
         "evidence_hints": [
+          "nrf",
+          "grant",
+          "rating",
+          "application",
+          "submission"
+        ],
+        "outputs": "NRF funding application or rating improvement",
+        "what_to_do": "Prepare and submit the application package; keep submission confirmations.",
+        "evidence_required": "Output evidence: NRF funding application or rating improvement; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; nrf; grant; rating"
+      },
+      {
+        "id": "task_035",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Postgraduate supervision meetings & progress tracking",
+        "cadence": "semester",
+        "months": [
+          3,
+          6,
+          9,
+          12
+        ],
+        "minimum_count": 4,
+        "stretch_count": 8,
+        "evidence_hints": [
+          "supervision",
+          "postgraduate",
+          "masters",
+          "phd",
+          "meeting",
+          "progress report"
+        ],
+        "outputs": "Postgraduate student supervision and progress monitoring",
+        "what_to_do": "Hold supervision meetings, track milestones, and file progress notes.",
+        "evidence_required": "Output evidence: Postgraduate student supervision and progress monitoring; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; supervision; postgraduate; masters"
+      },
+      {
+        "id": "task_038",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Budget planning & resource allocation",
+        "cadence": "monthly",
+        "months": [
+          3
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
           "meeting",
           "minutes",
           "committee",
           "chair",
           "agenda",
-          "administration"
+          "administration",
+          "senate",
+          "faculty board"
         ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+        "outputs": "Budget planning & resource allocation | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Budget planning & resource allocation | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
       },
       {
-        "id": "task_045",
+        "id": "task_050",
         "kpa_code": "KPA5",
         "kpa_name": "Social Responsiveness",
         "title": "Community engagement / industry involvement",
@@ -1300,7 +1661,9 @@
           "workshop",
           "industry"
         ],
-        "outputs": "SASHT website management; SASHT webinar coordination"
+        "outputs": "SASHT website management; SASHT webinar coordination",
+        "what_to_do": "Deliver the engagement activity and retain proof of participation and impact.",
+        "evidence_required": "Output evidence: SASHT website management; SASHT webinar coordination; event programme / flyer; attendance register; stakeholder correspondence; MoU / engagement letter; reflection / impact note; community; engagement; outreach; school"
       }
     ],
     "2025-04": [
@@ -1308,13 +1671,13 @@
         "id": "task_004",
         "kpa_code": "KPA1",
         "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "title": "Semester 1 Mid-term: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
         "cadence": "monthly",
         "months": [
           4
         ],
-        "minimum_count": 2,
-        "stretch_count": 4,
+        "minimum_count": 3,
+        "stretch_count": 5,
         "evidence_hints": [
           "lecture",
           "assessment",
@@ -1322,15 +1685,18 @@
           "lms",
           "class",
           "tutorial",
-          "marks"
+          "marks",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
         ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+        "outputs": "Mid-term assessments | Student feedback | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Run mid-term assessments and provide feedback/interventions where needed.",
+        "evidence_required": "Output evidence: Mid-term assessments | Student feedback | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
       },
       {
-        "id": "task_022",
+        "id": "task_023",
         "kpa_code": "KPA3",
         "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
+        "title": "Conference submission deadlines",
         "cadence": "monthly",
         "months": [
           4
@@ -1344,15 +1710,19 @@
           "grant",
           "submission",
           "review",
-          "publication"
+          "publication",
+          "conference",
+          "nrf"
         ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+        "outputs": "Conference submission deadlines | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+        "evidence_required": "Output evidence: Conference submission deadlines | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
       },
       {
-        "id": "task_036",
+        "id": "task_039",
         "kpa_code": "KPA4",
         "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
+        "title": "Student complaint resolutions / Quality assurance",
         "cadence": "monthly",
         "months": [
           4
@@ -1365,9 +1735,36 @@
           "committee",
           "chair",
           "agenda",
-          "administration"
+          "administration",
+          "senate",
+          "faculty board"
         ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+        "outputs": "Student complaint resolutions / Quality assurance | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Student complaint resolutions / Quality assurance | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
+      },
+      {
+        "id": "task_049",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Programme accreditation & quality assurance",
+        "cadence": "semester",
+        "months": [
+          4,
+          10
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "accreditation",
+          "quality assurance",
+          "programme review",
+          "heqc",
+          "cheps"
+        ],
+        "outputs": "Programme accreditation documentation and quality reviews",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Programme accreditation documentation and quality reviews; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; accreditation; quality assurance; programme review; heqc"
       }
     ],
     "2025-05": [
@@ -1375,13 +1772,13 @@
         "id": "task_005",
         "kpa_code": "KPA1",
         "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "title": "Semester 1 Completion: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
         "cadence": "monthly",
         "months": [
           5
         ],
-        "minimum_count": 2,
-        "stretch_count": 4,
+        "minimum_count": 3,
+        "stretch_count": 5,
         "evidence_hints": [
           "lecture",
           "assessment",
@@ -1389,12 +1786,15 @@
           "lms",
           "class",
           "tutorial",
-          "marks"
+          "marks",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
         ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+        "outputs": "Final lectures | Semester tests | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Deliver teaching activities and capture evidence of delivery, assessment, and learner support.",
+        "evidence_required": "Output evidence: Final lectures | Semester tests | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
       },
       {
-        "id": "task_016",
+        "id": "task_017",
         "kpa_code": "KPA2",
         "kpa_name": "Occupational Health & Safety",
         "title": "OHS compliance check",
@@ -1412,13 +1812,15 @@
           "popia",
           "dalro"
         ],
-        "outputs": "OHS compliance activities"
+        "outputs": "OHS compliance activities",
+        "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+        "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
       },
       {
-        "id": "task_023",
+        "id": "task_024",
         "kpa_code": "KPA3",
         "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
+        "title": "Mid-year research review preparation",
         "cadence": "monthly",
         "months": [
           5
@@ -1432,15 +1834,19 @@
           "grant",
           "submission",
           "review",
-          "publication"
+          "publication",
+          "conference",
+          "nrf"
         ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+        "outputs": "Mid-year research review preparation | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+        "evidence_required": "Output evidence: Mid-year research review preparation | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
       },
       {
-        "id": "task_037",
+        "id": "task_040",
         "kpa_code": "KPA4",
         "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
+        "title": "Mid-year performance reviews (staff)",
         "cadence": "monthly",
         "months": [
           5
@@ -1453,9 +1859,34 @@
           "committee",
           "chair",
           "agenda",
-          "administration"
+          "administration",
+          "senate",
+          "faculty board"
         ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+        "outputs": "Mid-year performance reviews (staff) | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Mid-year performance reviews (staff) | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
+      },
+      {
+        "id": "task_048",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Mid-year performance reviews & staff development",
+        "cadence": "critical_milestone",
+        "months": [
+          5
+        ],
+        "minimum_count": 1,
+        "stretch_count": 1,
+        "evidence_hints": [
+          "performance review",
+          "mid-year",
+          "staff development",
+          "mentoring"
+        ],
+        "outputs": "Staff performance reviews and development planning",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Staff performance reviews and development planning; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; performance review; mid-year; staff development; mentoring"
       }
     ],
     "2025-06": [
@@ -1463,13 +1894,13 @@
         "id": "task_006",
         "kpa_code": "KPA1",
         "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "title": "Semester 1 Exams: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
         "cadence": "monthly",
         "months": [
           6
         ],
         "minimum_count": 2,
-        "stretch_count": 4,
+        "stretch_count": 3,
         "evidence_hints": [
           "lecture",
           "assessment",
@@ -1477,16 +1908,19 @@
           "lms",
           "class",
           "tutorial",
-          "marks"
+          "marks",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
         ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+        "outputs": "Exam invigilation | Marking | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Set/invigilate assessments, mark scripts, and submit grades according to deadlines.",
+        "evidence_required": "Output evidence: Exam invigilation | Marking | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
       },
       {
         "id": "task_013",
         "kpa_code": "KPA1",
         "kpa_name": "Teaching and Learning",
-        "title": "Mid-year marks submission",
-        "cadence": "milestone",
+        "title": "Semester 1 marks submission deadline - LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "cadence": "critical_milestone",
         "months": [
           6
         ],
@@ -1496,21 +1930,48 @@
           "marks",
           "gradebook",
           "submission",
-          "assessment"
+          "assessment",
+          "semester 1",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
         ],
-        "outputs": "Semester 1 assessment completion"
+        "outputs": "Semester 1 assessment completion for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Finalise marks, complete moderation/QA, and store evidence of compliance and quality.",
+        "evidence_required": "Output evidence: Semester 1 assessment completion for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; marks; gradebook"
       },
       {
-        "id": "task_024",
+        "id": "task_015",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Module quality assurance - LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "cadence": "semester",
+        "months": [
+          6,
+          12
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "moderation",
+          "peer review",
+          "quality",
+          "evaluation",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
+        ],
+        "outputs": "Module evaluation and improvement for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Finalise marks, complete moderation/QA, and store evidence of compliance and quality.",
+        "evidence_required": "Output evidence: Module evaluation and improvement for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; moderation; peer review"
+      },
+      {
+        "id": "task_025",
         "kpa_code": "KPA3",
         "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
+        "title": "Mid-year research output submission",
         "cadence": "monthly",
         "months": [
           6
         ],
-        "minimum_count": 1,
-        "stretch_count": 3,
+        "minimum_count": 2,
+        "stretch_count": 4,
         "evidence_hints": [
           "draft",
           "manuscript",
@@ -1518,52 +1979,89 @@
           "grant",
           "submission",
           "review",
-          "publication"
+          "publication",
+          "conference",
+          "nrf"
         ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+        "outputs": "Mid-year research output submission | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+        "evidence_required": "Output evidence: Mid-year research output submission | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
       },
       {
-        "id": "task_031",
+        "id": "task_033",
         "kpa_code": "KPA3",
         "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Mid-year research milestone",
-        "cadence": "milestone",
-        "months": [
-          6
-        ],
-        "minimum_count": 1,
-        "stretch_count": 1,
-        "evidence_hints": [
-          "ethics",
-          "submission",
-          "grant",
-          "acceptance"
-        ],
-        "outputs": "Research submission or ethics approval"
-      },
-      {
-        "id": "task_038",
-        "kpa_code": "KPA4",
-        "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
-        "cadence": "monthly",
+        "title": "Mid-year research output (publication/conference)",
+        "cadence": "critical_milestone",
         "months": [
           6
         ],
         "minimum_count": 1,
         "stretch_count": 2,
         "evidence_hints": [
+          "publication",
+          "conference",
+          "acceptance",
+          "submission",
+          "doi"
+        ],
+        "outputs": "Research publication submission or conference acceptance",
+        "what_to_do": "Draft/revise a manuscript and progress it through submission or review stages.",
+        "evidence_required": "Output evidence: Research publication submission or conference acceptance; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; publication; conference; acceptance"
+      },
+      {
+        "id": "task_035",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Postgraduate supervision meetings & progress tracking",
+        "cadence": "semester",
+        "months": [
+          3,
+          6,
+          9,
+          12
+        ],
+        "minimum_count": 4,
+        "stretch_count": 8,
+        "evidence_hints": [
+          "supervision",
+          "postgraduate",
+          "masters",
+          "phd",
+          "meeting",
+          "progress report"
+        ],
+        "outputs": "Postgraduate student supervision and progress monitoring",
+        "what_to_do": "Hold supervision meetings, track milestones, and file progress notes.",
+        "evidence_required": "Output evidence: Postgraduate student supervision and progress monitoring; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; supervision; postgraduate; masters"
+      },
+      {
+        "id": "task_041",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Senate meetings / Academic planning",
+        "cadence": "monthly",
+        "months": [
+          6
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
           "meeting",
           "minutes",
           "committee",
           "chair",
           "agenda",
-          "administration"
+          "administration",
+          "senate",
+          "faculty board"
         ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+        "outputs": "Senate meetings / Academic planning | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Senate meetings / Academic planning | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
       },
       {
-        "id": "task_046",
+        "id": "task_051",
         "kpa_code": "KPA5",
         "kpa_name": "Social Responsiveness",
         "title": "Community engagement / industry involvement",
@@ -1581,7 +2079,9 @@
           "workshop",
           "industry"
         ],
-        "outputs": "SASHT website management; SASHT webinar coordination"
+        "outputs": "SASHT website management; SASHT webinar coordination",
+        "what_to_do": "Deliver the engagement activity and retain proof of participation and impact.",
+        "evidence_required": "Output evidence: SASHT website management; SASHT webinar coordination; event programme / flyer; attendance register; stakeholder correspondence; MoU / engagement letter; reflection / impact note; community; engagement; outreach; school"
       }
     ],
     "2025-07": [
@@ -1589,13 +2089,13 @@
         "id": "task_007",
         "kpa_code": "KPA1",
         "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "title": "Mid-Year Break: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
         "cadence": "monthly",
         "months": [
           7
         ],
         "minimum_count": 2,
-        "stretch_count": 4,
+        "stretch_count": 3,
         "evidence_hints": [
           "lecture",
           "assessment",
@@ -1603,15 +2103,18 @@
           "lms",
           "class",
           "tutorial",
-          "marks"
+          "marks",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
         ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+        "outputs": "Semester 2 planning | Module revisions | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Deliver teaching activities and capture evidence of delivery, assessment, and learner support.",
+        "evidence_required": "Output evidence: Semester 2 planning | Module revisions | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
       },
       {
-        "id": "task_025",
+        "id": "task_026",
         "kpa_code": "KPA3",
         "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
+        "title": "Winter research focus period",
         "cadence": "monthly",
         "months": [
           7
@@ -1625,15 +2128,19 @@
           "grant",
           "submission",
           "review",
-          "publication"
+          "publication",
+          "conference",
+          "nrf"
         ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+        "outputs": "Winter research focus period | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+        "evidence_required": "Output evidence: Winter research focus period | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
       },
       {
-        "id": "task_039",
+        "id": "task_042",
         "kpa_code": "KPA4",
         "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
+        "title": "Strategic planning sessions",
         "cadence": "monthly",
         "months": [
           7
@@ -1646,9 +2153,13 @@
           "committee",
           "chair",
           "agenda",
-          "administration"
+          "administration",
+          "senate",
+          "faculty board"
         ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+        "outputs": "Strategic planning sessions | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Strategic planning sessions | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
       }
     ],
     "2025-08": [
@@ -1656,13 +2167,13 @@
         "id": "task_008",
         "kpa_code": "KPA1",
         "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "title": "Semester 2 Start: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
         "cadence": "monthly",
         "months": [
           8
         ],
-        "minimum_count": 2,
-        "stretch_count": 4,
+        "minimum_count": 3,
+        "stretch_count": 5,
         "evidence_hints": [
           "lecture",
           "assessment",
@@ -1670,271 +2181,12 @@
           "lms",
           "class",
           "tutorial",
-          "marks"
-        ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
-      },
-      {
-        "id": "task_017",
-        "kpa_code": "KPA2",
-        "kpa_name": "Occupational Health & Safety",
-        "title": "OHS compliance check",
-        "cadence": "quarterly",
-        "months": [
-          8
-        ],
-        "minimum_count": 1,
-        "stretch_count": 1,
-        "evidence_hints": [
-          "ohs",
-          "safety",
-          "compliance",
-          "training",
-          "popia",
-          "dalro"
-        ],
-        "outputs": "OHS compliance activities"
-      },
-      {
-        "id": "task_026",
-        "kpa_code": "KPA3",
-        "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
-        "cadence": "monthly",
-        "months": [
-          8
-        ],
-        "minimum_count": 1,
-        "stretch_count": 3,
-        "evidence_hints": [
-          "draft",
-          "manuscript",
-          "ethics",
-          "grant",
-          "submission",
-          "review",
-          "publication"
-        ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
-      },
-      {
-        "id": "task_040",
-        "kpa_code": "KPA4",
-        "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
-        "cadence": "monthly",
-        "months": [
-          8
-        ],
-        "minimum_count": 1,
-        "stretch_count": 2,
-        "evidence_hints": [
-          "meeting",
-          "minutes",
-          "committee",
-          "chair",
-          "agenda",
-          "administration"
-        ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
-      }
-    ],
-    "2025-09": [
-      {
-        "id": "task_009",
-        "kpa_code": "KPA1",
-        "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
-        "cadence": "monthly",
-        "months": [
-          9
-        ],
-        "minimum_count": 2,
-        "stretch_count": 4,
-        "evidence_hints": [
-          "lecture",
-          "assessment",
-          "efundi",
-          "lms",
-          "class",
-          "tutorial",
-          "marks"
-        ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
-      },
-      {
-        "id": "task_027",
-        "kpa_code": "KPA3",
-        "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
-        "cadence": "monthly",
-        "months": [
-          9
-        ],
-        "minimum_count": 1,
-        "stretch_count": 3,
-        "evidence_hints": [
-          "draft",
-          "manuscript",
-          "ethics",
-          "grant",
-          "submission",
-          "review",
-          "publication"
-        ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
-      },
-      {
-        "id": "task_041",
-        "kpa_code": "KPA4",
-        "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
-        "cadence": "monthly",
-        "months": [
-          9
-        ],
-        "minimum_count": 1,
-        "stretch_count": 2,
-        "evidence_hints": [
-          "meeting",
-          "minutes",
-          "committee",
-          "chair",
-          "agenda",
-          "administration"
-        ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
-      },
-      {
-        "id": "task_047",
-        "kpa_code": "KPA5",
-        "kpa_name": "Social Responsiveness",
-        "title": "Community engagement / industry involvement",
-        "cadence": "quarterly",
-        "months": [
-          9
-        ],
-        "minimum_count": 1,
-        "stretch_count": 2,
-        "evidence_hints": [
-          "community",
-          "engagement",
-          "outreach",
-          "school",
-          "workshop",
-          "industry"
-        ],
-        "outputs": "SASHT website management; SASHT webinar coordination"
-      }
-    ],
-    "2025-10": [
-      {
-        "id": "task_010",
-        "kpa_code": "KPA1",
-        "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
-        "cadence": "monthly",
-        "months": [
-          10
-        ],
-        "minimum_count": 2,
-        "stretch_count": 4,
-        "evidence_hints": [
-          "lecture",
-          "assessment",
-          "efundi",
-          "lms",
-          "class",
-          "tutorial",
-          "marks"
-        ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
-      },
-      {
-        "id": "task_028",
-        "kpa_code": "KPA3",
-        "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
-        "cadence": "monthly",
-        "months": [
-          10
-        ],
-        "minimum_count": 1,
-        "stretch_count": 3,
-        "evidence_hints": [
-          "draft",
-          "manuscript",
-          "ethics",
-          "grant",
-          "submission",
-          "review",
-          "publication"
-        ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
-      },
-      {
-        "id": "task_042",
-        "kpa_code": "KPA4",
-        "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
-        "cadence": "monthly",
-        "months": [
-          10
-        ],
-        "minimum_count": 1,
-        "stretch_count": 2,
-        "evidence_hints": [
-          "meeting",
-          "minutes",
-          "committee",
-          "chair",
-          "agenda",
-          "administration"
-        ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
-      }
-    ],
-    "2025-11": [
-      {
-        "id": "task_011",
-        "kpa_code": "KPA1",
-        "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
-        "cadence": "monthly",
-        "months": [
-          11
-        ],
-        "minimum_count": 2,
-        "stretch_count": 4,
-        "evidence_hints": [
-          "lecture",
-          "assessment",
-          "efundi",
-          "lms",
-          "class",
-          "tutorial",
-          "marks"
-        ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
-      },
-      {
-        "id": "task_014",
-        "kpa_code": "KPA1",
-        "kpa_name": "Teaching and Learning",
-        "title": "Year-end marks and moderation",
-        "cadence": "milestone",
-        "months": [
-          11
-        ],
-        "minimum_count": 1,
-        "stretch_count": 1,
-        "evidence_hints": [
-          "moderation",
           "marks",
-          "exam",
-          "final"
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
         ],
-        "outputs": "Year-end assessment completion and moderation"
+        "outputs": "Welcome back | Semester 2 lectures begin | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Launch the semester: onboarding/orientation, first lectures, and initial assessments.",
+        "evidence_required": "Output evidence: Welcome back | Semester 2 lectures begin | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
       },
       {
         "id": "task_018",
@@ -1943,6 +2195,335 @@
         "title": "OHS compliance check",
         "cadence": "quarterly",
         "months": [
+          8
+        ],
+        "minimum_count": 1,
+        "stretch_count": 1,
+        "evidence_hints": [
+          "ohs",
+          "safety",
+          "compliance",
+          "training",
+          "popia",
+          "dalro"
+        ],
+        "outputs": "OHS compliance activities",
+        "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+        "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
+      },
+      {
+        "id": "task_027",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Manuscript drafting & revisions",
+        "cadence": "monthly",
+        "months": [
+          8
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication",
+          "conference",
+          "nrf"
+        ],
+        "outputs": "Manuscript drafting & revisions | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Draft/revise a manuscript and progress it through submission or review stages.",
+        "evidence_required": "Output evidence: Manuscript drafting & revisions | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
+      },
+      {
+        "id": "task_043",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Curriculum review & accreditation prep",
+        "cadence": "monthly",
+        "months": [
+          8
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration",
+          "senate",
+          "faculty board"
+        ],
+        "outputs": "Curriculum review & accreditation prep | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Curriculum review & accreditation prep | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
+      }
+    ],
+    "2025-09": [
+      {
+        "id": "task_009",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Semester 2 Teaching: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "cadence": "monthly",
+        "months": [
+          9
+        ],
+        "minimum_count": 3,
+        "stretch_count": 5,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
+        ],
+        "outputs": "Regular lectures | Formative assessments | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Deliver teaching activities and capture evidence of delivery, assessment, and learner support.",
+        "evidence_required": "Output evidence: Regular lectures | Formative assessments | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
+      },
+      {
+        "id": "task_028",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Conference presentations",
+        "cadence": "monthly",
+        "months": [
+          9
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication",
+          "conference",
+          "nrf"
+        ],
+        "outputs": "Conference presentations | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+        "evidence_required": "Output evidence: Conference presentations | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
+      },
+      {
+        "id": "task_035",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Postgraduate supervision meetings & progress tracking",
+        "cadence": "semester",
+        "months": [
+          3,
+          6,
+          9,
+          12
+        ],
+        "minimum_count": 4,
+        "stretch_count": 8,
+        "evidence_hints": [
+          "supervision",
+          "postgraduate",
+          "masters",
+          "phd",
+          "meeting",
+          "progress report"
+        ],
+        "outputs": "Postgraduate student supervision and progress monitoring",
+        "what_to_do": "Hold supervision meetings, track milestones, and file progress notes.",
+        "evidence_required": "Output evidence: Postgraduate student supervision and progress monitoring; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; supervision; postgraduate; masters"
+      },
+      {
+        "id": "task_044",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Faculty board meetings / Programme evaluations",
+        "cadence": "monthly",
+        "months": [
+          9
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration",
+          "senate",
+          "faculty board"
+        ],
+        "outputs": "Faculty board meetings / Programme evaluations | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Faculty board meetings / Programme evaluations | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
+      },
+      {
+        "id": "task_052",
+        "kpa_code": "KPA5",
+        "kpa_name": "Social Responsiveness",
+        "title": "Community engagement / industry involvement",
+        "cadence": "quarterly",
+        "months": [
+          9
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "community",
+          "engagement",
+          "outreach",
+          "school",
+          "workshop",
+          "industry"
+        ],
+        "outputs": "SASHT website management; SASHT webinar coordination",
+        "what_to_do": "Deliver the engagement activity and retain proof of participation and impact.",
+        "evidence_required": "Output evidence: SASHT website management; SASHT webinar coordination; event programme / flyer; attendance register; stakeholder correspondence; MoU / engagement letter; reflection / impact note; community; engagement; outreach; school"
+      }
+    ],
+    "2025-10": [
+      {
+        "id": "task_010",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Semester 2 Mid-term: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "cadence": "monthly",
+        "months": [
+          10
+        ],
+        "minimum_count": 3,
+        "stretch_count": 5,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
+        ],
+        "outputs": "Mid-term assessments | Student feedback | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Run mid-term assessments and provide feedback/interventions where needed.",
+        "evidence_required": "Output evidence: Mid-term assessments | Student feedback | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
+      },
+      {
+        "id": "task_029",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Year-end publication push",
+        "cadence": "monthly",
+        "months": [
+          10
+        ],
+        "minimum_count": 1,
+        "stretch_count": 3,
+        "evidence_hints": [
+          "draft",
+          "manuscript",
+          "ethics",
+          "grant",
+          "submission",
+          "review",
+          "publication",
+          "conference",
+          "nrf"
+        ],
+        "outputs": "Year-end publication push | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Draft/revise a manuscript and progress it through submission or review stages.",
+        "evidence_required": "Output evidence: Year-end publication push | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
+      },
+      {
+        "id": "task_045",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Budget reviews & resource reallocation",
+        "cadence": "monthly",
+        "months": [
+          10
+        ],
+        "minimum_count": 1,
+        "stretch_count": 2,
+        "evidence_hints": [
+          "meeting",
+          "minutes",
+          "committee",
+          "chair",
+          "agenda",
+          "administration",
+          "senate",
+          "faculty board"
+        ],
+        "outputs": "Budget reviews & resource reallocation | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Budget reviews & resource reallocation | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
+      },
+      {
+        "id": "task_049",
+        "kpa_code": "KPA4",
+        "kpa_name": "Academic Leadership & Administration",
+        "title": "Programme accreditation & quality assurance",
+        "cadence": "semester",
+        "months": [
+          4,
+          10
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "accreditation",
+          "quality assurance",
+          "programme review",
+          "heqc",
+          "cheps"
+        ],
+        "outputs": "Programme accreditation documentation and quality reviews",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Programme accreditation documentation and quality reviews; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; accreditation; quality assurance; programme review; heqc"
+      }
+    ],
+    "2025-11": [
+      {
+        "id": "task_011",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Semester 2 Completion: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "cadence": "monthly",
+        "months": [
+          11
+        ],
+        "minimum_count": 3,
+        "stretch_count": 5,
+        "evidence_hints": [
+          "lecture",
+          "assessment",
+          "efundi",
+          "lms",
+          "class",
+          "tutorial",
+          "marks",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
+        ],
+        "outputs": "Final lectures | Semester tests | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Deliver teaching activities and capture evidence of delivery, assessment, and learner support.",
+        "evidence_required": "Output evidence: Final lectures | Semester tests | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
+      },
+      {
+        "id": "task_019",
+        "kpa_code": "KPA2",
+        "kpa_name": "Occupational Health & Safety",
+        "title": "OHS compliance check",
+        "cadence": "quarterly",
+        "months": [
           11
         ],
         "minimum_count": 1,
@@ -1955,19 +2536,21 @@
           "popia",
           "dalro"
         ],
-        "outputs": "OHS compliance activities"
+        "outputs": "OHS compliance activities",
+        "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+        "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
       },
       {
-        "id": "task_029",
+        "id": "task_030",
         "kpa_code": "KPA3",
         "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
+        "title": "NWU Research Awards submissions",
         "cadence": "monthly",
         "months": [
           11
         ],
-        "minimum_count": 1,
-        "stretch_count": 3,
+        "minimum_count": 2,
+        "stretch_count": 4,
         "evidence_hints": [
           "draft",
           "manuscript",
@@ -1975,34 +2558,42 @@
           "grant",
           "submission",
           "review",
-          "publication"
+          "publication",
+          "conference",
+          "nrf"
         ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+        "outputs": "NWU Research Awards submissions | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+        "evidence_required": "Output evidence: NWU Research Awards submissions | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
       },
       {
-        "id": "task_032",
+        "id": "task_034",
         "kpa_code": "KPA3",
         "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Year-end research output",
-        "cadence": "milestone",
+        "title": "Year-end research output (accredited publication)",
+        "cadence": "critical_milestone",
         "months": [
           11
         ],
         "minimum_count": 1,
-        "stretch_count": 1,
+        "stretch_count": 2,
         "evidence_hints": [
           "publication",
           "accepted",
           "doi",
-          "journal"
+          "journal",
+          "accredited",
+          "subsidy"
         ],
-        "outputs": "Research publication or acceptance"
+        "outputs": "Accredited research publication for subsidy purposes",
+        "what_to_do": "Draft/revise a manuscript and progress it through submission or review stages.",
+        "evidence_required": "Output evidence: Accredited research publication for subsidy purposes; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; publication; accepted; doi"
       },
       {
-        "id": "task_043",
+        "id": "task_046",
         "kpa_code": "KPA4",
         "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
+        "title": "Year-end performance assessments",
         "cadence": "monthly",
         "months": [
           11
@@ -2015,9 +2606,13 @@
           "committee",
           "chair",
           "agenda",
-          "administration"
+          "administration",
+          "senate",
+          "faculty board"
         ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+        "outputs": "Year-end performance assessments | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Year-end performance assessments | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
       }
     ],
     "2025-12": [
@@ -2025,13 +2620,13 @@
         "id": "task_012",
         "kpa_code": "KPA1",
         "kpa_name": "Teaching and Learning",
-        "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+        "title": "Year-End Exams: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
         "cadence": "monthly",
         "months": [
           12
         ],
         "minimum_count": 2,
-        "stretch_count": 4,
+        "stretch_count": 3,
         "evidence_hints": [
           "lecture",
           "assessment",
@@ -2039,15 +2634,64 @@
           "lms",
           "class",
           "tutorial",
-          "marks"
+          "marks",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
         ],
-        "outputs": "D. Olivier CRSE 971; ST. Dinga CRSE 971; N. van Deventer CRSE 971"
+        "outputs": "Exam invigilation | Final marking | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Set/invigilate assessments, mark scripts, and submit grades according to deadlines.",
+        "evidence_required": "Output evidence: Exam invigilation | Final marking | Modules: LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment"
       },
       {
-        "id": "task_030",
+        "id": "task_014",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Year-end marks and moderation - LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "cadence": "critical_milestone",
+        "months": [
+          12
+        ],
+        "minimum_count": 1,
+        "stretch_count": 1,
+        "evidence_hints": [
+          "moderation",
+          "marks",
+          "exam",
+          "final",
+          "year-end",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
+        ],
+        "outputs": "Year-end assessment completion and moderation for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Finalise marks, complete moderation/QA, and store evidence of compliance and quality.",
+        "evidence_required": "Output evidence: Year-end assessment completion and moderation for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; moderation; marks"
+      },
+      {
+        "id": "task_015",
+        "kpa_code": "KPA1",
+        "kpa_name": "Teaching and Learning",
+        "title": "Module quality assurance - LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "cadence": "semester",
+        "months": [
+          6,
+          12
+        ],
+        "minimum_count": 2,
+        "stretch_count": 4,
+        "evidence_hints": [
+          "moderation",
+          "peer review",
+          "quality",
+          "evaluation",
+          "LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971"
+        ],
+        "outputs": "Module evaluation and improvement for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971",
+        "what_to_do": "Finalise marks, complete moderation/QA, and store evidence of compliance and quality.",
+        "evidence_required": "Output evidence: Module evaluation and improvement for LERP 671, HISE 322, ERTP 671, HISE 411, CRSE 971; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; moderation; peer review"
+      },
+      {
+        "id": "task_031",
         "kpa_code": "KPA3",
         "kpa_name": "Research, Innovation & Creative Outputs",
-        "title": "Research progress (writing, ethics, submissions)",
+        "title": "Annual research reporting",
         "cadence": "monthly",
         "months": [
           12
@@ -2061,33 +2705,67 @@
           "grant",
           "submission",
           "review",
-          "publication"
+          "publication",
+          "conference",
+          "nrf"
         ],
-        "outputs": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d"
+        "outputs": "Annual research reporting | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+        "what_to_do": "Advance research outputs and keep artefacts showing progress and submissions.",
+        "evidence_required": "Output evidence: Annual research reporting | Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; draft; manuscript; ethics"
       },
       {
-        "id": "task_044",
+        "id": "task_035",
+        "kpa_code": "KPA3",
+        "kpa_name": "Research, Innovation & Creative Outputs",
+        "title": "Postgraduate supervision meetings & progress tracking",
+        "cadence": "semester",
+        "months": [
+          3,
+          6,
+          9,
+          12
+        ],
+        "minimum_count": 4,
+        "stretch_count": 8,
+        "evidence_hints": [
+          "supervision",
+          "postgraduate",
+          "masters",
+          "phd",
+          "meeting",
+          "progress report"
+        ],
+        "outputs": "Postgraduate student supervision and progress monitoring",
+        "what_to_do": "Hold supervision meetings, track milestones, and file progress notes.",
+        "evidence_required": "Output evidence: Postgraduate student supervision and progress monitoring; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; supervision; postgraduate; masters"
+      },
+      {
+        "id": "task_047",
         "kpa_code": "KPA4",
         "kpa_name": "Academic Leadership & Administration",
-        "title": "Leadership activities (meetings, committees, administration)",
+        "title": "Annual reporting & strategic reviews",
         "cadence": "monthly",
         "months": [
           12
         ],
-        "minimum_count": 1,
-        "stretch_count": 2,
+        "minimum_count": 2,
+        "stretch_count": 4,
         "evidence_hints": [
           "meeting",
           "minutes",
           "committee",
           "chair",
           "agenda",
-          "administration"
+          "administration",
+          "senate",
+          "faculty board"
         ],
-        "outputs": "SDL scientific committee 5; Faculty Board: 12 hours"
+        "outputs": "Annual reporting & strategic reviews | SDL scientific committee 5; Faculty Board: 12 hours",
+        "what_to_do": "Complete the admin/leadership activity and retain minutes, reports, and approvals.",
+        "evidence_required": "Output evidence: Annual reporting & strategic reviews | SDL scientific committee 5; Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; chair"
       },
       {
-        "id": "task_048",
+        "id": "task_053",
         "kpa_code": "KPA5",
         "kpa_name": "Social Responsiveness",
         "title": "Community engagement / industry involvement",
@@ -2105,7 +2783,9 @@
           "workshop",
           "industry"
         ],
-        "outputs": "SASHT website management; SASHT webinar coordination"
+        "outputs": "SASHT website management; SASHT webinar coordination",
+        "what_to_do": "Deliver the engagement activity and retain proof of participation and impact.",
+        "evidence_required": "Output evidence: SASHT website management; SASHT webinar coordination; event programme / flyer; attendance register; stakeholder correspondence; MoU / engagement letter; reflection / impact note; community; engagement; outreach; school"
       }
     ]
   },
@@ -2131,7 +2811,7 @@
       "lag": "Impact reports"
     }
   },
-  "task_count": 48,
+  "task_count": 53,
   "months": [
     "2025-01",
     "2025-02",
