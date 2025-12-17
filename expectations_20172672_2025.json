@@ -1,0 +1,1485 @@
+{
+  "ok": true,
+  "staff_id": "20172672",
+  "year": 2025,
+  "tasks": [
+    {
+      "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+      "staff_id": "20172672",
+      "year": 2025,
+      "kpa_code": "KPA2",
+      "kpa_name": "Research",
+      "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+      "hours": 50.0,
+      "weight_pct": 13.243243,
+      "cadence": "monthly",
+      "window_start": "2025-01-01",
+      "window_end": "2025-12-31",
+      "min_required": 1,
+      "stretch_target": 1,
+      "enabler": "",
+      "goal": "",
+      "sub_goal": "",
+      "lag_target": "",
+      "lead_target": ""
+    },
+    {
+      "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+      "staff_id": "20172672",
+      "year": 2025,
+      "kpa_code": "KPA2",
+      "kpa_name": "Research",
+      "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+      "hours": 75.0,
+      "weight_pct": 19.864865,
+      "cadence": "monthly",
+      "window_start": "2025-01-01",
+      "window_end": "2025-12-31",
+      "min_required": 1,
+      "stretch_target": 1,
+      "enabler": "",
+      "goal": "",
+      "sub_goal": "",
+      "lag_target": "",
+      "lead_target": ""
+    },
+    {
+      "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+      "staff_id": "20172672",
+      "year": 2025,
+      "kpa_code": "KPA2",
+      "kpa_name": "Research",
+      "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+      "hours": 50.0,
+      "weight_pct": 13.243243,
+      "cadence": "monthly",
+      "window_start": "2025-01-01",
+      "window_end": "2025-12-31",
+      "min_required": 1,
+      "stretch_target": 1,
+      "enabler": "",
+      "goal": "",
+      "sub_goal": "",
+      "lag_target": "",
+      "lead_target": ""
+    },
+    {
+      "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+      "staff_id": "20172672",
+      "year": 2025,
+      "kpa_code": "KPA2",
+      "kpa_name": "Research",
+      "output": "Prosper GREAT project",
+      "hours": 50.0,
+      "weight_pct": 13.243243,
+      "cadence": "monthly",
+      "window_start": "2025-01-01",
+      "window_end": "2025-12-31",
+      "min_required": 1,
+      "stretch_target": 1,
+      "enabler": "",
+      "goal": "",
+      "sub_goal": "",
+      "lag_target": "",
+      "lead_target": ""
+    },
+    {
+      "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+      "staff_id": "20172672",
+      "year": 2025,
+      "kpa_code": "KPA2",
+      "kpa_name": "Research",
+      "output": "Citesaga project, Renewable Rangers project",
+      "hours": 20.0,
+      "weight_pct": 5.297297,
+      "cadence": "monthly",
+      "window_start": "2025-01-01",
+      "window_end": "2025-12-31",
+      "min_required": 1,
+      "stretch_target": 1,
+      "enabler": "",
+      "goal": "",
+      "sub_goal": "",
+      "lag_target": "",
+      "lead_target": ""
+    },
+    {
+      "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+      "staff_id": "20172672",
+      "year": 2025,
+      "kpa_code": "KPA2",
+      "kpa_name": "Research",
+      "output": "ECGBL",
+      "hours": 15.0,
+      "weight_pct": 3.972973,
+      "cadence": "monthly",
+      "window_start": "2025-01-01",
+      "window_end": "2025-12-31",
+      "min_required": 1,
+      "stretch_target": 1,
+      "enabler": "",
+      "goal": "",
+      "sub_goal": "",
+      "lag_target": "",
+      "lead_target": ""
+    },
+    {
+      "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+      "staff_id": "20172672",
+      "year": 2025,
+      "kpa_code": "KPA2",
+      "kpa_name": "Research",
+      "output": "SDL",
+      "hours": 15.0,
+      "weight_pct": 3.972973,
+      "cadence": "monthly",
+      "window_start": "2025-01-01",
+      "window_end": "2025-12-31",
+      "min_required": 1,
+      "stretch_target": 1,
+      "enabler": "",
+      "goal": "",
+      "sub_goal": "",
+      "lag_target": "",
+      "lead_target": ""
+    },
+    {
+      "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+      "staff_id": "20172672",
+      "year": 2025,
+      "kpa_code": "KPA2",
+      "kpa_name": "Research",
+      "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+      "hours": 50.0,
+      "weight_pct": 13.243243,
+      "cadence": "monthly",
+      "window_start": "2025-01-01",
+      "window_end": "2025-12-31",
+      "min_required": 1,
+      "stretch_target": 1,
+      "enabler": "",
+      "goal": "",
+      "sub_goal": "",
+      "lag_target": "",
+      "lead_target": ""
+    },
+    {
+      "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+      "staff_id": "20172672",
+      "year": 2025,
+      "kpa_code": "KPA2",
+      "kpa_name": "Research",
+      "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+      "hours": 35.0,
+      "weight_pct": 9.27027,
+      "cadence": "monthly",
+      "window_start": "2025-01-01",
+      "window_end": "2025-12-31",
+      "min_required": 1,
+      "stretch_target": 1,
+      "enabler": "",
+      "goal": "",
+      "sub_goal": "",
+      "lag_target": "",
+      "lead_target": ""
+    },
+    {
+      "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+      "staff_id": "20172672",
+      "year": 2025,
+      "kpa_code": "KPA2",
+      "kpa_name": "Research",
+      "output": "SDL scientific committee",
+      "hours": 10.0,
+      "weight_pct": 2.648649,
+      "cadence": "monthly",
+      "window_start": "2025-01-01",
+      "window_end": "2025-12-31",
+      "min_required": 1,
+      "stretch_target": 1,
+      "enabler": "",
+      "goal": "",
+      "sub_goal": "",
+      "lag_target": "",
+      "lead_target": ""
+    },
+    {
+      "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+      "kpa_code": "KPA5",
+      "kpa_name": "OHS",
+      "output": "OHS compliance (mandatory)",
+      "hours": 0.0,
+      "weight_pct": 2.0,
+      "cadence": "monthly",
+      "window_start": "",
+      "window_end": "",
+      "min_required": 1,
+      "stretch_target": 1
+    }
+  ],
+  "months": [
+    "2025-01",
+    "2025-02",
+    "2025-03",
+    "2025-04",
+    "2025-05",
+    "2025-06",
+    "2025-07",
+    "2025-08",
+    "2025-09",
+    "2025-10",
+    "2025-11",
+    "2025-12"
+  ],
+  "by_month": {
+    "2025-01": {
+      "month_bucket": "2025-01",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    },
+    "2025-02": {
+      "month_bucket": "2025-02",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    },
+    "2025-03": {
+      "month_bucket": "2025-03",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    },
+    "2025-04": {
+      "month_bucket": "2025-04",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    },
+    "2025-05": {
+      "month_bucket": "2025-05",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    },
+    "2025-06": {
+      "month_bucket": "2025-06",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    },
+    "2025-07": {
+      "month_bucket": "2025-07",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    },
+    "2025-08": {
+      "month_bucket": "2025-08",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    },
+    "2025-09": {
+      "month_bucket": "2025-09",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    },
+    "2025-10": {
+      "month_bucket": "2025-10",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    },
+    "2025-11": {
+      "month_bucket": "2025-11",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    },
+    "2025-12": {
+      "month_bucket": "2025-12",
+      "tasks": [
+        {
+          "task_id": "aab9556a-c119-42da-95e2-861e63229345",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "56ef07a1-acf6-4d87-884d-96ddcd251974",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Game-Based Learning in History Education: Insights from “Dogs of War”",
+          "planned_weight_pct": 1.655405,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "bc298c4a-9dce-4999-a404-0e38034447a4",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "0aaa66c6-1bab-4e20-8df9-bcc365255336",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Prosper GREAT project",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "c67a06f2-9224-4ef1-bb58-191f1824b9c9",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Citesaga project, Renewable Rangers project",
+          "planned_weight_pct": 0.441441,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "196df148-15b9-44fb-82eb-a447dbd56ba0",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "ECGBL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "58a7a057-050d-4c88-8518-fc30a4ea0559",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL",
+          "planned_weight_pct": 0.331081,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "74757995-a3c5-40e9-90c4-12564cc34f51",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+          "planned_weight_pct": 1.103604,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5f70a6ec-6116-48d3-9530-e583dadb216f",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+          "planned_weight_pct": 0.772523,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "20ba1398-017b-48b7-9d7c-4cfc0fc487bd",
+          "kpa_code": "KPA2",
+          "kpa_name": "Research",
+          "output": "SDL scientific committee",
+          "planned_weight_pct": 0.220721,
+          "min_required": 1,
+          "stretch_target": 1
+        },
+        {
+          "task_id": "5100b2ff-d1c3-4ecf-9329-212400f12058",
+          "kpa_code": "KPA5",
+          "kpa_name": "OHS",
+          "output": "OHS compliance (mandatory)",
+          "planned_weight_pct": 0.166667,
+          "min_required": 1,
+          "stretch_target": 1
+        }
+      ]
+    }
+  },
+  "source": "ta_summary"
+}
