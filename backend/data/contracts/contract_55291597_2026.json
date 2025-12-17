@@ -1,0 +1,134 @@
+{
+  "staff_id": "55291597",
+  "name": "Test User",
+  "position": "Lecturer",
+  "cycle_year": 2026,
+  "faculty": "Faculty of Education",
+  "line_manager": "",
+  "kpas": [
+    {
+      "code": "KPA1",
+      "name": "Teaching and Learning",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {
+        "name": "Teaching and Learning (including supervision)",
+        "hours": 1257.62,
+        "weight_pct": 78.57,
+        "norm_hours": 1728.0,
+        "teaching": [
+          "BSTE312 205",
+          "BSTE322 125",
+          "BSTE412 125",
+          "BSTE422 125",
+          "BSTD512 10",
+          "LABD522 10",
+          "BSTE312",
+          "BSTE322",
+          "BSTE522",
+          "Premoderation of assignment BSTE312",
+          "Premoderation of assignment BSTE322",
+          "Premoderation of assignment BSTE412",
+          "Premoderation of assignment BSTE422",
+          "Premoderation of assignment BSTD512",
+          "Premoderation of assignment LABD522"
+        ],
+        "supervision": [
+          "Maarman PH MED"
+        ],
+        "teaching_practice_windows": [
+          "April",
+          "July"
+        ]
+      }
+    },
+    {
+      "code": "KPA2",
+      "name": "Occupational Health and Safety",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {
+        "name": "Occupational Health & Safety",
+        "hours": 0.0,
+        "weight_pct": 0.0,
+        "teaching_modules": [
+          "BSTE312",
+          "BSTE412",
+          "BSTE322",
+          "BSTE422",
+          "BSTD512",
+          "LABD522"
+        ],
+        "norm_hours": 1728.0
+      }
+    },
+    {
+      "code": "KPA3",
+      "name": "Research and Innovation / Creative Outputs",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {
+        "name": "Personal Research, Innovation and/or Creative Outputs",
+        "hours": 100.0,
+        "weight_pct": 6.25,
+        "norm_hours": 1728.0,
+        "research": [
+          "Article writing on Promotion of Entrepreneurship",
+          "Article writing on teaching business studies in rural schools",
+          "Attendance of research colloquiums, writing schools, workshops (eg. Ethics, Integrity, Turnitin): Maximum of 60 hours",
+          "BSTE322,BSTD522",
+          "Attend graduation ceremony first semester and second semester"
+        ]
+      }
+    },
+    {
+      "code": "KPA4",
+      "name": "Academic Leadership and Management",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {
+        "name": "Academic Leadership and Administration",
+        "hours": 203.0,
+        "weight_pct": 12.68,
+        "norm_hours": 1728.0,
+        "leadership": [
+          "Research Focus Area/Unit Management Committee meetings: \nMaximum of 20 hours",
+          "Mentorship meetings: 8 hours",
+          "School Management Committee: 24 hours",
+          "Subject Group meetings: 22 hours",
+          "School meetings and functions: 10 hours",
+          "Faculty Forums: Maximum of 6 hours",
+          "Professional development (in accordance with PDP): Maximum of 10 hours"
+        ]
+      }
+    },
+    {
+      "code": "KPA5",
+      "name": "Social Responsiveness / Community and Industry Engagement",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {
+        "name": "Social Responsiveness (Community Engagement / Industry)",
+        "hours": 40.0,
+        "weight_pct": 2.5,
+        "norm_hours": 1728.0,
+        "social": [
+          "Student Training Entrepreneurship Programme"
+        ]
+      }
+    }
+  ],
+  "flags": [
+    "TA_IMPORTED"
+  ]
+}
