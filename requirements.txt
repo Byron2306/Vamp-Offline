@@ -24,8 +24,13 @@ pytesseract>=0.3.10
 pdf2image>=1.16.0
 
 # Voice cloning with OpenVoice V2 (MIT License)
-torch>=2.0.0
-torchaudio>=2.0.0
+# Install these separately if needed for your platform:
+# torch>=2.0.0
+# torchaudio>=2.0.0
+# For voice cloning (install after torch):
+# pip install soundfile scipy numpy librosa pydub
+# pip install git+https://github.com/myshell-ai/OpenVoice.git
 soundfile>=0.12.0
 scipy>=1.10.0
-git+https://github.com/myshell-ai/OpenVoice.git
+librosa>=0.10.0
+pydub>=0.25.0

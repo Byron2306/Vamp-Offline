@@ -8,15 +8,29 @@ VAMP can now **speak** to you using a cloned voice! Using OpenVoice V2 (MIT Lice
 
 ### 1. Install Dependencies
 
+**Linux/Mac:**
 ```bash
 ./setup_voice.sh
 ```
 
-Or manually:
+**Windows:**
+```powershell
+.\setup_voice_windows.ps1
+```
+
+**Or manually:**
 ```bash
-pip install torch torchaudio soundfile scipy
+# Install PyTorch first
+pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# Install audio libraries
+pip install soundfile scipy librosa pydub
+
+# Install OpenVoice (may require FFmpeg)
 pip install git+https://github.com/myshell-ai/OpenVoice.git
 ```
+
+**Windows users**: If installation fails, see [VOICE_WINDOWS_SETUP.md](VOICE_WINDOWS_SETUP.md)
 
 ### 2. Prepare Voice Samples
 

@@ -20,8 +20,9 @@ try:
     from openvoice import se_extractor
     from openvoice.api import ToneColorConverter, BaseSpeakerTTS
     OPENVOICE_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     OPENVOICE_AVAILABLE = False
+    OPENVOICE_IMPORT_ERROR = str(e)
     se_extractor = None
     ToneColorConverter = None
     BaseSpeakerTTS = None
@@ -47,9 +48,16 @@ class VoiceCloner:
             cache_dir: Directory to cache voice embeddings and generated audio
         """
         if not OPENVOICE_AVAILABLE:
-            raise RuntimeError(
-                "OpenVoice not installed. Install with: pip install openvoice"
+            error_msg = (
+                "OpenVoice not installed.\n"
+                "Install with:\n"
+                "  pip install torch torchaudio soundfile scipy\n"
+                "  pip install git+https://github.com/myshell-ai/OpenVoice.git\n\n"
+                "On Windows, see VOICE_WINDOWS_SETUP.md for detailed instructions.\n"
             )
+            if 'OPENVOICE_IMPORT_ERROR' in globals():
+                error_msg += f"\nImport error: {OPENVOICE_IMPORT_ERROR}"
+            raise RuntimeError(error_msg)
         
         if not AUDIO_LIBS_AVAILABLE:
             raise RuntimeError(
