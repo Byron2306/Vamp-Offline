@@ -12,3 +12,4 @@ dependencies:
       - pdfplumber
       - openpyxl
       - chardet
+      - pandas 
