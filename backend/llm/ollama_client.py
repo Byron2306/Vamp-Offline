@@ -15,7 +15,7 @@ except Exception as exc:  # pragma: no cover - handled at runtime
 
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
-OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "240"))
+OLLAMA_TIMEOUT = max(180.0, float(os.getenv("OLLAMA_TIMEOUT", "240")))
 OLLAMA_NUM_PREDICT = int(os.getenv("OLLAMA_NUM_PREDICT", "320"))
 OLLAMA_RETRIES = int(os.getenv("OLLAMA_RETRIES", "2"))
 OLLAMA_BACKOFFS = [2, 6]
@@ -66,11 +66,24 @@ def query_ollama(prompt: str, *, model: Optional[str] = None, format: Optional[s
     raise RuntimeError("Unknown Ollama error")
 
 
+def _balanced_brace_slice(text: str) -> str:
+    depth = 0
+    start = -1
+    for idx, ch in enumerate(text):
+        if ch == "{":
+            if depth == 0:
+                start = idx
+            depth += 1
+        elif ch == "}" and depth > 0:
+            depth -= 1
+            if depth == 0 and start != -1:
+                return text[start : idx + 1]
+    return ""
+
+
 def _repair_json_string(text: str) -> str:
     repaired = text.strip()
-    # Drop trailing commas before closing braces/brackets
     repaired = re.sub(r",\s*(\}|\])", r"\1", repaired)
-    # Normalise single quotes to double quotes for keys/strings
     repaired = re.sub(r"'", '"', repaired)
     return repaired
 
@@ -79,7 +92,7 @@ def extract_json_object(raw_text: str) -> Dict[str, Any]:
     """Best-effort extraction of a JSON object from an LLM response."""
     cleaned = (raw_text or "").strip()
     if not cleaned:
-        raise ValueError("Empty Ollama response")
+        return "AI_FAILED"  # type: ignore[return-value]
 
     def _attempt_parse(candidate: str) -> Optional[Dict[str, Any]]:
         try:
@@ -95,10 +108,7 @@ def extract_json_object(raw_text: str) -> Dict[str, Any]:
     if direct is not None:
         return direct
 
-    start = cleaned.find("{")
-    end = cleaned.rfind("}")
-    candidate = cleaned[start : end + 1] if 0 <= start < end else ""
-
+    candidate = _balanced_brace_slice(cleaned)
     parsed = _attempt_parse(candidate) if candidate else None
     if parsed is not None:
         return parsed
@@ -108,19 +118,13 @@ def extract_json_object(raw_text: str) -> Dict[str, Any]:
             "Return valid JSON only. Fix trailing commas, missing quotes, and remove commentary.\n"
             f"Malformed JSON:\n{candidate or cleaned}"
         )
-        repaired_response = query_ollama(repair_prompt, format="json")
+        repaired_response = query_ollama(repair_prompt, format="json", timeout=OLLAMA_TIMEOUT)
         repaired_response = (repaired_response or "").strip()
-        repaired_start = repaired_response.find("{")
-        repaired_end = repaired_response.rfind("}")
-        repaired_candidate = (
-            repaired_response[repaired_start : repaired_end + 1]
-            if 0 <= repaired_start < repaired_end
-            else repaired_response
-        )
+        repaired_candidate = _balanced_brace_slice(repaired_response) or repaired_response
         repaired = _attempt_parse(repaired_candidate)
         if repaired is not None:
             return repaired
     except Exception:
-        pass
+        return "AI_FAILED"  # type: ignore[return-value]
 
-    raise ValueError("No JSON object found in Ollama response")
+    return "AI_FAILED"  # type: ignore[return-value]

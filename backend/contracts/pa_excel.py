@@ -192,28 +192,6 @@ def _aggregate_kpa_window(df: pd.DataFrame, month_min: int, month_max: int) -> p
     return grouped
 
 
-def generate_initial_pa(profile: StaffProfile, out_dir: Path) -> Path:
-    """
-    Generate the Initial Performance Agreement Excel from the contract only,
-    filtering out KPIs with no time/weight allocation or inactive.
-    """
-    rows = _filter_live_kpis(_rows_for_profile(profile))
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Initial PA"
-
-    headers = ["KPA Name", "Outputs", "KPI", "Weight", "Hours", "Outcomes", "Active"]
-    ws.append(headers)
-    for row in rows:
-        ws.append(row)
-
-    out_path = out_dir / f"PA_{profile.staff_id}_{profile.cycle_year}_initial.xlsx"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    wb.save(out_path)
-    return out_path
-
-
 def generate_mid_year_review(profile: StaffProfile, out_dir: Path) -> Path:
     """
     Generate a Mid-Year review workbook that aggregates evidence

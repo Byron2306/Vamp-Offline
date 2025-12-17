@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAMP Offline Performance Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🔴 VAMP Offline Performance Management</h1>
+                <div class="status-badges">
+                    <span id="contractStatus" class="badge badge-red">Contract: ❌</span>
+                    <span id="taStatus" class="badge badge-red">TA: ❌</span>
+                    <span id="paStatus" class="badge badge-red">PA: ❌</span>
+                    <span id="enrichStatus" class="badge badge-red">Enrich: ❌</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Top Panel - Controls -->
+            <div class="panel top-panel">
+                <h2>1. Load Documents</h2>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>📄 Contract (JSON)</label>
+                        <input type="file" id="contractFile" accept=".json" class="file-input">
+                        <button onclick="uploadContract()" class="btn btn-primary">Load Contract</button>
+                    </div>
+                    <div class="form-group">
+                        <label>📋 Task Agreement (XLSX)</label>
+                        <input type="file" id="taFile" accept=".xlsx,.xls" class="file-input">
+                        <button onclick="uploadTA()" class="btn btn-primary">Load TA</button>
+                    </div>
+                    <div class="form-group">
+                        <label>🗂️ PA Skeleton (XLSX)</label>
+                        <input type="file" id="paSkeleton" accept=".xlsx,.xls" class="file-input">
+                        <button onclick="uploadPASkeleton()" class="btn btn-primary">Load PA Skeleton</button>
+                    </div>
+                    <div class="form-group">
+                        <label>⚡ Enrich with AI</label>
+                        <button onclick="enrichPA()" class="btn btn-secondary">Start Enrichment</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Panel - Scanning & Evidence -->
+            <div class="panel middle-panel">
+                <h2>2. Scan Evidence</h2>
+                <div class="form-group">
+                    <label>📁 Evidence Files</label>
+                    <input type="file" id="evidenceFile" multiple class="file-input">
+                    <button onclick="uploadEvidence()" class="btn btn-primary">Upload Evidence</button>
+                    <button onclick="scanEvidence()" class="btn btn-success" id="scanBtn" disabled>🔍 Scan Evidence</button>
+                </div>
+
+                <!-- Evidence Table -->
+                <div class="table-container">
+                    <table class="data-table" id="evidenceTable">
+                        <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Status</th>
+                                <th>KPA</th>
+                                <th>Confidence</th>
+                                <th>Impact Summary</th>
+                            </tr>
+                        </thead>
+                        <tbody id="evidenceTableBody">
+                            <tr><td colspan="5" class="text-center">No evidence scanned yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bottom Panel - Activity Log & Actions -->
+            <div class="panel bottom-panel">
+                <div class="bottom-split">
+                    <!-- Activity Log -->
+                    <div class="log-section">
+                        <h2>📝 Activity Log</h2>
+                        <div class="log-container" id="activityLog"></div>
+                        <div class="button-group">
+                            <button onclick="clearLogs()" class="btn btn-small">Clear Logs</button>
+                            <button onclick="exportResults()" class="btn btn-small btn-success">📥 Export CSV</button>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="filter-section">
+                        <h2>🔍 Filters</h2>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="filterStatus" class="select">
+                                <option value="">All</option>
+                                <option value="SCORED">Scored</option>
+                                <option value="NEEDS_REVIEW">Needs Review</option>
+                                <option value="FAILED">Failed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>KPA</label>
+                            <select id="filterKPA" class="select">
+                                <option value="">All KPAs</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="filterType" class="select">
+                                <option value="">All Types</option>
+                                <option value="PDF">PDF</option>
+                                <option value="Image">Image</option>
+                                <option value="Email">Email</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
