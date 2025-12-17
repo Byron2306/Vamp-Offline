@@ -41,6 +41,7 @@ import hashlib
 import json
 import os
 import queue
+import shutil
 import threading
 import time
 import traceback
@@ -104,12 +105,10 @@ except Exception:
 
 try:
     from backend.contracts.pa_excel import (  # type: ignore
-        generate_initial_pa,
         generate_mid_year_review,
         generate_final_review,
     )
 except Exception:
-    generate_initial_pa = None
     generate_mid_year_review = None
     generate_final_review = None
 
@@ -133,6 +132,10 @@ try:
 except Exception:
     build_staff_expectations = None
     load_staff_expectations = None
+
+# Expectations engine is intentionally disabled for offline stability
+build_staff_expectations = None
+load_staff_expectations = None
 
 try:
     from backend.nwu_formats import parse_nwu_ta  # type: ignore
@@ -184,6 +187,12 @@ OFFLINE_RESULTS_DIR = PROJECT_ROOT / "output" / "offline_results"
 OFFLINE_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 DATA_DIR = PROJECT_ROOT / "backend" / "data"
+PURGE_PATHS = [
+    PROJECT_ROOT / "backend" / "data" / "contracts",
+    PROJECT_ROOT / "backend" / "data" / "staff_expectations",
+    PROJECT_ROOT / "backend" / "data" / "evidence",
+    PROJECT_ROOT / "output" / "offline_results",
+]
 
 APP_TITLE = "VAMP – Offline Evidence Scanner"
 APP_SUBTITLE = "Expectation-aware monthly scoring (NWU brain + Ollama contextual score)"
@@ -479,8 +488,19 @@ def _sha1(path: Path) -> str:
 
 
 class OfflineApp(tk.Tk):
+    def _purge_cached_data(self) -> None:
+        for path in PURGE_PATHS:
+            try:
+                if path.exists():
+                    shutil.rmtree(path, ignore_errors=True)
+                path.mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
+
     def __init__(self) -> None:
         super().__init__()
+
+        self._purge_cached_data()
 
         self.title(APP_TITLE)
         self.geometry("1180x820")
@@ -491,7 +511,6 @@ class OfflineApp(tk.Tk):
         self.staff_profile: Optional[StaffProfile] = None
         self.task_agreement_path: Optional[Path] = None
         self.pa_skeleton_path: Optional[Path] = None
-        self.pa_initial_path: Optional[Path] = None
         self.pa_mid_path: Optional[Path] = None
         self.pa_final_path: Optional[Path] = None
         self.current_evidence_folder: Optional[Path] = None
@@ -587,6 +606,8 @@ class OfflineApp(tk.Tk):
         self.top_panel = tk.Frame(self.main_split, bg=self._colors["bg"], height=260)
         self.middle_panel = tk.Frame(self.main_split, bg=self._colors["bg"])
         self.bottom_panel = tk.Frame(self.main_split, bg=self._colors["bg"])
+        self.bottom_panel.rowconfigure(0, weight=1)
+        self.bottom_panel.columnconfigure(0, weight=1)
 
         self._add_pane_with_minsize(self.top_panel, 240)
         self._add_pane_with_minsize(self.middle_panel, 220)
@@ -601,6 +622,7 @@ class OfflineApp(tk.Tk):
 
         self.bind("<Escape>", lambda e: self._stop_scan())
         self._refresh_button_states()
+        self.after(0, lambda: self._log("🔄 Purged cached data for a clean start."))
 
     def _add_pane_with_minsize(self, pane: tk.Frame, minsize: int) -> None:
         """Add a pane and apply a minsize when supported by the Tk build.
@@ -716,7 +738,10 @@ class OfflineApp(tk.Tk):
             self.btn_gen_ai.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
 
         if hasattr(self, "btn_export_pa"):
-            self.btn_export_pa.configure(state=("normal" if getattr(self, "pa_skeleton_ready", False) else "disabled"))
+            enable_export = getattr(self, "pa_skeleton_ready", False) or getattr(
+                self, "pa_ai_ready", False
+            )
+            self.btn_export_pa.configure(state=("normal" if enable_export else "disabled"))
 
         if hasattr(self, "start_btn"):
             evidence_folder = getattr(self, "evidence_folder", None) or self.current_evidence_folder
@@ -1173,7 +1198,7 @@ class OfflineApp(tk.Tk):
 
         ttk.Button(btns, text="Enroll / Load", command=self._enroll).grid(row=0, column=0, sticky="ew", pady=4)
         ttk.Button(btns, text="Import Task Agreement", command=self._import_ta).grid(row=1, column=0, sticky="ew", pady=4)
-        self.generate_skeleton_btn = ttk.Button(btns, text="Generate PA Skeleton", command=self._generate_initial_pa)
+        self.generate_skeleton_btn = ttk.Button(btns, text="Generate PA Skeleton", command=self._generate_pa_skeleton)
         self.generate_skeleton_btn.grid(row=2, column=0, sticky="ew", pady=4)
         ttk.Button(btns, text="Generate PA (AI)", command=self._generate_ai_pa).grid(row=3, column=0, sticky="ew", pady=4)
         self.export_skeleton_btn = ttk.Button(btns, text="Export PA Skeleton", command=self._export_pa_skeleton)
@@ -1614,7 +1639,6 @@ class OfflineApp(tk.Tk):
         self.task_agreement_path = None
         self.pa_skeleton_path = None
         self.pa_ai_path = None
-        self.pa_initial_path = None
         self.pa_mid_path = None
         self.pa_final_path = None
         self.ta_valid = False
@@ -1764,9 +1788,6 @@ class OfflineApp(tk.Tk):
         else:
             self._log("TA imported")
 
-    def _generate_initial_pa(self) -> None:
-        self._generate_pa_skeleton()
-
     def _generate_ai_pa(self) -> None:
         self._generate_pa_ai()
 
@@ -1775,6 +1796,7 @@ class OfflineApp(tk.Tk):
             return
         if not self.ta_valid:
             messagebox.showerror("TA invalid", "Import a valid Task Agreement before generating the PA skeleton.")
+            self._log("ℹ️ Skeleton generation ignored – Task Agreement not validated.")
             return
         try:
             if generate_pa_skeleton_from_ta is None:
@@ -1785,8 +1807,6 @@ class OfflineApp(tk.Tk):
             self.pa_ai_ready = False
             self.pa_ai_path = None
             self.ai_enrich_status = "Skeleton ready"
-            # Keep initial path pointing to the skeleton until AI enrichment replaces it.
-            self.pa_initial_path = self.pa_initial_path or self.pa_skeleton_path
             self.pa_skeleton_rows = list(rows or [])
             self.session_state["pa_skeleton_rows"] = list(rows or [])
             self.session_state["pa_skeleton_path"] = str(self.pa_skeleton_path)
@@ -1810,13 +1830,10 @@ class OfflineApp(tk.Tk):
             return
         if not self._ensure_profile():
             return
-        if not self.pa_skeleton_rows:
+        if not self.pa_skeleton_path or not self.pa_skeleton_path.exists():
             self.ai_enrich_status = "Awaiting skeleton"
             self._refresh_button_states()
-            messagebox.showwarning(
-                "PA skeleton required",
-                "Generate the PA skeleton before requesting AI enrichment.",
-            )
+            self._log("ℹ️ AI enrichment skipped – generate the PA skeleton first.")
             return
 
         self.ai_enrich_running = True
@@ -1826,22 +1843,21 @@ class OfflineApp(tk.Tk):
 
         def _worker() -> None:
             log_messages: List[str] = []
-            status_message = "AI enrichment complete"
+            status_message = "AI enrichment failed—manual edit required"
             success = False
+            out: Optional[Path] = None
             try:
                 self.ui_queue.put(("status", "Contacting AI for PA enrichment…"))
                 self.ui_queue.put(("log", "Contacting AI for PA enrichment…"))
-                enrich_pa_with_ai(self.profile, self.pa_skeleton_rows)
-                if generate_initial_pa is None:
-                    raise RuntimeError("backend/contracts/pa_excel.py not available")
-                out = generate_initial_pa(self.profile, OFFLINE_RESULTS_DIR)
-                self.pa_initial_path = Path(out)
-                self.pa_ai_path = Path(out)
-                self.session_state["pa_initial_path"] = str(self.pa_initial_path)
-                log_messages.append("AI PA generated")
-                log_messages.append(f"✅ AI-enriched PA generated at: {self.pa_initial_path}")
-                status_message = "AI enrichment complete"
-                success = True
+                out_path = enrich_pa_with_ai(self.profile, self.pa_skeleton_path, log=self._log)
+                out = Path(out_path) if out_path else None
+                if out and out.exists():
+                    success = True
+                    status_message = "AI enrichment complete"
+                    log_messages.append(f"✅ AI-enriched PA generated at: {out}")
+                else:
+                    log_messages.append("ℹ️ AI enrichment returned skeleton unchanged.")
+                    status_message = "AI_FAILED"
             except Exception as e:
                 timeout_exceptions: Tuple[type, ...] = ()
                 if requests is not None:
@@ -1859,7 +1875,6 @@ class OfflineApp(tk.Tk):
                     status_message = "Timeout — manual edit required"
                     log_messages.append("⚠️ AI enrichment timed out—manual edit required")
                 else:
-                    status_message = "AI enrichment failed—manual edit required"
                     log_messages.append("AI enrichment failed—manual edit required")
                     log_messages.append(f"❌ AI enrichment error: {e}")
             finally:
@@ -1869,13 +1884,14 @@ class OfflineApp(tk.Tk):
                         status_message,
                         log_messages,
                         success,
+                        out,
                     ),
                 )
 
         threading.Thread(target=_worker, daemon=True).start()
 
     def _finalize_ai_enrichment(
-        self, status_message: str, log_messages: List[str], success: bool
+        self, status_message: str, log_messages: List[str], success: bool, out: Optional[Path]
     ) -> None:
         for msg in log_messages:
             self._log(msg)
@@ -1884,6 +1900,8 @@ class OfflineApp(tk.Tk):
         self.ai_enrich_status = status_message
         if not success:
             self.pa_ai_path = None
+        elif out:
+            self.pa_ai_path = out
         self.ai_enrich_running = False
         self._rebuild_expectations()
         _play_sound("vamp.wav")
@@ -1894,20 +1912,14 @@ class OfflineApp(tk.Tk):
 
     def _export_pa_excel(self) -> None:
         if not self.pa_skeleton_ready:
-            messagebox.showwarning("Generate PA", "Generate the PA skeleton before exporting.")
+            self._log("ℹ️ Export ignored – generate the PA skeleton first.")
             return
-        if not self.pa_ai_ready:
-            messagebox.showwarning(
-                "AI enrichment pending",
-                "Run AI enrichment first, or use 'Export PA Skeleton' to export the draft.",
-            )
-            return
-        path_to_open = self.pa_ai_path if self.pa_ai_ready and self.pa_ai_path else self.pa_skeleton_path
+        path_to_open = self.pa_ai_path if self.pa_ai_path and self.pa_ai_ready else self.pa_skeleton_path
         if not path_to_open:
-            messagebox.showerror("Missing PA", "No PA path available to export.")
+            self._log("❌ Missing PA path for export.")
             return
         _open_file(path_to_open)
-        self._log("PA exported" if not self.pa_ai_ready else "AI PA exported")
+        self._log("AI PA exported" if self.pa_ai_ready else "PA skeleton exported")
         self._refresh_button_states()
 
     def _export_pa_skeleton(self) -> None:
@@ -1920,7 +1932,7 @@ class OfflineApp(tk.Tk):
         if self.pa_skeleton_path and self.pa_skeleton_path.exists():
             _open_file(self.pa_skeleton_path)
             return
-        self._generate_initial_pa()
+        self._generate_pa_skeleton()
         if self.pa_skeleton_path and self.pa_skeleton_path.exists():
             _open_file(self.pa_skeleton_path)
 
@@ -1971,12 +1983,9 @@ class OfflineApp(tk.Tk):
             # It's okay: user might have a PA but no TA yet; we still can attempt with None.
             self._log("ℹ️ No Task Agreement selected yet – expectations will be limited.")
         try:
-            ta_path = str(self.task_agreement_path) if self.task_agreement_path else ""
-            pa_path_obj = self.pa_initial_path or self.pa_skeleton_path
-            pa_path = str(pa_path_obj) if pa_path_obj else None
-            exp = build_staff_expectations(self.profile.staff_id, ta_path, pa_path)
-            self.expectations = exp or {}
-            self._log("✅ Expectations JSON rebuilt (for contextual scoring).")
+            # Engine disabled; rely on TA-derived summary
+            self._log("ℹ️ Expectations engine disabled – using TA-derived expectations only.")
+            self.expectations = self._summary_from_profile_only()
         except Exception as e:
             self._log(f"⚠️ Could not rebuild expectations: {e}")
             self.expectations = self._summary_from_profile_only()
@@ -1997,24 +2006,16 @@ class OfflineApp(tk.Tk):
     def _refresh_expectations_snapshot(self) -> None:
         snap = ""
         if self.profile:
-            if callable(load_staff_expectations):
-                try:
-                    self.expectations = load_staff_expectations(self.profile.staff_id) or {}
-                    # Compact friendly snapshot (not full raw)
-                    snap = json.dumps(self.expectations, ensure_ascii=False, indent=2)[:6000]
-                except Exception as e:
-                    snap = f"(Could not load expectations: {e})"
-            else:
-                self._log(
-                    "ℹ️ Expectations engine not installed; TA summary will still display once TA is imported."
-                )
-                if not self.expectations:
-                    self.expectations = self._summary_from_profile_only()
-                snap = (
-                    json.dumps(self.expectations, ensure_ascii=False, indent=2)[:6000]
-                    if self.expectations
-                    else "Import Task Agreement / Generate PA to populate expectations."
-                )
+            self._log(
+                "ℹ️ Expectations engine disabled – using TA-derived expectations only."
+            )
+            if not self.expectations:
+                self.expectations = self._summary_from_profile_only()
+            snap = (
+                json.dumps(self.expectations, ensure_ascii=False, indent=2)[:6000]
+                if self.expectations
+                else "Import Task Agreement / Generate PA to populate expectations."
+            )
         else:
             snap = "Import Task Agreement / Generate PA to populate expectations."
 
@@ -2349,7 +2350,7 @@ class OfflineApp(tk.Tk):
             self.detail_rows.clear()
             self._detail_counter = 0
             self.after(0, lambda: self.tree.delete(*self.tree.get_children()))
-            self._refresh_action_states()
+            self.ui_queue.put(("call", self._refresh_action_states))
             self._log(f"🔎 Starting scan of {len(artefacts)} artefacts for month {month_bucket}…")
 
             for path in artefacts:
@@ -2465,9 +2466,9 @@ class OfflineApp(tk.Tk):
 
             self._set_status("Idle")
             self.scan_running = False
-            self._update_summary_panel()
-            self._refresh_action_states()
-            self._refresh_button_states()
+            self.ui_queue.put(("call", self._update_summary_panel))
+            self.ui_queue.put(("call", self._refresh_action_states))
+            self.ui_queue.put(("call", self._refresh_button_states))
             self._log("✅ Scan complete.")
             _play_sound("vamp.wav")
 
