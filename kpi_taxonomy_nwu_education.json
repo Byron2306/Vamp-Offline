@@ -1,0 +1,35 @@
+{
+  "teaching": [
+    "Curriculum delivery",
+    "Assessment & feedback",
+    "LMS (eFundi) management",
+    "Moderation",
+    "Student support"
+  ],
+  "research": [
+    "IRIMS updates",
+    "Manuscript pipeline",
+    "Grant applications",
+    "Supervision",
+    "Conference dissemination"
+  ],
+  "leadership": [
+    "Committee participation",
+    "Chairing/secretariat",
+    "Workplan execution",
+    "Governance compliance"
+  ],
+  "social": [
+    "Community engagement",
+    "Partnerships",
+    "Outreach reporting",
+    "Media/impact"
+  ],
+  "ohs": [
+    "Annual OHS compliance",
+    "Incident reporting",
+    "Safety training",
+    "Risk assessment",
+    "Drills"
+  ]
+}

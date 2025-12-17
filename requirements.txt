@@ -5,6 +5,14 @@ pillow>=10.0.0
 openpyxl>=3.1.0
 pandas>=2.0.0
 
+# Web server dependencies
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+Werkzeug>=3.0.0
+
+# PDF processing (for evidence scanning)
+PyPDF2>=3.0.0
+
 # Optional dependencies for enhanced features
 # Uncomment if needed:
 
