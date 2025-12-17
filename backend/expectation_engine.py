@@ -591,36 +591,65 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
     tasks: List[Dict[str, Any]] = []
     task_counter = 1
     
-    # KPA1: Teaching (monthly + milestone tasks)
+    # KPA1: Teaching (NWU 2025 Academic Calendar aligned)
     kpa1_hours = kpa_summary.get("KPA1", {}).get("hours", 0.0)
+    
+    # Extract teaching modules from TA
+    teaching_modules = []
+    for item in teaching:
+        module_matches = MODULE_CODE_RE.findall(item)
+        teaching_modules.extend(module_matches)
+    
+    teaching_modules_str = ", ".join(set(teaching_modules)) if teaching_modules else "Teaching modules as per TA"
+    
     if kpa1_hours > 0:
+        # NWU 2025 Calendar milestones
+        nwu_calendar = {
+            1: {"period": "Semester 1 Prep", "tasks": ["Module preparation", "eFundi setup", "Study guide finalization"]},
+            2: {"period": "Semester 1 Start", "tasks": ["Orientation week", "First lectures", "Student onboarding"]},
+            3: {"period": "Semester 1 Teaching", "tasks": ["Regular lectures", "Formative assessments", "Tutorial support"]},
+            4: {"period": "Semester 1 Mid-term", "tasks": ["Mid-term assessments", "Student feedback", "Remedial interventions"]},
+            5: {"period": "Semester 1 Completion", "tasks": ["Final lectures", "Semester tests", "Exam prep workshops"]},
+            6: {"period": "Semester 1 Exams", "tasks": ["Exam invigilation", "Marking", "Grade submission"]},
+            7: {"period": "Mid-Year Break", "tasks": ["Semester 2 planning", "Module revisions", "Research time"]},
+            8: {"period": "Semester 2 Start", "tasks": ["Welcome back", "Semester 2 lectures begin", "Assessment schedules"]},
+            9: {"period": "Semester 2 Teaching", "tasks": ["Regular lectures", "Formative assessments", "Tutorial support"]},
+            10: {"period": "Semester 2 Mid-term", "tasks": ["Mid-term assessments", "Student feedback", "Remedial interventions"]},
+            11: {"period": "Semester 2 Completion", "tasks": ["Final lectures", "Semester tests", "Exam prep workshops"]},
+            12: {"period": "Year-End Exams", "tasks": ["Exam invigilation", "Final marking", "Moderation", "Grade finalization"]}
+        }
+        
         for month in range(1, 13):
+            period_info = nwu_calendar.get(month, {"period": "Teaching", "tasks": []})
+            task_title = f"{period_info['period']}: {teaching_modules_str}"
+            task_description = " | ".join(period_info['tasks'][:2])
+            
             tasks.append({
                 "id": f"task_{task_counter:03d}",
                 "kpa_code": "KPA1",
                 "kpa_name": "Teaching and Learning",
-                "title": "Teaching delivery (lectures, assessments, eFundi activity)",
+                "title": task_title,
                 "cadence": "monthly",
                 "months": [month],
-                "minimum_count": 2,
-                "stretch_count": 4,
-                "evidence_hints": ["lecture", "assessment", "efundi", "lms", "class", "tutorial", "marks"],
-                "outputs": "; ".join(teaching[:3]) if teaching else "Teaching activities as per TA"
+                "minimum_count": 3 if month in [2,3,4,5,8,9,10,11] else 2,  # Higher expectations during teaching months
+                "stretch_count": 5 if month in [2,3,4,5,8,9,10,11] else 3,
+                "evidence_hints": ["lecture", "assessment", "efundi", "lms", "class", "tutorial", "marks", teaching_modules_str],
+                "outputs": f"{task_description} | Modules: {teaching_modules_str}"
             })
             task_counter += 1
         
-        # Add semester milestones
+        # Critical milestones
         tasks.append({
             "id": f"task_{task_counter:03d}",
             "kpa_code": "KPA1",
             "kpa_name": "Teaching and Learning",
-            "title": "Mid-year marks submission",
-            "cadence": "milestone",
+            "title": f"Semester 1 marks submission deadline - {teaching_modules_str}",
+            "cadence": "critical_milestone",
             "months": [6],
             "minimum_count": 1,
             "stretch_count": 1,
-            "evidence_hints": ["marks", "gradebook", "submission", "assessment"],
-            "outputs": "Semester 1 assessment completion"
+            "evidence_hints": ["marks", "gradebook", "submission", "assessment", "semester 1", teaching_modules_str],
+            "outputs": f"Semester 1 assessment completion for {teaching_modules_str}"
         })
         task_counter += 1
         
@@ -628,13 +657,28 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "id": f"task_{task_counter:03d}",
             "kpa_code": "KPA1",
             "kpa_name": "Teaching and Learning",
-            "title": "Year-end marks and moderation",
-            "cadence": "milestone",
-            "months": [11],
+            "title": f"Year-end marks and moderation - {teaching_modules_str}",
+            "cadence": "critical_milestone",
+            "months": [12],
             "minimum_count": 1,
             "stretch_count": 1,
-            "evidence_hints": ["moderation", "marks", "exam", "final"],
-            "outputs": "Year-end assessment completion and moderation"
+            "evidence_hints": ["moderation", "marks", "exam", "final", "year-end", teaching_modules_str],
+            "outputs": f"Year-end assessment completion and moderation for {teaching_modules_str}"
+        })
+        task_counter += 1
+        
+        # Module-specific tasks
+        tasks.append({
+            "id": f"task_{task_counter:03d}",
+            "kpa_code": "KPA1",
+            "kpa_name": "Teaching and Learning",
+            "title": f"Module quality assurance - {teaching_modules_str}",
+            "cadence": "semester",
+            "months": [6, 12],
+            "minimum_count": 2,
+            "stretch_count": 4,
+            "evidence_hints": ["moderation", "peer review", "quality", "evaluation", teaching_modules_str],
+            "outputs": f"Module evaluation and improvement for {teaching_modules_str}"
         })
         task_counter += 1
     
@@ -654,36 +698,53 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
         })
         task_counter += 1
     
-    # KPA3: Research (monthly + milestones)
+    # KPA3: Research (NWU Research Calendar aligned)
     kpa3_hours = kpa_summary.get("KPA3", {}).get("hours", 0.0)
     if kpa3_hours > 0:
+        research_calendar = {
+            1: "Research planning & ethics applications",
+            2: "Data collection / Literature review",
+            3: "NRF rating window / Grant applications",
+            4: "Conference submission deadlines",
+            5: "Mid-year research review preparation",
+            6: "Mid-year research output submission",
+            7: "Winter research focus period",
+            8: "Manuscript drafting & revisions",
+            9: "Conference presentations",
+            10: "Year-end publication push",
+            11: "NWU Research Awards submissions",
+            12: "Annual research reporting"
+        }
+        
         for month in range(1, 13):
+            focus_area = research_calendar.get(month, "Research progress")
+            
             tasks.append({
                 "id": f"task_{task_counter:03d}",
                 "kpa_code": "KPA3",
                 "kpa_name": "Research, Innovation & Creative Outputs",
-                "title": "Research progress (writing, ethics, submissions)",
+                "title": f"{focus_area}",
                 "cadence": "monthly",
                 "months": [month],
-                "minimum_count": 1,
-                "stretch_count": 3,
-                "evidence_hints": ["draft", "manuscript", "ethics", "grant", "submission", "review", "publication"],
-                "outputs": "; ".join(research[:2]) if research else "Research activities as per TA"
+                "minimum_count": 2 if month in [3,6,9,11] else 1,  # Higher expectations in key months
+                "stretch_count": 4 if month in [3,6,9,11] else 3,
+                "evidence_hints": ["draft", "manuscript", "ethics", "grant", "submission", "review", "publication", "conference", "nrf"],
+                "outputs": f"{focus_area} | " + ("; ".join(research[:2]) if research else "Research activities as per TA")
             })
             task_counter += 1
         
-        # Research milestones
+        # Critical research milestones
         tasks.append({
             "id": f"task_{task_counter:03d}",
             "kpa_code": "KPA3",
             "kpa_name": "Research, Innovation & Creative Outputs",
-            "title": "Mid-year research milestone",
-            "cadence": "milestone",
-            "months": [6],
+            "title": "NRF grant application / Rating submission",
+            "cadence": "critical_milestone",
+            "months": [3],
             "minimum_count": 1,
-            "stretch_count": 1,
-            "evidence_hints": ["ethics", "submission", "grant", "acceptance"],
-            "outputs": "Research submission or ethics approval"
+            "stretch_count": 2,
+            "evidence_hints": ["nrf", "grant", "rating", "application", "submission"],
+            "outputs": "NRF funding application or rating improvement"
         })
         task_counter += 1
         
@@ -691,33 +752,108 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             "id": f"task_{task_counter:03d}",
             "kpa_code": "KPA3",
             "kpa_name": "Research, Innovation & Creative Outputs",
-            "title": "Year-end research output",
-            "cadence": "milestone",
+            "title": "Mid-year research output (publication/conference)",
+            "cadence": "critical_milestone",
+            "months": [6],
+            "minimum_count": 1,
+            "stretch_count": 2,
+            "evidence_hints": ["publication", "conference", "acceptance", "submission", "doi"],
+            "outputs": "Research publication submission or conference acceptance"
+        })
+        task_counter += 1
+        
+        tasks.append({
+            "id": f"task_{task_counter:03d}",
+            "kpa_code": "KPA3",
+            "kpa_name": "Research, Innovation & Creative Outputs",
+            "title": "Year-end research output (accredited publication)",
+            "cadence": "critical_milestone",
             "months": [11],
             "minimum_count": 1,
-            "stretch_count": 1,
-            "evidence_hints": ["publication", "accepted", "doi", "journal"],
-            "outputs": "Research publication or acceptance"
+            "stretch_count": 2,
+            "evidence_hints": ["publication", "accepted", "doi", "journal", "accredited", "subsidy"],
+            "outputs": "Accredited research publication for subsidy purposes"
+        })
+        task_counter += 1
+        
+        # Supervision tasks if applicable
+        tasks.append({
+            "id": f"task_{task_counter:03d}",
+            "kpa_code": "KPA3",
+            "kpa_name": "Research, Innovation & Creative Outputs",
+            "title": "Postgraduate supervision meetings & progress tracking",
+            "cadence": "semester",
+            "months": [3, 6, 9, 12],
+            "minimum_count": 4,
+            "stretch_count": 8,
+            "evidence_hints": ["supervision", "postgraduate", "masters", "phd", "meeting", "progress report"],
+            "outputs": "Postgraduate student supervision and progress monitoring"
         })
         task_counter += 1
     
-    # KPA4: Leadership (monthly)
+    # KPA4: Academic Leadership & Administration (NWU governance cycle aligned)
     kpa4_hours = kpa_summary.get("KPA4", {}).get("hours", 0.0)
     if kpa4_hours > 0:
+        leadership_calendar = {
+            1: "Annual planning & goal setting",
+            2: "Faculty board meetings / School committees",
+            3: "Budget planning & resource allocation",
+            4: "Student complaint resolutions / Quality assurance",
+            5: "Mid-year performance reviews (staff)",
+            6: "Senate meetings / Academic planning",
+            7: "Strategic planning sessions",
+            8: "Curriculum review & accreditation prep",
+            9: "Faculty board meetings / Programme evaluations",
+            10: "Budget reviews & resource reallocation",
+            11: "Year-end performance assessments",
+            12: "Annual reporting & strategic reviews"
+        }
+        
         for month in range(1, 13):
+            focus_area = leadership_calendar.get(month, "Leadership activities")
+            
             tasks.append({
                 "id": f"task_{task_counter:03d}",
                 "kpa_code": "KPA4",
                 "kpa_name": "Academic Leadership & Administration",
-                "title": "Leadership activities (meetings, committees, administration)",
+                "title": f"{focus_area}",
                 "cadence": "monthly",
                 "months": [month],
-                "minimum_count": 1,
-                "stretch_count": 2,
-                "evidence_hints": ["meeting", "minutes", "committee", "chair", "agenda", "administration"],
-                "outputs": "; ".join(leadership[:2]) if leadership else "Leadership activities as per TA"
+                "minimum_count": 2 if month in [3,6,9,12] else 1,  # Higher expectations in key governance months
+                "stretch_count": 4 if month in [3,6,9,12] else 2,
+                "evidence_hints": ["meeting", "minutes", "committee", "chair", "agenda", "administration", "senate", "faculty board"],
+                "outputs": f"{focus_area} | " + ("; ".join(leadership[:2]) if leadership else "Leadership activities as per TA")
             })
             task_counter += 1
+        
+        # Critical leadership milestones
+        tasks.append({
+            "id": f"task_{task_counter:03d}",
+            "kpa_code": "KPA4",
+            "kpa_name": "Academic Leadership & Administration",
+            "title": "Mid-year performance reviews & staff development",
+            "cadence": "critical_milestone",
+            "months": [5],
+            "minimum_count": 1,
+            "stretch_count": 1,
+            "evidence_hints": ["performance review", "mid-year", "staff development", "mentoring"],
+            "outputs": "Staff performance reviews and development planning"
+        })
+        task_counter += 1
+        
+        tasks.append({
+            "id": f"task_{task_counter:03d}",
+            "kpa_code": "KPA4",
+            "kpa_name": "Academic Leadership & Administration",
+            "title": "Programme accreditation & quality assurance",
+            "cadence": "semester",
+            "months": [4, 10],
+            "minimum_count": 2,
+            "stretch_count": 4,
+            "evidence_hints": ["accreditation", "quality assurance", "programme review", "heqc", "cheps"],
+            "outputs": "Programme accreditation documentation and quality reviews"
+        })
+        task_counter += 1
     
     # KPA5: Social Responsiveness (quarterly)
     kpa5_hours = kpa_summary.get("KPA5", {}).get("hours", 0.0)

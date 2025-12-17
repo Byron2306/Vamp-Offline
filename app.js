@@ -640,8 +640,12 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
       setTimeout(() => loadExpectations(), 1000);
     }
     
-    // Auto-refresh evidence tab
-    loadEvidence();
+    // Auto-refresh evidence log
+    loadEvidenceLog();
+    
+    // Close scan section after successful scan
+    const section = $("scanEvidenceSection");
+    if (section) section.style.display = "none";
   } catch (e) {
     vampSpeak("Scan failed. Please check the server logs.");
     $("scanStatus").textContent = "Error";
@@ -1009,6 +1013,96 @@ function connectEventStream() {
     log("Could not connect event stream: " + e.message);
   }
 }
+
+/* ============================================================
+   SCAN SECTION TOGGLE (IN EXPECTATIONS TAB)
+============================================================ */
+
+$("scanEvidenceBtn")?.addEventListener("click", () => {
+  const section = $("scanEvidenceSection");
+  if (section) {
+    section.style.display = section.style.display === "none" ? "block" : "none";
+    if (section.style.display === "block") {
+      vampSpeak("Upload your evidence files and I'll classify them for you.");
+    }
+  }
+});
+
+$("closeScanSection")?.addEventListener("click", () => {
+  const section = $("scanEvidenceSection");
+  if (section) {
+    section.style.display = "none";
+  }
+});
+
+/* ============================================================
+   EVIDENCE LOG WITH FILTERING
+============================================================ */
+
+async function loadEvidenceLog(monthFilter = 'all') {
+  try {
+    const staffId = $("staffId")?.value || '20172672';
+    const year = $("cycleYear")?.value || '2025';
+    
+    const res = await fetch(`/api/progress?staff_id=${staffId}&year=${year}`);
+    if (!res.ok) throw new Error("Could not load evidence log");
+    
+    const data = await res.json();
+    const evidence = data.evidence || [];
+    
+    // Filter by month if specified
+    const filtered = monthFilter === 'all' 
+      ? evidence 
+      : evidence.filter(e => e.month === monthFilter);
+    
+    renderEvidenceLogTable(filtered);
+    
+    log(`Evidence log loaded: ${filtered.length} items${monthFilter !== 'all' ? ` for ${monthFilter}` : ''}`);
+  } catch (e) {
+    vampSpeak("Could not load evidence log.");
+    log("Evidence log error: " + e.message);
+  }
+}
+
+function renderEvidenceLogTable(evidence) {
+  const tbody = $("evidenceLogTableBody");
+  if (!tbody) return;
+  
+  tbody.innerHTML = "";
+  
+  if (evidence.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="no-data">No evidence logged yet. Use "Scan Evidence" in the Expectations tab.</td></tr>';
+    return;
+  }
+  
+  evidence.forEach(item => {
+    const row = document.createElement("tr");
+    const confidence = item.confidence || 0;
+    const confidenceClass = confidence >= 0.7 ? 'confidence-high' : confidence >= 0.5 ? 'confidence-medium' : 'confidence-low';
+    
+    row.innerHTML = `
+      <td>${item.date || item.timestamp || 'N/A'}</td>
+      <td>${item.filename || item.file || 'N/A'}</td>
+      <td>${item.kpa || 'Unknown'}</td>
+      <td>${item.month || 'N/A'}</td>
+      <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;">${item.task || item.title || 'N/A'}</td>
+      <td>${item.tier || 'N/A'}</td>
+      <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">${item.impact_summary || item.impact || 'N/A'}</td>
+      <td class="${confidenceClass}">${(confidence * 100).toFixed(0)}%</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+$("evidenceReloadBtn")?.addEventListener("click", () => {
+  const monthFilter = $("evidenceMonthFilter")?.value || 'all';
+  loadEvidenceLog(monthFilter);
+});
+
+$("evidenceMonthFilter")?.addEventListener("change", () => {
+  const monthFilter = $("evidenceMonthFilter")?.value || 'all';
+  loadEvidenceLog(monthFilter);
+});
 
 /* ============================================================
    INIT

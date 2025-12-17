@@ -85,8 +85,7 @@
   <div class="tabs">
     <div class="tab active" data-tab="enrol">Enrolment</div>
     <div class="tab" data-tab="expectations">Expectations</div>
-    <div class="tab" data-tab="scan">Scan</div>
-    <div class="tab" data-tab="evidence">Evidence</div>
+    <div class="tab" data-tab="evidence">Evidence Log</div>
     <div class="tab" data-tab="reports">Reports</div>
     <div class="tab" data-tab="logs">Logs</div>
   </div>
@@ -138,8 +137,41 @@
           <div class="card-title">Monthly Expectations</div>
           <div class="muted">Track progress month-by-month across all KPAs.</div>
         </div>
-        <div class="right">
-          <button class="btn" id="rebuildExpBtn">Rebuild expectations</button>
+        <div class="right" style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" id="scanEvidenceBtn" title="Scan and link evidence to tasks">📎 Scan Evidence</button>
+          <button class="btn glow" id="rebuildExpBtn">Rebuild Expectations</button>
+        </div>
+      </div>
+
+      <!-- Scan Evidence Modal/Section (initially hidden) -->
+      <div id="scanEvidenceSection" style="display:none;margin-top:16px;padding:16px;background:var(--panel-dark);border-radius:8px;border:2px solid var(--purple);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h4 style="margin:0;color:var(--purple);">📎 Scan Evidence Files</h4>
+          <button class="btn-small" id="closeScanSection">✕ Close</button>
+        </div>
+        <div class="form grid2" style="margin-bottom:12px;">
+          <div>
+            <label>Select Files (multi-select)</label>
+            <input type="file" id="scanFiles" multiple accept=".pdf,.docx,.txt,.xlsx,.pptx"/>
+          </div>
+          <div>
+            <label>Month bucket</label>
+            <input id="scanMonth" value="2025-01" placeholder="YYYY-MM"/>
+            <div class="row" style="margin-top:6px;">
+              <label class="chk"><input type="checkbox" id="scanUseBrain" checked/> Use NWU Brain</label>
+              <label class="chk"><input type="checkbox" id="scanUseContextual" checked/> Use Ollama</label>
+            </div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <button class="btn glow" id="scanUploadBtn">Upload & Scan Files</button>
+          <button class="btn" id="scanStopBtn">Stop</button>
+          <span class="pill" id="scanProgress" style="margin-left:10px;">—</span>
+          <span class="pill" id="scanStatus" style="margin-left:10px;">Idle</span>
+        </div>
+        <div class="box" style="margin-top:12px;">
+          <div class="box-h">Activity log</div>
+          <pre class="log" id="scanLog">Ready to scan evidence files…</pre>
         </div>
       </div>
 
@@ -183,89 +215,59 @@
     </div>
   </section>
 
-  <!-- SCAN -->
-  <section class="panel" id="tab-scan">
-    <div class="card">
-      <div class="card-h">
-        <div>
-          <div class="card-title">Evidence Scanner</div>
-          <div class="muted">Upload files → AI classification → store.</div>
-        </div>
-        <div class="right">
-          <span class="pill" id="scanStatus">Idle</span>
-        </div>
-      </div>
 
-      <div class="form grid2">
-        <div>
-          <label>Select Files (multi-select)</label>
-          <input type="file" id="scanFiles" multiple accept=".pdf,.docx,.txt,.xlsx,.pptx"/>
-        </div>
-        <div>
-          <label>Month bucket</label>
-          <input id="scanMonth" value="2025-01"/>
-          <div class="row" style="margin-top:6px;">
-            <label class="chk"><input type="checkbox" id="scanUseBrain" checked/> Use NWU Brain</label>
-            <label class="chk"><input type="checkbox" id="scanUseContextual" checked/> Use Ollama</label>
-          </div>
-        </div>
-      </div>
 
-      <div class="row" style="margin-top:12px;">
-        <button class="btn glow" id="scanUploadBtn">Upload & Scan Files</button>
-        <button class="btn" id="scanStopBtn">Stop</button>
-        <button class="btn" id="scanRefreshEvidenceBtn">Refresh evidence</button>
-        <span class="pill" id="scanProgress" style="margin-left:10px;">—</span>
-      </div>
-
-      <!-- Scan Results Table -->
-      <div class="table-container" style="margin-top:16px;">
-        <table class="vamp-table" id="scanResultsTable">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>File</th>
-              <th>KPA</th>
-              <th>Task</th>
-              <th>Tier</th>
-              <th>Impact Summary</th>
-              <th>Confidence</th>
-              <th>Status</th>
-              <th>Resolve</th>
-            </tr>
-          </thead>
-          <tbody id="scanResultsTableBody">
-            <tr><td colspan="9" class="no-data">No scans performed yet. Upload files to begin.</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="split" style="margin-top:16px;">
-        <div class="box">
-          <div class="box-h">Activity log</div>
-          <pre class="log" id="scanLog">Ready to scan evidence files…</pre>
-        </div>
-        <div class="box">
-          <div class="box-h">Classification insights</div>
-          <div class="evidence" id="scanInsights">Upload files to see AI analysis.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- EVIDENCE -->
+  <!-- EVIDENCE LOG -->
   <section class="panel" id="tab-evidence">
     <div class="card">
       <div class="card-h">
         <div>
-          <div class="card-title">Evidence</div>
-          <div class="muted">Stored evidence rows.</div>
+          <div class="card-title">Evidence Log</div>
+          <div class="muted">All scanned evidence files with task assignments and impact assessments.</div>
         </div>
         <div class="right">
-          <button class="btn glow" id="evidenceReloadBtn">Reload</button>
+          <div class="row" style="gap:8px;">
+            <label>Filter Month:</label>
+            <select id="evidenceMonthFilter" style="padding:4px 8px;">
+              <option value="all">All Months</option>
+              <option value="2025-01">January 2025</option>
+              <option value="2025-02">February 2025</option>
+              <option value="2025-03">March 2025</option>
+              <option value="2025-04">April 2025</option>
+              <option value="2025-05">May 2025</option>
+              <option value="2025-06">June 2025</option>
+              <option value="2025-07">July 2025</option>
+              <option value="2025-08">August 2025</option>
+              <option value="2025-09">September 2025</option>
+              <option value="2025-10">October 2025</option>
+              <option value="2025-11">November 2025</option>
+              <option value="2025-12">December 2025</option>
+            </select>
+            <button class="btn glow" id="evidenceReloadBtn">Reload</button>
+          </div>
         </div>
       </div>
-      <div class="evidence" id="evidenceTable"></div>
+      
+      <!-- Evidence Log Table -->
+      <div class="table-container" style="margin-top:16px;">
+        <table class="vamp-table" id="evidenceLogTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>File Name</th>
+              <th>KPA Assigned</th>
+              <th>Month</th>
+              <th>Task</th>
+              <th>Tier</th>
+              <th>Impact Assessment</th>
+              <th>Confidence</th>
+            </tr>
+          </thead>
+          <tbody id="evidenceLogTableBody">
+            <tr><td colspan="8" class="no-data">No evidence logged yet. Use "Scan Evidence" in the Expectations tab.</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 

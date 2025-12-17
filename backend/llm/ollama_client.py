@@ -13,7 +13,34 @@ except Exception as exc:  # pragma: no cover - handled at runtime
     _REQUESTS_IMPORT_ERROR = exc
 
 
-OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
+def _get_ollama_host():
+    """Determine the best Ollama host URL for the current environment."""
+    # If explicitly set, use that
+    if "OLLAMA_HOST" in os.environ:
+        return os.getenv("OLLAMA_HOST").rstrip("/")
+    
+    # Try multiple potential hosts for dev containers
+    potential_hosts = [
+        "http://host.docker.internal:11434",  # Docker Desktop
+        "http://172.17.0.1:11434",           # Docker default bridge
+        "http://10.0.0.1:11434",             # Codespaces gateway
+        "http://127.0.0.1:11434",            # Local fallback
+    ]
+    
+    if requests:
+        for host in potential_hosts:
+            try:
+                resp = requests.get(f"{host}/api/tags", timeout=2)
+                if resp.status_code == 200:
+                    return host
+            except:
+                continue
+    
+    # Default fallback
+    return "http://host.docker.internal:11434"
+
+
+OLLAMA_HOST = _get_ollama_host()
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 OLLAMA_TIMEOUT = max(180.0, float(os.getenv("OLLAMA_TIMEOUT", "240")))
 OLLAMA_NUM_PREDICT = int(os.getenv("OLLAMA_NUM_PREDICT", "320"))
