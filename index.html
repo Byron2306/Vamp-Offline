@@ -528,6 +528,44 @@
   </div>
 </div>
 
+<!-- Lock Evidence Explanation Modal -->
+<div id="lockExplanationModal" class="modal">
+  <div class="modal-content" style="max-width:600px;">
+    <div class="modal-header">
+      <h3>🔒 Explain Locked Evidence</h3>
+      <button class="modal-close" onclick="closeLockExplanationModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="muted" style="margin-bottom:16px;">You're locking evidence to a specific task. Please explain how this evidence relates to the selected task.</p>
+      
+      <div class="info-box" style="background:var(--accent-bg);padding:12px;border-radius:6px;margin-bottom:16px;border-left:3px solid var(--accent);">
+        <div style="margin-bottom:6px;"><strong>Task:</strong> <span id="lockModalTaskTitle">-</span></div>
+        <div style="margin-bottom:6px;"><strong>Files:</strong> <span id="lockModalFileCount">-</span></div>
+        <div><strong>Month:</strong> <span id="lockModalMonth">-</span></div>
+      </div>
+      
+      <label style="display:block;margin-bottom:8px;font-weight:600;">How does this evidence relate to the task?</label>
+      <textarea id="lockExplanationText" 
+                rows="6" 
+                style="width:100%;padding:10px;border:1px solid var(--grey);border-radius:4px;font-family:inherit;resize:vertical;"
+                placeholder="Example: This lecture recording demonstrates the module preparation and eFundi setup for HISE411. It shows the planning of lesson content, upload of materials, and configuration of assessment schedules for the semester."></textarea>
+      
+      <div style="margin-top:12px;font-size:0.9em;color:var(--grey-dim);">
+        💡 <strong>Why this matters:</strong> Your explanation will be stored with the evidence and used to:
+        <ul style="margin:8px 0 0 20px;line-height:1.6;">
+          <li>Improve evidence relevance scoring</li>
+          <li>Help reviewers understand your work</li>
+          <li>Strengthen your performance assessment</li>
+        </ul>
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;padding:16px;border-top:1px solid var(--grey);">
+      <button class="btn secondary" onclick="closeLockExplanationModal()">Cancel Scan</button>
+      <button class="btn glow" id="submitLockExplanationBtn" onclick="submitLockExplanation()">🔒 Lock & Scan</button>
+    </div>
+  </div>
+</div>
+
 <script src="./app.js?v=20251218"></script>
 </body>
 </html>

@@ -974,6 +974,7 @@ def scan_upload():
         use_brain = request.form.get('use_brain') == 'true'
         use_contextual = request.form.get('use_contextual') == 'true'
         asserted_mapping = request.form.get('asserted_mapping') == 'true'  # User pre-locked evidence to task
+        user_explanation = request.form.get('user_explanation', '').strip()  # User's explanation for locked evidence
         
         results = []
         
@@ -1003,13 +1004,16 @@ def scan_upload():
                 
                 # AI Classification using Ollama (skip if asserted mapping)
                 if asserted_mapping and target_task_id:
-                    # User asserted this evidence belongs to the target task
-                    # Skip AI classification entirely, use minimal classification
+                    # User asserted this evidence belongs to the target task with user explanation
+                    impact_text = "Evidence directly linked to task by user (asserted relevance)"
+                    if user_explanation:
+                        impact_text = f"User explanation: {user_explanation[:200]}... | {impact_text}"
+                    
                     classification = {
                         "kpa": "Asserted",
                         "task": "User-selected task",
-                        "tier": "N/A",
-                        "impact_summary": "Evidence directly linked to task by user (asserted relevance)",
+                        "tier": "User-Asserted",
+                        "impact_summary": impact_text,
                         "confidence": 1.0
                     }
                     use_brain = False  # Skip brain scorer too
@@ -1181,6 +1185,7 @@ def scan_upload():
                             "date": datetime.utcnow().date().isoformat(),
                             "timestamp": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
                             "impact_summary": classification["impact_summary"],
+                            "user_explanation": user_explanation if user_explanation else None,
                             "confidence": classification["confidence"],
                             "task": classification["task"],
                             "target_task_id": target_task_id or "",

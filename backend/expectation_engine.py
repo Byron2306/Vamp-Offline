@@ -791,44 +791,277 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
     # KPA1: Teaching (NWU 2025 Academic Calendar aligned)
     kpa1_hours = kpa_summary.get("KPA1", {}).get("hours", 0.0)
     
-    # Build teaching modules string with student counts
+    # Helper function to identify semester from module code
+    def _get_module_semester(module_code: str) -> int:
+        """
+        Identify semester from module code.
+        Modules with '1' in middle (e.g., HISE411) are semester 1.
+        Modules with '2' in middle (e.g., HISE322) are semester 2.
+        Returns 1 or 2, or 0 if undetermined (year-long).
+        
+        NWU module codes: ABCD ### where ### is level(1-9) + semester(1-2) + sequence(0-9)
+        Example: HISE 411 = 4th year, 1st semester, sequence 1
+                 HISE 322 = 3rd year, 2nd semester, sequence 2
+        """
+        # Extract the 3-digit number from module code
+        import re
+        match = re.search(r'[A-Z]+\s*(\d{3})', str(module_code))
+        if match:
+            three_digits = match.group(1)
+            # Middle digit (index 1) indicates semester
+            middle_digit = int(three_digits[1])
+            if middle_digit == 1:
+                return 1  # First semester
+            elif middle_digit == 2:
+                return 2  # Second semester
+        return 0  # Year-long or undetermined
+    
+    # Build teaching modules string with student counts AND separate by semester
+    semester1_modules = []
+    semester2_modules = []
+    yearlong_modules = []
+    
     if teaching_modules:
-        module_strs = []
         for mod in teaching_modules:
             if isinstance(mod, dict):
                 code = mod.get("code", "")
                 students = mod.get("students")
-                if students:
-                    module_strs.append(f"{code} ({students} students)")
-                else:
-                    module_strs.append(code)
+                mod_str = f"{code} ({students} students)" if students else code
             else:
-                module_strs.append(str(mod))
-        teaching_modules_str = ", ".join(module_strs)
+                code = str(mod)
+                mod_str = code
+            
+            semester = _get_module_semester(code)
+            if semester == 1:
+                semester1_modules.append(mod_str)
+            elif semester == 2:
+                semester2_modules.append(mod_str)
+            else:
+                yearlong_modules.append(mod_str)
+        
+        # Build display strings
+        all_modules_str = ", ".join([m for m in semester1_modules + semester2_modules + yearlong_modules])
+        sem1_str = ", ".join(semester1_modules) if semester1_modules else None
+        sem2_str = ", ".join(semester2_modules) if semester2_modules else None
+        teaching_modules_str = all_modules_str if all_modules_str else "Teaching modules as per TA"
     else:
         teaching_modules_str = "Teaching modules as per TA"
+        sem1_str = None
+        sem2_str = None
     
     if kpa1_hours > 0:
-        # NWU 2025 Calendar milestones
+        # NWU 2025 Calendar with detailed task types
         nwu_calendar = {
-            1: {"period": "Semester 1 Prep", "tasks": ["Module preparation", "eFundi setup", "Study guide finalization"]},
-            2: {"period": "Semester 1 Start", "tasks": ["Orientation week", "First lectures", "Student onboarding"]},
-            3: {"period": "Semester 1 Teaching", "tasks": ["Regular lectures", "Formative assessments", "Tutorial support"]},
-            4: {"period": "Semester 1 Mid-term", "tasks": ["Mid-term assessments", "Student feedback", "Remedial interventions"]},
-            5: {"period": "Semester 1 Completion", "tasks": ["Final lectures", "Semester tests", "Exam prep workshops"]},
-            6: {"period": "Semester 1 Exams", "tasks": ["Exam invigilation", "Marking", "Grade submission"]},
-            7: {"period": "Mid-Year Break", "tasks": ["Semester 2 planning", "Module revisions", "Research time"]},
-            8: {"period": "Semester 2 Start", "tasks": ["Welcome back", "Semester 2 lectures begin", "Assessment schedules"]},
-            9: {"period": "Semester 2 Teaching", "tasks": ["Regular lectures", "Formative assessments", "Tutorial support"]},
-            10: {"period": "Semester 2 Mid-term", "tasks": ["Mid-term assessments", "Student feedback", "Remedial interventions"]},
-            11: {"period": "Semester 2 Completion", "tasks": ["Final lectures", "Semester tests", "Exam prep workshops"]},
-            12: {"period": "Year-End Exams", "tasks": ["Exam invigilation", "Final marking", "Moderation", "Grade finalization"]}
+            1: {
+                "period": "Semester 1 Prep", 
+                "tasks": [
+                    "Module preparation & planning",
+                    "eFundi LMS setup & content upload", 
+                    "Study guide finalization",
+                    "Assessment planning & rubric design",
+                    "Reading list updates"
+                ],
+                "semester": 1
+            },
+            2: {
+                "period": "Semester 1 Start",
+                "tasks": [
+                    "Orientation week & student onboarding",
+                    "First lectures",
+                    "Class lists & student consultation setup",
+                    "Initial formative assessments"
+                ],
+                "semester": 1
+            },
+            3: {
+                "period": "Semester 1 Teaching",
+                "tasks": [
+                    "Regular lectures & tutorials",
+                    "Formative assessments & feedback",
+                    "Student consultations",
+                    "eFundi engagement tracking"
+                ],
+                "semester": 1
+            },
+            4: {
+                "period": "Semester 1 Mid-term",
+                "tasks": [
+                    "Mid-term assessments & tests",
+                    "Student feedback sessions",
+                    "Remedial interventions",
+                    "Marking & grade capture"
+                ],
+                "semester": 1
+            },
+            5: {
+                "period": "Semester 1 Completion",
+                "tasks": [
+                    "Final lectures & exam prep",
+                    "Semester tests & assignments",
+                    "Exam prep workshops",
+                    "Student consultation (exam prep)"
+                ],
+                "semester": 1
+            },
+            6: {
+                "period": "Semester 1 Exams",
+                "tasks": [
+                    "Exam invigilation",
+                    "Exam marking & moderation",
+                    "Grade submission & finalization",
+                    "Student appeals handling"
+                ],
+                "semester": 1
+            },
+            7: {
+                "period": "Mid-Year Break",
+                "tasks": [
+                    "Semester 2 planning & prep",
+                    "Module revisions & updates",
+                    "Research time allocation",
+                    "Performance review preparation"
+                ],
+                "semester": 0  # Break period
+            },
+            8: {
+                "period": "Semester 2 Start",
+                "tasks": [
+                    "Welcome back sessions",
+                    "Semester 2 lectures begin",
+                    "Assessment schedules distribution",
+                    "eFundi updates for Semester 2"
+                ],
+                "semester": 2
+            },
+            9: {
+                "period": "Semester 2 Teaching",
+                "tasks": [
+                    "Regular lectures & tutorials",
+                    "Formative assessments",
+                    "Student consultations",
+                    "Tutorial support"
+                ],
+                "semester": 2
+            },
+            10: {
+                "period": "Semester 2 Mid-term",
+                "tasks": [
+                    "Mid-term assessments",
+                    "Student feedback & interventions",
+                    "Remedial support",
+                    "Marking & moderation"
+                ],
+                "semester": 2
+            },
+            11: {
+                "period": "Semester 2 Completion",
+                "tasks": [
+                    "Final lectures & reviews",
+                    "Semester tests",
+                    "Exam prep workshops",
+                    "Consultation hours (exam prep)"
+                ],
+                "semester": 2
+            },
+            12: {
+                "period": "Year-End Exams",
+                "tasks": [
+                    "Exam invigilation",
+                    "Final marking & moderation",
+                    "Grade finalization",
+                    "Annual performance review"
+                ],
+                "semester": 2
+            }
         }
         
-        for month in range(1, 13):
-            period_info = nwu_calendar.get(month, {"period": "Teaching", "tasks": []})
-            task_title = f"{period_info['period']}: {teaching_modules_str}"
-            task_description = " | ".join(period_info['tasks'][:2])
+        # SPECIAL HANDLING FOR JANUARY: Create detailed planning tasks
+        if teaching_modules_str != "Teaching modules as per TA":
+            # January: Break down into specific planning activities
+            january_tasks = [
+                {
+                    "title": f"Module planning & curriculum design",
+                    "tasks_desc": "Lesson planning, assessment design, learning outcomes",
+                    "hints": ["planning", "curriculum", "lesson plan", "learning outcomes", "design"],
+                    "min": 2,
+                    "stretch": 3
+                },
+                {
+                    "title": f"eFundi LMS setup & content upload",
+                    "tasks_desc": "eFundi configuration, content upload, resource preparation",
+                    "hints": ["efundi", "lms", "blackboard", "upload", "resources", "online"],
+                    "min": 2,
+                    "stretch": 3
+                },
+                {
+                    "title": f"Study guides & reading lists finalization",
+                    "tasks_desc": "Study guide updates, reading list compilation, material preparation",
+                    "hints": ["study guide", "reading list", "materials", "textbook", "resources"],
+                    "min": 1,
+                    "stretch": 2
+                },
+                {
+                    "title": f"Assessment planning & rubric development",
+                    "tasks_desc": "Assessment calendar, rubrics, marking criteria",
+                    "hints": ["assessment", "rubric", "marking", "criteria", "planning"],
+                    "min": 1,
+                    "stretch": 2
+                }
+            ]
+            
+            for jan_task in january_tasks:
+                # For January, show ALL modules since it's prep for both semesters
+                tasks.append({
+                    "id": f"task_{task_counter:03d}",
+                    "kpa_code": "KPA1",
+                    "kpa_name": "Teaching and Learning",
+                    "title": f"Jan: {jan_task['title']} - {teaching_modules_str}",
+                    "cadence": "annual",
+                    "months": [1],
+                    "minimum_count": jan_task["min"],
+                    "stretch_count": jan_task["stretch"],
+                    "evidence_hints": jan_task["hints"] + [teaching_modules_str],
+                    "outputs": f"{jan_task['tasks_desc']} | Modules: {teaching_modules_str}",
+                    "what_to_do": _what_to_do("KPA1", jan_task['title'], jan_task['tasks_desc']),
+                    "evidence_required": _evidence_required(
+                        "KPA1",
+                        jan_task["hints"],
+                        f"{jan_task['tasks_desc']} | Modules: {teaching_modules_str}",
+                    ),
+                })
+                task_counter += 1
+        
+        # Regular monthly tasks for Feb-December
+        for month in range(2, 13):
+            period_info = nwu_calendar.get(month, {"period": "Teaching", "tasks": [], "semester": 0})
+            period_semester = period_info.get("semester", 0)
+            
+            # Determine which modules are active this month
+            if period_semester == 1 and sem1_str:
+                active_modules = sem1_str
+            elif period_semester == 2 and sem2_str:
+                active_modules = sem2_str
+            elif period_semester == 0:  # Break or year-long
+                active_modules = teaching_modules_str
+            else:
+                # If no modules for this semester, use all modules
+                active_modules = teaching_modules_str
+            
+            task_title = f"{period_info['period']}: {active_modules}"
+            all_tasks = period_info.get('tasks', [])
+            task_description = " | ".join(all_tasks[:3])  # Show up to 3 task types
+            
+            # Build comprehensive evidence hints
+            evidence_hints_list = ["lecture", "assessment", "efundi", "lms", "class", "tutorial", "marks"]
+            if "planning" in task_description.lower():
+                evidence_hints_list.extend(["planning", "preparation", "study guide"])
+            if "consultation" in task_description.lower():
+                evidence_hints_list.append("consultation")
+            if "exam" in task_description.lower():
+                evidence_hints_list.extend(["exam", "invigilation", "moderation"])
+            if "marking" in task_description.lower():
+                evidence_hints_list.append("marking")
+            evidence_hints_list.append(active_modules)
             
             tasks.append({
                 "id": f"task_{task_counter:03d}",
@@ -839,13 +1072,13 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "months": [month],
                 "minimum_count": 3 if month in [2,3,4,5,8,9,10,11] else 2,  # Higher expectations during teaching months
                 "stretch_count": 5 if month in [2,3,4,5,8,9,10,11] else 3,
-                "evidence_hints": ["lecture", "assessment", "efundi", "lms", "class", "tutorial", "marks", teaching_modules_str],
-                "outputs": f"{task_description} | Modules: {teaching_modules_str}",
+                "evidence_hints": evidence_hints_list,
+                "outputs": f"{task_description} | Modules: {active_modules}",
                 "what_to_do": _what_to_do("KPA1", task_title, task_description),
                 "evidence_required": _evidence_required(
                     "KPA1",
-                    ["lecture", "assessment", "efundi", "lms", "class", "tutorial", "marks"],
-                    f"{task_description} | Modules: {teaching_modules_str}",
+                    evidence_hints_list[:5],  # Pass first 5 hints
+                    f"{task_description} | Modules: {active_modules}",
                 ),
             })
             task_counter += 1
@@ -1421,6 +1654,26 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
         })
         task_counter += 1
         
+        tasks.append({
+            "id": f"task_{task_counter:03d}",
+            "kpa_code": "KPA4",
+            "kpa_name": "Academic Leadership & Administration",
+            "title": "Year-end performance review & annual planning",
+            "cadence": "critical_milestone",
+            "months": [12],
+            "minimum_count": 1,
+            "stretch_count": 1,
+            "evidence_hints": ["performance review", "year-end", "final", "annual planning", "professional development plan"],
+            "outputs": "Year-end performance review, annual achievements summary, and next year planning",
+            "what_to_do": "Complete final performance review documentation, summarize annual achievements against PA targets, and plan professional development for next year.",
+            "evidence_required": _evidence_required(
+                "KPA4",
+                ["performance review", "year-end", "final", "annual report", "professional development plan"],
+                "Year-end performance review and annual planning",
+            ),
+        })
+        task_counter += 1
+        
         # Module leadership tasks (monthly reports for teaching months)
         if module_leadership:
             for mod_lead in module_leadership:
@@ -1589,10 +1842,24 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
     }
     
     # Build by_month structure for UI
-    by_month: Dict[str, List[Dict[str, Any]]] = {}
+    by_month: Dict[str, Dict[str, Any]] = {}
     for month in range(1, 13):
         month_key = f"{year}-{month:02d}"
-        by_month[month_key] = [t for t in tasks if month in t.get("months", [])]
+        month_tasks = [t for t in tasks if month in t.get("months", [])]
+        by_month[month_key] = {
+            "month": month_key,
+            "tasks": month_tasks,
+            "task_count": len(month_tasks)
+        }
+    
+    # Add teaching modules info for easier access
+    teaching_modules_metadata = []
+    if teaching_modules:
+        for mod in teaching_modules:
+            if isinstance(mod, dict):
+                teaching_modules_metadata.append(mod)
+            else:
+                teaching_modules_metadata.append({"code": str(mod)})
     
     return {
         "ok": True,
@@ -1602,6 +1869,7 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
         "tasks": tasks,
         "by_month": by_month,
         "lead_lag": lead_lag,
+        "teaching_modules": teaching_modules_metadata,
         "task_count": len(tasks),
         "months": [f"{year}-{m:02d}" for m in range(1, 13)]
     }

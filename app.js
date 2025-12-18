@@ -883,6 +883,9 @@ async function checkMonthStatus() {
    SCAN FLOW — FILE UPLOAD & AI CLASSIFICATION
 ============================================================ */
 
+// Store pending scan data for lock explanation modal
+let pendingScanData = null;
+
 $("scanUploadBtn")?.addEventListener("click", async () => {
   const files = $("scanFiles").files;
   if (files.length === 0) {
@@ -890,6 +893,30 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
     return;
   }
   
+  const targetTaskId = $("scanTargetTaskId")?.value;
+  const lockToTask = $("scanLockToTask")?.checked;
+  
+  // If locking to task, show explanation modal first
+  if (lockToTask && targetTaskId) {
+    // Store scan parameters for later
+    pendingScanData = {
+      files: files,
+      targetTaskId: targetTaskId,
+      month: $("scanMonth").value,
+      useBrain: $("scanUseBrain").checked,
+      useContextual: $("scanUseContextual").checked
+    };
+    
+    // Open explanation modal
+    openLockExplanationModal(files, targetTaskId);
+    return;  // Don't proceed with scan yet
+  }
+  
+  // Regular scan (not locked)
+  await performScan(files, targetTaskId, null, false);
+});
+
+async function performScan(files, targetTaskId, userExplanation, isLocked) {
   vampBusy(`Scanning ${files.length} files…`);
   $("scanStatus").textContent = "Scanning…";
   scanLog(`Starting scan of ${files.length} files...`);
@@ -903,15 +930,16 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
   fd.append("use_brain", $("scanUseBrain").checked);
   fd.append("use_contextual", $("scanUseContextual").checked);
 
-  const targetTaskId = $("scanTargetTaskId")?.value;
   if (targetTaskId) {
     fd.append("target_task_id", targetTaskId);
   }
   
-  // Lock-to-task mode: bypass AI mapping, treat as asserted relevance
-  const lockToTask = $("scanLockToTask")?.checked;
-  if (lockToTask && targetTaskId) {
+  // Lock-to-task mode with user explanation
+  if (isLocked && targetTaskId) {
     fd.append("asserted_mapping", "true");
+    if (userExplanation) {
+      fd.append("user_explanation", userExplanation);
+    }
   }
   
   try {
@@ -1922,6 +1950,7 @@ document.addEventListener("DOMContentLoaded", () => {
       closeModal('aiGuidanceModal');
       closeModal('resolveModal');
       closeEnhanceModal();
+      closeLockExplanationModal();
     }
   });
 });
@@ -1962,6 +1991,74 @@ function closeEnhanceModal() {
   if (modal) modal.style.display = "none";
   currentEnhancingEvidence = null;
 }
+
+/* ============================================================
+   LOCK EXPLANATION MODAL
+============================================================ */
+
+function openLockExplanationModal(files, targetTaskId) {
+  const modal = $("lockExplanationModal");
+  if (!modal) return;
+  
+  // Get task title from the dropdown
+  const taskSelect = $("scanTargetTaskId");
+  const taskTitle = taskSelect?.selectedOptions[0]?.text || "Selected task";
+  const monthSelect = $("scanMonth");
+  const monthText = monthSelect?.selectedOptions[0]?.text || "Selected month";
+  
+  // Update modal content
+  $("lockModalTaskTitle").textContent = taskTitle;
+  $("lockModalFileCount").textContent = `${files.length} file(s) selected`;
+  $("lockModalMonth").textContent = monthText;
+  $("lockExplanationText").value = "";
+  
+  modal.style.display = "flex";
+  $("lockExplanationText").focus();
+}
+
+function closeLockExplanationModal() {
+  const modal = $("lockExplanationModal");
+  if (modal) {
+    modal.style.display = "none";
+  }
+  pendingScanData = null;
+}
+
+async function submitLockExplanation() {
+  const explanation = $("lockExplanationText")?.value.trim();
+  
+  if (!explanation || explanation.length < 20) {
+    vampSpeak("Please provide a detailed explanation (at least 20 characters).");
+    return;
+  }
+  
+  if (!pendingScanData) {
+    vampSpeak("No pending scan data found.");
+    closeLockExplanationModal();
+    return;
+  }
+  
+  // Close modal
+  closeLockExplanationModal();
+  
+  // Perform the scan with explanation
+  await performScan(
+    pendingScanData.files,
+    pendingScanData.targetTaskId,
+    explanation,
+    true  // isLocked
+  );
+  
+  // Clear pending data
+  pendingScanData = null;
+}
+
+// Close modal on background click
+$("lockExplanationModal")?.addEventListener("click", (e) => {
+  if (e.target.id === "lockExplanationModal") {
+    closeLockExplanationModal();
+  }
+});
 
 async function submitEnhancement() {
   if (!currentEnhancingEvidence) return;
