@@ -19,6 +19,21 @@ const scanLog = (msg) => {
   }
 };
 
+// Fallback global tab switcher so inline `onclick="switchToTab(...)"` never fails
+window.switchToTab = function(tabKey) {
+  try {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    const tab = document.querySelector(`.tab[data-tab="${tabKey}"]`);
+    if (tab) tab.classList.add('active');
+    const panel = document.getElementById('tab-' + tabKey);
+    if (panel) panel.classList.add('active');
+    log(`Switched to: ${tabKey}`);
+  } catch (e) {
+    console.error('switchToTab error', e);
+  }
+}
+
 // Global state
 let currentProfile = null;
 let currentExpectations = [];
@@ -455,19 +470,26 @@ async function updateYearTimeline() {
   if (!container || !staffId || !year) return;
 
   container.innerHTML = '';
+  let monthsData = null;
+  try {
+    const res = await fetch(`/api/progress?staff_id=${staffId}&year=${year}`);
+    if (res.ok) monthsData = await res.json();
+  } catch (e) {
+    console.warn('Year timeline fetch failed, falling back to per-month requests', e);
+  }
 
-  // Fetch progress per month in parallel
-  const months = Array.from({length:12}, (_,i) => i+1);
-  const requests = months.map(m => {
-    const mm = String(m).padStart(2,'0');
-    const monthKey = `${year}-${mm}`;
-    return fetch(`/api/progress?staff_id=${staffId}&year=${year}&month=${monthKey}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => ({ monthKey, data: d }))
-      .catch(() => ({ monthKey, data: null }));
-  });
+  const monthKeys = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
+  const monthsProgress = monthsData?.months_progress || null;
 
-  const results = await Promise.all(requests);
+  // If we have aggregated months_progress, use it; otherwise fall back to per-month fetches
+  const results = monthsProgress
+    ? monthKeys.map(mk => ({ monthKey: mk, data: monthsProgress[mk] || null }))
+    : await Promise.all(monthKeys.map(monthKey => {
+        return fetch(`/api/progress?staff_id=${staffId}&year=${year}&month=${monthKey}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(d => ({ monthKey, data: d }))
+          .catch(() => ({ monthKey, data: null }));
+      }));
 
   results.forEach(res => {
     const { monthKey, data } = res;
@@ -485,20 +507,25 @@ async function updateYearTimeline() {
     let completed = 0;
     let total = 0;
     let evidenceCount = 0;
-    if (data && data.progress) {
-      completed = parseInt(data.progress.completed_count || 0, 10);
-      total = parseInt(data.progress.total_tasks || 0, 10);
-      evidenceCount = parseInt((data.stats && data.stats.evidence_count) || 0, 10);
-    }
 
-    count.textContent = total > 0 ? `${completed}/${total}` : `${evidenceCount} ev`;
+    const progress = data?.progress || {};
+    const stats = data?.stats || {};
+    completed = parseInt(progress.completed_count || 0, 10);
+    total = parseInt(progress.total_tasks || 0, 10);
+    evidenceCount = parseInt(stats.evidence_count || 0, 10);
 
-    // Mark complete if tasks met or evidence exists
-    if ((total > 0 && completed >= total) || (total === 0 && evidenceCount > 0)) {
+    // Show task completion ratio (never substitute evidence-only counts)
+    count.textContent = `${completed}/${total}`;
+
+    // Month is complete only when all expected tasks are done
+    const isComplete = total > 0 && completed >= total;
+    if (isComplete) {
       monthEl.classList.add('done');
       monthEl.title = `${label}: complete`;
     } else {
-      monthEl.title = `${label}: incomplete`;
+      monthEl.title = total > 0
+        ? `${label}: incomplete (${completed}/${total} tasks)`
+        : `${label}: incomplete (no tasks defined)`;
     }
 
     const lbl = document.createElement('div');
@@ -557,6 +584,8 @@ function renderMonthView(monthKey) {
   const container = $("monthlyExpectationsContainer");
   if (!container || !window.currentByMonth) return;
 
+  const kpaSectionMap = {};
+
   // If the scan panel was previously moved inside the month container,
   // restore it before wiping the container to avoid losing it.
   restoreScanPanelHome({ hide: true });
@@ -603,6 +632,7 @@ function renderMonthView(monthKey) {
   sortedKPAs.forEach(([code, kpaData]) => {
     const kpaSection = document.createElement("div");
     kpaSection.style.cssText = "margin-bottom:16px;border:1px solid var(--grey-dim);border-radius:8px;overflow:hidden;";
+    kpaSectionMap[code] = kpaSection;
     
     // KPA Header
     const kpaHeader = document.createElement("div");
@@ -695,6 +725,31 @@ function renderMonthView(monthKey) {
     kpaSection.appendChild(tasksList);
     container.appendChild(kpaSection);
   });
+
+  // Highlight KPAs that are already complete for this month
+  try {
+    const staffId = $("staffId").value;
+    const year = $("cycleYear").value;
+    fetch(`/api/progress?staff_id=${staffId}&year=${year}&month=${monthKey}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(pdata => {
+        const byKpa = pdata?.progress?.by_kpa || {};
+        Object.entries(byKpa).forEach(([code, stats]) => {
+          const section = kpaSectionMap[code];
+          if (!section) return;
+          if (stats.expected > 0 && stats.completed >= stats.expected) {
+            section.classList.add('neon-complete');
+            section.classList.add('animate');
+            setTimeout(() => {
+              try { section.classList.remove('animate'); } catch (e) {}
+            }, 800);
+          }
+        });
+      })
+      .catch(() => {});
+  } catch (e) {
+    console.warn('Could not fetch KPA month progress', e);
+  }
 }
 
 function renderPAExpectationsTable(tasks) {
@@ -1017,72 +1072,98 @@ async function loadEvidence(monthKey = null) {
       data = await res.json();
     }
 
-    const evidence = data.evidence || [];
+    let evidence = data.evidence || [];
 
-    // Prefer the dedicated evidence log table body if present (avoids legacy container mismatches)
-    const tableBody = $("evidenceLogTableBody");
-    const legacyContainer = $("evidenceTable");
+    // Merge recent scan results so the UI shows mappings immediately
+    try {
+      if (Array.isArray(currentScanResults) && currentScanResults.length > 0) {
+        const byId = {};
+        evidence.forEach(ev => { if (ev && ev.evidence_id) byId[ev.evidence_id] = ev; });
 
-    // Render into the table body if available
-    if (tableBody) {
-      if (evidence.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="8" class="no-data">No evidence stored yet. Use "Scan Evidence" in the Expectations tab.</td></tr>';
-      } else {
-        tableBody.innerHTML = evidence.map(e => {
-          const conf = e.confidence || 0;
-          const confClass = conf >= 0.7 ? 'confidence-high' : conf >= 0.5 ? 'confidence-medium' : 'confidence-low';
-          return `
-            <tr>
-              <td>${e.date || 'N/A'}</td>
-              <td>${e.filename || e.file || 'N/A'}</td>
-              <td>${e.kpa || 'N/A'}</td>
-              <td>${e.task || 'N/A'}</td>
-              <td>${e.month || ''}</td>
-              <td>${e.tier || 'N/A'}</td>
-              <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${e.impact_summary || 'N/A'}</td>
-              <td class="${confClass}">${(conf * 100).toFixed(0)}%</td>
-            </tr>
-          `;
-        }).join('');
+        currentScanResults.forEach(scan => {
+          const sid = scan.evidence_id || null;
+          const sf = scan.file || scan.filename || scan.file_name || null;
+          const sm = scan.month || scan.month_bucket || null;
+
+          if (sid && byId[sid]) {
+            byId[sid].mapped_tasks = scan.mapped_tasks || byId[sid].mapped_tasks || [];
+            byId[sid].mapped_count = scan.mapped_count !== undefined ? scan.mapped_count : (byId[sid].mapped_tasks || []).length;
+            byId[sid].recent_scan = true;
+          } else if (sf) {
+            const match = evidence.find(ev => (ev.filename === sf || ev.file === sf) && (!sm || ev.month === sm));
+            if (match) {
+              match.mapped_tasks = scan.mapped_tasks || match.mapped_tasks || [];
+              match.mapped_count = scan.mapped_count !== undefined ? scan.mapped_count : (match.mapped_tasks || []).length;
+              match.recent_scan = true;
+            } else if (sm) {
+              evidence.unshift({
+                evidence_id: sid || (`scan_${Math.random().toString(36).slice(2,9)}`),
+                date: scan.date || new Date().toISOString().split('T')[0],
+                filename: sf,
+                file_path: scan.file_path || '',
+                kpa: scan.kpa_code || scan.kpa || '',
+                month: sm,
+                task: scan.task || '',
+                task_id: scan.task_id || '',
+                mapped_tasks: scan.mapped_tasks || [],
+                mapped_count: scan.mapped_count !== undefined ? scan.mapped_count : (scan.mapped_tasks || []).length,
+                tier: scan.tier || '',
+                impact_summary: scan.impact_summary || scan.summary || '',
+                confidence: scan.confidence !== undefined ? scan.confidence : 0.0,
+                recent_scan: true
+              });
+            }
+          }
+        });
       }
-    } else if (legacyContainer) {
-      // Fallback: render a simpler table into legacy container
-      if (evidence.length === 0) {
-        legacyContainer.innerHTML = '<div style="padding:20px;text-align:center;color:var(--grey-dim);">No evidence stored yet. Scan files to begin.</div>';
-      } else {
-        legacyContainer.innerHTML = `
-          <div style="margin-bottom:10px;font-size:13px;color:var(--grey-muted);">
-            Total evidence items: ${evidence.length}
-          </div>
-          <table class="vamp-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>File</th>
-                <th>KPA</th>
-                <th>Task</th>
-                <th>Impact</th>
-                <th>Confidence</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${evidence.map(e => {
-                const conf = e.confidence || 0;
-                const confClass = conf >= 0.7 ? 'confidence-high' : conf >= 0.5 ? 'confidence-medium' : 'confidence-low';
-                return `
-                  <tr>
-                    <td>${e.date || 'N/A'}</td>
-                    <td>${e.filename || e.file || 'N/A'}</td>
-                    <td>${e.kpa || 'N/A'}</td>
-                    <td>${e.task || 'N/A'}</td>
-                    <td style="max-width:250px;">${e.impact_summary || 'N/A'}</td>
-                    <td class="${confClass}">${(conf * 100).toFixed(0)}%</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        `;
+    } catch (e) {
+      console.warn('Could not merge scan results into evidence view', e);
+    }
+
+    // Render using the shared renderer (evidence log table)
+    const rendered = renderEvidenceLogTable(evidence);
+
+    // Fallback: legacy container if the new table is absent
+    if (!rendered) {
+      const legacyContainer = $("evidenceTable");
+      if (legacyContainer) {
+        if (evidence.length === 0) {
+          legacyContainer.innerHTML = '<div style="padding:20px;text-align:center;color:var(--grey-dim);">No evidence stored yet. Scan files to begin.</div>';
+        } else {
+          legacyContainer.innerHTML = `
+            <div style="margin-bottom:10px;font-size:13px;color:var(--grey-muted);">
+              Total evidence items: ${evidence.length}
+            </div>
+            <table class="vamp-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>File</th>
+                  <th>KPA</th>
+                  <th>Task</th>
+                  <th>Impact</th>
+                  <th>Confidence</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${evidence.map(e => {
+                  const conf = e.confidence || 0;
+                  const confClass = conf >= 0.7 ? 'confidence-high' : conf >= 0.5 ? 'confidence-medium' : 'confidence-low';
+                  return `
+                    <tr>
+                      <td>${e.date || 'N/A'}</td>
+                      <td>${e.filename || e.file || 'N/A'}</td>
+                      <td>${e.kpa || 'N/A'}</td>
+                      <td>${e.task || 'N/A'}</td>
+                      <td style="max-width:250px;">${e.impact_summary || 'N/A'}</td>
+                      <td class="${confClass}">${(conf * 100).toFixed(0)}%</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          `;
+        }
       }
     }
 
@@ -1417,32 +1498,78 @@ async function loadEvidenceLog(monthFilter = 'all') {
 
 function renderEvidenceLogTable(evidence) {
   const tbody = $("evidenceLogTableBody");
-  if (!tbody) return;
+  if (!tbody) return false;
   
   tbody.innerHTML = "";
   
   if (evidence.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="no-data">No evidence logged yet. Use "Scan Evidence" in the Expectations tab.</td></tr>';
-    return;
+    tbody.innerHTML = '<tr><td colspan="10" class="no-data">No evidence logged yet. Use "Scan Evidence" in the Expectations tab.</td></tr>';
+    return true;
   }
   
   evidence.forEach(item => {
     const row = document.createElement("tr");
+    if (item.recent_scan) row.classList.add('recent-scan');
     const confidence = item.confidence || 0;
     const confidenceClass = confidence >= 0.7 ? 'confidence-high' : confidence >= 0.5 ? 'confidence-medium' : 'confidence-low';
+    const mappedCount = (item.mapped_count !== undefined) ? item.mapped_count : (item.mapped_tasks ? item.mapped_tasks.length : 0);
+    const mappedTitles = (item.mapped_tasks || []).map(m => m.title).filter(Boolean).slice(0,3).join(', ');
+    const tooltip = mappedCount > 0 ? `Mapped to: ${mappedTitles}` : '';
     
+    // Build row with an initial empty cell (we'll replace with expand button)
     row.innerHTML = `
+      <td></td>
       <td>${item.date || item.timestamp || 'N/A'}</td>
       <td>${item.filename || item.file || 'N/A'}</td>
       <td>${item.kpa || 'Unknown'}</td>
       <td>${item.month || 'N/A'}</td>
+      <td><span class="pill mapped-pill" title="${tooltip}" style="cursor:default;">${mappedCount}</span></td>
       <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;">${item.task || item.title || 'N/A'}</td>
       <td>${item.tier || 'N/A'}</td>
       <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">${item.impact_summary || item.impact || 'N/A'}</td>
       <td class="${confidenceClass}">${(confidence * 100).toFixed(0)}%</td>
     `;
+
+    // Create expand button in the first cell
+    const expandCell = document.createElement('td');
+    expandCell.style.width = '36px';
+    expandCell.innerHTML = `<button class="expand-btn" aria-label="Expand mapped tasks">▸</button>`;
+    row.replaceChild(expandCell, row.children[0]);
     tbody.appendChild(row);
+
+    // Expanded detail row (hidden by default)
+    const detailTr = document.createElement('tr');
+    detailTr.className = 'evidence-expanded-row';
+    detailTr.style.display = 'none';
+    const detailTd = document.createElement('td');
+    detailTd.colSpan = 10;
+    const mappedListHtml = (item.mapped_tasks || []).map(m => {
+      const confText = m.confidence !== undefined ? ` <span class="conf">${Math.round((m.confidence||0)*100)}%</span>` : '';
+      const src = m.relevance_source ? ` <em style="color:var(--grey-dim);">(${m.relevance_source})</em>` : '';
+      return `<div class="mapped-item">${m.kpa_code || ''} • ${m.title || m.task_id}${confText}${src}</div>`;
+    }).join('') || '<div class="muted">No mapped tasks</div>';
+    detailTd.innerHTML = `<div class="evidence-expanded"><div style="font-weight:600;margin-bottom:6px;">Mapped tasks (${mappedCount})</div><div class="mapped-list">${mappedListHtml}</div></div>`;
+    detailTr.appendChild(detailTd);
+    tbody.appendChild(detailTr);
+
+    // Toggle on expand button click
+    const expandBtn = row.querySelector('.expand-btn');
+    if (expandBtn) {
+      expandBtn.addEventListener('click', () => {
+        const expanding = detailTr.style.display === 'none';
+        detailTr.style.display = expanding ? 'table-row' : 'none';
+        if (expanding) {
+          detailTr.classList.add('expanded');
+          expandBtn.textContent = '▾';
+        } else {
+          detailTr.classList.remove('expanded');
+          expandBtn.textContent = '▸';
+        }
+      });
+    }
   });
+
+  return true;
 }
 
 $("evidenceReloadBtn")?.addEventListener("click", () => {

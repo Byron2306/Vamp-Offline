@@ -1,5 +1,12 @@
 import csv
+import importlib.util
 from types import SimpleNamespace
+
+import pytest
+
+# Skip this module entirely when tkinter isn't available (headless/CI runs)
+if importlib.util.find_spec("tkinter") is None:  # pragma: no cover
+    pytest.skip("tkinter not available; skipping GUI artefact tests", allow_module_level=True)
 
 from backend.vamp_master import generate_run_id
 from frontend.offline_app.offline_app_gui_llm_csv import CSV_COLUMNS, process_artefact

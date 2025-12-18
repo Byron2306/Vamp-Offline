@@ -65,6 +65,7 @@ UPLOAD_FOLDER.mkdir(exist_ok=True)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "180"))
+PORT = int(os.getenv("PORT", "5000"))
 
 # Global state
 profiles = {}
@@ -253,14 +254,23 @@ def import_task_agreement():
             
             if EXPECTATION_ENGINE_AVAILABLE and build_expectations_from_ta:
                 expectations = build_expectations_from_ta(staff_id, int(cycle_year), ta_summary)
-                
+
                 # Save expectations
                 expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{cycle_year}.json"
                 expectations_file.parent.mkdir(parents=True, exist_ok=True)
-                
+
                 with open(expectations_file, 'w') as f:
                     json.dump(expectations, f, indent=2)
-                
+
+                # Immediately ensure tasks are present in the progress DB
+                try:
+                    from progress_store import ProgressStore
+                    from mapper import ensure_tasks
+                    store = ProgressStore()
+                    ensure_tasks(store, staff_id=staff_id, year=int(cycle_year), expectations=expectations)
+                except Exception as e:
+                    print(f"Warning: could not upsert tasks after import: {e}")
+
                 return jsonify({
                     "status": "success",
                     "tasks_count": len(expectations.get('tasks', [])),
@@ -270,7 +280,7 @@ def import_task_agreement():
         
         # If no contract, parse from uploaded file
         if 'file' not in request.files:
-            return jsonify({"error": "No file uploaded and no existing contract found"}), 400
+            return jsonify({"error": "No file uploaded and no existing contract found. Please upload a Task Agreement."}), 400
         
         file = request.files['file']
         
@@ -291,17 +301,26 @@ def import_task_agreement():
                 # Save expectations
                 expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{cycle_year}.json"
                 expectations_file.parent.mkdir(parents=True, exist_ok=True)
-                
+
                 with open(expectations_file, 'w') as f:
                     json.dump(expectations, f, indent=2)
-                
+
                 # Also save TA summary
                 ta_file = CONTRACTS_FOLDER / f"ta_summary_{staff_id}_{cycle_year}.json"
                 ta_file.parent.mkdir(parents=True, exist_ok=True)
-                
+
                 with open(ta_file, 'w') as f:
                     json.dump(ta_summary, f, indent=2)
-                
+
+                # Immediately ensure tasks are present in the progress DB
+                try:
+                    from progress_store import ProgressStore
+                    from mapper import ensure_tasks
+                    store = ProgressStore()
+                    ensure_tasks(store, staff_id=staff_id, year=int(cycle_year), expectations=expectations)
+                except Exception as e:
+                    print(f"Warning: could not upsert tasks after import: {e}")
+
                 return jsonify({
                     "status": "success",
                     "tasks_count": len(expectations.get('tasks', [])),
@@ -313,13 +332,8 @@ def import_task_agreement():
                 import traceback
                 traceback.print_exc()
         else:
-            print("TA parser not available. Using mock data.")
-            return jsonify({
-                "status": "success",
-                "tasks_count": 12,
-                "contract_path": "mock_contract.json",
-                "note": "Using mock data for development"
-            })
+            print("TA parser not available.")
+            return jsonify({"error": "Task Agreement parser not available. Please ensure the expectation engine is installed and import a TA."}), 500
     
     except Exception as e:
         print(f"TA import error: {e}")
@@ -366,8 +380,10 @@ def get_progress():
 
         # Compute window progress (ProgressStore returns ints, not lists)
         progress: Dict[str, Any] = {}
+        months_progress: Dict[str, Any] = {}
         
         try:
+            # Aggregate progress for the requested window (all months or a single month)
             progress = store.compute_window_progress(staff_id, int(year), months)
         except Exception as e:
             print(f"Window progress error: {e}")
@@ -380,6 +396,34 @@ def get_progress():
                 "missing_tasks": [],
                 "by_kpa": {},
             }
+
+        # If no specific month requested, build per-month progress map so the UI can fetch once
+        try:
+            if not month:
+                for m in months:
+                    try:
+                        p = store.compute_window_progress(staff_id, int(year), [m])
+                        evidence_rows_m = store.list_evidence(staff_id, int(year), month_bucket=f"{int(year):04d}-{m:02d}")
+                        months_progress[f"{int(year):04d}-{m:02d}"] = {
+                            "progress": {
+                                "total_tasks": int(p.get("expected_tasks", 0)),
+                                "completed_count": int(p.get("completed_tasks", 0)),
+                                "missing_tasks": p.get("missing_tasks", []),
+                                "by_kpa": p.get("by_kpa", {}),
+                            },
+                            "stats": {
+                                "total_tasks": int(p.get("expected_tasks", 0)),
+                                "completed_tasks": int(p.get("completed_tasks", 0)),
+                                "evidence_count": len(evidence_rows_m)
+                            }
+                        }
+                    except Exception:
+                        months_progress[f"{int(year):04d}-{m:02d}"] = {
+                            "progress": {"total_tasks": 0, "completed_count": 0, "missing_tasks": [], "by_kpa": {}},
+                            "stats": {"total_tasks": 0, "completed_tasks": 0, "evidence_count": 0}
+                        }
+        except Exception as e:
+            print(f"Error building months_progress: {e}")
         
         # Derive completion map (expected - missing) for the window
         task_rows = store.list_tasks_for_window(int(year), months)
@@ -449,12 +493,31 @@ def get_progress():
             top_task_title = None
             top_task_id = None
             top_conf = None
+            mapped_tasks = []
             try:
                 mappings = store.list_mappings_for_evidence(evd["evidence_id"])
                 if mappings:
-                    top_task_id = mappings[0]["task_id"]
-                    top_task_title = mappings[0]["title"]
-                    top_conf = float(mappings[0]["confidence"])
+                    for m in mappings:
+                        try:
+                            # sqlite3.Row behaves like a sequence/dict but does not implement `.get()`
+                            # access keys safely using Row.keys() and index access
+                            row_keys = set(m.keys()) if hasattr(m, 'keys') else set()
+                            title = m["title"] if ("title" in row_keys and m["title"]) else m["task_id"]
+                            confidence = float(m["confidence"]) if ("confidence" in row_keys and m["confidence"] is not None) else 0.0
+                            mapped_tasks.append({
+                                "task_id": m["task_id"],
+                                "title": title,
+                                "confidence": confidence,
+                                "mapped_by": m["mapped_by"] if "mapped_by" in row_keys else "",
+                                "kpa_code": m["kpa_code"] if "kpa_code" in row_keys else ""
+                            })
+                        except Exception:
+                            continue
+                    # First mapping is the top match
+                    if mapped_tasks:
+                        top_task_id = mapped_tasks[0]["task_id"]
+                        top_task_title = mapped_tasks[0]["title"]
+                        top_conf = mapped_tasks[0]["confidence"]
             except Exception:
                 pass
 
@@ -469,6 +532,8 @@ def get_progress():
                 "month": evd.get("month_bucket") or "",
                 "task": top_task_title or meta.get("task") or "",
                 "task_id": top_task_id or meta.get("target_task_id") or "",
+                "mapped_tasks": mapped_tasks,
+                "mapped_count": len(mapped_tasks),
                 "tier": evd.get("tier") or meta.get("tier") or "",
                 "impact_summary": meta.get("impact_summary") or "",
                 "confidence": top_conf if top_conf is not None else float(meta.get("confidence") or 0.0),
@@ -476,7 +541,7 @@ def get_progress():
                 "file_path": file_path or "",
             })
         
-        return jsonify({
+        resp = {
             "progress": {
                 "staff_id": staff_id,
                 "year": int(year),
@@ -493,7 +558,13 @@ def get_progress():
                 "completed_tasks": int(progress.get("completed_tasks", 0)),
                 "evidence_count": len(evidence_list)
             }
-        })
+        }
+
+        # Always include months_progress for year-level requests (frontend expects this key)
+        if not month:
+            resp["months_progress"] = months_progress
+
+        return jsonify(resp)
     
     except Exception as e:
         print(f"Progress error: {e}")
@@ -534,6 +605,14 @@ def rebuild_expectations():
             
             with open(expectations_file, 'w') as f:
                 json.dump(expectations, f, indent=2)
+            # Immediately ensure tasks are present in the progress DB
+            try:
+                from progress_store import ProgressStore
+                from mapper import ensure_tasks
+                store = ProgressStore()
+                ensure_tasks(store, staff_id=staff_id, year=int(year), expectations=expectations)
+            except Exception as e:
+                print(f"Warning: could not upsert tasks after rebuild: {e}")
             
             return jsonify({
                 "status": "success",
@@ -616,20 +695,8 @@ def get_expectations():
             # Return the full expectations structure with tasks and by_month
             return jsonify(expectations_data)
 
-        # Return mock data for development if no expectations file was found
-        mock_expectations = generate_mock_expectations()
-        mock_kpa_summary = {
-            "Teaching & Learning": {"total": 4, "completed": 2, "progress": 50},
-            "Research": {"total": 3, "completed": 1, "progress": 33},
-            "Community Engagement": {"total": 2, "completed": 0, "progress": 0}
-        }
-
-        return jsonify({
-            "expectations": mock_expectations,
-            "kpa_summary": mock_kpa_summary,
-            "tasks": mock_expectations,
-            "by_month": {}
-        })
+        # If expectations file not found, require explicit import
+        return jsonify({"error": "Expectations not found. Please import a Task Agreement via /api/ta/import."}), 404
     
     except Exception as e:
         print(f"Expectations error: {e}")
@@ -709,32 +776,38 @@ def check_month_completion():
         expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{year}.json"
         
         month_tasks = []
+        expectations_data = None
         if expectations_file.exists():
             with open(expectations_file, 'r') as f:
-                exp_data = json.load(f)
-                by_month = exp_data.get('by_month', {})
+                expectations_data = json.load(f)
+                by_month = expectations_data.get('by_month', {})
                 month_tasks = by_month.get(month, [])
         
         # Use progress store to get accurate per-task evidence counts
         import sys
         sys.path.insert(0, str(Path(__file__).parent))
         from progress_store import ProgressStore
+        from mapper import ensure_tasks
         
         store = ProgressStore()
 
         # Prefer canonical tasks from the DB for this staff/month so that hashed/DB task_ids
         # used by asserted/targeted mappings are matched correctly.
         try:
+            # Ensure the DB catalog exists for this staff/year
+            ensure_tasks(store, staff_id=staff_id, year=int(year), expectations=expectations_data)
+
             month_num = int(month.split('-')[1])
             db_rows = store.list_tasks_for_window(int(year), [month_num], kpa_code=None)
             # Always use DB-derived month tasks (canonical task_ids)
             month_tasks = []
             for r in db_rows:
+                row = dict(r)
                 month_tasks.append({
-                    'id': r['task_id'],
-                    'kpa_code': r.get('kpa_code'),
-                    'title': r.get('title'),
-                    'minimum_count': r.get('min_required') or r.get('min_required') or r.get('min_required', 0)
+                    'id': row.get('task_id'),
+                    'kpa_code': row.get('kpa_code'),
+                    'title': row.get('title'),
+                    'minimum_count': row.get('min_required') or row.get('minimum_count') or row.get('min_required', 0)
                 })
         except Exception:
             # If DB lookup fails, fall back to expectations file contents already loaded
@@ -809,7 +882,8 @@ def check_month_completion():
         
         # Month is complete if all tasks with min_required > 0 are met
         required_tasks = [t for t in task_status if t['minimum_required'] > 0]
-        complete = all(t['met'] for t in required_tasks) if required_tasks else (evidence_count > 0)
+        # Month is only complete when all required tasks are met (no evidence-only shortcut)
+        complete = bool(required_tasks) and all(t['met'] for t in required_tasks)
         
         # Build AI analysis prompt
         ai_context = {
@@ -1694,11 +1768,11 @@ if __name__ == '__main__':
     print(f"Upload Folder: {UPLOAD_FOLDER}")
     print(f"Data Folder: {DATA_FOLDER}")
     print("=" * 60)
-    print("\nServer running at: http://localhost:5000")
-    print("Open http://localhost:5000 in your browser")
+    print(f"\nServer running at: http://localhost:{PORT}")
+    print(f"Open http://localhost:{PORT} in your browser")
     print("\nPress Ctrl+C to stop")
     print("=" * 60)
     
     # Run without the debug auto-reloader for stable testing sessions.
     # Keep threaded=True for concurrency; explicit `use_reloader=False` prevents restarts.
-    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False, threaded=True)
+    app.run(host='0.0.0.0', port=PORT, debug=False, use_reloader=False, threaded=True)

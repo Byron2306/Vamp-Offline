@@ -83,12 +83,12 @@
 <div class="container">
 
   <div class="tabs">
-    <div class="tab active" data-tab="enrol">Enrolment</div>
-    <div class="tab" data-tab="expectations">Expectations</div>
-    <div class="tab" data-tab="evidence">Evidence Log</div>
-    <div class="tab" data-tab="reports">Reports</div>
-    <div class="tab" data-tab="voice">Voice Settings</div>
-    <div class="tab" data-tab="logs">Logs</div>
+    <div class="tab active" data-tab="enrol" onclick="switchToTab('enrol')">Enrolment</div>
+    <div class="tab" data-tab="expectations" onclick="switchToTab('expectations')">Expectations</div>
+    <div class="tab" data-tab="evidence" onclick="switchToTab('evidence')">Evidence Log</div>
+    <div class="tab" data-tab="reports" onclick="switchToTab('reports')">Reports</div>
+    <div class="tab" data-tab="voice" onclick="switchToTab('voice')">Voice Settings</div>
+    <div class="tab" data-tab="logs" onclick="switchToTab('logs')">Logs</div>
   </div>
 
   <!-- ENROLMENT -->
@@ -271,19 +271,21 @@
       <div class="table-container" style="margin-top:16px;">
         <table class="vamp-table" id="evidenceLogTable">
           <thead>
-            <tr>
-              <th>Date</th>
-              <th>File Name</th>
-              <th>KPA Assigned</th>
-              <th>Month</th>
-              <th>Task</th>
-              <th>Tier</th>
-              <th>Impact Assessment</th>
-              <th>Confidence</th>
-            </tr>
+              <tr>
+                <th></th>
+                <th>Date</th>
+                <th>File Name</th>
+                <th>KPA Assigned</th>
+                <th>Month</th>
+                <th>Covers</th>
+                <th>Task</th>
+                <th>Tier</th>
+                <th>Impact Assessment</th>
+                <th>Confidence</th>
+              </tr>
           </thead>
           <tbody id="evidenceLogTableBody">
-            <tr><td colspan="8" class="no-data">No evidence logged yet. Use "Scan Evidence" in the Expectations tab.</td></tr>
+            <tr><td colspan="10" class="no-data">No evidence logged yet. Use "Scan Evidence" in the Expectations tab.</td></tr>
           </tbody>
         </table>
       </div>
@@ -490,6 +492,6 @@
   </div>
 </div>
 
-<script src="./app.js?v=20251217"></script>
+<script src="./app.js?v=20251218"></script>
 </body>
 </html>

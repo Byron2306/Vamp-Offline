@@ -1,0 +1,29 @@
+{
+  "name": "vamp-offline",
+  "version": "1.0.0",
+  "description": "VAMP (Validation, Assessment, and Management Platform) Offline is a comprehensive system for managing academic performance agreements and evidence-based assessment for NWU (North-West University) staff.",
+  "main": "app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Byron2306/Vamp-Offline.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Byron2306/Vamp-Offline/issues"
+  },
+  "homepage": "https://github.com/Byron2306/Vamp-Offline#readme",
+  "dependencies": {
+    "esprima": "^4.0.1",
+    "jsdom": "^27.3.0",
+    "node-fetch": "^2.7.0"
+  }
+}

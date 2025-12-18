@@ -1,0 +1,1 @@
+const fs=require('fs'); const s=fs.readFileSync('app.js','utf8').split('\n'); s.forEach((ln,i)=>{ if(ln.includes('`')) console.log(i+1+': '+ln); });

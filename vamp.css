@@ -35,6 +35,8 @@
 
   --border-dark: rgba(255,255,255,0.06);
   --border-red: rgba(200,0,50,0.35);
+  --green: #7bed9f;
+  --neon-green: rgba(120, 255, 140, 0.18);
 }
 
 /* ============================================================
@@ -109,6 +111,51 @@ html, body {
   border-color: rgba(80,200,120,.5);
   color: #8ff0b2;
 }
+
+/* Neon green highlight for completed KPA windows */
+.neon-complete {
+  box-shadow: 0 0 28px rgba(120,255,140,0.14), inset 0 0 18px rgba(120,255,140,0.06);
+  border: 1px solid rgba(120,255,140,0.22) !important;
+  outline: 4px solid rgba(120,255,140,0.06);
+  transition: box-shadow 0.35s ease, transform 0.2s ease;
+}
+
+/* Subtle pulse when KPA section becomes complete */
+@keyframes kpaPulse {
+  0% { box-shadow: 0 0 0px rgba(120,255,140,0.06); transform: translateY(0); }
+  40% { box-shadow: 0 0 28px rgba(120,255,140,0.12), inset 0 0 18px rgba(120,255,140,0.05); transform: translateY(-4px); }
+  100% { box-shadow: 0 0 18px rgba(120,255,140,0.08); transform: translateY(0); }
+}
+.neon-complete.animate {
+  animation: kpaPulse 750ms ease;
+}
+
+/* Expanded evidence detail row */
+.evidence-expanded {
+  background: linear-gradient(180deg, rgba(10,20,10,0.4), rgba(5,8,5,0.2));
+  border-top: 1px solid rgba(255,255,255,0.03);
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--grey-muted);
+}
+.evidence-expanded .mapped-list { display:flex; gap:8px; flex-wrap:wrap; }
+.mapped-item { padding:6px 8px; border-radius:6px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); font-size:12px; }
+.mapped-item .conf { margin-left:8px; color:var(--grey-dim); font-weight:600; }
+
+/* Smooth expand/collapse for evidence details */
+.evidence-expanded-row .evidence-expanded { max-height: 0; overflow: hidden; transition: max-height 300ms ease, opacity 200ms ease; opacity: 0; }
+.evidence-expanded-row.expanded .evidence-expanded { max-height: 420px; opacity: 1; }
+
+/* Mapped-pill chevron */
+.mapped-pill { display:inline-flex; align-items:center; gap:8px; }
+.mapped-pill .chev { display:inline-block; transition: transform 220ms ease; font-size:12px; color:var(--grey-dim); }
+.mapped-pill.expanded .chev { transform: rotate(180deg); color:var(--grey-text); }
+
+.recent-scan { background: rgba(143, 240, 178, 0.06); }
+
+/* Expand button */
+.expand-btn { background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--grey-muted);padding:6px 8px;border-radius:6px;cursor:pointer }
+.expand-btn:hover { background:rgba(255,255,255,0.02); color:var(--grey-text); }
 
 /* ============================================================
    VAMP AGENT
