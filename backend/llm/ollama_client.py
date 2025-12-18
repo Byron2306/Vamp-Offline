@@ -41,7 +41,7 @@ def _get_ollama_host():
 
 
 OLLAMA_HOST = _get_ollama_host()
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")  # Faster and more capable
 OLLAMA_TIMEOUT = max(180.0, float(os.getenv("OLLAMA_TIMEOUT", "240")))
 OLLAMA_NUM_PREDICT = int(os.getenv("OLLAMA_NUM_PREDICT", "320"))
 OLLAMA_RETRIES = int(os.getenv("OLLAMA_RETRIES", "2"))

@@ -63,7 +63,7 @@ EVIDENCE_FOLDER = DATA_FOLDER / "evidence"
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")  # Faster and better than 1b
 OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "180"))
 PORT = int(os.getenv("PORT", "5000"))
 
@@ -96,9 +96,9 @@ Context:
 
 User Question: {prompt}
 
-Provide helpful, professional guidance. Keep responses concise and actionable."""
+IMPORTANT: Write in plain text only. NO asterisks (*), underscores (_), markdown, or special symbols. Write naturally as if speaking. Keep responses concise and actionable."""
         else:
-            enhanced_prompt = f"You are VAMP, an AI assistant for academic performance management. {prompt}"
+            enhanced_prompt = f"You are VAMP, an AI assistant for academic performance management. Write in plain text only - no asterisks, markdown, or special symbols. {prompt}"
         
         # Call Ollama API
         response = requests.post(
@@ -1554,31 +1554,41 @@ def generate_report():
         return jsonify({"error": str(e)}), 500
 
 # ============================================================
-# VOICE CLONING API
+# ELEVENLABS TTS API
 # ============================================================
 
 try:
-    from backend.llm.voice_cloner import get_voice_cloner, text_to_speech as tts_convert
-    VOICE_CLONER_AVAILABLE = True
+    from backend.llm.elevenlabs_tts import text_to_speech, sanitize_for_speech, get_tts_client
+    ELEVENLABS_AVAILABLE = True
+    print("✓ ElevenLabs TTS loaded successfully")
 except ImportError as e:
-    print(f"Warning: Voice cloner not available: {e}")
-    VOICE_CLONER_AVAILABLE = False
-    get_voice_cloner = None
-    tts_convert = None
+    print(f"Warning: ElevenLabs TTS not available: {e}")
+    ELEVENLABS_AVAILABLE = False
+    text_to_speech = None
+    sanitize_for_speech = None
+    get_tts_client = None
 
 @app.route('/api/voice/status', methods=['GET'])
 def voice_status():
-    """Get voice cloner status"""
+    """Get ElevenLabs TTS status"""
     try:
-        if not VOICE_CLONER_AVAILABLE:
+        if not ELEVENLABS_AVAILABLE:
             return jsonify({
                 "available": False,
-                "error": "Voice cloner not installed"
+                "error": "ElevenLabs TTS not available"
             })
         
-        cloner = get_voice_cloner()
-        status = cloner.status()
-        return jsonify(status)
+        client = get_tts_client()
+        quota = client.check_quota()
+        voice_info = client.get_voice_info()
+        
+        return jsonify({
+            "available": True,
+            "engine": "elevenlabs",
+            "voice_id": client.VOICE_ID,
+            "voice_name": voice_info.get("name") if voice_info else "Unknown",
+            "quota": quota
+        })
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -1644,10 +1654,10 @@ def voice_upload():
 
 @app.route('/api/voice/synthesize', methods=['POST'])
 def voice_synthesize():
-    """Convert text to speech with cloned voice"""
+    """Convert text to speech using ElevenLabs"""
     try:
-        if not VOICE_CLONER_AVAILABLE:
-            return jsonify({"error": "Voice cloner not available"}), 503
+        if not ELEVENLABS_AVAILABLE:
+            return jsonify({"error": "ElevenLabs TTS not available"}), 503
         
         data = request.json
         text = data.get('text')
@@ -1655,8 +1665,11 @@ def voice_synthesize():
         if not text:
             return jsonify({"error": "No text provided"}), 400
         
-        # Generate speech
-        audio_path = tts_convert(text)
+        # Sanitize text first
+        clean_text = sanitize_for_speech(text)
+        
+        # Generate speech using ElevenLabs
+        audio_path = text_to_speech(clean_text)
         
         if audio_path is None:
             return jsonify({"error": "Speech generation failed"}), 500
@@ -1665,7 +1678,8 @@ def voice_synthesize():
         return jsonify({
             "success": True,
             "audio_url": f"/api/voice/audio/{audio_path.name}",
-            "filename": audio_path.name
+            "filename": audio_path.name,
+            "engine": "elevenlabs"
         })
     
     except Exception as e:
@@ -1674,18 +1688,18 @@ def voice_synthesize():
 
 @app.route('/api/voice/audio/<filename>')
 def voice_audio(filename):
-    """Serve generated audio files"""
+    """Serve generated audio files from ElevenLabs"""
     try:
-        if not VOICE_CLONER_AVAILABLE:
-            return jsonify({"error": "Voice cloner not available"}), 503
+        if not ELEVENLABS_AVAILABLE:
+            return jsonify({"error": "ElevenLabs TTS not available"}), 503
         
-        cloner = get_voice_cloner()
-        audio_path = cloner.cache_dir / filename
+        client = get_tts_client()
+        audio_path = client.cache_dir / filename
         
         if not audio_path.exists():
             return jsonify({"error": "Audio file not found"}), 404
         
-        return send_from_directory(str(cloner.cache_dir), filename)
+        return send_from_directory(str(client.cache_dir), filename, mimetype='audio/mpeg')
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -1693,7 +1707,7 @@ def voice_audio(filename):
 @app.route('/api/vamp/ask-voice', methods=['POST'])
 def ask_vamp_voice():
     """
-    Ask VAMP for AI guidance with voice response
+    Ask VAMP for AI guidance with voice response using ElevenLabs
     """
     try:
         data = request.json
@@ -1706,24 +1720,32 @@ def ask_vamp_voice():
         # Query Ollama for text response
         answer = query_ollama(question, context)
         
-        # Generate voice if available
+        # Sanitize text for speech (remove asterisks, markdown, etc.)
+        if ELEVENLABS_AVAILABLE and sanitize_for_speech:
+            clean_answer = sanitize_for_speech(answer)
+        else:
+            clean_answer = answer
+        
+        # Generate voice using ElevenLabs
         audio_url = None
-        if VOICE_CLONER_AVAILABLE:
+        if ELEVENLABS_AVAILABLE:
             try:
-                audio_path = tts_convert(answer)
+                audio_path = text_to_speech(clean_answer)
                 if audio_path:
+                    # Serve from cache directory
                     audio_url = f"/api/voice/audio/{audio_path.name}"
             except Exception as voice_error:
-                print(f"Voice generation failed (non-fatal): {voice_error}")
+                print(f"ElevenLabs voice generation failed (non-fatal): {voice_error}")
         
         return jsonify({
-            "answer": answer,
+            "answer": clean_answer,
             "audio_url": audio_url,
-            "has_voice": audio_url is not None
+            "has_voice": audio_url is not None,
+            "voice_engine": "elevenlabs" if ELEVENLABS_AVAILABLE else "none"
         })
     
     except Exception as e:
-        print(f"Ask VAMP error: {e}")
+        print(f"Ask VAMP voice error: {e}")
         return jsonify({"error": str(e)}), 500
 
 # ============================================================

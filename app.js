@@ -136,22 +136,12 @@ function vampSpeak(text) {
     vampVideo.currentTime = 0;
     vampVideo.play().catch(() => {});
   }
-  // Play vamp audio when speaking
-  try {
-    if (vampSound) {
-      vampSound.currentTime = 0;
-      vampSound.play().catch(() => {});
-    }
-  } catch (e) {}
+  // ElevenLabs voice will play instead of vamp.wav
   hideVampOverlay();
   pushBubble(text, "speak");
   
-  // Auto-return to idle after speaking (simulate reading time)
-  setTimeout(() => {
-    if (currentVampState === VAMP_STATE.SPEAKING) {
-      vampIdle();
-    }
-  }, 3000 + (text.length * 30)); // ~30ms per character
+  // Don't auto-return to idle - let voice audio control this
+  // The playVoiceResponse function will call vampIdle() when audio ends
 }
 
 function showVampOverlay(text) {
@@ -1594,13 +1584,17 @@ async function checkVoiceStatus() {
     const resp = await fetch('/api/voice/status');
     const data = await resp.json();
     
-    if (data.available && data.is_trained) {
+    if (data.available) {
       voiceEnabled = true;
-      log("✓ Voice cloning ready");
-    } else if (data.available && !data.is_trained) {
-      log("⚠ Voice available but not trained. Upload voice samples to train.");
+      if (data.engine === 'elevenlabs') {
+        log("✓ ElevenLabs TTS ready");
+      } else if (data.is_trained) {
+        log("✓ Voice cloning ready");
+      } else {
+        log("⚠ Voice available but not trained. Upload voice samples to train.");
+      }
     } else {
-      log("ℹ Voice cloning not available");
+      log("ℹ Voice TTS not available");
     }
     
     // Update voice status display if on voice tab
@@ -1647,24 +1641,44 @@ function updateVoiceStatusDisplay(data) {
 }
 
 function playVoiceResponse(audioUrl) {
-  if (!audioUrl) return;
+  if (!audioUrl) {
+    // If no voice audio, return to idle after text display
+    setTimeout(() => {
+      if (currentVampState === VAMP_STATE.SPEAKING) {
+        vampIdle();
+      }
+    }, 3000);
+    return;
+  }
+  
+  console.log('Playing ElevenLabs voice:', audioUrl);
   
   // Stop any currently playing audio
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio = null;
+  if (window.currentAudio) {
+    window.currentAudio.pause();
+    window.currentAudio = null;
   }
   
   // Create and play new audio
-  currentAudio = new Audio(audioUrl);
-  currentAudio.play().catch(err => {
-    console.error("Audio playback failed:", err);
+  window.currentAudio = new Audio(audioUrl);
+  window.currentAudio.play().catch(err => {
+    console.error("ElevenLabs audio playback failed:", err);
+    // Return to idle if playback fails
+    setTimeout(() => vampIdle(), 1000);
   });
   
-  // Cleanup when done
-  currentAudio.addEventListener('ended', () => {
-    currentAudio = null;
+  // Cleanup and return to idle when done
+  window.currentAudio.addEventListener('ended', () => {
+    console.log('ElevenLabs voice finished playing');
+    window.currentAudio = null;
     vampIdle();
+  });
+  
+  // Safety timeout in case ended event doesn't fire
+  window.currentAudio.addEventListener('error', (e) => {
+    console.error('Audio error:', e);
+    window.currentAudio = null;
+    setTimeout(() => vampIdle(), 1000);
   });
 }
 

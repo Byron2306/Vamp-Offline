@@ -13,7 +13,7 @@ Expectation-aware orchestrator that:
 Environment variables
 ---------------------
 OLLAMA_HOST          default: http://127.0.0.1:11434
-OLLAMA_MODEL         default: llama3.2:1b
+OLLAMA_MODEL         default: llama3.2:3b
 OLLAMA_TIMEOUT       default: 45
 OLLAMA_NUM_PREDICT   default: 320
 VAMP_LLM_TEMPERATURE default: 0.25
@@ -58,7 +58,7 @@ MAX_CONTRACT_CHARS = int(os.getenv("VAMP_MAX_CONTRACT_CHARS", "1500"))
 MAX_EXPECT_CHARS = int(os.getenv("VAMP_MAX_EXPECT_CHARS", "1200"))
 
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")  # Faster and more capable
 OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "45"))
 OLLAMA_NUM_PREDICT = int(os.getenv("OLLAMA_NUM_PREDICT", "320"))
 
