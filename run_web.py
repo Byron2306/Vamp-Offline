@@ -524,8 +524,15 @@ def get_progress():
             file_path = evd.get("file_path")
             filename = meta.get("filename") or (Path(file_path).name if file_path else None)
 
+            # Extract rating from brain scorer if available
+            brain_data = meta.get("brain", {})
+            rating = brain_data.get("rating") if isinstance(brain_data, dict) else None
+            rating_label = brain_data.get("rating_label", "") if isinstance(brain_data, dict) else ""
+            user_enhanced = meta.get("user_enhanced", False)
+            
             evidence_list.append({
                 "evidence_id": evd["evidence_id"],
+                "staff_id": evd.get("staff_id"),
                 "date": meta.get("date") or meta.get("timestamp") or "",
                 "filename": filename or "",
                 "kpa": evd.get("kpa_code") or "",
@@ -537,7 +544,11 @@ def get_progress():
                 "tier": evd.get("tier") or meta.get("tier") or "",
                 "impact_summary": meta.get("impact_summary") or "",
                 "confidence": top_conf if top_conf is not None else float(meta.get("confidence") or 0.0),
-                "rating": evd.get("rating") or "",
+                "rating": rating,
+                "rating_label": rating_label,
+                "user_enhanced": user_enhanced,
+                "brain": brain_data,
+                "meta": meta,
                 "file_path": file_path or "",
             })
         
@@ -1025,8 +1036,9 @@ def scan_upload():
                     }
 
                 # Deterministic NWU Brain scoring (prioritize this for accuracy)
+                # Skip brain scorer if user has asserted the mapping to respect their decision
                 brain_ctx = None
-                if brain_enabled:
+                if brain_enabled and not (asserted_mapping and target_task_id):
                     try:
                         brain_ctx = brain_score_evidence(path=Path(filepath), full_text=file_text, kpa_hint_code=None)
                         # Update classification with brain scorer results if more confident
@@ -1057,8 +1069,28 @@ def scan_upload():
                             
                             # Enhance impact summary with brain insights
                             values_hits = brain_ctx.get("values_hits", [])
+                            policy_hits = brain_ctx.get("policy_hits", [])
+                            tier_label = brain_ctx.get("tier_label", "")
+                            rating = brain_ctx.get("rating", 0)
+                            
+                            # Build richer impact summary
+                            impact_parts = [classification["impact_summary"]]
+                            
+                            if tier_label:
+                                impact_parts.append(f"Tier: {tier_label}")
+                            
+                            if rating:
+                                impact_parts.append(f"Rating: {rating:.1f}/5.0")
+                            
                             if values_hits:
-                                classification["impact_summary"] += f" | Demonstrates: {', '.join(values_hits[:3])}"
+                                impact_parts.append(f"Demonstrates: {', '.join(values_hits[:3])}")
+                            
+                            if policy_hits:
+                                policy_names = [p.get("name", "") for p in policy_hits[:2] if isinstance(p, dict)]
+                                if policy_names:
+                                    impact_parts.append(f"Policies: {', '.join(policy_names)}")
+                            
+                            classification["impact_summary"] = " | ".join(impact_parts)
                     except Exception as e:
                         print(f"[BRAIN ERROR] Brain scorer failed for {filename}: {e}")
                         import traceback
@@ -1117,8 +1149,9 @@ def scan_upload():
                     sha1 = hashlib.sha1(file_text.encode(errors="ignore")).hexdigest()
                     evidence_id = f"ev_{staff_id}_{month}_{sha1[:10]}"
                     
-                    # If a target task was provided, prefer its KPA and map directly
-                    if target_task_id:
+                    # If a target task was provided AND it's an assertion, override KPA from task
+                    # This must happen BEFORE evidence insertion to ensure correct KPA is stored
+                    if target_task_id and asserted_mapping:
                         try:
                             task_row = None
                             for r in store.list_tasks_for_window(int(month[:4]), [int(month.split('-')[1])], kpa_code=None):
@@ -1126,9 +1159,11 @@ def scan_upload():
                                     task_row = r
                                     break
                             if task_row is not None:
+                                # Override KPA code to match the target task's KPA
                                 kpa_code = task_row["kpa_code"]
-                        except Exception:
-                            pass
+                                print(f"[ASSERTION] Overriding KPA to {kpa_code} based on target task {target_task_id}")
+                        except Exception as e:
+                            print(f"[ASSERTION WARNING] Could not extract KPA from target task: {e}")
 
                     # Insert evidence
                     store.insert_evidence(
@@ -1154,22 +1189,29 @@ def scan_upload():
                     )
                     
                     # Map evidence to tasks
-                    mapped_tasks = map_evidence_to_tasks(
-                        store,
-                        evidence_id=evidence_id,
-                        staff_id=staff_id,
-                        year=int(month[:4]),
-                        month_bucket=month,
-                        kpa_code=kpa_code,
-                        meta={
-                            "filename": filename,
-                            "impact_summary": classification["impact_summary"],
-                            "evidence_type": classification["task"]
-                        },
-                        mapped_by="web_scan:v1"
-                    )
+                    # Skip generic mapping if user has asserted a specific task (respect user decision)
+                    if asserted_mapping and target_task_id:
+                        # User has locked evidence to a specific task - skip generic mapping
+                        mapped_tasks = []
+                        print(f"[ASSERTION] Skipping generic mapping - evidence locked to task {target_task_id}")
+                    else:
+                        # Perform generic mapping based on KPA, text signals, etc.
+                        mapped_tasks = map_evidence_to_tasks(
+                            store,
+                            evidence_id=evidence_id,
+                            staff_id=staff_id,
+                            year=int(month[:4]),
+                            month_bucket=month,
+                            kpa_code=kpa_code,
+                            meta={
+                                "filename": filename,
+                                "impact_summary": classification["impact_summary"],
+                                "evidence_type": classification["task"]
+                            },
+                            mapped_by="web_scan:v1"
+                        )
 
-                    # Targeted mapping (high confidence) - apply AFTER generic mapping to avoid overwrite
+                    # Targeted mapping (high confidence) - apply AFTER generic mapping
                     if target_task_id:
                         try:
                             # Mark as asserted if user explicitly locked evidence to task
@@ -1219,12 +1261,15 @@ def scan_upload():
                     "kpa_code": kpa_code,
                     "task": classification["task"],
                     "tier": classification["tier"],
+                    "rating": brain_ctx.get("rating") if brain_ctx else None,
+                    "rating_label": brain_ctx.get("rating_label") if brain_ctx else "",
                     "impact_summary": classification["impact_summary"],
                     "confidence": classification["confidence"],
                     "status": "Classified" if classification["confidence"] >= 0.6 else "Needs Review",
                     "evidence_id": evidence_id,
                     "mapped_tasks": mapped_tasks,  # Full array with task IDs, titles, and confidence
-                    "mapped_count": len(mapped_tasks)  # Keep count for backward compatibility
+                    "mapped_count": len(mapped_tasks),  # Keep count for backward compatibility
+                    "brain": brain_ctx or {}  # Include full brain scorer results
                 }
                 
                 results.append(result)
@@ -1303,6 +1348,104 @@ def extract_text_from_file(filepath: str) -> str:
                 print(f"[PDF FALLBACK ERROR] {filepath}: {pdf_err}")
         
         return f"File: {Path(filepath).name} (extraction failed)"
+
+def _build_enhanced_impact_summary(
+    user_description: str,
+    ai_summary: str,
+    brain_ctx: Dict = None,
+    filename: str = "",
+    tier: str = ""
+) -> str:
+    """
+    Build a comprehensive impact summary from multiple sources.
+    Combines user description, AI classification, and brain scorer insights.
+    """
+    parts = []
+    
+    # Start with user description (most trusted)
+    if user_description:
+        parts.append(f"User: {user_description.strip()}")
+    
+    # Add AI-generated summary if different from user description
+    if ai_summary and ai_summary.lower() not in user_description.lower():
+        parts.append(f"Analysis: {ai_summary.strip()}")
+    
+    # Add brain scorer insights
+    if brain_ctx:
+        details = []
+        
+        # Rating and tier
+        rating = brain_ctx.get("rating")
+        tier_label = brain_ctx.get("tier_label")
+        if rating:
+            details.append(f"Rating {rating:.1f}/5.0")
+        if tier_label:
+            details.append(f"{tier_label}")
+        
+        # Values demonstrated
+        values_hits = brain_ctx.get("values_hits", [])
+        if values_hits:
+            values_str = ", ".join(values_hits[:3])
+            details.append(f"Values: {values_str}")
+        
+        # Policy alignment
+        policy_hits = brain_ctx.get("policy_hits", [])
+        if policy_hits and isinstance(policy_hits, list):
+            policy_names = [p.get("name", "") for p in policy_hits[:2] if isinstance(p, dict) and p.get("name")]
+            if policy_names:
+                details.append(f"Policies: {', '.join(policy_names)}")
+        
+        if details:
+            parts.append(" | ".join(details))
+    elif tier:
+        # Fallback if no brain context
+        parts.append(f"Tier: {tier}")
+    
+    # Combine all parts
+    return " • ".join(parts) if parts else "Evidence uploaded"
+
+
+def classify_with_ollama_raw(prompt: str) -> Dict:
+    """
+    Raw Ollama classification with custom prompt.
+    Returns parsed JSON classification result.
+    """
+    try:
+        response = requests.post(
+            f"{OLLAMA_BASE_URL}/api/generate",
+            json={
+                "model": OLLAMA_MODEL,
+                "prompt": prompt,
+                "stream": False,
+                "format": "json"
+            },
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            ai_response = data.get("response", "").strip()
+            
+            # Parse JSON response
+            import json
+            try:
+                return json.loads(ai_response)
+            except json.JSONDecodeError:
+                # Fallback if not valid JSON
+                return {
+                    "kpa": "KPA1",
+                    "task": "Classification failed",
+                    "tier": "Unknown",
+                    "impact_summary": ai_response[:200],
+                    "confidence": 0.5
+                }
+        else:
+            raise Exception(f"Ollama returned status {response.status_code}")
+            
+    except Exception as e:
+        print(f"Ollama raw classification error: {e}")
+        raise
+
 
 def classify_with_ollama(filename: str, content: str) -> Dict:
     """
@@ -1462,6 +1605,320 @@ def resolve_evidence():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/evidence/enhance', methods=['POST'])
+def enhance_evidence():
+    """
+    Enhance evidence confidence with user-provided description.
+    Uses Ollama to reclassify evidence with semantic understanding.
+    """
+    try:
+        data = request.json
+        evidence_id = data.get('evidence_id')
+        staff_id = data.get('staff_id')
+        user_description = data.get('user_description', '').strip()
+        target_task_id = data.get('target_task_id')  # Optional
+        
+        if not evidence_id or not staff_id:
+            return jsonify({"error": "Missing evidence_id or staff_id"}), 400
+        
+        if not user_description:
+            return jsonify({"error": "User description is required"}), 400
+        
+        # Load evidence from database
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent))
+        from progress_store import ProgressStore
+        from mapper import map_evidence_to_tasks
+        import hashlib
+        
+        store = ProgressStore()
+        
+        # Get evidence metadata
+        evidence_rows = store.list_evidence(staff_id=staff_id)
+        evidence_item = None
+        for row in evidence_rows:
+            if row.get("evidence_id") == evidence_id:
+                evidence_item = row
+                break
+        
+        if not evidence_item:
+            return jsonify({"error": "Evidence not found"}), 404
+        
+        # Get original values
+        old_kpa = evidence_item.get("kpa_code", "Unknown")
+        old_confidence = float(evidence_item.get("meta", {}).get("confidence", 0.0))
+        file_path = evidence_item.get("file_path", "")
+        filename = evidence_item.get("meta", {}).get("filename", "")
+        
+        # Extract text from file
+        file_text = ""
+        try:
+            from backend.vamp_master import extract_text_from_file
+            file_text = extract_text_from_file(file_path) if Path(file_path).exists() else ""
+        except Exception:
+            file_text = filename  # Fallback
+        
+        # Classify with Ollama using user description
+        print(f"[ENHANCE] Reclassifying {filename} with user description")
+        
+        enhanced_prompt = f"""You are classifying evidence for academic performance assessment.
+
+USER CONTEXT (HIGHEST PRIORITY - TRUST THIS):
+The staff member described this evidence as:
+"{user_description}"
+
+EVIDENCE FILE: {filename}
+CONTENT PREVIEW (first 500 chars):
+{file_text[:500] if file_text else 'N/A'}
+
+Based primarily on the USER'S DESCRIPTION (which is highly trusted), classify this evidence:
+
+1. KPA Classification (choose ONE):
+   - KPA1: Teaching & Learning
+   - KPA2: Occupational Health & Safety  
+   - KPA3: Research & Innovation
+   - KPA4: Academic Leadership & Administration
+   - KPA5: Social Responsiveness & Engagement
+
+2. Tier Level:
+   - Transformational: Major impact, innovation
+   - Developmental: Growth, improvement
+   - Compliance: Meeting standards
+
+3. Impact Summary: Brief description of the evidence's value (1-2 sentences)
+
+4. Confidence: Based on user description clarity (0.85-0.95 typical for user-enhanced)
+
+Return ONLY valid JSON:
+{{
+  "kpa": "KPA2",
+  "task": "Brief task description",
+  "tier": "Compliance",
+  "impact_summary": "Based on user description, this evidence...",
+  "confidence": 0.92
+}}"""
+        
+        try:
+            classification = classify_with_ollama_raw(enhanced_prompt)
+        except Exception as e:
+            print(f"[ENHANCE ERROR] Ollama classification failed: {e}")
+            classification = {
+                "kpa": old_kpa,
+                "task": "Classification failed",
+                "tier": "Unknown",
+                "impact_summary": f"User description: {user_description[:100]}...",
+                "confidence": min(0.85, old_confidence + 0.30)  # Boost anyway
+            }
+        
+        # Map KPA name to code
+        kpa_map = {
+            "teaching": "KPA1", "teaching & learning": "KPA1",
+            "ohs": "KPA2", "occupational health": "KPA2",
+            "research": "KPA3", "innovation": "KPA3",
+            "leadership": "KPA4", "administration": "KPA4",
+            "social": "KPA5", "community": "KPA5"
+        }
+        new_kpa = classification.get("kpa", "KPA1")
+        if not new_kpa.startswith("KPA"):
+            kpa_lower = classification.get("kpa", "").lower()
+            new_kpa = "KPA1"
+            for key, code in kpa_map.items():
+                if key in kpa_lower:
+                    new_kpa = code
+                    break
+        
+        new_confidence = float(classification.get("confidence", 0.90))
+        new_impact = classification.get("impact_summary", user_description[:200])
+        
+        # Also run brain scorer if available for rating
+        brain_ctx = None
+        if BRAIN_SCORER_AVAILABLE and brain_score_evidence:
+            try:
+                brain_ctx = brain_score_evidence(
+                    path=Path(file_path) if file_path else Path(filename),
+                    full_text=f"{user_description}\n\n{file_text}",  # Include user description
+                    kpa_hint_code=new_kpa
+                )
+                print(f"[ENHANCE] Brain rating: {brain_ctx.get('rating', 'N/A')}")
+            except Exception as e:
+                print(f"[ENHANCE] Brain scorer failed: {e}")
+        
+        # Create enhanced impact summary combining all sources
+        enhanced_impact = _build_enhanced_impact_summary(
+            user_description=user_description,
+            ai_summary=new_impact,
+            brain_ctx=brain_ctx,
+            filename=filename,
+            tier=classification.get("tier", "")
+        )
+        new_impact = enhanced_impact
+        
+        # Update evidence in database
+        year = int(evidence_item.get("year", 2025))
+        month_bucket = evidence_item.get("month_bucket", "")
+        sha1 = evidence_item.get("sha1", hashlib.sha1(file_text.encode(errors="ignore")).hexdigest())
+        
+        updated_meta = evidence_item.get("meta", {})
+        updated_meta.update({
+            "user_description": user_description,
+            "user_enhanced": True,
+            "enhancement_date": datetime.utcnow().isoformat() + "Z",
+            "original_confidence": old_confidence,
+            "enhanced_confidence": new_confidence,
+            "impact_summary": new_impact,
+            "confidence": new_confidence,
+        })
+        
+        store.insert_evidence(
+            evidence_id=evidence_id,
+            sha1=sha1,
+            staff_id=staff_id,
+            year=year,
+            month_bucket=month_bucket,
+            kpa_code=new_kpa,
+            rating=(brain_ctx.get("rating_label") if brain_ctx else classification.get("tier")),
+            tier=(brain_ctx.get("tier_label") if brain_ctx else classification.get("tier")),
+            file_path=file_path,
+            meta=updated_meta
+        )
+        
+        # Clear old mappings and create new ones
+        # (upsert will handle this in progress_store)
+        month_num = int(month_bucket.split('-')[1]) if '-' in month_bucket else 1
+        
+        mapped_tasks = map_evidence_to_tasks(
+            store,
+            evidence_id=evidence_id,
+            staff_id=staff_id,
+            year=year,
+            month_bucket=month_bucket,
+            kpa_code=new_kpa,
+            meta={
+                "filename": filename,
+                "impact_summary": new_impact,
+                "evidence_type": classification.get("task", "")
+            },
+            mapped_by="user_enhanced:v1"
+        )
+        
+        print(f"[ENHANCE] Success: {old_kpa} → {new_kpa}, conf {old_confidence:.2f} → {new_confidence:.2f}")
+        
+        return jsonify({
+            "success": True,
+            "evidence_id": evidence_id,
+            "old_confidence": old_confidence,
+            "new_confidence": new_confidence,
+            "old_kpa": old_kpa,
+            "new_kpa": new_kpa,
+            "reclassified": (old_kpa != new_kpa),
+            "old_mapped_count": 0,  # We cleared mappings
+            "new_mapped_count": len(mapped_tasks),
+            "rating": brain_ctx.get("rating") if brain_ctx else None,
+            "message": "Evidence enhanced with user context"
+        })
+        
+    except Exception as e:
+        print(f"[ENHANCE ERROR] {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e), "success": False}), 500
+
+
+@app.route('/api/evidence/kpa-scores', methods=['GET'])
+def get_kpa_scores():
+    """
+    Calculate average rating scores per KPA for a given staff member and month.
+    Returns scores on 0-5 scale from brain scorer ratings.
+    """
+    try:
+        staff_id = request.args.get('staff_id')
+        month = request.args.get('month')  # e.g., "2025-02" or "all"
+        
+        if not staff_id:
+            return jsonify({"error": "Missing staff_id"}), 400
+        
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent))
+        from progress_store import ProgressStore
+        
+        store = ProgressStore()
+        
+        # Get all evidence for staff
+        evidence_rows = store.list_evidence(staff_id=staff_id)
+        
+        # Filter by month if specified
+        if month and month != 'all':
+            evidence_rows = [r for r in evidence_rows if r.get("month_bucket", "").startswith(month)]
+        
+        # Group by KPA and calculate averages
+        kpa_scores = {}
+        kpa_counts = {}
+        
+        for row in evidence_rows:
+            kpa_code = row.get("kpa_code", "")
+            if not kpa_code:
+                continue
+            
+            # Try to get rating from brain scorer results
+            rating = None
+            meta = row.get("meta", {})
+            brain_data = meta.get("brain", {})
+            
+            if isinstance(brain_data, dict):
+                rating = brain_data.get("rating")
+            
+            # Fallback: try to extract from meta directly
+            if rating is None:
+                rating = meta.get("rating")
+            
+            if rating is not None:
+                try:
+                    rating = float(rating)
+                    if 0 <= rating <= 5:
+                        if kpa_code not in kpa_scores:
+                            kpa_scores[kpa_code] = 0.0
+                            kpa_counts[kpa_code] = 0
+                        kpa_scores[kpa_code] += rating
+                        kpa_counts[kpa_code] += 1
+                except (ValueError, TypeError):
+                    pass
+        
+        # Calculate averages
+        averages = {}
+        for kpa_code in kpa_scores:
+            if kpa_counts[kpa_code] > 0:
+                averages[kpa_code] = round(kpa_scores[kpa_code] / kpa_counts[kpa_code], 2)
+        
+        # Add KPA names
+        kpa_names = {
+            "KPA1": "Teaching & Learning",
+            "KPA2": "Occupational Health & Safety",
+            "KPA3": "Research & Innovation",
+            "KPA4": "Academic Leadership",
+            "KPA5": "Social Responsiveness"
+        }
+        
+        result = {
+            "ok": True,
+            "staff_id": staff_id,
+            "month": month,
+            "scores": averages,
+            "counts": kpa_counts,
+            "kpa_names": kpa_names
+        }
+        
+        print(f"[KPA SCORES] {staff_id} {month}: {averages}")
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"[KPA SCORES ERROR] {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e), "ok": False}), 500
+
 
 # ============================================================
 # AI GUIDANCE

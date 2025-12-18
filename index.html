@@ -280,12 +280,14 @@
                 <th>Covers</th>
                 <th>Task</th>
                 <th>Tier</th>
+                <th>Rating</th>
                 <th>Impact Assessment</th>
                 <th>Confidence</th>
+                <th>Actions</th>
               </tr>
           </thead>
           <tbody id="evidenceLogTableBody">
-            <tr><td colspan="10" class="no-data">No evidence logged yet. Use "Scan Evidence" in the Expectations tab.</td></tr>
+            <tr><td colspan="12" class="no-data">No evidence logged yet. Use "Scan Evidence" in the Expectations tab.</td></tr>
           </tbody>
         </table>
       </div>
@@ -489,6 +491,40 @@
   <div class="vamp-overlay-content">
     <div class="vamp-spinner"></div>
     <div class="vamp-overlay-text" id="vampThinkingText">Analysing…</div>
+  </div>
+</div>
+
+<!-- Evidence Description/Enhancement Modal -->
+<div id="evidenceEnhanceModal" class="modal" style="display:none;">
+  <div class="modal-overlay" onclick="closeEnhanceModal()"></div>
+  <div class="modal-content" style="max-width:600px;">
+    <div class="modal-header">
+      <h3>Enhance Evidence Confidence</h3>
+      <button class="modal-close" onclick="closeEnhanceModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="muted" style="margin-bottom:16px;">Help improve accuracy by describing how this evidence covers the expectation.</p>
+      
+      <div class="info-box" style="background:var(--grey-bg);padding:12px;border-radius:6px;margin-bottom:16px;">
+        <div style="margin-bottom:6px;"><strong>Evidence:</strong> <span id="modalEvidenceFile">-</span></div>
+        <div style="margin-bottom:6px;"><strong>Current KPA:</strong> <span id="modalCurrentKPA">-</span></div>
+        <div><strong>Current Confidence:</strong> <span id="modalCurrentConf">-</span></div>
+      </div>
+      
+      <label style="display:block;margin-bottom:8px;font-weight:600;">How does this evidence cover the expectation?</label>
+      <textarea id="evidenceDescriptionText" 
+                rows="5" 
+                style="width:100%;padding:10px;border:1px solid var(--grey);border-radius:4px;font-family:inherit;resize:vertical;"
+                placeholder="Example: This certificate proves I completed the mandatory fire safety training session on Feb 15th, covering evacuation procedures and extinguisher use as required for OHS compliance."></textarea>
+      
+      <div style="margin-top:12px;font-size:0.9em;color:var(--grey-dim);">
+        💡 Tip: Include specific dates, topics covered, and why this evidence matters for your KPA task.
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;padding:16px;border-top:1px solid var(--grey);">
+      <button class="btn secondary" onclick="closeEnhanceModal()">Cancel</button>
+      <button class="btn glow" id="submitEnhanceBtn" onclick="submitEnhancement()">✨ Enhance Confidence</button>
+    </div>
   </div>
 </div>
 

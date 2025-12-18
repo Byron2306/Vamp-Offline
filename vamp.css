@@ -1196,3 +1196,37 @@ body::before {
   background: rgba(200, 0, 50, 0.3);
   box-shadow: 0 0 8px var(--red-soft);
 }
+
+/* ============================================================
+   ENHANCED IMPACT SUMMARIES
+============================================================ */
+
+.impact-enhanced {
+  font-size: 0.9em;
+  line-height: 1.5;
+  color: var(--grey-text);
+}
+
+.impact-enhanced strong {
+  color: var(--red-main);
+  font-weight: 600;
+}
+
+.impact-separator {
+  color: var(--grey-dim);
+  margin: 0 6px;
+}
+
+.impact-user {
+  color: var(--grey-text);
+  font-style: italic;
+}
+
+.impact-analysis {
+  color: var(--grey-muted);
+}
+
+.impact-details {
+  color: var(--grey-dim);
+  font-size: 0.85em;
+}

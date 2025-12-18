@@ -208,10 +208,14 @@ def generate_initial_pa(profile: StaffProfile, out_dir: Path) -> Path:
     for row in rows:
         ws.append(row)
 
+    # Handle both Path and string for out_dir
+    if isinstance(out_dir, str):
+        out_dir = Path(out_dir)
+    
     out_path = out_dir / f"PA_{profile.staff_id}_{profile.cycle_year}_initial.xlsx"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(out_path)
-    return out_path
+    return str(out_path)
 
 
 def generate_mid_year_review(profile: StaffProfile, out_dir: Path) -> Path:

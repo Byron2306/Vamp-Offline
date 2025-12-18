@@ -278,7 +278,9 @@ def parse_task_agreement(excel_path: str, director_level: bool = False) -> Dict[
                     break
 
             rows = list(_iter_sheet_rows(zf, ta_sheet_path, shared))
-            teaching_modules = _extract_teaching_modules_from_addendum(sheets, zf, shared)
+            teaching_modules_simple = _extract_teaching_modules_from_addendum(sheets, zf, shared)
+            # Convert to dict format for enrichment with student counts later
+            teaching_modules = [{"code": code, "students": None, "hours": None} for code in teaching_modules_simple]
     except Exception as e:
         print(f"[expectation_engine] Error reading TA file {excel_path}: {e}")
         return {
@@ -300,9 +302,12 @@ def parse_task_agreement(excel_path: str, director_level: bool = False) -> Dict[
     current_section: int | None = None
     kpa_hours: Dict[str, float] = {}
     teaching: List[str] = []
+    teaching_ror: List[str] = []  # ROR teaching activities (section 2.19)
     supervision: List[str] = []
     research: List[str] = []
     leadership: List[str] = []
+    module_leadership: List[Dict[str, Any]] = []  # Module leadership (section 4.6)
+    mentorship: List[Dict[str, Any]] = []  # Research mentees (section 4.1)
     people_management: List[str] = []
     social: List[str] = []
     teaching_practice_windows: List[str] = []
@@ -373,6 +378,12 @@ def parse_task_agreement(excel_path: str, director_level: bool = False) -> Dict[
             new_block = "teaching_practice_windows"
         elif "module code" in lowered and "number of students" in lowered:
             new_block = "module_table"
+        elif "presentation at reception" in lowered or ("ror" in lowered and "presentation" in lowered):
+            new_block = "ror_teaching"  # Section 2.19
+        elif "mentorship" in lowered and "4.1" in lowered:
+            new_block = "mentorship"  # Section 4.1
+        elif "module leaders" in lowered:
+            new_block = "module_leadership"  # Section 4.6
         elif "committee" in lowered or "meetings" in lowered:
             new_block = "committee_roles"
         elif "research" in lowered and "section" not in lowered:
@@ -381,10 +392,8 @@ def parse_task_agreement(excel_path: str, director_level: bool = False) -> Dict[
             new_block = "ohs_block"
 
         if new_block:
-            if current_block == "supervision" and new_block == "module_table":
-                pass
-            else:
-                current_block = new_block
+            # Switch to new block
+            current_block = new_block
 
         if current_block and current_section is not None:
             ta_parse_report.setdefault(current_section, {"blocks_detected": set(), "rows_consumed": 0, "rows_unconsumed": 0, "unconsumed_examples": []})
@@ -394,17 +403,32 @@ def parse_task_agreement(excel_path: str, director_level: bool = False) -> Dict[
         hours_cell = cells[3] if len(cells) > 3 else None
         hours_val = _safe_float(hours_cell)
 
-        # Only treat rows as actual tasks if they have real hours
-        if hours_val <= 0:
-            continue
-
-        # Build a "detail" string from the text columns
+        # Build a "detail" string from the text columns (do this before hours check for ROR)
         detail_pieces = [cells[1] if len(cells) > 1 else "", cells[0] if len(cells) > 0 else "", cells[2] if len(cells) > 2 else ""]
         detail = " ".join(_clean_cell(c) for c in detail_pieces if _clean_cell(c))
         if not detail:
-            continue
-
+            if hours_val <= 0:
+                continue
+        
         dlow = detail.lower()
+
+        # Special case: ROR teaching activities don't have hours in the detail rows
+        # They're described as "Presentation: 1 hour per presentation", etc.
+        if current_block == "ror_teaching" and detail:
+            if any(keyword in dlow for keyword in ["presentation:", "preparation:", "organising:", "material:"]):
+                teaching_ror.append(detail)
+                consumed = True
+                if current_section is not None:
+                    ta_parse_report.setdefault(
+                        current_section,
+                        {"blocks_detected": set(), "rows_consumed": 0, "rows_unconsumed": 0, "unconsumed_examples": []},
+                    )
+                    ta_parse_report[current_section]["rows_consumed"] += 1
+                continue
+
+        # Only treat rows as actual tasks if they have real hours
+        if hours_val <= 0:
+            continue
 
         # Teaching Practice Assessment rows sometimes contain only month windows
         # (e.g., "April / July"). Do not treat those as targets or people names –
@@ -443,12 +467,49 @@ def parse_task_agreement(excel_path: str, director_level: bool = False) -> Dict[
         kpa_hours[kpa_code] = kpa_hours.get(kpa_code, 0.0) + hours_val
 
         consumed = False
-        if current_block == "supervision":
+        if current_block == "ror_teaching":
+            # Section 2.19: ROR presentation activities
+            # Examples: "Presentation: 1 hour per presentation", "Preparation: 1 hour..."
+            if any(keyword in dlow for keyword in ["presentation:", "preparation:", "organising:", "material:"]):
+                teaching_ror.append(detail)
+                consumed = True
+        elif current_block == "mentorship":
+            # Section 4.1: Research mentees (NOT postgrad supervision students)
+            # Extract mentee names
+            name_pattern = re.compile(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:\s+([A-Z][a-z]+))?')
+            match = name_pattern.search(detail)
+            if match and not MODULE_CODE_RE.search(detail):
+                full_name = match.group(0).strip()
+                mentorship.append({"name": full_name, "hours": hours_val})
+                consumed = True
+        elif current_block == "module_leadership":
+            # Section 4.6: Module leadership (administrative role)
+            # Extract module codes from detail
+            module_codes = MODULE_CODE_RE.findall(detail)
+            if module_codes:
+                module_leadership.append({
+                    "modules": ", ".join(module_codes),
+                    "hours": hours_val
+                })
+                consumed = True
+        elif current_block == "supervision":
+            # Extract student names (format: Surname, Initials or Surname I.)
+            # Ignore module codes like CRSE 971, HISE 411
             if MODULE_CODE_RE.search(detail):
-                teaching.append(detail)
+                # This is a module code row, skip it (don't add to teaching or supervision)
+                consumed = True
             else:
-                supervision.append(detail)
-            consumed = True
+                # Extract names using pattern: Surname, Initials
+                name_pattern = re.compile(r'\b([A-Z][a-z]+),?\s+([A-Z]\.?\s*[A-Z]*\.?)')
+                names = name_pattern.findall(detail)
+                if names:
+                    for surname, initials in names:
+                        student_name = f"{surname}, {initials.strip()}"
+                        supervision.append(student_name)
+                    consumed = True
+                elif detail.strip():  # Any other non-empty supervision detail
+                    supervision.append(detail)
+                    consumed = True
         elif current_block == "teaching_practice_windows":
             months = month_tokens or _extract_month_tokens(detail)
             if months:
@@ -458,8 +519,38 @@ def parse_task_agreement(excel_path: str, director_level: bool = False) -> Dict[
                 teaching.append(detail)
                 consumed = True
         elif current_block == "module_table":
-            teaching.append(detail)
-            consumed = True
+            # Extract module codes WITH student numbers and hours
+            module_codes = MODULE_CODE_RE.findall(detail)
+            if module_codes:
+                # Try to extract student count (column 3) and hours (column 4)
+                students = None
+                if len(cells) > 2:
+                    try:
+                        students = int(_safe_float(cells[2]))
+                    except:
+                        pass
+                
+                for code in module_codes:
+                    # Normalize code for matching (remove spaces)
+                    code_normalized = code.replace(" ", "").upper()
+                    
+                    # Update or add module with metadata
+                    existing = next((m for m in teaching_modules if m.get("code", "").replace(" ", "").upper() == code_normalized), None)
+                    if not existing:
+                        teaching_modules.append({
+                            "code": code,
+                            "students": students,
+                            "hours": hours_val
+                        })
+                    else:  # Update existing with student count and hours
+                        if students:
+                            existing["students"] = students
+                        if hours_val:
+                            existing["hours"] = hours_val
+                consumed = True
+            else:
+                teaching.append(detail)
+                consumed = True
         elif current_block == "committee_roles":
             leadership.append(detail)
             consumed = True
@@ -528,9 +619,12 @@ def parse_task_agreement(excel_path: str, director_level: bool = False) -> Dict[
         {
             "kpa_summary": kpa_summary,
             "teaching": teaching,
+            "teaching_ror": teaching_ror,
             "supervision": supervision,
             "research": research,
             "leadership": leadership,
+            "module_leadership": module_leadership,
+            "mentorship": mentorship,
             "social": social,
             "ohs": ohs,
             "norm_hours": norm_hours,
@@ -568,10 +662,15 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
     """
     kpa_summary = ta_summary.get("kpa_summary", {})
     teaching = ta_summary.get("teaching", [])
+    teaching_ror = ta_summary.get("teaching_ror", [])
+    teaching_modules = ta_summary.get("teaching_modules", [])
     research = ta_summary.get("research", [])
     leadership = ta_summary.get("leadership", [])
+    module_leadership = ta_summary.get("module_leadership", [])
+    mentorship = ta_summary.get("mentorship", [])
     social = ta_summary.get("social", [])
     ohs = ta_summary.get("ohs", [])
+    supervision = ta_summary.get("supervision", [])
     practice_windows = ta_summary.get("teaching_practice_windows", [])
     
     # Ensure all 5 KPAs exist in summary (add missing ones with zero hours)
@@ -692,13 +791,22 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
     # KPA1: Teaching (NWU 2025 Academic Calendar aligned)
     kpa1_hours = kpa_summary.get("KPA1", {}).get("hours", 0.0)
     
-    # Extract teaching modules from TA
-    teaching_modules = []
-    for item in teaching:
-        module_matches = MODULE_CODE_RE.findall(item)
-        teaching_modules.extend(module_matches)
-    
-    teaching_modules_str = ", ".join(set(teaching_modules)) if teaching_modules else "Teaching modules as per TA"
+    # Build teaching modules string with student counts
+    if teaching_modules:
+        module_strs = []
+        for mod in teaching_modules:
+            if isinstance(mod, dict):
+                code = mod.get("code", "")
+                students = mod.get("students")
+                if students:
+                    module_strs.append(f"{code} ({students} students)")
+                else:
+                    module_strs.append(code)
+            else:
+                module_strs.append(str(mod))
+        teaching_modules_str = ", ".join(module_strs)
+    else:
+        teaching_modules_str = "Teaching modules as per TA"
     
     if kpa1_hours > 0:
         # NWU 2025 Calendar milestones
@@ -803,6 +911,101 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
             ),
         })
         task_counter += 1
+        
+        # Teaching practice assessment tasks (April, July)
+        if practice_windows:
+            month_map = {
+                'jan': 1, 'january': 1,
+                'feb': 2, 'february': 2,
+                'mar': 3, 'march': 3,
+                'apr': 4, 'april': 4,
+                'may': 5,
+                'jun': 6, 'june': 6,
+                'jul': 7, 'july': 7,
+                'aug': 8, 'august': 8,
+                'sep': 9, 'sept': 9, 'september': 9,
+                'oct': 10, 'october': 10,
+                'nov': 11, 'november': 11,
+                'dec': 12, 'december': 12,
+            }
+            
+            # Convert month tokens to month numbers
+            practice_months = []
+            for window in practice_windows:
+                month_num = month_map.get(window.lower())
+                if month_num:
+                    practice_months.append(month_num)
+            
+            # Create dedicated teaching practice task for each window
+            for month in sorted(set(practice_months)):
+                month_names = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June',
+                              7: 'July', 8: 'August', 9: 'September', 10: 'October', 11: 'November', 12: 'December'}
+                month_name = month_names.get(month, f'Month {month}')
+                
+                tasks.append({
+                    "id": f"task_{task_counter:03d}",
+                    "kpa_code": "KPA1",
+                    "kpa_name": "Teaching and Learning",
+                    "title": f"Teaching Practice Assessment - {month_name}",
+                    "cadence": "teaching_practice",
+                    "months": [month],
+                    "minimum_count": 1,
+                    "stretch_count": 2,
+                    "evidence_hints": ["teaching practice", "wil", "work integrated learning", "assessment", "visit", "observation"],
+                    "outputs": f"Teaching practice supervision and assessment for {month_name} window",
+                    "what_to_do": "Conduct teaching practice visits, assess student teachers, provide feedback, and complete assessment documentation.",
+                    "evidence_required": _evidence_required(
+                        "KPA1",
+                        ["teaching practice", "wil", "work integrated learning", "assessment", "visit"],
+                        f"Teaching practice supervision for {month_name}",
+                    ),
+                })
+                task_counter += 1
+        
+        # ROR Teaching Activities (January preparation, February event)
+        if teaching_ror:
+            ror_details = " | ".join(teaching_ror)
+            # January: Preparation
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA1",
+                "kpa_name": "Teaching and Learning",
+                "title": "ROR Preparation: Orientation Programme",
+                "cadence": "annual",
+                "months": [1],
+                "minimum_count": 1,
+                "stretch_count": 2,
+                "evidence_hints": ["ror", "reception", "orientation", "registration", "presentation", "preparation"],
+                "outputs": f"Preparation for ROR: {ror_details[:100]}",
+                "what_to_do": "Prepare presentation materials and content for Reception, Orientation and Registration (ROR) programme.",
+                "evidence_required": _evidence_required(
+                    "KPA1",
+                    ["presentation slides", "preparation notes", "ror materials"],
+                    f"ROR preparation: {ror_details[:80]}",
+                ),
+            })
+            task_counter += 1
+            
+            # February: Actual presentations
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA1",
+                "kpa_name": "Teaching and Learning",
+                "title": "ROR Event: Orientation Programme Delivery",
+                "cadence": "annual",
+                "months": [2],
+                "minimum_count": 1,
+                "stretch_count": 2,
+                "evidence_hints": ["ror", "reception", "orientation", "registration", "presentation", "attendance"],
+                "outputs": f"ROR programme delivery: {ror_details[:100]}",
+                "what_to_do": "Deliver presentations and materials at Reception, Orientation and Registration (ROR) event.",
+                "evidence_required": _evidence_required(
+                    "KPA1",
+                    ["attendance register", "presentation evidence", "photos", "programme schedule"],
+                    f"ROR event: {ror_details[:80]}",
+                ),
+            })
+            task_counter += 1
     
     # KPA2: OHS (quarterly)
     for month in [2, 5, 8, 11]:
@@ -826,35 +1029,212 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
         })
         task_counter += 1
     
-    # KPA3: Research (NWU Research Calendar aligned)
-    kpa3_hours = kpa_summary.get("KPA3", {}).get("hours", 0.0)
-    if kpa3_hours > 0:
-        research_calendar = {
-            1: "Research planning & ethics applications",
-            2: "Data collection / Literature review",
-            3: "NRF rating window / Grant applications",
-            4: "Conference submission deadlines",
-            5: "Mid-year research review preparation",
-            6: "Mid-year research output submission",
-            7: "Winter research focus period",
-            8: "Manuscript drafting & revisions",
-            9: "Conference presentations",
-            10: "Year-end publication push",
-            11: "NWU Research Awards submissions",
-            12: "Annual research reporting"
+    # Helper function to categorize research items
+    def _categorize_research(research_items: List[str]) -> Dict[str, List[str]]:
+        """Categorize research items into projects, conferences, publications, etc."""
+        categories = {
+            'projects': [],
+            'conferences': [],
+            'publications': [],
+            'ertp_lerp': [],
+            'leadership': [],
+            'professional_dev': []
         }
         
-        for month in range(1, 13):
-            focus_area = research_calendar.get(month, "Research progress")
+        for item in research_items:
+            item_lower = item.lower()
+            
+            if 'ertp' in item_lower or 'lerp' in item_lower:
+                categories['ertp_lerp'].append(item)
+            elif 'ecgbl' in item_lower or 'conference' in item_lower:
+                categories['conferences'].append(item)
+            elif 'book' in item_lower or 'article' in item_lower or 'chapter' in item_lower:
+                categories['publications'].append(item)
+            elif 'sdl' == item_lower or 'sub area leader' in item_lower or 'leader' in item_lower:
+                categories['leadership'].append(item)
+            elif 'colloqui' in item_lower or 'workshop' in item_lower or 'writing school' in item_lower:
+                categories['professional_dev'].append(item)
+            elif 'project' in item_lower or any(keyword in item_lower for keyword in ['learning', 'education', 'knowledge', 'oep']):
+                categories['projects'].append(item)
+        
+        return categories
+    
+    # KPA3: Research - Create individual tasks for each research activity
+    kpa3_hours = kpa_summary.get("KPA3", {}).get("hours", 0.0)
+    if kpa3_hours > 0:
+        # Categorize research items
+        research_categories = _categorize_research(research)
+        
+        # 1. Create tasks for ongoing research projects (throughout the year)
+        for project in research_categories['projects']:
+            project_name = project.split(':')[0].strip() if ':' in project else project[:50]
             
             tasks.append({
                 "id": f"task_{task_counter:03d}",
                 "kpa_code": "KPA3",
                 "kpa_name": "Research, Innovation & Creative Outputs",
-                "title": f"{focus_area}",
-                "cadence": "monthly",
-                "months": [month],
-                "minimum_count": 2 if month in [3,6,9,11] else 1,  # Higher expectations in key months
+                "title": f"Research Project: {project_name}",
+                "cadence": "research_ongoing",
+                "months": [2, 4, 6, 8, 10],  # Bi-monthly progress
+                "minimum_count": 1,
+                "stretch_count": 2,
+                "evidence_hints": ["research", "project", "progress", "data", "analysis", project_name.lower()],
+                "outputs": project,
+                "what_to_do": f"Continue work on {project_name}: data collection, analysis, writing, collaboration.",
+                "evidence_required": _evidence_required(
+                    "KPA3",
+                    ["research notes", "data", "draft", "meeting minutes", "progress report"],
+                    project,
+                ),
+            })
+            task_counter += 1
+        
+        # 2. Conference presentations
+        for conference in research_categories['conferences']:
+            conf_name = conference.split(':')[0].strip() if ':' in conference else conference
+            
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA3",
+                "kpa_name": "Research, Innovation & Creative Outputs",
+                "title": f"Conference: {conf_name}",
+                "cadence": "research_event",
+                "months": [4, 9],  # Submission and presentation months
+                "minimum_count": 1,
+                "stretch_count": 2,
+                "evidence_hints": ["conference", "presentation", "submission", "acceptance", conf_name.lower()],
+                "outputs": conference,
+                "what_to_do": f"Prepare and submit paper for {conf_name}, attend conference, present research findings.",
+                "evidence_required": _evidence_required(
+                    "KPA3",
+                    ["abstract", "full paper", "submission confirmation", "presentation slides", "certificate"],
+                    conference,
+                ),
+            })
+            task_counter += 1
+        
+        # 3. Publications
+        for publication in research_categories['publications']:
+            pub_name = publication.split(',')[0].strip() if ',' in publication else publication[:50]
+            
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA3",
+                "kpa_name": "Research, Innovation & Creative Outputs",
+                "title": f"Publication: {pub_name}",
+                "cadence": "research_publication",
+                "months": [3, 6, 9, 11],  # Quarterly milestones
+                "minimum_count": 1,
+                "stretch_count": 2,
+                "evidence_hints": ["publication", "manuscript", "book", "chapter", "draft", "review"],
+                "outputs": publication,
+                "what_to_do": f"Write and publish {pub_name}: drafting, peer review, revisions, final submission.",
+                "evidence_required": _evidence_required(
+                    "KPA3",
+                    ["manuscript draft", "peer review comments", "revisions", "acceptance letter", "DOI"],
+                    publication,
+                ),
+            })
+            task_counter += 1
+        
+        # 4. ERTP/LERP Honours supervision (during teaching semesters)
+        for ertp_item in research_categories['ertp_lerp']:
+            task_type = "Proposals" if "proposal" in ertp_item.lower() else "Reports"
+            
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA3",
+                "kpa_name": "Research, Innovation & Creative Outputs",
+                "title": f"Honours Supervision: ERTP/LERP {task_type}",
+                "cadence": "honours_supervision",
+                "months": [4, 5, 9, 10],  # Semester assessment periods
+                "minimum_count": 2,
+                "stretch_count": 4,
+                "evidence_hints": ["ertp", "lerp", "honours", "supervision", "feedback", "marking"],
+                "outputs": ertp_item,
+                "what_to_do": f"Supervise Honours students on ERTP/LERP {task_type.lower()}: provide feedback, assess submissions, track progress.",
+                "evidence_required": _evidence_required(
+                    "KPA3",
+                    ["supervision log", "feedback comments", "marked assignments", "progress reports"],
+                    ertp_item,
+                ),
+            })
+            task_counter += 1
+        
+        # 5. Research leadership roles
+        for leadership_role in research_categories['leadership']:
+            role_name = leadership_role.strip()
+            
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA3",
+                "kpa_name": "Research, Innovation & Creative Outputs",
+                "title": f"Research Leadership: {role_name}",
+                "cadence": "research_leadership",
+                "months": [3, 6, 9, 12],  # Quarterly
+                "minimum_count": 1,
+                "stretch_count": 2,
+                "evidence_hints": ["leadership", "sdl", "research entity", "coordination", role_name.lower()],
+                "outputs": leadership_role,
+                "what_to_do": f"Fulfill research leadership responsibilities for {role_name}: coordinate activities, mentor colleagues, facilitate meetings.",
+                "evidence_required": _evidence_required(
+                    "KPA3",
+                    ["meeting minutes", "coordination emails", "reports", "planning documents"],
+                    leadership_role,
+                ),
+            })
+            task_counter += 1
+        
+        # 6. Professional development (workshops, colloquiums)
+        for prof_dev in research_categories['professional_dev']:
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA3",
+                "kpa_name": "Research, Innovation & Creative Outputs",
+                "title": "Research Professional Development",
+                "cadence": "professional_development",
+                "months": [3, 6, 9],  # Throughout year
+                "minimum_count": 1,
+                "stretch_count": 3,
+                "evidence_hints": ["workshop", "colloquium", "writing school", "training", "professional development"],
+                "outputs": prof_dev,
+                "what_to_do": "Attend research colloquiums, writing schools, workshops on ethics, integrity, research methods.",
+                "evidence_required": _evidence_required(
+                    "KPA3",
+                    ["attendance certificate", "registration confirmation", "workshop materials", "reflection"],
+                    prof_dev,
+                ),
+            })
+            task_counter += 1
+        
+        # 7. Generic monthly research tasks only if no specific activities (fallback)
+        if not any(research_categories.values()):
+            research_calendar = {
+                1: "Research planning & ethics applications",
+                2: "Data collection / Literature review",
+                3: "NRF rating window / Grant applications",
+                4: "Conference submission deadlines",
+                5: "Mid-year research review preparation",
+                6: "Mid-year research output submission",
+                7: "Winter research focus period",
+                8: "Manuscript drafting & revisions",
+                9: "Conference presentations",
+                10: "Year-end publication push",
+                11: "NWU Research Awards submissions",
+                12: "Annual research reporting"
+            }
+            
+            for month in range(1, 13):
+                focus_area = research_calendar.get(month, "Research progress")
+                
+                tasks.append({
+                    "id": f"task_{task_counter:03d}",
+                    "kpa_code": "KPA3",
+                    "kpa_name": "Research, Innovation & Creative Outputs",
+                    "title": f"{focus_area}",
+                    "cadence": "monthly",
+                    "months": [month],
+                    "minimum_count": 2 if month in [3,6,9,11] else 1,  # Higher expectations in key months
                 "stretch_count": 4 if month in [3,6,9,11] else 3,
                 "evidence_hints": ["draft", "manuscript", "ethics", "grant", "submission", "review", "publication", "conference", "nrf"],
                 "outputs": f"{focus_area} | " + ("; ".join(research[:2]) if research else "Research activities as per TA"),
@@ -928,64 +1308,94 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
         })
         task_counter += 1
         
-        # Supervision tasks if applicable
-        tasks.append({
-            "id": f"task_{task_counter:03d}",
-            "kpa_code": "KPA3",
-            "kpa_name": "Research, Innovation & Creative Outputs",
-            "title": "Postgraduate supervision meetings & progress tracking",
-            "cadence": "semester",
-            "months": [3, 6, 9, 12],
-            "minimum_count": 4,
-            "stretch_count": 8,
-            "evidence_hints": ["supervision", "postgraduate", "masters", "phd", "meeting", "progress report"],
-            "outputs": "Postgraduate student supervision and progress monitoring",
-            "what_to_do": _what_to_do("KPA3", "Postgraduate supervision meetings & progress tracking", ""),
-            "evidence_required": _evidence_required(
-                "KPA3",
-                ["supervision", "postgraduate", "masters", "phd", "meeting", "progress report"],
-                "Postgraduate student supervision and progress monitoring",
-            ),
-        })
-        task_counter += 1
+        # Supervision tasks if applicable (with student names)
+        if supervision:
+            student_list = " | ".join(supervision[:5])  # Show up to 5 students
+            if len(supervision) > 5:
+                student_list += f" (and {len(supervision) - 5} more)"
+            
+            tasks.append({
+                "id": f"task_{task_counter:03d}",
+                "kpa_code": "KPA3",
+                "kpa_name": "Research, Innovation & Creative Outputs",
+                "title": "Postgraduate supervision meetings & progress tracking",
+                "cadence": "semester",
+                "months": [3, 6, 9, 12],
+                "minimum_count": 4,
+                "stretch_count": 8,
+                "evidence_hints": ["supervision", "postgraduate", "masters", "phd", "meeting", "progress report"],
+                "outputs": f"Students: {student_list}",
+                "what_to_do": _what_to_do("KPA3", "Postgraduate supervision meetings & progress tracking", ""),
+                "evidence_required": _evidence_required(
+                    "KPA3",
+                    ["supervision", "postgraduate", "masters", "phd", "meeting", "progress report"],
+                    f"Students: {student_list}",
+                ),
+            })
+            task_counter += 1
     
-    # KPA4: Academic Leadership & Administration (NWU governance cycle aligned)
+    # Helper function to extract hours from committee description
+    def _extract_committee_hours(committee_desc: str) -> float:
+        """Extract hours from strings like 'Faculty Board: 12 hours' or 'SDL scientific committee 5'"""
+        import re
+        # Look for patterns like ": 12 hours" or "12 hours per"
+        match = re.search(r':\s*(\d+)\s*hours?', committee_desc, re.IGNORECASE)
+        if match:
+            return float(match.group(1))
+        # Look for standalone numbers (e.g., "SDL scientific committee 5")
+        match = re.search(r'\s(\d+)$', committee_desc)
+        if match:
+            return float(match.group(1))
+        return 0.0
+    
+    def _committee_meeting_months(committee_desc: str, hours: float) -> List[int]:
+        """Determine which months a committee meets based on description and hours"""
+        desc_lower = committee_desc.lower()
+        
+        # High frequency (monthly) - typically >20 hours
+        if hours >= 20 or 'school management' in desc_lower or 'subject group' in desc_lower:
+            return [2, 3, 4, 5, 6, 8, 9, 10, 11]  # Teaching months
+        
+        # Medium frequency (quarterly) - 10-20 hours
+        elif hours >= 10 or 'faculty board' in desc_lower or 'teaching and learning' in desc_lower:
+            return [2, 5, 8, 11]  # Quarterly
+        
+        # Lower frequency (semester) - 5-10 hours
+        elif hours >= 5 or 'mentorship' in desc_lower or 'forums' in desc_lower:
+            return [3, 9]  # Bi-annual
+        
+        # Minimal (annual or few meetings) - <5 hours
+        else:
+            return [3]  # Annual or minimal
+    
+    # KPA4: Academic Leadership & Administration
+    # Create individual tasks for each committee based on their meeting frequency
     kpa4_hours = kpa_summary.get("KPA4", {}).get("hours", 0.0)
     if kpa4_hours > 0:
-        leadership_calendar = {
-            1: "Annual planning & goal setting",
-            2: "Faculty board meetings / School committees",
-            3: "Budget planning & resource allocation",
-            4: "Student complaint resolutions / Quality assurance",
-            5: "Mid-year performance reviews (staff)",
-            6: "Senate meetings / Academic planning",
-            7: "Strategic planning sessions",
-            8: "Curriculum review & accreditation prep",
-            9: "Faculty board meetings / Programme evaluations",
-            10: "Budget reviews & resource reallocation",
-            11: "Year-end performance assessments",
-            12: "Annual reporting & strategic reviews"
-        }
-        
-        for month in range(1, 13):
-            focus_area = leadership_calendar.get(month, "Leadership activities")
+        # Create individual committee tasks
+        for committee_desc in leadership:
+            hours = _extract_committee_hours(committee_desc)
+            meeting_months = _committee_meeting_months(committee_desc, hours)
+            
+            # Extract clean committee name (without hours suffix)
+            committee_name = committee_desc.split(':')[0].strip() if ':' in committee_desc else committee_desc
             
             tasks.append({
                 "id": f"task_{task_counter:03d}",
                 "kpa_code": "KPA4",
                 "kpa_name": "Academic Leadership & Administration",
-                "title": f"{focus_area}",
-                "cadence": "monthly",
-                "months": [month],
-                "minimum_count": 2 if month in [3,6,9,12] else 1,  # Higher expectations in key governance months
-                "stretch_count": 4 if month in [3,6,9,12] else 2,
-                "evidence_hints": ["meeting", "minutes", "committee", "chair", "agenda", "administration", "senate", "faculty board"],
-                "outputs": f"{focus_area} | " + ("; ".join(leadership[:2]) if leadership else "Leadership activities as per TA"),
-                "what_to_do": _what_to_do("KPA4", focus_area, ""),
+                "title": f"Committee: {committee_name}",
+                "cadence": "committee_recurring",
+                "months": meeting_months,
+                "minimum_count": 1,
+                "stretch_count": 2,
+                "evidence_hints": ["meeting", "minutes", "committee", "agenda", committee_name.lower()],
+                "outputs": committee_desc,
+                "what_to_do": f"Attend and contribute to {committee_name} meetings. Prepare agenda items, review documents, and complete follow-up actions.",
                 "evidence_required": _evidence_required(
                     "KPA4",
-                    ["meeting", "minutes", "committee", "chair", "agenda", "administration", "senate", "faculty board"],
-                    f"{focus_area} | " + ("; ".join(leadership[:2]) if leadership else "Leadership activities as per TA"),
+                    ["meeting", "minutes", "committee", "agenda"],
+                    committee_desc,
                 ),
             })
             task_counter += 1
@@ -1011,6 +1421,73 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
         })
         task_counter += 1
         
+        # Module leadership tasks (monthly reports for teaching months)
+        if module_leadership:
+            for mod_lead in module_leadership:
+                # Handle both dict and string formats
+                if isinstance(mod_lead, dict):
+                    modules = mod_lead.get("modules", "")
+                    hours = mod_lead.get("hours", 0)
+                else:
+                    # String format
+                    modules = mod_lead
+                    hours = 40  # Default hours
+                
+                # Teaching months: Feb-June (5), Aug-Nov (4) = 9 months
+                teaching_months = [2, 3, 4, 5, 6, 8, 9, 10, 11]
+                
+                tasks.append({
+                    "id": f"task_{task_counter:03d}",
+                    "kpa_code": "KPA4",
+                    "kpa_name": "Academic Leadership & Administration",
+                    "title": f"Module Leadership: {modules}",
+                    "cadence": "monthly",
+                    "months": teaching_months,
+                    "minimum_count": 1,
+                    "stretch_count": 2,
+                    "evidence_hints": ["module leadership", "report", "assessment planning", "moderation", "campus collaboration", modules],
+                    "outputs": f"Module leadership for {modules}: Monthly reports, assessment planning, cross-campus coordination",
+                    "what_to_do": f"Submit monthly module reports, coordinate assessment planning with colleagues across campuses, facilitate moderation processes for {modules}.",
+                    "evidence_required": _evidence_required(
+                        "KPA4",
+                        ["module report", "assessment plan", "moderation evidence", "email correspondence", "meeting notes"],
+                        f"Module leadership activities for {modules}",
+                    ),
+                })
+                task_counter += 1
+        
+        # Mentorship tasks (quarterly check-ins)
+        if mentorship:
+            for mentee in mentorship:
+                # Handle both dict and string formats
+                if isinstance(mentee, dict):
+                    name = mentee.get("name", "")
+                    hours = mentee.get("hours", 0)
+                else:
+                    # String format
+                    name = mentee
+                    hours = 10  # Default hours
+                
+                tasks.append({
+                    "id": f"task_{task_counter:03d}",
+                    "kpa_code": "KPA4",
+                    "kpa_name": "Academic Leadership & Administration",
+                    "title": f"Research Mentorship: {name}",
+                    "cadence": "quarterly",
+                    "months": [3, 6, 9, 12],
+                    "minimum_count": 1,
+                    "stretch_count": 2,
+                    "evidence_hints": ["mentorship", "mentee", "meeting", "guidance", "professional development", name],
+                    "outputs": f"Mentorship meetings and guidance for {name}",
+                    "what_to_do": f"Provide research mentorship to {name}: quarterly meetings, career guidance, research collaboration, professional development support.",
+                    "evidence_required": _evidence_required(
+                        "KPA4",
+                        ["meeting notes", "mentorship log", "feedback", "email correspondence"],
+                        f"Mentorship activities for {name}",
+                    ),
+                })
+                task_counter += 1
+        
         tasks.append({
             "id": f"task_{task_counter:03d}",
             "kpa_code": "KPA4",
@@ -1031,29 +1508,76 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
         })
         task_counter += 1
     
-    # KPA5: Social Responsiveness (quarterly)
+    # KPA5: Social Responsiveness - Create individual tasks for each activity
     kpa5_hours = kpa_summary.get("KPA5", {}).get("hours", 0.0)
     if kpa5_hours > 0:
-        for month in [3, 6, 9, 12]:
-            tasks.append({
-                "id": f"task_{task_counter:03d}",
-                "kpa_code": "KPA5",
-                "kpa_name": "Social Responsiveness",
-                "title": "Community engagement / industry involvement",
-                "cadence": "quarterly",
-                "months": [month],
-                "minimum_count": 1,
-                "stretch_count": 2,
-                "evidence_hints": ["community", "engagement", "outreach", "school", "workshop", "industry"],
-                "outputs": "; ".join(social[:2]) if social else "Community engagement activities",
-                "what_to_do": _what_to_do("KPA5", "Community engagement / industry involvement", ""),
-                "evidence_required": _evidence_required(
-                    "KPA5",
-                    ["community", "engagement", "outreach", "school", "workshop", "industry"],
-                    "; ".join(social[:2]) if social else "Community engagement activities",
-                ),
-            })
-            task_counter += 1
+        if social:
+            # Create individual tasks for each social responsibility item
+            for social_item in social:
+                # Determine cadence based on nature of activity
+                if 'website' in social_item.lower() or 'management' in social_item.lower():
+                    # Ongoing management activities - monthly
+                    cadence = "monthly"
+                    months = [2, 3, 4, 5, 6, 8, 9, 10, 11]  # Teaching months
+                    min_count = 1
+                    stretch_count = 2
+                elif 'webinar' in social_item.lower() or 'workshop' in social_item.lower() or 'event' in social_item.lower():
+                    # Event-based activities - quarterly or bi-annual
+                    cadence = "quarterly"
+                    months = [3, 6, 9, 12]
+                    min_count = 1
+                    stretch_count = 3
+                else:
+                    # General community engagement - quarterly
+                    cadence = "quarterly"
+                    months = [3, 6, 9, 12]
+                    min_count = 1
+                    stretch_count = 2
+                
+                # Create descriptive title from social item
+                title_short = social_item.split(':')[0].strip() if ':' in social_item else social_item[:50]
+                
+                tasks.append({
+                    "id": f"task_{task_counter:03d}",
+                    "kpa_code": "KPA5",
+                    "kpa_name": "Social Responsiveness",
+                    "title": f"{title_short}",
+                    "cadence": cadence,
+                    "months": months,
+                    "minimum_count": min_count,
+                    "stretch_count": stretch_count,
+                    "evidence_hints": ["community", "engagement", "outreach", "social responsibility", title_short.lower()],
+                    "outputs": social_item,
+                    "what_to_do": f"Execute {title_short}: coordinate activities, maintain records, engage stakeholders, ensure impact.",
+                    "evidence_required": _evidence_required(
+                        "KPA5",
+                        ["activity report", "correspondence", "website updates", "event materials", "attendance records"],
+                        social_item,
+                    ),
+                })
+                task_counter += 1
+        else:
+            # Fallback: generic quarterly tasks if no specific items
+            for month in [3, 6, 9, 12]:
+                tasks.append({
+                    "id": f"task_{task_counter:03d}",
+                    "kpa_code": "KPA5",
+                    "kpa_name": "Social Responsiveness",
+                    "title": "Community engagement / industry involvement",
+                    "cadence": "quarterly",
+                    "months": [month],
+                    "minimum_count": 1,
+                    "stretch_count": 2,
+                    "evidence_hints": ["community", "engagement", "outreach", "school", "workshop", "industry"],
+                    "outputs": "Community engagement activities",
+                    "what_to_do": _what_to_do("KPA5", "Community engagement / industry involvement", ""),
+                    "evidence_required": _evidence_required(
+                        "KPA5",
+                        ["community", "engagement", "outreach", "school", "workshop", "industry"],
+                        "Community engagement activities",
+                    ),
+                })
+                task_counter += 1
     
     # Build lead/lag indicators per KPA
     lead_lag = {

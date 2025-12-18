@@ -1493,7 +1493,7 @@ function renderEvidenceLogTable(evidence) {
   tbody.innerHTML = "";
   
   if (evidence.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" class="no-data">No evidence logged yet. Use "Scan Evidence" in the Expectations tab.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="12" class="no-data">No evidence logged yet. Use "Scan Evidence" in the Expectations tab.</td></tr>';
     return true;
   }
   
@@ -1506,18 +1506,47 @@ function renderEvidenceLogTable(evidence) {
     const mappedTitles = (item.mapped_tasks || []).map(m => m.title).filter(Boolean).slice(0,3).join(', ');
     const tooltip = mappedCount > 0 ? `Mapped to: ${mappedTitles}` : '';
     
+    // Extract rating from brain scorer (0-5 scale)
+    const rating = item.rating !== undefined ? item.rating : (item.brain?.rating || null);
+    const ratingLabel = item.rating_label || (item.brain?.rating_label || '');
+    const ratingDisplay = rating !== null ? `${rating.toFixed(1)} ⭐` : 'N/A';
+    const ratingClass = rating >= 4.0 ? 'confidence-high' : rating >= 2.5 ? 'confidence-medium' : rating ? 'confidence-low' : '';
+    const ratingTooltip = ratingLabel ? `Rating: ${ratingLabel}` : '';
+    
+    // Check if enhancement available (low confidence or user requested)
+    const isEnhanced = item.meta?.user_enhanced || item.user_enhanced;
+    const showEnhanceBtn = confidence < 0.6 && !isEnhanced;
+    
+    // Format enhanced impact summary for better readability
+    let impactDisplay = item.impact_summary || item.impact || 'N/A';
+    if (impactDisplay !== 'N/A' && impactDisplay.includes('•')) {
+      // Enhanced format detected - add subtle styling
+      impactDisplay = impactDisplay
+        .replace(/User:/g, '<strong>User:</strong>')
+        .replace(/Analysis:/g, '<em>Analysis:</em>')
+        .replace(/Rating \d+\.\d+\/5\.0/g, match => `<span style="color:var(--green);">${match}</span>`)
+        .replace(/Values:/g, '<span style="color:var(--grey-dim);">Values:</span>')
+        .replace(/Policies:/g, '<span style="color:var(--grey-dim);">Policies:</span>')
+        .replace(/Tier:/g, '<span style="color:var(--grey-dim);">Tier:</span>');
+    } else if (impactDisplay !== 'N/A' && impactDisplay.includes('|')) {
+      // Old format with | separators - convert to • for consistency
+      impactDisplay = impactDisplay.replace(/\s*\|\s*/g, ' • ');
+    }
+    
     // Build row with an initial empty cell (we'll replace with expand button)
     row.innerHTML = `
       <td></td>
       <td>${item.date || item.timestamp || 'N/A'}</td>
-      <td>${item.filename || item.file || 'N/A'}</td>
+      <td>${item.filename || item.file || 'N/A'}${isEnhanced ? ' <span class="pill" style="font-size:0.75em;background:var(--accent);color:white;" title="User enhanced">✓</span>' : ''}</td>
       <td>${item.kpa || 'Unknown'}</td>
       <td>${item.month || 'N/A'}</td>
       <td><span class="pill mapped-pill" title="${tooltip}" style="cursor:default;">${mappedCount}</span></td>
       <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;">${item.task || item.title || 'N/A'}</td>
       <td>${item.tier || 'N/A'}</td>
-      <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">${item.impact_summary || item.impact || 'N/A'}</td>
+      <td class="${ratingClass}" title="${ratingTooltip}">${ratingDisplay}</td>
+      <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;" class="impact-enhanced">${impactDisplay}</td>
       <td class="${confidenceClass}">${(confidence * 100).toFixed(0)}%</td>
+      <td></td>
     `;
 
     // Create expand button in the first cell
@@ -1525,6 +1554,25 @@ function renderEvidenceLogTable(evidence) {
     expandCell.style.width = '36px';
     expandCell.innerHTML = `<button class="expand-btn" aria-label="Expand mapped tasks">▸</button>`;
     row.replaceChild(expandCell, row.children[0]);
+    
+    // Create actions cell with enhance button
+    const actionsCell = document.createElement('td');
+    actionsCell.style.whiteSpace = 'nowrap';
+    if (showEnhanceBtn) {
+      const enhanceBtn = document.createElement('button');
+      enhanceBtn.className = 'btn-small secondary';
+      enhanceBtn.textContent = '✨ Enhance';
+      enhanceBtn.title = 'Improve confidence with your description';
+      enhanceBtn.onclick = (e) => {
+        e.stopPropagation();
+        openEnhanceModal(item);
+      };
+      actionsCell.appendChild(enhanceBtn);
+    } else if (isEnhanced) {
+      actionsCell.innerHTML = '<span style="color:var(--grey-dim);font-size:0.85em;">Enhanced ✓</span>';
+    }
+    row.replaceChild(actionsCell, row.children[row.children.length - 1]);
+    
     tbody.appendChild(row);
 
     // Expanded detail row (hidden by default)
@@ -1532,13 +1580,19 @@ function renderEvidenceLogTable(evidence) {
     detailTr.className = 'evidence-expanded-row';
     detailTr.style.display = 'none';
     const detailTd = document.createElement('td');
-    detailTd.colSpan = 10;
+    detailTd.colSpan = 12;
     const mappedListHtml = (item.mapped_tasks || []).map(m => {
       const confText = m.confidence !== undefined ? ` <span class="conf">${Math.round((m.confidence||0)*100)}%</span>` : '';
       const src = m.relevance_source ? ` <em style="color:var(--grey-dim);">(${m.relevance_source})</em>` : '';
       return `<div class="mapped-item">${m.kpa_code || ''} • ${m.title || m.task_id}${confText}${src}</div>`;
     }).join('') || '<div class="muted">No mapped tasks</div>';
-    detailTd.innerHTML = `<div class="evidence-expanded"><div style="font-weight:600;margin-bottom:6px;">Mapped tasks (${mappedCount})</div><div class="mapped-list">${mappedListHtml}</div></div>`;
+    
+    // Add full impact summary in expanded view
+    const fullImpactHtml = impactDisplay !== 'N/A' 
+      ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-dark);"><div style="font-weight:600;margin-bottom:6px;">Impact Assessment</div><div class="impact-enhanced" style="max-width:none;white-space:normal;line-height:1.6;">${impactDisplay}</div></div>`
+      : '';
+    
+    detailTd.innerHTML = `<div class="evidence-expanded"><div style="font-weight:600;margin-bottom:6px;">Mapped tasks (${mappedCount})</div><div class="mapped-list">${mappedListHtml}</div>${fullImpactHtml}</div>`;
     detailTr.appendChild(detailTd);
     tbody.appendChild(detailTr);
 
@@ -1867,6 +1921,120 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === 'Escape') {
       closeModal('aiGuidanceModal');
       closeModal('resolveModal');
+      closeEnhanceModal();
     }
   });
 });
+
+/* ============================================================
+   EVIDENCE ENHANCEMENT FUNCTIONALITY
+============================================================ */
+
+let currentEnhancingEvidence = null;
+
+function openEnhanceModal(evidence) {
+  currentEnhancingEvidence = evidence;
+  const modal = $("evidenceEnhanceModal");
+  if (!modal) return;
+  
+  // Populate modal with evidence details
+  const fileSpan = $("modalEvidenceFile");
+  const kpaSpan = $("modalCurrentKPA");
+  const confSpan = $("modalCurrentConf");
+  
+  if (fileSpan) fileSpan.textContent = evidence.filename || evidence.file || "Unknown";
+  if (kpaSpan) kpaSpan.textContent = evidence.kpa || "Unknown";
+  if (confSpan) confSpan.textContent = evidence.confidence !== undefined 
+    ? `${(evidence.confidence * 100).toFixed(0)}%` 
+    : "N/A";
+  
+  // Clear previous description
+  const textarea = $("evidenceDescriptionText");
+  if (textarea) textarea.value = "";
+  
+  // Show modal
+  modal.style.display = "block";
+  setTimeout(() => textarea?.focus(), 100);
+}
+
+function closeEnhanceModal() {
+  const modal = $("evidenceEnhanceModal");
+  if (modal) modal.style.display = "none";
+  currentEnhancingEvidence = null;
+}
+
+async function submitEnhancement() {
+  if (!currentEnhancingEvidence) return;
+  
+  const textarea = $("evidenceDescriptionText");
+  const description = textarea?.value?.trim();
+  
+  if (!description) {
+    alert("Please provide a description of how this evidence covers the expectation.");
+    return;
+  }
+  
+  const submitBtn = $("submitEnhanceBtn");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Enhancing...";
+  }
+  
+  try {
+    const response = await fetch("/api/evidence/enhance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        evidence_id: currentEnhancingEvidence.evidence_id,
+        staff_id: currentEnhancingEvidence.staff_id || $("staffInput")?.value,
+        user_description: description,
+        target_task_id: null // Optional: could allow re-targeting
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Show success message
+      const improvement = ((result.new_confidence - result.old_confidence) * 100).toFixed(0);
+      alert(`✓ Evidence enhanced!\n\nConfidence: ${(result.old_confidence*100).toFixed(0)}% → ${(result.new_confidence*100).toFixed(0)}% (↑${improvement}%)\n${result.reclassified ? `KPA: ${result.old_kpa} → ${result.new_kpa}` : ''}\nMapped tasks: ${result.new_mapped_count}`);
+      
+      // Reload evidence log
+      closeEnhanceModal();
+      const monthFilter = $("evidenceMonthFilter")?.value || 'all';
+      loadEvidenceLog(monthFilter);
+    } else {
+      alert("Enhancement failed: " + (result.error || "Unknown error"));
+    }
+  } catch (error) {
+    console.error("Enhancement error:", error);
+    alert("Failed to enhance evidence. Check console for details.");
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "✨ Enhance Confidence";
+    }
+  }
+}
+
+/* ============================================================
+   KPA SCORE AVERAGING
+============================================================ */
+
+async function loadKPAScores(month) {
+  const staffId = $("staffInput")?.value;
+  if (!staffId) return;
+  
+  try {
+    const response = await fetch(`/api/evidence/kpa-scores?staff_id=${staffId}&month=${month}`);
+    const data = await response.json();
+    
+    if (data.ok && data.scores) {
+      // Display KPA scores in UI (you can create a section for this)
+      console.log("KPA Scores for", month, data.scores);
+      // Example: data.scores = { "KPA1": 4.2, "KPA2": 3.8, "KPA3": 4.5, ...  }
+    }
+  } catch (error) {
+    console.error("Failed to load KPA scores:", error);
+  }
+}
