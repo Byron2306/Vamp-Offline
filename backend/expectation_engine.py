@@ -1308,7 +1308,7 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "kpa_name": "Research, Innovation & Creative Outputs",
                 "title": f"Research Project: {project_name}",
                 "cadence": "research_ongoing",
-                "months": [2, 4, 6, 8, 10],  # Bi-monthly progress
+                "months": [2, 4, 6, 7, 8, 10],  # Bi-monthly progress + July winter research
                 "minimum_count": 1,
                 "stretch_count": 2,
                 "evidence_hints": ["research", "project", "progress", "data", "analysis", project_name.lower()],
@@ -1332,7 +1332,7 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "kpa_name": "Research, Innovation & Creative Outputs",
                 "title": f"Conference: {conf_name}",
                 "cadence": "research_event",
-                "months": [4, 9],  # Submission and presentation months
+                "months": [4, 7, 9],  # Submission and presentation months + July prep
                 "minimum_count": 1,
                 "stretch_count": 2,
                 "evidence_hints": ["conference", "presentation", "submission", "acceptance", conf_name.lower()],
@@ -1356,7 +1356,7 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "kpa_name": "Research, Innovation & Creative Outputs",
                 "title": f"Publication: {pub_name}",
                 "cadence": "research_publication",
-                "months": [3, 6, 9, 11],  # Quarterly milestones
+                "months": [3, 6, 7, 9, 11],  # Quarterly milestones + July writing
                 "minimum_count": 1,
                 "stretch_count": 2,
                 "evidence_hints": ["publication", "manuscript", "book", "chapter", "draft", "review"],
@@ -1380,7 +1380,7 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "kpa_name": "Research, Innovation & Creative Outputs",
                 "title": f"Honours Supervision: ERTP/LERP {task_type}",
                 "cadence": "honours_supervision",
-                "months": [4, 5, 9, 10],  # Semester assessment periods
+                "months": [4, 5, 7, 9, 10],  # Semester assessment periods + July progress
                 "minimum_count": 2,
                 "stretch_count": 4,
                 "evidence_hints": ["ertp", "lerp", "honours", "supervision", "feedback", "marking"],
@@ -1404,7 +1404,7 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "kpa_name": "Research, Innovation & Creative Outputs",
                 "title": f"Research Leadership: {role_name}",
                 "cadence": "research_leadership",
-                "months": [3, 6, 9, 12],  # Quarterly
+                "months": [3, 6, 7, 9, 12],  # Quarterly + July planning
                 "minimum_count": 1,
                 "stretch_count": 2,
                 "evidence_hints": ["leadership", "sdl", "research entity", "coordination", role_name.lower()],
@@ -1426,7 +1426,7 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "kpa_name": "Research, Innovation & Creative Outputs",
                 "title": "Research Professional Development",
                 "cadence": "professional_development",
-                "months": [3, 6, 9],  # Throughout year
+                "months": [3, 6, 7, 9],  # Throughout year + July winter schools
                 "minimum_count": 1,
                 "stretch_count": 3,
                 "evidence_hints": ["workshop", "colloquium", "writing school", "training", "professional development"],
@@ -1587,15 +1587,15 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
         
         # High frequency (monthly) - typically >20 hours
         if hours >= 20 or 'school management' in desc_lower or 'subject group' in desc_lower:
-            return [2, 3, 4, 5, 6, 8, 9, 10, 11]  # Teaching months
+            return [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # Teaching months + July planning
         
         # Medium frequency (quarterly) - 10-20 hours
         elif hours >= 10 or 'faculty board' in desc_lower or 'teaching and learning' in desc_lower:
-            return [2, 5, 8, 11]  # Quarterly
+            return [2, 5, 7, 8, 11]  # Quarterly + July mid-year
         
         # Lower frequency (semester) - 5-10 hours
         elif hours >= 5 or 'mentorship' in desc_lower or 'forums' in desc_lower:
-            return [3, 9]  # Bi-annual
+            return [3, 7, 9]  # Bi-annual + July mid-year
         
         # Minimal (annual or few meetings) - <5 hours
         else:
@@ -1771,19 +1771,19 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 if 'website' in social_item.lower() or 'management' in social_item.lower():
                     # Ongoing management activities - monthly
                     cadence = "monthly"
-                    months = [2, 3, 4, 5, 6, 8, 9, 10, 11]  # Teaching months
+                    months = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # Teaching months + July
                     min_count = 1
                     stretch_count = 2
                 elif 'webinar' in social_item.lower() or 'workshop' in social_item.lower() or 'event' in social_item.lower():
                     # Event-based activities - quarterly or bi-annual
                     cadence = "quarterly"
-                    months = [3, 6, 9, 12]
+                    months = [3, 6, 7, 9, 12]
                     min_count = 1
                     stretch_count = 3
                 else:
                     # General community engagement - quarterly
                     cadence = "quarterly"
-                    months = [3, 6, 9, 12]
+                    months = [3, 6, 7, 9, 12]
                     min_count = 1
                     stretch_count = 2
                 

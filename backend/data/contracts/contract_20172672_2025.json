@@ -3,45 +3,60 @@
     "KPA3": {
       "name": "Personal Research, Innovation and/or Creative Outputs",
       "hours": 370.0,
-      "weight_pct": 22.18
+      "weight_pct": 17.7
     },
     "KPA1": {
       "name": "Teaching and Learning (including supervision)",
       "hours": 792.99,
-      "weight_pct": 47.54
+      "weight_pct": 37.94
     },
     "KPA5": {
       "name": "Social Responsiveness (Community Engagement / Industry)",
       "hours": 30.0,
-      "weight_pct": 1.8
+      "weight_pct": 1.44
     },
     "KPA4": {
       "name": "Academic Leadership and Administration",
-      "hours": 475.0,
-      "weight_pct": 28.48
+      "hours": 895.0,
+      "weight_pct": 42.83
     },
     "KPA2": {
       "name": "Occupational Health & Safety",
-      "hours": 0.0,
-      "weight_pct": 0.0,
+      "hours": 2.0,
+      "weight_pct": 0.1,
       "teaching_modules": [
-        "HISE322",
-        "HISE411"
+        {
+          "code": "HISE322",
+          "students": 40,
+          "hours": 117.92000000000002
+        },
+        {
+          "code": "HISE411",
+          "students": 35,
+          "hours": 117.07
+        },
+        {
+          "code": "ERTP 671",
+          "students": 1,
+          "hours": 25.0
+        },
+        {
+          "code": "LERP 671",
+          "students": 1,
+          "hours": 25.0
+        }
       ]
     }
   },
   "teaching": [
-    "D. Olivier CRSE 971",
-    "ST. Dinga CRSE 971",
-    "N. van Deventer CRSE 971",
-    "M. Bouwer CRSE 971",
-    "ERTP 671 / LERP 671 1",
-    "HISE 322 40",
-    "HISE 411 35",
     "Presentation: 1 hour per presentation",
     "Preparation: 1 hour per presentation",
     "Facilitator: 1 hour per presentation (assisting presenter)",
     "Material development: 5 hours per theme"
+  ],
+  "teaching_ror": [
+    "Presentation: 1 hour per presentation times  number of presentations divided by number of presenters",
+    "Preparation: 1 hour preparation per presentation"
   ],
   "supervision": [
     "C. Choba",
@@ -61,11 +76,8 @@
     "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
     "ERTP/LERP Research proposals (2 assignments) @ 30min (0,5 hours) per student 2",
     "ERTP/LERP Research reports @ 2 hours per student 2",
-    "Ntombiyoxolo Mqadi",
-    "Dawid Olivier",
     "Attendance of research colloquims, writing schools, workshops (eg. Ethics, Integrity, Turnitin): Maximum of 60 hours",
-    "Play-based SDL sub area leader",
-    "HISE 411, HISE 322"
+    "Play-based SDL sub area leader"
   ],
   "leadership": [
     "SDL scientific committee 5",
@@ -81,23 +93,62 @@
     "School meetings and functions: 10 hours",
     "Faculty Forums: Maximum of 6 hours",
     "Professional development (in accordance with PDP): Maximum of 10 hours",
-    "SASHT exco committee"
+    "SASHT exco committee",
+    ""
+  ],
+  "module_leadership": [
+    {
+      "modules": "HISE 411, HISE 322",
+      "hours": 40.0
+    }
+  ],
+  "mentorship": [
+    {
+      "name": "Ntombiyoxolo Mqadi",
+      "hours": 10.0
+    },
+    {
+      "name": "Dawid Olivier",
+      "hours": 10.0
+    }
   ],
   "social": [
     "SASHT website management",
     "SASHT webinar coordination"
   ],
-  "ohs": [],
+  "ohs": [
+    ""
+  ],
   "norm_hours": 1728.0,
   "teaching_modules": [
-    "HISE322",
-    "HISE411"
+    {
+      "code": "HISE322",
+      "students": 40,
+      "hours": 117.92000000000002
+    },
+    {
+      "code": "HISE411",
+      "students": 35,
+      "hours": 117.07
+    },
+    {
+      "code": "ERTP 671",
+      "students": 1,
+      "hours": 25.0
+    },
+    {
+      "code": "LERP 671",
+      "students": 1,
+      "hours": 25.0
+    }
   ],
   "teaching_practice_windows": [
     "April",
     "July"
   ],
-  "people_management": [],
+  "people_management": [
+    ""
+  ],
   "ta_parse_report": {
     "1": {
       "blocks_detected": [
@@ -113,10 +164,11 @@
         "committee_roles",
         "module_table",
         "research_block",
+        "ror_teaching",
         "supervision",
         "teaching_practice_windows"
       ],
-      "rows_consumed": 19,
+      "rows_consumed": 21,
       "rows_unconsumed": 0,
       "unconsumed_examples": []
     },
@@ -129,6 +181,8 @@
     "4": {
       "blocks_detected": [
         "committee_roles",
+        "mentorship",
+        "module_leadership",
         "research_block"
       ],
       "rows_consumed": 18,
@@ -140,19 +194,19 @@
         "committee_roles",
         "ohs_block"
       ],
-      "rows_consumed": 0,
+      "rows_consumed": 1,
       "rows_unconsumed": 0,
       "unconsumed_examples": []
     },
     "6": {
       "blocks_detected": [],
-      "rows_consumed": 0,
+      "rows_consumed": 1,
       "rows_unconsumed": 0,
       "unconsumed_examples": []
     }
   },
-  "warnings": [],
-  "total_hours": 1667.99,
-  "staff_id": "20172672",
-  "cycle_year": 2025
+  "warnings": [
+    "Over-norm workload: +362.0 hours"
+  ],
+  "total_hours": 2089.99
 }

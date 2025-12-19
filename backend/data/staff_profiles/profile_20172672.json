@@ -1,0 +1,18 @@
+{
+  "staff_id": "20172672",
+  "full_name": "L Bunt",
+  "position": "Lecturer",
+  "campus": "Potchefstroom",
+  "faculty": "Education",
+  "school": "Social Sciences and Language Education",
+  "enrolled_cycles": [
+    {
+      "year": 2025,
+      "contract_path": "backend/data/contracts/contract_20172672_2025.json",
+      "expectations_path": "backend/data/staff_expectations/expectations_20172672_2025.json",
+      "enrolled_date": "2025-12-19"
+    }
+  ],
+  "created_date": "2025-12-19",
+  "last_updated": "2025-12-19"
+}

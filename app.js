@@ -40,6 +40,7 @@ let currentExpectations = [];
 let currentScanResults = [];
 let currentResolveItem = null;
 let currentScanTargetTaskId = null;
+let currentScanAbortController = null;
 
 // Scan panel DOM home (so we can move it inline under a month/KPA and restore safely)
 let scanPanelHome = null;
@@ -269,16 +270,16 @@ document.querySelectorAll(".tab").forEach(tab => {
    ENROLMENT FLOW (PRESERVED)
 ============================================================ */
 
-$("enrolBtn")?.addEventListener("click", async () => {
+async function enrolOrLoadProfile() {
   vampBusy("Registering your academic identity…");
 
   const profile = {
-    staff_id: $("staffId").value,
-    cycle_year: $("cycleYear").value,
-    name: $("name").value,
-    position: $("position").value,
-    faculty: $("faculty").value,
-    manager: $("manager").value
+    staff_id: $("staffId")?.value,
+    cycle_year: $("cycleYear")?.value,
+    name: $("name")?.value,
+    position: $("position")?.value,
+    faculty: $("faculty")?.value,
+    manager: $("manager")?.value
   };
 
   try {
@@ -307,7 +308,12 @@ $("enrolBtn")?.addEventListener("click", async () => {
     vampSpeak("Cannot reach the server. Please ensure it is running.");
     log("Enrolment error: " + e.message);
   }
-});
+}
+
+// Expose as a global for the inline fallback handler (and for debugging).
+window.enrolOrLoadProfile = enrolOrLoadProfile;
+
+$("enrolBtn")?.addEventListener("click", enrolOrLoadProfile);
 
 /* ============================================================
    TASK AGREEMENT IMPORT
@@ -362,6 +368,123 @@ $("taUploadBtn")?.addEventListener("click", async () => {
 });
 
 /* ============================================================
+   STATUS REFRESH — UPDATE PILLS/CHIPS WITHOUT FULL PAGE RELOAD
+============================================================ */
+
+$("refreshStatusBtn")?.addEventListener("click", refreshStatusIndicators);
+
+async function refreshStatusIndicators() {
+  const staffId = $("staffId")?.value?.trim();
+  const cycleYear = $("cycleYear")?.value?.trim();
+
+  if (!staffId || !cycleYear) {
+    vampSpeak("Enter your Staff ID and cycle year before refreshing status.");
+    return;
+  }
+
+  vampBusy("Refreshing system status…");
+  log("Refreshing UI status indicators");
+
+  try {
+    const [progressResult, expectationsResult] = await Promise.allSettled([
+      fetch(`/api/progress?staff_id=${staffId}&year=${cycleYear}`),
+      fetch(`/api/expectations?staff_id=${staffId}&year=${cycleYear}`)
+    ]);
+
+    let progressData = null;
+    if (progressResult.status === "fulfilled") {
+      if (progressResult.value.ok) {
+        progressData = await progressResult.value.json();
+        taskCompletionMap = progressData.task_completion || {};
+      } else if (progressResult.value.status === 404) {
+        taskCompletionMap = {};
+      } else {
+        const errorText = await progressResult.value.text();
+        throw new Error(errorText || `Progress refresh failed (${progressResult.value.status})`);
+      }
+    } else {
+      const reason = progressResult.reason?.message || progressResult.reason || "unknown error";
+      log(`Status refresh: progress fetch failed (${reason})`);
+    }
+
+    let expectationsData = null;
+    if (expectationsResult.status === "fulfilled") {
+      if (expectationsResult.value.ok) {
+        expectationsData = await expectationsResult.value.json();
+      } else if (expectationsResult.value.status === 404) {
+        currentExpectations = [];
+        renderMonthlyExpectations({}, []);
+        renderPAExpectationsTable([]);
+      } else {
+        const errorText = await expectationsResult.value.text();
+        throw new Error(errorText || `Expectations refresh failed (${expectationsResult.value.status})`);
+      }
+    } else {
+      const reason = expectationsResult.reason?.message || expectationsResult.reason || "unknown error";
+      log(`Status refresh: expectations fetch failed (${reason})`);
+    }
+
+    if (expectationsData) {
+      currentExpectations = expectationsData.tasks || expectationsData.expectations || [];
+      renderMonthlyExpectations(expectationsData.by_month || {}, currentExpectations);
+      renderPAExpectationsTable(currentExpectations);
+    }
+
+    await updateYearTimeline(progressData?.months_progress || null);
+
+    const expectationsLoaded = currentExpectations.length > 0;
+    const taImported = expectationsLoaded || Boolean(progressData?.progress?.total_tasks);
+    const profileLoaded = currentProfile
+      ? currentProfile.staff_id === staffId && String(currentProfile.cycle_year) === cycleYear
+      : (expectationsLoaded || taImported);
+
+    updateStatusChips({ profileLoaded, taImported, expectationsLoaded });
+    vampSpeak("Status refreshed.");
+  } catch (e) {
+    vampSpeak("Could not refresh status.");
+    log("Status refresh error: " + e.message);
+  }
+}
+
+function updateStatusChips({ profileLoaded, taImported, expectationsLoaded }) {
+  setChipState("chipProfile", "Profile", profileLoaded);
+  setChipState("chipTA", "TA", taImported);
+  setChipState("chipExp", "Expectations", expectationsLoaded);
+
+  setPillState("profilePill", "Profile loaded", "No profile loaded", profileLoaded);
+  setPillState("taPill", "TA imported", "No TA imported", taImported);
+
+  const stagePill = $("stagePill");
+  if (stagePill) {
+    if (expectationsLoaded) {
+      stagePill.textContent = "Stage: Expectations ready";
+    } else if (taImported) {
+      stagePill.textContent = "Stage: TA imported";
+    } else if (profileLoaded) {
+      stagePill.textContent = "Stage: Profile loaded";
+    } else {
+      stagePill.textContent = "Stage: Awaiting enrolment";
+    }
+  }
+}
+
+function setChipState(id, label, ok) {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = ok ? `${label} ✓` : `${label} ❌`;
+  el.classList.toggle("ok", ok);
+  el.classList.toggle("bad", !ok);
+}
+
+function setPillState(id, okText, badText, ok) {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = ok ? okText : badText;
+  el.classList.toggle("ok", ok);
+  el.classList.toggle("bad", !ok);
+}
+
+/* ============================================================
    EXPECTATIONS TAB — TABLE RENDERING
 ============================================================ */
 
@@ -369,12 +492,25 @@ $("taUploadBtn")?.addEventListener("click", async () => {
 let taskCompletionMap = {};
 
 async function loadExpectations() {
+  const staffId = $("staffId")?.value?.trim();
+  const cycleYear = $("cycleYear")?.value?.trim();
+  
+  if (!staffId || !cycleYear) {
+    log("Cannot load expectations: staff ID or cycle year not set");
+    return;
+  }
+  
   vampBusy("Loading expectations…");
   
   try {
-    const res = await fetch(`/api/expectations?staff_id=${$("staffId").value}&year=${$("cycleYear").value}`);
+    const res = await fetch(`/api/expectations?staff_id=${staffId}&year=${cycleYear}`);
     
-    if (!res.ok) throw new Error("Failed to load expectations");
+    if (!res.ok) {
+      if (res.status === 404) {
+        throw new Error("Expectations not found. Please import a Task Agreement.");
+      }
+      throw new Error(`Failed to load expectations (${res.status})`);
+    }
     
     const data = await res.json();
     console.log("Expectations data received:", data);
@@ -432,7 +568,7 @@ async function loadExpectations() {
     vampSpeak(`Loaded ${tasks.length} tasks across ${kpaCount} KPAs. ${completedCount} tasks completed.`);
     log(`Expectations loaded: ${tasks.length} tasks, ${kpaCount} KPAs, ${completedCount} completed`);
   } catch (e) {
-    vampSpeak("Could not load expectations. Import a Task Agreement first.");
+    vampSpeak(e.message || "Could not load expectations.");
     log("Expectations error: " + e.message);
     console.error("Expectations error:", e);
   }
@@ -453,23 +589,29 @@ async function loadProgress() {
 }
 
 // Update year timeline UI with per-month completion counts
-async function updateYearTimeline() {
+async function updateYearTimeline(prefetchedMonthsProgress = null) {
   const container = $("yearTimeline");
   const staffId = $("staffId").value;
   const year = $("cycleYear").value;
   if (!container || !staffId || !year) return;
 
   container.innerHTML = '';
-  let monthsData = null;
-  try {
-    const res = await fetch(`/api/progress?staff_id=${staffId}&year=${year}`);
-    if (res.ok) monthsData = await res.json();
-  } catch (e) {
-    console.warn('Year timeline fetch failed, falling back to per-month requests', e);
+  let monthsProgress = null;
+
+  if (prefetchedMonthsProgress) {
+    monthsProgress = prefetchedMonthsProgress;
+  } else {
+    let monthsData = null;
+    try {
+      const res = await fetch(`/api/progress?staff_id=${staffId}&year=${year}`);
+      if (res.ok) monthsData = await res.json();
+    } catch (e) {
+      console.warn('Year timeline fetch failed, falling back to per-month requests', e);
+    }
+    monthsProgress = monthsData?.months_progress || null;
   }
 
   const monthKeys = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
-  const monthsProgress = monthsData?.months_progress || null;
 
   // If we have aggregated months_progress, use it; otherwise fall back to per-month fetches
   const results = monthsProgress
@@ -549,14 +691,15 @@ function renderMonthlyExpectations(byMonth, allTasks) {
   const monthSelect = $("currentMonthSelect");
   if (!container || !monthSelect) return;
   
-  if (Object.keys(byMonth).length === 0) {
+  // Validate inputs
+  if (!byMonth || typeof byMonth !== 'object' || Object.keys(byMonth).length === 0) {
     container.innerHTML = '<div class="muted" style="text-align:center;padding:20px;">Import a Task Agreement to see monthly expectations.</div>';
     return;
   }
   
   // Store for later use
   window.currentByMonth = byMonth;
-  window.currentAllTasks = allTasks;
+  window.currentAllTasks = Array.isArray(allTasks) ? allTasks : [];
   
   // Initial render for current month
   renderMonthView(monthSelect.value);
@@ -582,7 +725,15 @@ function renderMonthView(monthKey) {
   
   container.innerHTML = "";
   
-  const tasks = window.currentByMonth[monthKey] || [];
+  let tasks = window.currentByMonth[monthKey] || [];
+  
+  // Handle both array format and object format with tasks property
+  if (!Array.isArray(tasks) && tasks.tasks) {
+    tasks = tasks.tasks;
+  }
+  if (!Array.isArray(tasks)) {
+    tasks = [];
+  }
   
   if (tasks.length === 0) {
     container.innerHTML = `<div class="muted" style="text-align:center;padding:20px;">No expectations for this month.</div>`;
@@ -748,7 +899,7 @@ function renderPAExpectationsTable(tasks) {
   
   tbody.innerHTML = "";
   
-  if (tasks.length === 0) {
+  if (!Array.isArray(tasks) || tasks.length === 0) {
     tbody.innerHTML = '<tr><td colspan="8" class="no-data">No expectations loaded. Import Task Agreement first.</td></tr>';
     return;
   }
@@ -920,6 +1071,9 @@ async function performScan(files, targetTaskId, userExplanation, isLocked) {
   vampBusy(`Scanning ${files.length} files…`);
   $("scanStatus").textContent = "Scanning…";
   scanLog(`Starting scan of ${files.length} files...`);
+
+  const abortController = new AbortController();
+  currentScanAbortController = abortController;
   
   const fd = new FormData();
   for (let i = 0; i < files.length; i++) {
@@ -945,9 +1099,9 @@ async function performScan(files, targetTaskId, userExplanation, isLocked) {
   try {
     const res = await fetch("/api/scan/upload", {
       method: "POST",
-      body: fd
+      body: fd,
+      signal: abortController.signal
     });
-    
     if (!res.ok) throw new Error("Scan failed");
     
     const data = await res.json();
@@ -989,12 +1143,54 @@ async function performScan(files, targetTaskId, userExplanation, isLocked) {
     restoreScanPanelHome({ hide: true });
     clearTargetedScanState();
   } catch (e) {
+    if (e.name === "AbortError") {
+      $("scanStatus").textContent = "Cancelled";
+      $("scanProgress").textContent = "—";
+      scanLog("Scan cancelled by user.");
+      log("Scan cancelled by user");
+      vampSpeak("Scan cancelled.");
+      return;
+    }
     vampSpeak("Scan failed. Please check the server logs.");
     $("scanStatus").textContent = "Error";
     scanLog(`Error: ${e.message}`);
     log("Scan error: " + e.message);
+  } finally {
+    if (currentScanAbortController === abortController) {
+      currentScanAbortController = null;
+    }
   }
-});
+}
+
+$("scanStopBtn")?.addEventListener("click", cancelActiveScan);
+
+function cancelActiveScan() {
+  const controller = currentScanAbortController;
+  const hasStream = !!eventSource;
+
+  if (!controller && !hasStream) {
+    vampSpeak("No scan is currently running.");
+    return;
+  }
+
+  const status = $("scanStatus");
+  if (status) status.textContent = "Cancelling…";
+  const progress = $("scanProgress");
+  if (progress) progress.textContent = "—";
+  scanLog("Cancelling scan…");
+
+  if (controller) {
+    controller.abort();
+  }
+
+  if (hasStream) {
+    try {
+      eventSource.close();
+    } catch (e) {}
+    eventSource = null;
+    setTimeout(() => connectEventStream(), 1500);
+  }
+}
 
 function renderScanResults(results) {
   const tbody = $("scanResultsTableBody");
@@ -2011,15 +2207,15 @@ function openLockExplanationModal(files, targetTaskId) {
   $("lockModalFileCount").textContent = `${files.length} file(s) selected`;
   $("lockModalMonth").textContent = monthText;
   $("lockExplanationText").value = "";
-  
-  modal.style.display = "flex";
+
+  modal.classList.add("active");
   $("lockExplanationText").focus();
 }
 
 function closeLockExplanationModal() {
   const modal = $("lockExplanationModal");
   if (modal) {
-    modal.style.display = "none";
+    modal.classList.remove("active");
   }
   pendingScanData = null;
 }
@@ -2084,6 +2280,7 @@ async function submitEnhancement() {
       body: JSON.stringify({
         evidence_id: currentEnhancingEvidence.evidence_id,
         staff_id: currentEnhancingEvidence.staff_id || $("staffInput")?.value,
+        year: $("cycleYear")?.value || new Date().getFullYear(),
         user_description: description,
         target_task_id: null // Optional: could allow re-targeting
       })

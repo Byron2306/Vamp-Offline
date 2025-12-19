@@ -1102,21 +1102,25 @@ def scan_upload():
                         brain_ctx = None
                 
                 # Map KPA name to KPA code (from brain first, else from Ollama classification)
-                kpa_map = {
-                    "teaching": "KPA1", "teaching & learning": "KPA1", "teaching and learning": "KPA1",
-                    "ohs": "KPA2", "occupational health": "KPA2", "occupational health & safety": "KPA2",
-                    "research": "KPA3", "innovation": "KPA3", "research & innovation": "KPA3",
-                    "leadership": "KPA4", "academic leadership": "KPA4", "administration": "KPA4",
-                    "social": "KPA5", "community": "KPA5", "social responsiveness": "KPA5", "engagement": "KPA5"
-                }
+                # Use exact matching to avoid false positives (e.g., "teaching" in "teaching practice")
                 kpa_code = None
                 if brain_ctx and brain_ctx.get("primary_kpa_code"):
                     kpa_code = str(brain_ctx.get("primary_kpa_code"))
                 if not kpa_code:
+                    kpa_lower = classification.get("kpa", "").lower().strip()
+                    
+                    # Exact match prioritized by specificity (longest first)
+                    kpa_patterns = [
+                        (["teaching & learning", "teaching and learning"], "KPA1"),
+                        (["occupational health & safety", "occupational health and safety", "ohs"], "KPA2"),
+                        (["research, innovation & creative outputs", "research & innovation", "research and innovation", "research"], "KPA3"),
+                        (["academic leadership & administration", "leadership & administration", "academic leadership", "leadership"], "KPA4"),
+                        (["social responsiveness", "community engagement", "social responsibility"], "KPA5"),
+                    ]
+                    
                     kpa_code = "KPA1"  # default
-                    kpa_lower = classification.get("kpa", "").lower()
-                    for key, code in kpa_map.items():
-                        if key in kpa_lower:
+                    for patterns, code in kpa_patterns:
+                        if kpa_lower in patterns:
                             kpa_code = code
                             break
                 
@@ -1454,7 +1458,8 @@ def classify_with_ollama_raw(prompt: str) -> Dict:
 
 def classify_with_ollama(filename: str, content: str) -> Dict:
     """
-    Use Ollama to classify evidence into KPAs
+    Use Ollama to classify evidence into KPAs.
+    Uses prioritized keyword matching to avoid misclassification.
     """
     try:
         # Simple keyword-based classification as fallback
@@ -1462,25 +1467,30 @@ def classify_with_ollama(filename: str, content: str) -> Dict:
         filename_lower = filename.lower()
         combined = content_lower + " " + filename_lower
         
-        # Keyword matching for quick classification
+        # Keyword matching with priority order (most specific first)
         kpa = "Teaching & Learning"  # Default
         confidence = 0.5
         
-        if any(word in combined for word in ["research", "publication", "journal", "conference", "study"]):
+        # Priority 1: Research (high signal words)
+        if any(word in combined for word in ["publication", "journal article", "conference paper", "doi", "research project", "manuscript"]):
             kpa = "Research"
-            confidence = 0.7
-        elif any(word in combined for word in ["community", "engagement", "outreach", "service"]):
+            confidence = 0.8
+        # Priority 2: Community/Social (specific terms)
+        elif any(word in combined for word in ["community engagement", "outreach program", "social responsibility", "public service"]):
             kpa = "Community Engagement"
-            confidence = 0.7
-        elif any(word in combined for word in ["teach", "lecture", "student", "curriculum", "module"]):
+            confidence = 0.75
+        # Priority 3: Leadership (committee/admin)
+        elif any(word in combined for word in ["committee meeting", "leadership role", "chair", "management position"]):
+            kpa = "Leadership & Management"
+            confidence = 0.75
+        # Priority 4: Teaching (only if clear teaching context)
+        elif any(word in combined for word in ["lecture", "tutorial", "student assessment", "curriculum", "teaching module"]):
             kpa = "Teaching & Learning"
             confidence = 0.7
-        elif any(word in combined for word in ["innovation", "impact", "technology", "development"]):
-            kpa = "Innovation & Impact"
-            confidence = 0.7
-        elif any(word in combined for word in ["leadership", "management", "committee", "chair"]):
-            kpa = "Leadership & Management"
-            confidence = 0.7
+        # Broader research terms (lower priority)
+        elif any(word in combined for word in ["research", "study", "analysis"]):
+            kpa = "Research"
+            confidence = 0.6
         
         # Try Ollama with short timeout as enhancement
         try:
@@ -1622,11 +1632,12 @@ def enhance_evidence():
         data = request.json
         evidence_id = data.get('evidence_id')
         staff_id = data.get('staff_id')
+        year = data.get('year')
         user_description = data.get('user_description', '').strip()
         target_task_id = data.get('target_task_id')  # Optional
         
-        if not evidence_id or not staff_id:
-            return jsonify({"error": "Missing evidence_id or staff_id"}), 400
+        if not evidence_id or not staff_id or not year:
+            return jsonify({"error": "Missing evidence_id, staff_id, or year"}), 400
         
         if not user_description:
             return jsonify({"error": "User description is required"}), 400
@@ -1641,11 +1652,13 @@ def enhance_evidence():
         store = ProgressStore()
         
         # Get evidence metadata
-        evidence_rows = store.list_evidence(staff_id=staff_id)
+        evidence_rows = store.list_evidence(staff_id=staff_id, year=int(year))
         evidence_item = None
         for row in evidence_rows:
-            if row.get("evidence_id") == evidence_id:
-                evidence_item = row
+            # Convert sqlite3.Row to dict
+            row_dict = dict(row)
+            if row_dict.get("evidence_id") == evidence_id:
+                evidence_item = row_dict
                 break
         
         if not evidence_item:
@@ -1653,9 +1666,17 @@ def enhance_evidence():
         
         # Get original values
         old_kpa = evidence_item.get("kpa_code", "Unknown")
-        old_confidence = float(evidence_item.get("meta", {}).get("confidence", 0.0))
+        # Parse metadata JSON if it's a string
+        meta = evidence_item.get("meta", {})
+        if isinstance(meta, str):
+            import json
+            try:
+                meta = json.loads(meta)
+            except:
+                meta = {}
+        old_confidence = float(meta.get("confidence", 0.0))
         file_path = evidence_item.get("file_path", "")
-        filename = evidence_item.get("meta", {}).get("filename", "")
+        filename = meta.get("filename", "")
         
         # Extract text from file
         file_text = ""
