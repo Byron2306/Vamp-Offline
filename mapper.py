@@ -41,6 +41,14 @@ def ensure_tasks(
     expectations: Optional[Dict[str, Any]] = None,
 ) -> int:
     """Ensure a staff/year task catalog exists in sqlite; return count inserted."""
+    # Clear existing tasks for this staff/year to prevent duplication
+    try:
+        deleted = store.clear_tasks_for_staff_year(staff_id, int(year))
+        if deleted > 0:
+            print(f"Cleared {deleted} existing tasks for staff {staff_id} year {year}")
+    except Exception as e:
+        print(f"Warning: could not clear existing tasks: {e}")
+    
     if expectations:
         rows = tasks_from_expectations(staff_id, int(year), expectations)
         if rows:

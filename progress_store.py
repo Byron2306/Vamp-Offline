@@ -127,6 +127,24 @@ class ProgressStore:
     # ----------------------------
     # Task management
     # ----------------------------
+    def clear_tasks_for_staff_year(self, staff_id: str, year: int) -> int:
+        """Delete all tasks for a specific staff/year (based on window_start year)."""
+        with self._lock:
+            con = self._connect()
+            try:
+                cur = con.cursor()
+                # Delete tasks based on window_start year prefix
+                year_prefix = f"{int(year):04d}-"
+                cur.execute(
+                    "DELETE FROM tasks WHERE window_start LIKE ?",
+                    (year_prefix + "%",)
+                )
+                deleted = cur.rowcount if cur.rowcount is not None else 0
+                con.commit()
+                return deleted
+            finally:
+                con.close()
+    
     def upsert_tasks(self, tasks: Iterable[TaskRow]) -> int:
         """Insert tasks; ignore if already present."""
         rows = list(tasks)

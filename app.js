@@ -41,6 +41,7 @@ let currentScanResults = [];
 let currentResolveItem = null;
 let currentScanTargetTaskId = null;
 let currentScanAbortController = null;
+let currentAIGuidanceTask = null; // Store the task for AI guidance modal
 
 // Scan panel DOM home (so we can move it inline under a month/KPA and restore safely)
 let scanPanelHome = null;
@@ -237,7 +238,7 @@ if (vampInput) {
 ============================================================ */
 
 function collectContext() {
-  return {
+  const context = {
     staff_id: $("staffId")?.value || null,
     cycle_year: $("cycleYear")?.value || null,
     stage: $("stagePill")?.textContent || null,
@@ -246,6 +247,23 @@ function collectContext() {
     expectations_count: currentExpectations.length,
     scan_results_count: currentScanResults.length
   };
+  
+  // Include current task info if AI guidance modal is active
+  if (currentAIGuidanceTask) {
+    context.task = {
+      id: currentAIGuidanceTask.id || currentAIGuidanceTask.task_id,
+      title: currentAIGuidanceTask.title || currentAIGuidanceTask.task || currentAIGuidanceTask.output,
+      kpa: currentAIGuidanceTask.kpa_name || currentAIGuidanceTask.kpa || currentAIGuidanceTask.kpa_code,
+      goal: currentAIGuidanceTask.goal || currentAIGuidanceTask.outputs || currentAIGuidanceTask.what_to_do,
+      cadence: currentAIGuidanceTask.cadence,
+      minimum_count: currentAIGuidanceTask.minimum_count || currentAIGuidanceTask.min_required,
+      stretch_count: currentAIGuidanceTask.stretch_count || currentAIGuidanceTask.stretch_target,
+      evidence_hints: currentAIGuidanceTask.evidence_hints,
+      evidence_required: currentAIGuidanceTask.evidence_required
+    };
+  }
+  
+  return context;
 }
 
 /* ============================================================
@@ -518,6 +536,9 @@ async function loadExpectations() {
     // Use tasks array from the response
     const tasks = data.tasks || data.expectations || [];
     currentExpectations = tasks;
+    
+    // Also store by_month for task lookup
+    window.expectationsData = data;
 
     // Normalize per-month tasks to prefer hashed DB task IDs when provided
     try {
@@ -1462,27 +1483,78 @@ function renderPAReportTable(paData) {
 
 function openAIGuidance(taskId) {
   const modal = $("aiGuidanceModal");
-  const task = currentExpectations.find(e => e.id === taskId || e.task === taskId);
+  
+  if (!modal) {
+    vampSpeak("Error: AI guidance modal not found.");
+    rSearch strategy: try multiple sources since tasks can have different IDs
+  let task = null;
+  
+  // 1. Try current month view first (most likely to match)
+  if (window.currentByMonth) {
+    const monthSelect = $("currentMonthSelect");
+    const currentMonth = monthSelect ? monthSelect.value : null;
+    if (currentMonth) {
+      const monthData = window.currentByMonth[currentMonth];
+      const monthTasks = Array.isArray(monthData) ? monthData : (monthData?.tasks || []);
+      task = monthTasks.find(t => t.id === taskId || t.task_id === taskId);
+    }
+  }
+  
+  // 2. Try base expectations by ID
+  if (!task) {
+    task = currentExpectations.find(e => e.id === taskId || e.task_id === taskId || e.task === taskId);
+  }
+  
+  // 3. Try finding by hashed_ids in base tasks
+  if (!task && currentExpectations) {
+    task = currentExpectations.find(e => {
+      if (e.hashed_ids && typeof e.hashed_ids === 'object') {
+        return Object.values(e.hashed_ids).includes(taskId);
+      }
+      return false;
+    });
+  }
+  
+  // 4. Search all months in by_month data
+  if (!task && window.expectationsData && window.expectationsData.by_month) {
+    for (const [monthKey, monthData] of Object.entries(window.expectationsData.by_month)) {
+      const monthTasks = Array.isArray(monthData) ? monthData : (monthData?.tasks || []);
+      task = monthTasks.find(t => t.id === taskId || t.task_id === taskId);
+      if (task) break;
+      if (monthTask) {
+        task = monthTask;
+      }
+    }
+  }
   
   if (!task) {
     vampSpeak("Could not find that task.");
     return;
   }
   
+  // Store the task globally so it can be sent with the AI request
+  currentAIGuidanceTask = task;
+  
   const contextDiv = $("aiTaskContext");
   if (contextDiv) {
+    // Handle both PA expectations format and monthly task format
+    const taskTitle = task.title || task.task || task.output || "Unknown task";
+    const kpaInfo = task.kpa_name || task.kpa || task.kpa_code || "Unknown KPA";
+    const goalInfo = task.goal || task.outputs || task.what_to_do || "";
+    const weightInfo = task.weight !== undefined ? `${task.weight}%` : "N/A";
+    
     contextDiv.innerHTML = `
-      <strong>${task.task}</strong><br/>
-      KPA: ${task.kpa}<br/>
-      Goal: ${task.goal}<br/>
-      Weight: ${task.weight}%
+      <strong>${taskTitle}</strong><br/>
+      KPA: ${kpaInfo}<br/>
+      ${goalInfo ? `Goal: ${goalInfo}<br/>` : ''}
+      ${task.weight !== undefined ? `Weight: ${weightInfo}` : ''}
     `;
   }
   
   modal?.classList.add("active");
   $("aiGuidanceInput")?.focus();
   
-  log(`Opened AI guidance for: ${task.task}`);
+  log(`Opened AI guidance for: ${task.title || task.task || taskId}`);
 }
 
 function openResolveModal(resultIndex) {
@@ -1504,6 +1576,11 @@ function openResolveModal(resultIndex) {
 function closeModal(modalId) {
   const modal = $(modalId);
   modal?.classList.remove("active");
+  
+  // Clear AI guidance task when AI modal closes
+  if (modalId === "aiGuidanceModal") {
+    currentAIGuidanceTask = null;
+  }
 }
 
 // AI Guidance submission

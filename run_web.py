@@ -1982,12 +1982,29 @@ def ai_guidance():
         question = data.get('question')
         context = data.get('context', {})
         
+        print("=" * 60)
+        print("AI GUIDANCE REQUEST:")
+        print(f"Question: {question}")
+        print(f"Context received: {json.dumps(context, indent=2)}")
+        
+        task_info = context.get('task')
+        if task_info:
+            print(f"Task ID: {task_info.get('id')}")
+            print(f"Task Title: {task_info.get('title')}")
+            print(f"Task KPA: {task_info.get('kpa')}")
+        else:
+            print("⚠️ WARNING: No task information in context!")
+        print("=" * 60)
+        
         # Query Ollama
         guidance = query_ollama(f"Provide guidance: {question}", context)
         
         return jsonify({"guidance": guidance})
     
     except Exception as e:
+        print(f"❌ AI GUIDANCE ERROR: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 # ============================================================
