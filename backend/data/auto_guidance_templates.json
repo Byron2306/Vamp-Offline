@@ -1,0 +1,1635 @@
+[
+  {
+    "template_id": "kpa_KPA1_summary",
+    "scope": {
+      "kpa": "Teaching and Learning"
+    },
+    "priority": 500,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "For Teaching and Learning tasks like {title}, prefer artefacts that directly evidence the outcome: primary artefacts (documents, datasets, or outputs) plus supporting materials. Aim for {evidence_count} clear items.",
+      "detailed": "Teaching and Learning guidance for {title} ({month}): upload primary artefacts that directly demonstrate the outcome (e.g., curriculum documents, assessment rubrics, reports) and up to {evidence_count} supporting items such as emails, minutes, or reflections. Label each file with date and a 1-line explanation."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is kpa_KPA1_summary.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "kpa_KPA2_summary",
+    "scope": {
+      "kpa": "Occupational Health & Safety"
+    },
+    "priority": 500,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "For Occupational Health & Safety tasks like {title}, prefer artefacts that directly evidence the outcome: primary artefacts (documents, datasets, or outputs) plus supporting materials. Aim for {evidence_count} clear items.",
+      "detailed": "Occupational Health & Safety guidance for {title} ({month}): upload primary artefacts that directly demonstrate the outcome (e.g., curriculum documents, assessment rubrics, reports) and up to {evidence_count} supporting items such as emails, minutes, or reflections. Label each file with date and a 1-line explanation."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is kpa_KPA2_summary.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "kpa_KPA3_summary",
+    "scope": {
+      "kpa": "Research, Innovation & Creative Outputs"
+    },
+    "priority": 500,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "For Research, Innovation & Creative Outputs tasks like {title}, prefer artefacts that directly evidence the outcome: primary artefacts (documents, datasets, or outputs) plus supporting materials. Aim for {evidence_count} clear items.",
+      "detailed": "Research, Innovation & Creative Outputs guidance for {title} ({month}): upload primary artefacts that directly demonstrate the outcome (e.g., curriculum documents, assessment rubrics, reports) and up to {evidence_count} supporting items such as emails, minutes, or reflections. Label each file with date and a 1-line explanation."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is kpa_KPA3_summary.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "kpa_KPA4_summary",
+    "scope": {
+      "kpa": "Academic Leadership & Administration"
+    },
+    "priority": 500,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "For Academic Leadership & Administration tasks like {title}, prefer artefacts that directly evidence the outcome: primary artefacts (documents, datasets, or outputs) plus supporting materials. Aim for {evidence_count} clear items.",
+      "detailed": "Academic Leadership & Administration guidance for {title} ({month}): upload primary artefacts that directly demonstrate the outcome (e.g., curriculum documents, assessment rubrics, reports) and up to {evidence_count} supporting items such as emails, minutes, or reflections. Label each file with date and a 1-line explanation."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is kpa_KPA4_summary.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "kpa_KPA5_summary",
+    "scope": {
+      "kpa": "Social Responsiveness"
+    },
+    "priority": 500,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "For Social Responsiveness tasks like {title}, prefer artefacts that directly evidence the outcome: primary artefacts (documents, datasets, or outputs) plus supporting materials. Aim for {evidence_count} clear items.",
+      "detailed": "Social Responsiveness guidance for {title} ({month}): upload primary artefacts that directly demonstrate the outcome (e.g., curriculum documents, assessment rubrics, reports) and up to {evidence_count} supporting items such as emails, minutes, or reflections. Label each file with date and a 1-line explanation."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is kpa_KPA5_summary.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_001_guidance",
+    "scope": {
+      "base_task_id": "task_001"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Jan: Module planning & curriculum design - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students): provide 2 primary artefacts (e.g., planning, curriculum, lesson plan, learning outcomes, design) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Jan: Module planning & curriculum design - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 2 primary artefacts and up to 3 supporting items. Primary artefacts should be: Output evidence: Lesson planning, assessment design, learning outcomes | Modules: HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; planning; curriculum. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_001_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_002_guidance",
+    "scope": {
+      "base_task_id": "task_002"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Jan: eFundi LMS setup & content upload - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students): provide 2 primary artefacts (e.g., efundi, lms, blackboard, upload, resources) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Jan: eFundi LMS setup & content upload - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 2 primary artefacts and up to 3 supporting items. Primary artefacts should be: Output evidence: eFundi configuration, content upload, resource preparation | Modules: HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; efundi; lms. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_002_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_003_guidance",
+    "scope": {
+      "base_task_id": "task_003"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Jan: Study guides & reading lists finalization - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students): provide 1 primary artefact (e.g., study guide, reading list, materials, textbook, resources) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Jan: Study guides & reading lists finalization - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Study guide updates, reading list compilation, material preparation | Modules: HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; study guide; reading list. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_003_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_004_guidance",
+    "scope": {
+      "base_task_id": "task_004"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Jan: Assessment planning & rubric development - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students): provide 1 primary artefact (e.g., assessment, rubric, marking, criteria, planning) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Jan: Assessment planning & rubric development - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Assessment calendar, rubrics, marking criteria | Modules: HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; assessment; rubric. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_004_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_005_guidance",
+    "scope": {
+      "base_task_id": "task_005"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Semester 1 Start: HISE411 (35 students): provide 3 primary artefacts (e.g., lecture, assessment, efundi, lms, class) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Semester 1 Start: HISE411 (35 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 3 primary artefacts and up to 5 supporting items. Primary artefacts should be: Output evidence: Orientation week & student onboarding | First lectures | Class lists & student consultation setup | Modules: HISE411 (35 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_005_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_006_guidance",
+    "scope": {
+      "base_task_id": "task_006"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Semester 1 Teaching: HISE411 (35 students): provide 3 primary artefacts (e.g., lecture, assessment, efundi, lms, class) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Semester 1 Teaching: HISE411 (35 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 3 primary artefacts and up to 5 supporting items. Primary artefacts should be: Output evidence: Regular lectures & tutorials | Formative assessments & feedback | Student consultations | Modules: HISE411 (35 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_006_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_007_guidance",
+    "scope": {
+      "base_task_id": "task_007"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Semester 1 Mid-term: HISE411 (35 students): provide 3 primary artefacts (e.g., lecture, assessment, efundi, lms, class) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Semester 1 Mid-term: HISE411 (35 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 3 primary artefacts and up to 5 supporting items. Primary artefacts should be: Output evidence: Mid-term assessments & tests | Student feedback sessions | Remedial interventions | Modules: HISE411 (35 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_007_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_008_guidance",
+    "scope": {
+      "base_task_id": "task_008"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Semester 1 Completion: HISE411 (35 students): provide 3 primary artefacts (e.g., lecture, assessment, efundi, lms, class) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Semester 1 Completion: HISE411 (35 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 3 primary artefacts and up to 5 supporting items. Primary artefacts should be: Output evidence: Final lectures & exam prep | Semester tests & assignments | Exam prep workshops | Modules: HISE411 (35 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_008_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_009_guidance",
+    "scope": {
+      "base_task_id": "task_009"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Semester 1 Exams: HISE411 (35 students): provide 2 primary artefacts (e.g., lecture, assessment, efundi, lms, class) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Semester 1 Exams: HISE411 (35 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 2 primary artefacts and up to 3 supporting items. Primary artefacts should be: Output evidence: Exam invigilation | Exam marking & moderation | Grade submission & finalization | Modules: HISE411 (35 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_009_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_010_guidance",
+    "scope": {
+      "base_task_id": "task_010"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Mid-Year Break: HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students): provide 2 primary artefacts (e.g., lecture, assessment, efundi, lms, class) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Mid-Year Break: HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 2 primary artefacts and up to 3 supporting items. Primary artefacts should be: Output evidence: Semester 2 planning & prep | Module revisions & updates | Research time allocation | Modules: HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_010_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_011_guidance",
+    "scope": {
+      "base_task_id": "task_011"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Semester 2 Start: HISE322 (40 students): provide 3 primary artefacts (e.g., lecture, assessment, efundi, lms, class) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Semester 2 Start: HISE322 (40 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 3 primary artefacts and up to 5 supporting items. Primary artefacts should be: Output evidence: Welcome back sessions | Semester 2 lectures begin | Assessment schedules distribution | Modules: HISE322 (40 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_011_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_012_guidance",
+    "scope": {
+      "base_task_id": "task_012"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Semester 2 Teaching: HISE322 (40 students): provide 3 primary artefacts (e.g., lecture, assessment, efundi, lms, class) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Semester 2 Teaching: HISE322 (40 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 3 primary artefacts and up to 5 supporting items. Primary artefacts should be: Output evidence: Regular lectures & tutorials | Formative assessments | Student consultations | Modules: HISE322 (40 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_012_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_013_guidance",
+    "scope": {
+      "base_task_id": "task_013"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Semester 2 Mid-term: HISE322 (40 students): provide 3 primary artefacts (e.g., lecture, assessment, efundi, lms, class) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Semester 2 Mid-term: HISE322 (40 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 3 primary artefacts and up to 5 supporting items. Primary artefacts should be: Output evidence: Mid-term assessments | Student feedback & interventions | Remedial support | Modules: HISE322 (40 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_013_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_014_guidance",
+    "scope": {
+      "base_task_id": "task_014"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Semester 2 Completion: HISE322 (40 students): provide 3 primary artefacts (e.g., lecture, assessment, efundi, lms, class) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Semester 2 Completion: HISE322 (40 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 3 primary artefacts and up to 5 supporting items. Primary artefacts should be: Output evidence: Final lectures & reviews | Semester tests | Exam prep workshops | Modules: HISE322 (40 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_014_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_015_guidance",
+    "scope": {
+      "base_task_id": "task_015"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Year-End Exams: HISE322 (40 students): provide 2 primary artefacts (e.g., lecture, assessment, efundi, lms, class) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Year-End Exams: HISE322 (40 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 2 primary artefacts and up to 3 supporting items. Primary artefacts should be: Output evidence: Exam invigilation | Final marking & moderation | Grade finalization | Modules: HISE322 (40 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; lecture; assessment. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_015_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_016_guidance",
+    "scope": {
+      "base_task_id": "task_016"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Semester 1 marks submission deadline - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students): provide 1 primary artefact (e.g., marks, gradebook, submission, assessment, semester 1) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Semester 1 marks submission deadline - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 1 supporting items. Primary artefacts should be: Output evidence: Semester 1 assessment completion for HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; marks; gradebook. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_016_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_017_guidance",
+    "scope": {
+      "base_task_id": "task_017"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Year-end marks and moderation - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students): provide 1 primary artefact (e.g., moderation, marks, exam, final, year-end) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Year-end marks and moderation - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 1 supporting items. Primary artefacts should be: Output evidence: Year-end assessment completion and moderation for HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; moderation; marks. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_017_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_018_guidance",
+    "scope": {
+      "base_task_id": "task_018"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Module quality assurance - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students): provide 2 primary artefacts (e.g., moderation, peer review, quality, evaluation, HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Module quality assurance - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 2 primary artefacts and up to 4 supporting items. Primary artefacts should be: Output evidence: Module evaluation and improvement for HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students); lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; moderation; peer review. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_018_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_019_guidance",
+    "scope": {
+      "base_task_id": "task_019"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Teaching Practice Assessment - April: provide 1 primary artefact (e.g., teaching practice, wil, work integrated learning, assessment, visit) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Teaching Practice Assessment - April\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Teaching practice supervision for April; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; teaching practice; wil. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_019_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_020_guidance",
+    "scope": {
+      "base_task_id": "task_020"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Teaching Practice Assessment - July: provide 1 primary artefact (e.g., teaching practice, wil, work integrated learning, assessment, visit) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Teaching Practice Assessment - July\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Teaching practice supervision for July; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; teaching practice; wil. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_020_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_021_guidance",
+    "scope": {
+      "base_task_id": "task_021"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for ROR Preparation: Orientation Programme: provide 1 primary artefact (e.g., ror, reception, orientation, registration, presentation) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: ROR Preparation: Orientation Programme\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: ROR preparation: Presentation: 1 hour per presentation times  number of presentations divided by ; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; presentation slides; preparation notes. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_021_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_022_guidance",
+    "scope": {
+      "base_task_id": "task_022"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for ROR Event: Orientation Programme Delivery: provide 1 primary artefact (e.g., ror, reception, orientation, registration, presentation) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: ROR Event: Orientation Programme Delivery\nKPA: Teaching and Learning\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: ROR event: Presentation: 1 hour per presentation times  number of presentations divided by ; lesson plan / teaching plan; lecture slides / notes; LMS (eFundi) screenshots or exports; assessment brief / rubric; mark sheet / gradebook export; moderation report / internal moderation evidence; student feedback / reflection; attendance register; presentation evidence. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_022_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_023_guidance",
+    "scope": {
+      "base_task_id": "task_023"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for OHS compliance check: provide 1 primary artefact (e.g., ohs, safety, compliance, training, popia) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: OHS compliance check\nKPA: Occupational Health & Safety\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 1 supporting items. Primary artefacts should be: OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia; dalro. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_023_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_024_guidance",
+    "scope": {
+      "base_task_id": "task_024"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for OHS compliance check: provide 1 primary artefact (e.g., ohs, safety, compliance, training, popia) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: OHS compliance check\nKPA: Occupational Health & Safety\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 1 supporting items. Primary artefacts should be: OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia; dalro. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_024_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_025_guidance",
+    "scope": {
+      "base_task_id": "task_025"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for OHS compliance check: provide 1 primary artefact (e.g., ohs, safety, compliance, training, popia) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: OHS compliance check\nKPA: Occupational Health & Safety\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 1 supporting items. Primary artefacts should be: OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia; dalro. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_025_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_026_guidance",
+    "scope": {
+      "base_task_id": "task_026"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for OHS compliance check: provide 1 primary artefact (e.g., ohs, safety, compliance, training, popia) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: OHS compliance check\nKPA: Occupational Health & Safety\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 1 supporting items. Primary artefacts should be: OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia; dalro. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_026_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_027_guidance",
+    "scope": {
+      "base_task_id": "task_027"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Research Project: Level Up Learning: provide 1 primary artefact (e.g., research, project, progress, data, analysis) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Research Project: Level Up Learning\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; research notes; data; draft. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_027_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_028_guidance",
+    "scope": {
+      "base_task_id": "task_028"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Research Project: Game-Based Learning in History Education: provide 1 primary artefact (e.g., research, project, progress, data, analysis) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Research Project: Game-Based Learning in History Education\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Game-Based Learning in History Education: Insights from “Dogs of War”; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; research notes; data; draft. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_028_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_029_guidance",
+    "scope": {
+      "base_task_id": "task_029"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Research Project: Revitalizing Classrooms: provide 1 primary artefact (e.g., research, project, progress, data, analysis) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Research Project: Revitalizing Classrooms\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; research notes; data; draft. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_029_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_030_guidance",
+    "scope": {
+      "base_task_id": "task_030"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Research Project: Prosper GREAT project: provide 1 primary artefact (e.g., research, project, progress, data, analysis) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Research Project: Prosper GREAT project\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Prosper GREAT project; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; research notes; data; draft. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_030_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_031_guidance",
+    "scope": {
+      "base_task_id": "task_031"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Research Project: Citesaga project, Renewable Rangers project: provide 1 primary artefact (e.g., research, project, progress, data, analysis) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Research Project: Citesaga project, Renewable Rangers project\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Citesaga project, Renewable Rangers project; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; research notes; data; draft. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_031_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_032_guidance",
+    "scope": {
+      "base_task_id": "task_032"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Research Project: Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): provide 1 primary artefact (e.g., research, project, progress, data, analysis) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Research Project: Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR)\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL); manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; research notes; data; draft. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_032_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_033_guidance",
+    "scope": {
+      "base_task_id": "task_033"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Conference: ECGBL: provide 1 primary artefact (e.g., conference, presentation, submission, acceptance, ecgbl) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Conference: ECGBL\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: ECGBL; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; abstract; full paper; submission confirmation. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_033_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_034_guidance",
+    "scope": {
+      "base_task_id": "task_034"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Publication: Play with purpose: provide 1 primary artefact (e.g., publication, manuscript, book, chapter, draft) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Publication: Play with purpose\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; manuscript draft; peer review comments; revisions. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_034_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_035_guidance",
+    "scope": {
+      "base_task_id": "task_035"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Honours Supervision: ERTP/LERP Proposals: provide 2 primary artefacts (e.g., ertp, lerp, honours, supervision, feedback) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Honours Supervision: ERTP/LERP Proposals\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 2 primary artefacts and up to 4 supporting items. Primary artefacts should be: Output evidence: ERTP/LERP Research proposals (2 assignments) @ 30min (0,5 hours) per student 2; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; supervision log; feedback comments; marked assignments. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_035_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_036_guidance",
+    "scope": {
+      "base_task_id": "task_036"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Honours Supervision: ERTP/LERP Reports: provide 2 primary artefacts (e.g., ertp, lerp, honours, supervision, feedback) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Honours Supervision: ERTP/LERP Reports\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 2 primary artefacts and up to 4 supporting items. Primary artefacts should be: Output evidence: ERTP/LERP Research reports @ 2 hours per student 2; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; supervision log; feedback comments; marked assignments. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_036_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_037_guidance",
+    "scope": {
+      "base_task_id": "task_037"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Research Leadership: SDL: provide 1 primary artefact (e.g., leadership, sdl, research entity, coordination, sdl) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Research Leadership: SDL\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: SDL; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; meeting minutes; coordination emails; reports. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_037_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_038_guidance",
+    "scope": {
+      "base_task_id": "task_038"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Research Leadership: Play-based SDL sub area leader: provide 1 primary artefact (e.g., leadership, sdl, research entity, coordination, play-based sdl sub area leader) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Research Leadership: Play-based SDL sub area leader\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Play-based SDL sub area leader; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; meeting minutes; coordination emails; reports. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_038_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_039_guidance",
+    "scope": {
+      "base_task_id": "task_039"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Research Professional Development: provide 1 primary artefact (e.g., workshop, colloquium, writing school, training, professional development) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Research Professional Development\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 3 supporting items. Primary artefacts should be: Output evidence: Attendance of research colloquims, writing schools, workshops (eg. Ethics, Integrity, Turnitin): Maximum of 60 hours; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; attendance certificate; registration confirmation; workshop materials. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_039_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_040_guidance",
+    "scope": {
+      "base_task_id": "task_040"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for NRF grant application / Rating submission: provide 1 primary artefact (e.g., nrf, grant, rating, application, submission) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: NRF grant application / Rating submission\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: NRF funding application or rating improvement; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; nrf; grant; rating. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_040_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_041_guidance",
+    "scope": {
+      "base_task_id": "task_041"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Mid-year research output (publication/conference): provide 1 primary artefact (e.g., publication, conference, acceptance, submission, doi) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Mid-year research output (publication/conference)\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Research publication submission or conference acceptance; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; publication; conference; acceptance. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_041_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_042_guidance",
+    "scope": {
+      "base_task_id": "task_042"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Year-end research output (accredited publication): provide 1 primary artefact (e.g., publication, accepted, doi, journal, accredited) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Year-end research output (accredited publication)\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Accredited research publication for subsidy purposes; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; publication; accepted; doi. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_042_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_043_guidance",
+    "scope": {
+      "base_task_id": "task_043"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Postgraduate supervision meetings & progress tracking: provide 4 primary artefacts (e.g., supervision, postgraduate, masters, phd, meeting) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Postgraduate supervision meetings & progress tracking\nKPA: Research, Innovation & Creative Outputs\nMonth: {{month}}\nRequired: Provide 4 primary artefacts and up to 8 supporting items. Primary artefacts should be: Output evidence: Students: C. Choba | S. Manana | V van Rensberg | P. Motsosi; manuscript draft / tracked changes; submission confirmation / email; ethics application / approval; grant application pack; conference submission / acceptance; research report / progress log; supervision; postgraduate; masters. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_043_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_044_guidance",
+    "scope": {
+      "base_task_id": "task_044"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: SDL scientific committee 5: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, sdl scientific committee 5) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: SDL scientific committee 5\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: SDL scientific committee 5; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_044_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_045_guidance",
+    "scope": {
+      "base_task_id": "task_045"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: Faculty Board: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, faculty board) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: Faculty Board\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Faculty Board: 12 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_045_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_046_guidance",
+    "scope": {
+      "base_task_id": "task_046"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: Teaching and Learning Committee: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, teaching and learning committee) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: Teaching and Learning Committee\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Teaching and Learning Committee: 18 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_046_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_047_guidance",
+    "scope": {
+      "base_task_id": "task_047"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: Scientific Committee meetings: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, scientific committee meetings) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: Scientific Committee meetings\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Scientific Committee meetings: 55 hours per entity; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_047_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_048_guidance",
+    "scope": {
+      "base_task_id": "task_048"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: Entity Exco meetings: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, entity exco meetings) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: Entity Exco meetings\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Entity Exco meetings: 30 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_048_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_049_guidance",
+    "scope": {
+      "base_task_id": "task_049"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: Research Focus Area/Unit Management Committee meetings: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, research focus area/unit management committee meetings) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: Research Focus Area/Unit Management Committee meetings\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Research Focus Area/Unit Management Committee meetings: \nMaximum of 20 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_049_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_050_guidance",
+    "scope": {
+      "base_task_id": "task_050"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: Research Focus Area/Entity meetings: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, research focus area/entity meetings) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: Research Focus Area/Entity meetings\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Research Focus Area/Entity meetings: Maximum of 10 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_050_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_051_guidance",
+    "scope": {
+      "base_task_id": "task_051"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: Mentorship meetings: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, mentorship meetings) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: Mentorship meetings\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Mentorship meetings: 8 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_051_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_052_guidance",
+    "scope": {
+      "base_task_id": "task_052"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: School Management Committee: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, school management committee) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: School Management Committee\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: School Management Committee: 24 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_052_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_053_guidance",
+    "scope": {
+      "base_task_id": "task_053"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: Subject Group meetings: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, subject group meetings) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: Subject Group meetings\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Subject Group meetings: 22 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_053_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_054_guidance",
+    "scope": {
+      "base_task_id": "task_054"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: School meetings and functions: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, school meetings and functions) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: School meetings and functions\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: School meetings and functions: 10 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_054_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_055_guidance",
+    "scope": {
+      "base_task_id": "task_055"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: Faculty Forums: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, faculty forums) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: Faculty Forums\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Faculty Forums: Maximum of 6 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_055_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_056_guidance",
+    "scope": {
+      "base_task_id": "task_056"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: Professional development (in accordance with PDP): provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, professional development (in accordance with pdp)) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: Professional development (in accordance with PDP)\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Professional development (in accordance with PDP): Maximum of 10 hours; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_056_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_057_guidance",
+    "scope": {
+      "base_task_id": "task_057"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: SASHT exco committee: provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, sasht exco committee) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: SASHT exco committee\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: SASHT exco committee; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_057_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_058_guidance",
+    "scope": {
+      "base_task_id": "task_058"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Committee: : provide 1 primary artefact (e.g., meeting, minutes, committee, agenda, ) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Committee: \nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting; minutes; committee; agenda. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_058_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_059_guidance",
+    "scope": {
+      "base_task_id": "task_059"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Mid-year performance reviews & staff development: provide 1 primary artefact (e.g., performance review, mid-year, staff development, mentoring) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Mid-year performance reviews & staff development\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 1 supporting items. Primary artefacts should be: Output evidence: Staff performance reviews and development planning; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; performance review; mid-year; staff development; mentoring. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_059_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_060_guidance",
+    "scope": {
+      "base_task_id": "task_060"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Year-end performance review & annual planning: provide 1 primary artefact (e.g., performance review, year-end, final, annual planning, professional development plan) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Year-end performance review & annual planning\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 1 supporting items. Primary artefacts should be: Output evidence: Year-end performance review and annual planning; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; performance review; year-end; final; annual report. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_060_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_061_guidance",
+    "scope": {
+      "base_task_id": "task_061"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Module Leadership: HISE 411, HISE 322: provide 1 primary artefact (e.g., module leadership, report, assessment planning, moderation, campus collaboration) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Module Leadership: HISE 411, HISE 322\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Module leadership activities for HISE 411, HISE 322; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; module report; assessment plan; moderation evidence; email correspondence. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_061_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_062_guidance",
+    "scope": {
+      "base_task_id": "task_062"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Research Mentorship: Ntombiyoxolo Mqadi: provide 1 primary artefact (e.g., mentorship, mentee, meeting, guidance, professional development) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Research Mentorship: Ntombiyoxolo Mqadi\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Mentorship activities for Ntombiyoxolo Mqadi; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting notes; mentorship log; feedback; email correspondence. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_062_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_063_guidance",
+    "scope": {
+      "base_task_id": "task_063"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Research Mentorship: Dawid Olivier: provide 1 primary artefact (e.g., mentorship, mentee, meeting, guidance, professional development) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Research Mentorship: Dawid Olivier\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: Mentorship activities for Dawid Olivier; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; meeting notes; mentorship log; feedback; email correspondence. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_063_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_064_guidance",
+    "scope": {
+      "base_task_id": "task_064"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for Programme accreditation & quality assurance: provide 2 primary artefacts (e.g., accreditation, quality assurance, programme review, heqc, cheps) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: Programme accreditation & quality assurance\nKPA: Academic Leadership & Administration\nMonth: {{month}}\nRequired: Provide 2 primary artefacts and up to 4 supporting items. Primary artefacts should be: Output evidence: Programme accreditation documentation and quality reviews; meeting agenda / minutes; committee report / decision memo; planning document; QA / review notes; emails confirming actions/approvals; accreditation; quality assurance; programme review; heqc. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_064_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_065_guidance",
+    "scope": {
+      "base_task_id": "task_065"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for SASHT website management: provide 1 primary artefact (e.g., community, engagement, outreach, social responsibility, sasht website management) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: SASHT website management\nKPA: Social Responsiveness\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 2 supporting items. Primary artefacts should be: Output evidence: SASHT website management; event programme / flyer; attendance register; stakeholder correspondence; MoU / engagement letter; reflection / impact note; activity report; correspondence; website updates; event materials. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_065_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  },
+  {
+    "template_id": "base_task_066_guidance",
+    "scope": {
+      "base_task_id": "task_066"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "auto",
+      "version": "1.0"
+    },
+    "template_variants": {
+      "short": "Task-specific guidance for SASHT webinar coordination: provide 1 primary artefact (e.g., community, engagement, outreach, social responsibility, sasht webinar coordination) that directly show the outcome. Label files with date and role.",
+      "detailed": "Task: SASHT webinar coordination\nKPA: Social Responsiveness\nMonth: {{month}}\nRequired: Provide 1 primary artefacts and up to 3 supporting items. Primary artefacts should be: Output evidence: SASHT webinar coordination; event programme / flyer; attendance register; stakeholder correspondence; MoU / engagement letter; reflection / impact note; activity report; correspondence; website updates; event materials. When uploading, add a one-line note linking the artefact to the task outcome and include the date."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month",
+      "evidence_count": "Recommended count"
+    },
+    "template_text": "This task is base_task_066_guidance.. Include a direct artefact that shows the work you did. When you upload give each file a short title and date and add a one line note saying what the item shows and when it happened. If formal documents are not available add a dated confirmation email or a short colleague statement and mark it as supplementary",
+    "auto_reworded": true,
+    "taxonomy_used": false
+  }
+]

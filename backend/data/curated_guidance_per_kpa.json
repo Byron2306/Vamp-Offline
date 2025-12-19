@@ -1,0 +1,37 @@
+{
+  "KPA1": {
+    "kpa_code": "KPA1",
+    "kpa_name": "Teaching and Learning",
+    "task_id": "task_001",
+    "task_title": "Module planning & curriculum design",
+    "guidance": "You have prepared Module planning & curriculum design This activity reflects the NWU value Lifelong Learning and supports the KPA Consider uploading a lesson plan as a primary artefact Add a one line note for each file stating what it is and the date and include the module or task name in the filename"
+  },
+  "KPA2": {
+    "kpa_code": "KPA2",
+    "kpa_name": "Occupational Health & Safety",
+    "task_id": "task_023",
+    "task_title": "OHS compliance check",
+    "guidance": "Impressive You have prepared OHS compliance check This activity reflects the NWU value Accountability and supports the KPA Consider uploading You have prepared OHS as a primary artefact Add a one line note for each file stating what it is and the date and include the module or task name in the filename"
+  },
+  "KPA3": {
+    "kpa_code": "KPA3",
+    "kpa_name": "Research, Innovation & Creative Outputs",
+    "task_id": "task_027",
+    "task_title": "Level Up Learning",
+    "guidance": "Well done You have prepared Level Up Learning This activity reflects the NWU value Innovation and supports the KPA Consider uploading You have prepared Level as a primary artefact Add a one line note for each file stating what it is and the date and include the module or task name in the filename"
+  },
+  "KPA4": {
+    "kpa_code": "KPA4",
+    "kpa_name": "Academic Leadership & Administration",
+    "task_id": "task_044",
+    "task_title": "SDL scientific committee 5",
+    "guidance": "You have prepared SDL scientific committee 5 Consider uploading You have prepared SDL as a primary artefact Add a one line note for each file stating what it is and the date and include the module or task name in the filename"
+  },
+  "KPA5": {
+    "kpa_code": "KPA5",
+    "kpa_name": "Social Responsiveness",
+    "task_id": "task_065",
+    "task_title": "SASHT website management",
+    "guidance": "You have prepared SASHT website management This activity reflects the NWU value Social Responsiveness and supports the KPA Consider uploading an outreach report or summary as a primary artefact Add a one line note for each file stating what it is and the date and include the module or task name in the filename For external partners check goodwill permission or a memorandum of understanding before sharing"
+  }
+}

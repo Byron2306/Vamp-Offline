@@ -252,6 +252,8 @@ function collectContext() {
   if (currentAIGuidanceTask) {
     context.task = {
       id: currentAIGuidanceTask.id || currentAIGuidanceTask.task_id,
+      _baseId: currentAIGuidanceTask._baseId || null,
+      _canonicalId: currentAIGuidanceTask._canonicalId || null,
       title: currentAIGuidanceTask.title || currentAIGuidanceTask.task || currentAIGuidanceTask.output,
       kpa: currentAIGuidanceTask.kpa_name || currentAIGuidanceTask.kpa || currentAIGuidanceTask.kpa_code,
       goal: currentAIGuidanceTask.goal || currentAIGuidanceTask.outputs || currentAIGuidanceTask.what_to_do,
@@ -540,7 +542,40 @@ async function loadExpectations() {
     // Also store by_month for task lookup
     window.expectationsData = data;
 
-    // Normalize per-month tasks to prefer hashed DB task IDs when provided
+    // Prefer backend canonical hashed IDs: build base->month->hid map from tasks
+    try {
+      const baseToHashed = {};
+      (data.tasks || []).forEach(bt => {
+        const baseId = bt.task_id || bt.id;
+        const hashed = bt.hashed_ids || {};
+        if (baseId && hashed && typeof hashed === 'object') {
+          Object.entries(hashed).forEach(([mon, hid]) => {
+            baseToHashed[`${baseId}|${mon.padStart ? mon.padStart(2,'0') : String(mon).padStart(2,'0')}`] = hid;
+          });
+        }
+      });
+
+      // Normalize by_month tasks to use canonical hashed id when available
+      const byMonth = data.by_month || {};
+      Object.entries(byMonth).forEach(([monthKey, monthEntry]) => {
+        const monthNum = monthKey.split('-')[1] || null;
+        const monthTasks = Array.isArray(monthEntry) ? monthEntry : (monthEntry.tasks || []);
+        monthTasks.forEach(mt => {
+          const baseId = mt._baseId || mt.task_id || mt.id;
+          if (!baseId || !monthNum) return;
+          const key = `${baseId}|${String(parseInt(monthNum,10)).padStart(2,'0')}`;
+          const hid = baseToHashed[key];
+          if (hid) {
+            mt._canonicalId = hid;
+            mt.id = hid; // prefer canonical hashed id for UI lookup
+          }
+        });
+      });
+    } catch (e) {
+      console.warn('Could not apply backend canonical id normalization:', e);
+    }
+
+    // Robust normalization: always set monthly task.id to canonical hashed ID if available, and add baseId for fallback
     try {
       const taskIndex = {};
       (tasks || []).forEach(t => {
@@ -555,17 +590,19 @@ async function loadExpectations() {
         monthTasks.forEach(t => {
           const baseId = t.task_id || t.id;
           const base = taskIndex[baseId];
-              if (base && base.hashed_ids) {
-                // Only use canonical hashed IDs supplied by the backend.
-                const m = monthKey.split('-')[1];
-                if (base.hashed_ids[m]) {
-                  t.id = base.hashed_ids[m];
-                }
-              }
+          // Always store the original baseId for fallback
+          t._baseId = baseId;
+          if (base && base.hashed_ids) {
+            const m = monthKey.split('-')[1];
+            if (base.hashed_ids[m]) {
+              t.id = base.hashed_ids[m];
+              t._canonicalId = base.hashed_ids[m];
+            }
+          }
         });
       });
     } catch (e) {
-      console.warn('Could not normalize hashed task ids:', e);
+      console.warn('Could not robustly normalize hashed task ids:', e);
     }
     
     console.log("Tasks count:", tasks.length);
@@ -1489,6 +1526,7 @@ function openAIGuidance(taskId) {
     rSearch strategy: try multiple sources since tasks can have different IDs
   let task = null;
   
+  let debugSteps = [];
   // 1. Try current month view first (most likely to match)
   if (window.currentByMonth) {
     const monthSelect = $("currentMonthSelect");
@@ -1496,15 +1534,17 @@ function openAIGuidance(taskId) {
     if (currentMonth) {
       const monthData = window.currentByMonth[currentMonth];
       const monthTasks = Array.isArray(monthData) ? monthData : (monthData?.tasks || []);
-      task = monthTasks.find(t => t.id === taskId || t.task_id === taskId);
+      task = monthTasks.find(t => t.id === taskId || t.task_id === taskId || t._baseId === taskId || t._canonicalId === taskId);
+      debugSteps.push({step: 'currentMonth', found: !!task, taskId, available: monthTasks.map(t => t.id || t.task_id || t._baseId || t.title)});
     }
   }
-  
+
   // 2. Try base expectations by ID
   if (!task) {
     task = currentExpectations.find(e => e.id === taskId || e.task_id === taskId || e.task === taskId);
+    debugSteps.push({step: 'baseExpectations', found: !!task, taskId});
   }
-  
+
   // 3. Try finding by hashed_ids in base tasks
   if (!task && currentExpectations) {
     task = currentExpectations.find(e => {
@@ -1513,21 +1553,64 @@ function openAIGuidance(taskId) {
       }
       return false;
     });
+    debugSteps.push({step: 'hashedIds', found: !!task, taskId});
   }
-  
-  // 4. Search all months in by_month data
+
+  // 4. Search all months in by_month data, with all possible ID fields
   if (!task && window.expectationsData && window.expectationsData.by_month) {
     for (const [monthKey, monthData] of Object.entries(window.expectationsData.by_month)) {
       const monthTasks = Array.isArray(monthData) ? monthData : (monthData?.tasks || []);
-      task = monthTasks.find(t => t.id === taskId || t.task_id === taskId);
+      task = monthTasks.find(t => t.id === taskId || t.task_id === taskId || t._baseId === taskId || t._canonicalId === taskId);
+      debugSteps.push({step: 'allMonths', monthKey, found: !!task, taskId, available: monthTasks.map(t => t.id || t.task_id || t._baseId || t.title)});
       if (task) break;
-      if (monthTask) {
-        task = monthTask;
+    }
+  }
+
+  // 4b. Use top-level id_map provided by backend to resolve hashed -> base ids
+  if (!task && window.expectationsData && window.expectationsData._id_map) {
+    const idMap = window.expectationsData._id_map || {};
+    const baseId = idMap[taskId];
+    debugSteps.push({step: 'id_map_lookup', found: !!baseId, baseId, taskId});
+    if (baseId) {
+      task = currentExpectations.find(e => e.id === baseId || e.task_id === baseId);
+      if (task) {
+        // annotate so subsequent flows know the canonical hashed id used
+        task._canonicalId = task._canonicalId || taskId;
       }
     }
   }
-  
+
+  // 5. Fallback: try to find by title if all else fails (last resort, for debugging)
+  if (!task && window.currentByMonth) {
+    const monthSelect = $("currentMonthSelect");
+    const currentMonth = monthSelect ? monthSelect.value : null;
+    if (currentMonth) {
+      const monthData = window.currentByMonth[currentMonth];
+      const monthTasks = Array.isArray(monthData) ? monthData : (monthData?.tasks || []);
+      const maybeTask = monthTasks.find(t => (t.title && taskId && t.title === taskId));
+      debugSteps.push({step: 'fallbackTitle', found: !!maybeTask, taskId, available: monthTasks.map(t => t.title)});
+      if (maybeTask) {
+        task = maybeTask;
+      }
+    }
+  }
+
   if (!task) {
+    // Debug info for developers, and log to logs tab if available
+    let debugMsg = `Could not find that task. TaskId: ${taskId}`;
+    debugMsg += `\nDebug steps:\n` + debugSteps.map(s => JSON.stringify(s)).join('\n');
+    if (window.appendLog) {
+      window.appendLog(debugMsg, 'error');
+    }
+    if ($('logsTabContent')) {
+      const logDiv = document.createElement('div');
+      logDiv.style.color = '#ff6b9d';
+      logDiv.style.fontSize = '12px';
+      logDiv.style.marginBottom = '8px';
+      logDiv.textContent = debugMsg;
+      $('logsTabContent').appendChild(logDiv);
+    }
+    console.warn(debugMsg);
     vampSpeak("Could not find that task.");
     return;
   }

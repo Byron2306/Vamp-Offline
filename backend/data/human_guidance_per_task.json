@@ -1,0 +1,398 @@
+{
+  "task_001": {
+    "task_id": "task_001",
+    "title": "Jan: Module planning & curriculum design - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup."
+  },
+  "task_002": {
+    "task_id": "task_002",
+    "title": "Jan: eFundi LMS setup & content upload - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup."
+  },
+  "task_003": {
+    "task_id": "task_003",
+    "title": "Jan: Study guides & reading lists finalization - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup."
+  },
+  "task_004": {
+    "task_id": "task_004",
+    "title": "Jan: Assessment planning & rubric development - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup."
+  },
+  "task_005": {
+    "task_id": "task_005",
+    "title": "Semester 1 Start: HISE411 (35 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task HISE411, consider a module outline, an LMS screenshot or export or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_006": {
+    "task_id": "task_006",
+    "title": "Semester 1 Teaching: HISE411 (35 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "Good to see this For the task HISE411, consider an attendance list or register, tutorial materials or worksheets or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_007": {
+    "task_id": "task_007",
+    "title": "Semester 1 Mid-term: HISE411 (35 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task HISE411, consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_008": {
+    "task_id": "task_008",
+    "title": "Semester 1 Completion: HISE411 (35 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task HISE411, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_009": {
+    "task_id": "task_009",
+    "title": "Semester 1 Exams: HISE411 (35 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task HISE411, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_010": {
+    "task_id": "task_010",
+    "title": "Mid-Year Break: HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup."
+  },
+  "task_011": {
+    "task_id": "task_011",
+    "title": "Semester 2 Start: HISE322 (40 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task HISE322, consider a module outline, an LMS screenshot or export or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_012": {
+    "task_id": "task_012",
+    "title": "Semester 2 Teaching: HISE322 (40 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task HISE322, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_013": {
+    "task_id": "task_013",
+    "title": "Semester 2 Mid-term: HISE322 (40 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task HISE322, consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_014": {
+    "task_id": "task_014",
+    "title": "Semester 2 Completion: HISE322 (40 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task HISE322, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_015": {
+    "task_id": "task_015",
+    "title": "Year-End Exams: HISE322 (40 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task HISE322, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_016": {
+    "task_id": "task_016",
+    "title": "Semester 1 marks submission deadline - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup."
+  },
+  "task_017": {
+    "task_id": "task_017",
+    "title": "Year-end marks and moderation - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup."
+  },
+  "task_018": {
+    "task_id": "task_018",
+    "title": "Module quality assurance - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students)",
+    "kpa": "Teaching and Learning",
+    "guidance": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup."
+  },
+  "task_019": {
+    "task_id": "task_019",
+    "title": "Teaching Practice Assessment - April",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task Teaching Practice Assessment, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_020": {
+    "task_id": "task_020",
+    "title": "Teaching Practice Assessment - July",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task Teaching Practice Assessment, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_021": {
+    "task_id": "task_021",
+    "title": "ROR Preparation: Orientation Programme",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task Orientation Programme, consider ror, reception or orientation. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_022": {
+    "task_id": "task_022",
+    "title": "ROR Event: Orientation Programme Delivery",
+    "kpa": "Teaching and Learning",
+    "guidance": "For the task Orientation Programme Delivery, consider ror, reception or orientation. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_023": {
+    "task_id": "task_023",
+    "title": "OHS compliance check",
+    "kpa": "Occupational Health & Safety",
+    "guidance": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_024": {
+    "task_id": "task_024",
+    "title": "OHS compliance check",
+    "kpa": "Occupational Health & Safety",
+    "guidance": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_025": {
+    "task_id": "task_025",
+    "title": "OHS compliance check",
+    "kpa": "Occupational Health & Safety",
+    "guidance": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_026": {
+    "task_id": "task_026",
+    "title": "OHS compliance check",
+    "kpa": "Occupational Health & Safety",
+    "guidance": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_027": {
+    "task_id": "task_027",
+    "title": "Research Project: Level Up Learning",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task Level Up Learning, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_028": {
+    "task_id": "task_028",
+    "title": "Research Project: Game-Based Learning in History Education",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task GameBased Learning in History Education, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_029": {
+    "task_id": "task_029",
+    "title": "Research Project: Revitalizing Classrooms",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task Revitalizing Classrooms, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_030": {
+    "task_id": "task_030",
+    "title": "Research Project: Prosper GREAT project",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task Prosper GREAT project, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_031": {
+    "task_id": "task_031",
+    "title": "Research Project: Citesaga project, Renewable Rangers project",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task Citesaga project, Renewable Rangers project, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_032": {
+    "task_id": "task_032",
+    "title": "Research Project: Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR)",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR), consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_033": {
+    "task_id": "task_033",
+    "title": "Conference: ECGBL",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task ECGBL, consider conference, presentation or submission. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_034": {
+    "task_id": "task_034",
+    "title": "Publication: Play with purpose",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task Play with purpose, consider publication, manuscript or book. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_035": {
+    "task_id": "task_035",
+    "title": "Honours Supervision: ERTP/LERP Proposals",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task ERTP/LERP Proposals, consider ertp, lerp or honours. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_036": {
+    "task_id": "task_036",
+    "title": "Honours Supervision: ERTP/LERP Reports",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task ERTP/LERP Reports, consider ertp, lerp or honours. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_037": {
+    "task_id": "task_037",
+    "title": "Research Leadership: SDL",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task SDL, consider leadership, sdl or research entity. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_038": {
+    "task_id": "task_038",
+    "title": "Research Leadership: Play-based SDL sub area leader",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "Lovely work For the task Playbased SDL sub area leader, consider leadership, sdl or research entity. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_039": {
+    "task_id": "task_039",
+    "title": "Research Professional Development",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "Well done For the task Research Professional Development, consider workshop, colloquium or writing school. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing."
+  },
+  "task_040": {
+    "task_id": "task_040",
+    "title": "NRF grant application / Rating submission",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task NRF grant application / Rating submission, consider nrf, grant or rating. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_041": {
+    "task_id": "task_041",
+    "title": "Mid-year research output (publication/conference)",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task Midyear research output (publication/conference), consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_042": {
+    "task_id": "task_042",
+    "title": "Year-end research output (accredited publication)",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task Yearend research output (accredited publication), consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_043": {
+    "task_id": "task_043",
+    "title": "Postgraduate supervision meetings & progress tracking",
+    "kpa": "Research, Innovation & Creative Outputs",
+    "guidance": "For the task Postgraduate supervision meetings & progress tracking, consider supervision, postgraduate or masters. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_044": {
+    "task_id": "task_044",
+    "title": "Committee: SDL scientific committee 5",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task SDL scientific committee 5, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_045": {
+    "task_id": "task_045",
+    "title": "Committee: Faculty Board",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "Lovely work For the task Faculty Board, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_046": {
+    "task_id": "task_046",
+    "title": "Committee: Teaching and Learning Committee",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "Great planning For the task Teaching and Learning Committee, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_047": {
+    "task_id": "task_047",
+    "title": "Committee: Scientific Committee meetings",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Scientific Committee meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_048": {
+    "task_id": "task_048",
+    "title": "Committee: Entity Exco meetings",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Entity Exco meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_049": {
+    "task_id": "task_049",
+    "title": "Committee: Research Focus Area/Unit Management Committee meetings",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Research Focus Area/Unit Management Committee meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_050": {
+    "task_id": "task_050",
+    "title": "Committee: Research Focus Area/Entity meetings",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "Nice work For the task Research Focus Area/Entity meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_051": {
+    "task_id": "task_051",
+    "title": "Committee: Mentorship meetings",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Mentorship meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_052": {
+    "task_id": "task_052",
+    "title": "Committee: School Management Committee",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task School Management Committee, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing."
+  },
+  "task_053": {
+    "task_id": "task_053",
+    "title": "Committee: Subject Group meetings",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Subject Group meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_054": {
+    "task_id": "task_054",
+    "title": "Committee: School meetings and functions",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "Lovely work For the task School meetings and functions, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing."
+  },
+  "task_055": {
+    "task_id": "task_055",
+    "title": "Committee: Faculty Forums",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Faculty Forums, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_056": {
+    "task_id": "task_056",
+    "title": "Committee: Professional development (in accordance with PDP)",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Professional development (in accordance with PDP), consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_057": {
+    "task_id": "task_057",
+    "title": "Committee: SASHT exco committee",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task SASHT exco committee, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_058": {
+    "task_id": "task_058",
+    "title": "Committee: ",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task , consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_059": {
+    "task_id": "task_059",
+    "title": "Mid-year performance reviews & staff development",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Midyear performance reviews & staff development, consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_060": {
+    "task_id": "task_060",
+    "title": "Year-end performance review & annual planning",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Yearend performance review & annual planning, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_061": {
+    "task_id": "task_061",
+    "title": "Module Leadership: HISE 411, HISE 322",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task HISE 411, HISE 322, consider module leadership, an outreach report or a lesson plan. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_062": {
+    "task_id": "task_062",
+    "title": "Research Mentorship: Ntombiyoxolo Mqadi",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Ntombiyoxolo Mqadi, consider mentorship, mentee or meeting. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_063": {
+    "task_id": "task_063",
+    "title": "Research Mentorship: Dawid Olivier",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Dawid Olivier, consider mentorship, mentee or meeting. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_064": {
+    "task_id": "task_064",
+    "title": "Programme accreditation & quality assurance",
+    "kpa": "Academic Leadership & Administration",
+    "guidance": "For the task Programme accreditation & quality assurance, consider accreditation, quality assurance or programme review. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup."
+  },
+  "task_065": {
+    "task_id": "task_065",
+    "title": "SASHT website management",
+    "kpa": "Social Responsiveness",
+    "guidance": "Solid work For the task SASHT website management, consider community, engagement or an outreach report. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing."
+  },
+  "task_066": {
+    "task_id": "task_066",
+    "title": "SASHT webinar coordination",
+    "kpa": "Social Responsiveness",
+    "guidance": "For the task SASHT webinar coordination, consider community, engagement or an outreach report. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing."
+  }
+}

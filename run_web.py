@@ -5,6 +5,7 @@ VAMP Web Server - Comprehensive API backend with Ollama integration
 
 import os
 import json
+import logging
 import time
 from datetime import datetime
 from pathlib import Path
@@ -73,6 +74,26 @@ expectations_cache = {}
 evidence_store = None
 event_clients = []
 
+# Debug flag (set VAMP_DEBUG=true to enable)
+DEBUG = os.getenv('VAMP_DEBUG', 'false').lower() == 'true'
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG if DEBUG else logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+def dlog(*args, **kwargs):
+    if DEBUG:
+        logger.debug(' '.join(str(arg) for arg in args))
+
+# Load guidance templates (if any)
+try:
+    from backend.guidance_renderer import load_templates, render_best_template
+    GUIDANCE_TEMPLATES = load_templates(DATA_FOLDER / 'guidance_templates.json')
+    dlog(f"Loaded {len(GUIDANCE_TEMPLATES)} guidance templates")
+except Exception as _e:
+    GUIDANCE_TEMPLATES = []
+    dlog(f"Guidance templates not available: {_e}")
+
 # ============================================================
 # OLLAMA INTEGRATION
 # ============================================================
@@ -101,28 +122,61 @@ IMPORTANT: Write in plain text only. NO asterisks (*), underscores (_), markdown
             enhanced_prompt = f"You are VAMP, an AI assistant for academic performance management. Write in plain text only - no asterisks, markdown, or special symbols. {prompt}"
         
         # Call Ollama API
-        response = requests.post(
-            f"{OLLAMA_BASE_URL}/api/generate",
-            json={
-                "model": OLLAMA_MODEL,
-                "prompt": enhanced_prompt,
-                "stream": False
-            },
-            timeout=OLLAMA_TIMEOUT
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            return data.get("response", "I cannot provide guidance at this time.")
-        else:
-            return "Ollama service is unavailable. Please ensure it is running."
-    
-    except requests.exceptions.RequestException as e:
-        print(f"Ollama error: {e}")
-        return "Cannot reach Ollama. Please ensure the service is running on port 11434."
+        try:
+            response = requests.post(
+                f"{OLLAMA_BASE_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": enhanced_prompt,
+                    "stream": False
+                },
+                timeout=OLLAMA_TIMEOUT
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return data.get("response", "I cannot provide guidance at this time.")
+            else:
+                return "Ollama service is unavailable. Please ensure it is running."
+        except requests.exceptions.RequestException as e:
+            # If a mock is enabled, return a generated canned response
+            use_mock = os.getenv('USE_MOCK_OLLAMA', '0') in ('1', 'true', 'True')
+            if use_mock:
+                return run_mock_ollama(prompt, context)
+            print(f"Ollama error: {e}")
+            return "Cannot reach Ollama. Please ensure the service is running on port 11434."
     except Exception as e:
         print(f"Unexpected error: {e}")
         return "An unexpected error occurred."
+
+
+def run_mock_ollama(prompt: str, context: Dict = None) -> str:
+    """
+    Generate a simple, useful canned guidance based on context when Ollama is mocked or unavailable.
+    """
+    try:
+        task = (context or {}).get('task') or {}
+        title = task.get('title') or task.get('task') or 'this task'
+        kpa = task.get('kpa') or task.get('kpa_code') or 'Unknown KPA'
+        hints = task.get('evidence_hints') or []
+        evidence_required = task.get('evidence_required') or ''
+        min_req = task.get('minimum_count') or task.get('min_required') or 1
+        stretch = task.get('stretch_count') or task.get('stretch_target') or min_req
+
+        guidance_lines = []
+        guidance_lines.append(f"Task: {title} (KPA: {kpa})")
+        guidance_lines.append(f"Minimum required items: {min_req}. Stretch target: {stretch}.")
+        if evidence_required:
+            guidance_lines.append(f"Evidence required: {evidence_required}")
+        if hints:
+            guidance_lines.append("Useful evidence examples: " + ", ".join(hints[:8]))
+        guidance_lines.append("If unsure, upload a clear artefact (document or screenshot) and lock it to this task with an explanation.")
+        guidance_lines.append("If you need a step-by-step checklist, ask a focused question like: 'List 5 pieces of evidence to meet this task'.")
+
+        return "\n".join(guidance_lines)
+    except Exception as e:
+        print(f"Mock Ollama error: {e}")
+        return "I cannot provide guidance at this time."
 
 # ============================================================
 # STATIC FILES
@@ -691,18 +745,83 @@ def get_expectations():
                         month_lookup = str(int(month_num)) if month_num else None
 
                         for task in month_tasks:
-                            base_task = task_index.get(task.get('task_id')) if task.get('task_id') else None
+                            base_id = task.get('task_id') or task.get('id')
+                            base_task = task_index.get(base_id) if base_id else None
                             hashed_id = None
                             if base_task and month_lookup and 'hashed_ids' in base_task:
                                 hashed_id = base_task['hashed_ids'].get(month_lookup)
 
-                            task['id'] = hashed_id or task.get('task_id')
+                            # Always set canonical hashed ID if available, else fallback to base ID
+                            task['id'] = hashed_id or base_id
+                            task['_baseId'] = base_id
+                            task['_canonicalId'] = hashed_id
+
                             # Normalize field names for UI
                             if 'title' not in task and 'output' in task:
                                 task['title'] = task['output']
                             task['minimum_count'] = task.get('min_required') or task.get('minimum_count') or 1
                             task['stretch_count'] = task.get('stretch_target') or task.get('stretch_count') or task['minimum_count']
 
+                # Build a top-level id_map for deterministic lookups (hashed_id -> base_id)
+                id_map: Dict[str, str] = {}
+                mapping_warnings: List[str] = []
+                collision_map: Dict[str, List[str]] = {}
+                for base_id, base_task in task_index.items():
+                    hashed_ids = base_task.get('hashed_ids') or {}
+                    if not isinstance(hashed_ids, dict) or not hashed_ids:
+                        mapping_warnings.append(f"No hashed_ids for base task {base_id}")
+                        continue
+                    for mon, hid in (hashed_ids.items() if isinstance(hashed_ids, dict) else []):
+                        if not hid:
+                            mapping_warnings.append(f"Empty hashed id for {base_id} month {mon}")
+                            continue
+                        # detect collisions
+                        if hid in id_map and id_map[hid] != base_id:
+                            collision_map.setdefault(hid, []).extend([id_map[hid], base_id])
+                            mapping_warnings.append(f"Collision: hashed id {hid} maps to multiple base ids ({id_map[hid]}, {base_id})")
+                        id_map[str(hid)] = base_id
+
+                # Attach id_map and task_index for frontend diagnostics
+                expectations_data['_id_map'] = id_map
+                # Provide a lightweight task_index for quick lookups (base_id -> title)
+                expectations_data['_task_index'] = {k: {'title': v.get('title') or v.get('output') or '', 'kpa_code': v.get('kpa_code')} for k, v in task_index.items()}
+                # Attach mapping warnings for visibility
+                if mapping_warnings:
+                    expectations_data['_mapping_warnings'] = mapping_warnings
+                    # persist warnings to file
+                    try:
+                        log_dir = CONTRACTS_FOLDER.parent / 'logs'
+                        log_dir.mkdir(parents=True, exist_ok=True)
+                        warn_file = log_dir / f'mapping_warnings_{staff_id}_{year}.log'
+                        with open(warn_file, 'a') as wf:
+                            import datetime as _dt
+                            wf.write(f"---- { _dt.datetime.utcnow().isoformat() } UTC ----\n")
+                            for w in mapping_warnings:
+                                wf.write(w + "\n")
+                            wf.write("\n")
+                    except Exception as _e:
+                        print(f"Could not persist mapping warnings: {_e}")
+                if collision_map:
+                    expectations_data['_mapping_collisions'] = {k: list(set(v)) for k, v in collision_map.items()}
+                    try:
+                        log_dir = CONTRACTS_FOLDER.parent / 'logs'
+                        log_dir.mkdir(parents=True, exist_ok=True)
+                        coll_file = log_dir / f'mapping_collisions_{staff_id}_{year}.log'
+                        with open(coll_file, 'a') as cf:
+                            import datetime as _dt
+                            cf.write(f"---- { _dt.datetime.utcnow().isoformat() } UTC ----\n")
+                            for hid, bases in collision_map.items():
+                                cf.write(f"{hid} -> {set(bases)}\n")
+                            cf.write("\n")
+                    except Exception as _e:
+                        print(f"Could not persist mapping collisions: {_e}")
+
+            # Cache the expectations for quick lookups by other endpoints
+            try:
+                expectations_cache[(staff_id, year)] = expectations_data
+                print(f"Cached expectations for {staff_id}/{year}")
+            except Exception as _e:
+                print(f"Could not cache expectations: {_e}")
             # Return the full expectations structure with tasks and by_month
             return jsonify(expectations_data)
 
@@ -1579,25 +1698,8 @@ def get_evidence():
     try:
         staff_id = request.args.get('staff_id')
         
-        # Mock evidence data
-        evidence = [
-            {
-                "date": "2025-01-10",
-                "file": "lecture_notes.pdf",
-                "kpa": "Teaching & Learning",
-                "task": "Curriculum development",
-                "impact": "Developed comprehensive lecture materials",
-                "confidence": 0.85
-            },
-            {
-                "date": "2025-01-15",
-                "file": "research_proposal.docx",
-                "kpa": "Research",
-                "task": "Grant application",
-                "impact": "Submitted NRF grant proposal",
-                "confidence": 0.92
-            }
-        ]
+        # Return empty evidence list for fresh start
+        evidence = []
         
         return jsonify({"evidence": evidence})
     
@@ -1988,18 +2090,308 @@ def ai_guidance():
         print(f"Context received: {json.dumps(context, indent=2)}")
         
         task_info = context.get('task')
+        # If task info isn't provided as an object, try to recover from alternative fields
+        if not task_info:
+            # Common alternate forms: task_id, id, taskId
+            alt_id = context.get('task_id') or context.get('id') or context.get('taskId')
+            if isinstance(context.get('task'), str) and context.get('task'):
+                alt_id = context.get('task')
+            if alt_id:
+                task_info = {'id': alt_id}
+                print(f"Recovered task id from context: {alt_id}")
+            else:
+                # Try to locate the task using staff_id, cycle_year and scan_month from the expectations file
+                staff_id = context.get('staff_id')
+                year = context.get('cycle_year')
+                month = context.get('scan_month')
+                if staff_id and year and month:
+                    try:
+                        expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{year}.json"
+                        if expectations_file.exists():
+                            with open(expectations_file, 'r') as f:
+                                expectations_data = json.load(f)
+                            by_month = expectations_data.get('by_month', {})
+                            # Try explicit month key first
+                            month_key = month if month in by_month else None
+                            if not month_key and isinstance(month, str) and '-' in month:
+                                month_key = month
+                            if month_key and month_key in by_month:
+                                month_tasks = by_month.get(month_key) or by_month.get(month_key, {}).get('tasks') or []
+                                for t in month_tasks:
+                                    # match against various id fields
+                                    tid = t.get('id') or t.get('task_id') or t.get('_canonicalId') or t.get('_baseId')
+                                    if tid == context.get('task_id') or tid == context.get('id') or tid == context.get('task'):
+                                        task_info = t
+                                        print(f"Located task in expectations by month: {t.get('id')} - {t.get('title')}")
+                                        break
+                            # As a last resort, search all tasks for the id
+                            if not task_info and 'tasks' in expectations_data:
+                                for t in expectations_data.get('tasks', []):
+                                    tid = t.get('task_id') or t.get('id')
+                                    if tid == context.get('task_id') or tid == context.get('id') or tid == context.get('task'):
+                                        task_info = t
+                                        print(f"Located base task in expectations: {t.get('id')} - {t.get('title')}")
+                                        break
+                    except Exception as _e:
+                        print(f"Error while attempting to recover task from expectations file: {_e}")
+
         if task_info:
+            # Ensure we attach a _baseId when possible so template scope matching works
+            try:
+                if not task_info.get('_baseId'):
+                    staff_id = context.get('staff_id')
+                    year = context.get('cycle_year')
+                    expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{year}.json"
+
+                    # Load expectations (prefer cached)
+                    expectations_data = None
+                    cached = expectations_cache.get((staff_id, year))
+                    if cached and (cached.get('_id_map') or any((t.get('hashed_ids') for t in (cached.get('tasks') or [])))):
+                        expectations_data = cached
+                        if DEBUG:
+                            print(f"Using cached expectations for {staff_id}/{year}")
+                    elif expectations_file.exists():
+                        try:
+                            with open(expectations_file, 'r') as f:
+                                expectations_data = json.load(f)
+                            if DEBUG:
+                                print(f"Found expectations file: {expectations_file}")
+                                print(f"Expectations tasks count: {len(expectations_data.get('tasks') or [])}")
+                        except Exception as _e:
+                            print(f"Error reading expectations file: {_e}")
+                    else:
+                        expectations_data = None
+
+                    if expectations_data:
+                        logger.info(f"ENRICHMENT: expectations_data present. tasks_count={len(expectations_data.get('tasks') or [])}, has_id_map={('_id_map' in expectations_data)}")
+                        
+                        # Build _id_map if not present (for consistency with /api/expectations)
+                        if '_id_map' not in expectations_data and TASK_MAP_AVAILABLE:
+                            # First, ensure tasks have hashed_ids populated
+                            for bt in expectations_data.get('tasks', []):
+                                base_id = bt.get('task_id') or bt.get('id')
+                                if not bt.get('hashed_ids') and base_id:
+                                    bt['hashed_ids'] = {}
+                                    # Generate for all months (01-12)
+                                    for month in range(1, 13):
+                                        try:
+                                            hid = _hid(staff_id, str(year), base_id, f"{month:02d}")
+                                            bt['hashed_ids'][str(month)] = hid
+                                        except Exception as _e:
+                                            pass
+                            
+                            id_map = {}
+                            for bt in expectations_data.get('tasks', []):
+                                base_id = bt.get('task_id') or bt.get('id')
+                                hashed_ids = bt.get('hashed_ids') or {}
+                                if isinstance(hashed_ids, dict):
+                                    for mon, hid in hashed_ids.items():
+                                        if hid:
+                                            id_map[str(hid)] = base_id
+                            expectations_data['_id_map'] = id_map
+                            logger.info(f"Built _id_map with {len(id_map)} entries")
+                        
+                        # Fast path: use top-level id_map (hashed -> base) if available
+                        try:
+                            id_map = expectations_data.get('_id_map') or {}
+                            if id_map and isinstance(id_map, dict):
+                                # debug info (always show for diagnostics)
+                                logger.debug(f"_id_map sample keys: {list(id_map.keys())[:10]}")
+                                mapped = id_map.get(str(task_info.get('id')))
+                                logger.debug(f"_id_map lookup for {task_info.get('id')}: {mapped}")
+                                if mapped:
+                                    task_info['_baseId'] = mapped
+                                    logger.info(f"Resolved _baseId via _id_map: {mapped}")
+                                    # Enrich task_info with base task fields for template selection
+                                    try:
+                                        base_tasks = expectations_data.get('tasks') or []
+                                        for bt in base_tasks:
+                                            if (bt.get('task_id') or bt.get('id')) == mapped:
+                                                # Copy useful fields if missing
+                                                for src, dst in [('title','title'), ('kpa_name','kpa'), ('kpa_code','kpa'), ('outputs','goal'), ('evidence_hints','evidence_hints'), ('evidence_required','evidence_required'), ('minimum_count','minimum_count')]:
+                                                    if bt.get(src) is not None and not task_info.get(dst):
+                                                        task_info[dst] = bt.get(src)
+                                                if DEBUG:
+                                                    print(f"Enriched task_info from base task {mapped}: title={task_info.get('title')}, kpa={task_info.get('kpa')}")
+                                                # Always log a short summary so tests can observe behavior
+                                                logger.info(f"ENRICHMENT: task_info after id_map resolution: id={task_info.get('id')}, _baseId={task_info.get('_baseId')}, title={task_info.get('title')}, kpa={task_info.get('kpa')}")
+                                                break
+                                    except Exception as _e:
+                                        logger.error(f"Error enriching from base task after _id_map resolution: {_e}")
+                                else:
+                                    logger.debug(f"_id_map lookup miss for key: {task_info.get('id')}")
+                        except Exception as _e:
+                            logger.error(f"Error checking _id_map: {_e}")
+
+                        # check by_month entries for a match
+                        for mk, md in (expectations_data.get('by_month') or {}).items():
+                            month_tasks = md.get('tasks') or []
+                            # debug: show a sample task id for traceability
+                            if month_tasks and DEBUG:
+                                logger.debug(f"Month {mk} sample task id: {month_tasks[0].get('id')} (keys: {list(month_tasks[0].keys())[:6]})")
+                            for t in month_tasks:
+                                if t.get('id') == task_info.get('id') or t.get('_canonicalId') == task_info.get('id') or t.get('_baseId') == task_info.get('id'):
+                                    # copy base id into task_info for matching
+                                    if t.get('_baseId'):
+                                        task_info['_baseId'] = t.get('_baseId')
+                                        # copy useful fields from the month task
+                                        for fld in ['title', 'kpa', 'kpa_code', 'minimum_count', 'stretch_count', 'evidence_hints']:
+                                            if not task_info.get(fld) and t.get(fld) is not None:
+                                                task_info[fld] = t.get(fld)
+                                        if DEBUG:
+                                            logger.debug(f"Located task in by_month and copied _baseId: {task_info.get('_baseId')}")
+                                        break
+                            if task_info.get('_baseId'):
+                                break
+
+                        # If still not found, scan base tasks' hashed_ids as a fallback
+                        if not task_info.get('_baseId'):
+                            logger.info(f"Scanning {len(expectations_data.get('tasks') or [])} base tasks for hashed_ids match...")
+                            for bt in (expectations_data.get('tasks') or []):
+                                hashed = bt.get('hashed_ids') or {}
+                                # show a quick sample of this base task's hashed ids
+                                if isinstance(hashed, dict):
+                                    sample = list(hashed.items())[:3]
+                                    logger.debug(f"Checking base {bt.get('id')}: sample hashed ids {sample}")
+                                if isinstance(hashed, dict) and any(h == task_info.get('id') for h in hashed.values()):
+                                    task_info['_baseId'] = bt.get('task_id') or bt.get('id')
+                                    # shallow-merge useful fields to improve template selection
+                                    for fld in ['title', 'kpa_name', 'kpa_code', 'outputs', 'evidence_hints', 'minimum_count', 'stretch_count']:
+                                        if not task_info.get(fld) and bt.get(fld) is not None:
+                                            task_info[fld] = bt.get(fld)
+                                    logger.info(f"Matched hashed id to base task via hashed_ids: {task_info.get('_baseId')}")
+                                    break
+
+                        # As a robust fallback, try the on-disk expectations file directly
+                        if not task_info.get('_baseId') and expectations_file.exists():
+                            try:
+                                with open(expectations_file, 'r') as ef:
+                                    file_expect = json.load(ef)
+                                for bt in (file_expect.get('tasks') or []):
+                                    hashed = bt.get('hashed_ids') or {}
+                                    if isinstance(hashed, dict) and any(h == task_info.get('id') for h in hashed.values()):
+                                        task_info['_baseId'] = bt.get('task_id') or bt.get('id')
+                                        for fld in ['title', 'kpa_name', 'kpa_code', 'outputs', 'evidence_hints', 'minimum_count', 'stretch_count']:
+                                            if not task_info.get(fld) and bt.get(fld) is not None:
+                                                task_info[fld] = bt.get(fld)
+                                        if DEBUG:
+                                            print(f"Matched hashed id to base task via on-disk file: {task_info.get('_baseId')}")
+                                        break
+                            except Exception as _e:
+                                print(f"Error while scanning on-disk expectations for hashed ids: {_e}")
+
+                        # Final fallback: compute _hid for base tasks and compare
+                        if not task_info.get('_baseId') and TASK_MAP_AVAILABLE and _hid:
+                            try:
+                                search_tasks = expectations_data.get('tasks') or []
+                                if not search_tasks and expectations_file.exists():
+                                    with open(expectations_file, 'r') as ef:
+                                        file_expect = json.load(ef)
+                                    search_tasks = file_expect.get('tasks') or []
+
+                                found_hid = False
+                                for bt in (search_tasks or []):
+                                    months = bt.get('months') or []
+                                    for m in months:
+                                        try:
+                                            month_int = int(m)
+                                            hid = _hid(staff_id, str(year), str(bt.get('id') or bt.get('task_id')), f"{month_int:02d}")
+                                            if hid == task_info.get('id'):
+                                                task_info['_baseId'] = bt.get('task_id') or bt.get('id')
+                                                for fld in ['title', 'kpa_name', 'kpa_code', 'outputs', 'evidence_hints', 'minimum_count', 'stretch_count']:
+                                                    if not task_info.get(fld) and bt.get(fld) is not None:
+                                                        task_info[fld] = bt.get(fld)
+                                                if DEBUG:
+                                                    logger.info(f"Matched hashed id to base task by computing _hid: {task_info.get('_baseId')}")
+                                                found_hid = True
+                                                break
+                                        except Exception:
+                                            continue
+                                    if found_hid:
+                                        break
+                            except Exception as _e:
+                                print(f"Error while attempting to compute hashed ids for mapping: {_e}")
+
+                        # If still not found, search base tasks directly
+                        if not task_info.get('_baseId'):
+                            for t in (expectations_data.get('tasks') or []):
+                                # direct match against base id
+                                if t.get('task_id') == task_info.get('id') or t.get('id') == task_info.get('id'):
+                                    task_info['_baseId'] = t.get('task_id') or t.get('id')
+                                    if DEBUG:
+                                        print(f"Matched base id directly: {task_info.get('_baseId')}")
+                                    break
+                                # match against hashed ids stored on base tasks
+                                hashed = t.get('hashed_ids') or {}
+                                if isinstance(hashed, dict) and any(h == task_info.get('id') for h in hashed.values()):
+                                    task_info['_baseId'] = t.get('task_id') or t.get('id')
+                                    if DEBUG:
+                                        print(f"Matched hashed id to base task: {task_info.get('_baseId')}")
+                                    break
+            except Exception as _e:
+                print(f"Error while attempting to enrich task info: {_e}")
+
+            # Build a concise task_summary if available so the LLM/generator has a full prompt
+            try:
+                if not task_info.get('task_summary'):
+                    pieces = []
+                    if task_info.get('kpa'):
+                        pieces.append(f"{task_info.get('kpa')}")
+                    if task_info.get('title'):
+                        pieces.append(f"{task_info.get('title')}")
+                    if task_info.get('what_to_do'):
+                        pieces.append(f"What to do: {task_info.get('what_to_do')}")
+                    if task_info.get('evidence_required'):
+                        pieces.append(f"Evidence required: {task_info.get('evidence_required')}")
+                    if pieces:
+                        task_info['task_summary'] = "\n".join(pieces)
+            except Exception:
+                pass
+
+            # Ensure enriched task info is placed back into the context so template/LLM renderers can access it
+            try:
+                context['task'] = task_info
+            except Exception:
+                pass
+
             print(f"Task ID: {task_info.get('id')}")
-            print(f"Task Title: {task_info.get('title')}")
-            print(f"Task KPA: {task_info.get('kpa')}")
+            if DEBUG:
+                print(f"Task Title: {task_info.get('title')}")
+                print(f"Task KPA: {task_info.get('kpa')}")
+                print(f"Task _baseId: {task_info.get('_baseId')}")
         else:
             print("⚠️ WARNING: No task information in context!")
         print("=" * 60)
         
-        # Query Ollama
+        # Try template-based guidance first (fast, deterministic)
+        try:
+            # Load and render template (single-call helper)
+            try:
+                from backend.guidance_renderer import get_rendered_template, generate_qualitative_guidance
+                # Try auto-generated templates first, then static templates
+                tmpl = None
+                try:
+                    tmpl = get_rendered_template(DATA_FOLDER / 'auto_guidance_templates.json', context, variant='short')
+                except Exception:
+                    tmpl = None
+                if not tmpl:
+                    tmpl = get_rendered_template(DATA_FOLDER / 'guidance_templates.json', context, variant='short')
+                if tmpl and tmpl.get('text'):
+                    return jsonify({"guidance": tmpl.get('text'), "source": "template", "template_id": tmpl.get('template_id')})
+
+                # If no strict template match, generate a concise, personal guidance
+                gen = generate_qualitative_guidance(context, variant='short_personal')
+                if gen and gen.get('text'):
+                    return jsonify({"guidance": gen.get('text'), "source": "generated", "template_id": gen.get('template_id')})
+            except Exception as _e:
+                print(f"Template/Generator error: {_e}")
+        except Exception as _e:
+            print(f"Template rendering error: {_e}")
+
+        # Fallback: Query Ollama
         guidance = query_ollama(f"Provide guidance: {question}", context)
         
-        return jsonify({"guidance": guidance})
+        return jsonify({"guidance": guidance, "source": "llm"})
     
     except Exception as e:
         print(f"❌ AI GUIDANCE ERROR: {e}")

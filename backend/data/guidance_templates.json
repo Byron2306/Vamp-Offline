@@ -1,0 +1,1584 @@
+[
+  {
+    "template_id": "committee_attendance_evidence",
+    "scope": {
+      "title_regex": "committee"
+    },
+    "priority": 1000,
+    "metadata": {
+      "author": "system",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T00:00:00Z"
+    },
+    "template_variants": {
+      "short": "I see this task relates to committee participation ({{title}}). To meet the requirement for {{month}}, upload one or more of: meeting invite showing your name, the meeting agenda with your role listed, minutes that record your contribution, or an email confirming your attendance.",
+      "detailed": "Task: {{title}}\nMonth: {{month}}\nEvidence: Please upload items that clearly show your involvement: (1) the meeting invite or calendar entry with your name; (2) the agenda or minutes that reference your contribution; (3) any slides or documents you presented (with date); (4) an email confirming your attendance. If some items are not available, provide a short note explaining why and include any related correspondence.",
+      "coach": "When coaching, ask for the meeting invite and agenda first. If the staff cannot provide formal minutes, accept an email confirmation plus notes explaining the contribution. Encourage uploading a brief reflective note describing the role taken."
+    },
+    "placeholders": {
+      "month": "Month string like 2025-01",
+      "title": "Task title"
+    },
+    "fields_to_include": [
+      "title",
+      "kpa",
+      "evidence_count"
+    ]
+  },
+  {
+    "template_id": "generic_evidence_suggestion",
+    "scope": {},
+    "priority": 10,
+    "metadata": {
+      "author": "system",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T00:00:00Z"
+    },
+    "template_variants": {
+      "short": "To meet this task ({{title}}) for {{month}}, consider uploading clear artefacts such as an agenda, a signed attendance list, a screenshot of a meeting record, or a short reflective note explaining your contribution.",
+      "detailed": "Evidence guidance for {{title}}: start with items that directly show participation (invites, minutes, signed registers). Complement with artifacts that show your role (slides, authored documents) and add a short note that describes your contribution and dates."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "base_task_specific_example",
+    "scope": {
+      "base_task_id": "base_task_072"
+    },
+    "priority": 2000,
+    "metadata": {
+      "author": "system",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T00:00:00Z"
+    },
+    "template_variants": {
+      "short": "This specific task ({title}) expects curriculum evidence. Upload: the curriculum document with your name on it, module outlines, or assessment rubrics dated for {{month}}.",
+      "detailed": "Task {title} ({{month}}): Required evidence includes the curriculum document with author/editor listed, assessment rubrics, and a short reflective note describing changes made. If available, include LMS screenshots showing materials published for students."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "kpa_teaching_learning_examples",
+    "scope": {
+      "kpa": "Teaching and Learning"
+    },
+    "priority": 1500,
+    "metadata": {
+      "author": "system",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T00:00:00Z"
+    },
+    "template_variants": {
+      "short": "For teaching tasks ({{title}}), typical evidence: lesson plans, slides, assessment briefs, LMS exports, and student feedback. Aim for {{evidence_count}} clear items.",
+      "detailed": "Teaching & Learning evidence guidance for {{title}}: include lesson plans with dates, slide decks or handouts, assessment briefs/rubrics, gradebook exports or moderation reports, and any student feedback excerpts. Add a short note explaining how these artefacts demonstrate attainment of the stated learning outcomes."
+    },
+    "placeholders": {
+      "title": "Task title",
+      "evidence_count": "Number of recommended evidence items"
+    }
+  },
+  {
+    "template_id": "human_teaching_short",
+    "scope": {
+      "kpa": "Teaching and Learning"
+    },
+    "priority": 3000,
+    "metadata": {
+      "author": "human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T00:00:00Z"
+    },
+    "template_variants": {
+      "short": "Nice work You planned learning activities that matter For this task upload a teaching artefact such as a lesson plan a slide deck or an assessment rubric and add a short note describing your role and the date",
+      "coach": "Ask for a clear teaching artefact and a short reflective note that links the artefact to student learning outcomes Keep files named with the module and month"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_social_responsiveness_short",
+    "scope": {
+      "kpa": "Social Responsiveness"
+    },
+    "priority": 3000,
+    "metadata": {
+      "author": "human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T00:00:00Z"
+    },
+    "template_variants": {
+      "short": "Wow great initiative You are showing strong community engagement For this task upload a clear artefact such as an outreach report photos or a summary of activities and include a one line note about the community reached and the date Remember to confirm permission from external partners if needed",
+      "coach": "Encourage staff to provide a short outreach report and evidence of community participation If external partners are involved ask for written permission or an MoU before sharing sensitive data"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_001",
+    "scope": {
+      "base_task_id": "task_001"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "detailed": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "coach": "Coach tip For Jan: Module planning & curriculum design - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students) ask for a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_002",
+    "scope": {
+      "base_task_id": "task_002"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "detailed": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "coach": "Coach tip For Jan: eFundi LMS setup & content upload - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students) ask for a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_003",
+    "scope": {
+      "base_task_id": "task_003"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "detailed": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "coach": "Coach tip For Jan: Study guides & reading lists finalization - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students) ask for a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_004",
+    "scope": {
+      "base_task_id": "task_004"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "detailed": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "coach": "Coach tip For Jan: Assessment planning & rubric development - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students) ask for a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_005",
+    "scope": {
+      "base_task_id": "task_005"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task HISE411, consider a module outline, an LMS screenshot or export or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task HISE411, consider a module outline, an LMS screenshot or export or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Semester 1 Start: HISE411 (35 students) ask for a module outline, an LMS screenshot or export or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_006",
+    "scope": {
+      "base_task_id": "task_006"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "Good to see this For the task HISE411, consider an attendance list or register, tutorial materials or worksheets or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "Good to see this For the task HISE411, consider an attendance list or register, tutorial materials or worksheets or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Semester 1 Teaching: HISE411 (35 students) ask for an attendance list or register, tutorial materials or worksheets or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_007",
+    "scope": {
+      "base_task_id": "task_007"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task HISE411, consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task HISE411, consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Semester 1 Mid-term: HISE411 (35 students) ask for an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_008",
+    "scope": {
+      "base_task_id": "task_008"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task HISE411, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task HISE411, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Semester 1 Completion: HISE411 (35 students) ask for a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_009",
+    "scope": {
+      "base_task_id": "task_009"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task HISE411, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task HISE411, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Semester 1 Exams: HISE411 (35 students) ask for a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_010",
+    "scope": {
+      "base_task_id": "task_010"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "detailed": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "coach": "Coach tip For Mid-Year Break: HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students) ask for a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_011",
+    "scope": {
+      "base_task_id": "task_011"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task HISE322, consider a module outline, an LMS screenshot or export or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task HISE322, consider a module outline, an LMS screenshot or export or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Semester 2 Start: HISE322 (40 students) ask for a module outline, an LMS screenshot or export or a slide deck. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_012",
+    "scope": {
+      "base_task_id": "task_012"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task HISE322, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task HISE322, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Semester 2 Teaching: HISE322 (40 students) ask for a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_013",
+    "scope": {
+      "base_task_id": "task_013"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task HISE322, consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task HISE322, consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Semester 2 Mid-term: HISE322 (40 students) ask for an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_014",
+    "scope": {
+      "base_task_id": "task_014"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task HISE322, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task HISE322, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Semester 2 Completion: HISE322 (40 students) ask for a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_015",
+    "scope": {
+      "base_task_id": "task_015"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task HISE322, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task HISE322, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Year-End Exams: HISE322 (40 students) ask for a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_016",
+    "scope": {
+      "base_task_id": "task_016"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "detailed": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "coach": "Coach tip For Semester 1 marks submission deadline - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students) ask for a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_017",
+    "scope": {
+      "base_task_id": "task_017"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "detailed": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "coach": "Coach tip For Year-end marks and moderation - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students) ask for a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_018",
+    "scope": {
+      "base_task_id": "task_018"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "detailed": "For HISE411 consider a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup.",
+      "coach": "Coach tip For Module quality assurance - HISE411 (35 students), HISE322 (40 students), ERTP 671 (1 students), LERP 671 (1 students) ask for a slide deck, a sample of student feedback or an assessment rubric. For HISE322 consider an LMS screenshot or export, a gradebook export or a sample of anonymized student feedback. Add a short one line note to each file and name files so they include the module code for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_019",
+    "scope": {
+      "base_task_id": "task_019"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Teaching Practice Assessment, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Teaching Practice Assessment, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Teaching Practice Assessment - April ask for a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_020",
+    "scope": {
+      "base_task_id": "task_020"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Teaching Practice Assessment, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Teaching Practice Assessment, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Teaching Practice Assessment - July ask for a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_021",
+    "scope": {
+      "base_task_id": "task_021"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Orientation Programme, consider ror, reception or orientation. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Orientation Programme, consider ror, reception or orientation. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For ROR Preparation: Orientation Programme ask for ror, reception or orientation. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_022",
+    "scope": {
+      "base_task_id": "task_022"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Orientation Programme Delivery, consider ror, reception or orientation. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Orientation Programme Delivery, consider ror, reception or orientation. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For ROR Event: Orientation Programme Delivery ask for ror, reception or orientation. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_023",
+    "scope": {
+      "base_task_id": "task_023"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For OHS compliance check ask for ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_024",
+    "scope": {
+      "base_task_id": "task_024"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For OHS compliance check ask for ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_025",
+    "scope": {
+      "base_task_id": "task_025"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For OHS compliance check ask for ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_026",
+    "scope": {
+      "base_task_id": "task_026"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task OHS compliance check, consider ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For OHS compliance check ask for ohs, safety or compliance. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_027",
+    "scope": {
+      "base_task_id": "task_027"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Level Up Learning, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Level Up Learning, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Research Project: Level Up Learning ask for research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_028",
+    "scope": {
+      "base_task_id": "task_028"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task GameBased Learning in History Education, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task GameBased Learning in History Education, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Research Project: Game-Based Learning in History Education ask for research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_029",
+    "scope": {
+      "base_task_id": "task_029"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Revitalizing Classrooms, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Revitalizing Classrooms, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Research Project: Revitalizing Classrooms ask for research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_030",
+    "scope": {
+      "base_task_id": "task_030"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Prosper GREAT project, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Prosper GREAT project, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Research Project: Prosper GREAT project ask for research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_031",
+    "scope": {
+      "base_task_id": "task_031"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Citesaga project, Renewable Rangers project, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Citesaga project, Renewable Rangers project, consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Research Project: Citesaga project, Renewable Rangers project ask for research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_032",
+    "scope": {
+      "base_task_id": "task_032"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR), consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR), consider research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Research Project: Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR) ask for research, project or progress. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_033",
+    "scope": {
+      "base_task_id": "task_033"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task ECGBL, consider conference, presentation or submission. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task ECGBL, consider conference, presentation or submission. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Conference: ECGBL ask for conference, presentation or submission. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_034",
+    "scope": {
+      "base_task_id": "task_034"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Play with purpose, consider publication, manuscript or book. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Play with purpose, consider publication, manuscript or book. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Publication: Play with purpose ask for publication, manuscript or book. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_035",
+    "scope": {
+      "base_task_id": "task_035"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task ERTP/LERP Proposals, consider ertp, lerp or honours. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task ERTP/LERP Proposals, consider ertp, lerp or honours. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Honours Supervision: ERTP/LERP Proposals ask for ertp, lerp or honours. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_036",
+    "scope": {
+      "base_task_id": "task_036"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task ERTP/LERP Reports, consider ertp, lerp or honours. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task ERTP/LERP Reports, consider ertp, lerp or honours. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Honours Supervision: ERTP/LERP Reports ask for ertp, lerp or honours. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_037",
+    "scope": {
+      "base_task_id": "task_037"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task SDL, consider leadership, sdl or research entity. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task SDL, consider leadership, sdl or research entity. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Research Leadership: SDL ask for leadership, sdl or research entity. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_038",
+    "scope": {
+      "base_task_id": "task_038"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "Lovely work For the task Playbased SDL sub area leader, consider leadership, sdl or research entity. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "Lovely work For the task Playbased SDL sub area leader, consider leadership, sdl or research entity. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Research Leadership: Play-based SDL sub area leader ask for leadership, sdl or research entity. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_039",
+    "scope": {
+      "base_task_id": "task_039"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "Well done For the task Research Professional Development, consider workshop, colloquium or writing school. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing.",
+      "detailed": "Well done For the task Research Professional Development, consider workshop, colloquium or writing school. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing.",
+      "coach": "Coach tip For Research Professional Development ask for workshop, colloquium or writing school. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_040",
+    "scope": {
+      "base_task_id": "task_040"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task NRF grant application / Rating submission, consider nrf, grant or rating. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task NRF grant application / Rating submission, consider nrf, grant or rating. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For NRF grant application / Rating submission ask for nrf, grant or rating. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_041",
+    "scope": {
+      "base_task_id": "task_041"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Midyear research output (publication/conference), consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Midyear research output (publication/conference), consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Mid-year research output (publication/conference) ask for an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_042",
+    "scope": {
+      "base_task_id": "task_042"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Yearend research output (accredited publication), consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Yearend research output (accredited publication), consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Year-end research output (accredited publication) ask for a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_043",
+    "scope": {
+      "base_task_id": "task_043"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Postgraduate supervision meetings & progress tracking, consider supervision, postgraduate or masters. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Postgraduate supervision meetings & progress tracking, consider supervision, postgraduate or masters. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Postgraduate supervision meetings & progress tracking ask for supervision, postgraduate or masters. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_044",
+    "scope": {
+      "base_task_id": "task_044"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task SDL scientific committee 5, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task SDL scientific committee 5, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: SDL scientific committee 5 ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_045",
+    "scope": {
+      "base_task_id": "task_045"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "Lovely work For the task Faculty Board, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "Lovely work For the task Faculty Board, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: Faculty Board ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_046",
+    "scope": {
+      "base_task_id": "task_046"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "Great planning For the task Teaching and Learning Committee, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "Great planning For the task Teaching and Learning Committee, consider a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: Teaching and Learning Committee ask for a slide deck, an attendance list or register or tutorial materials or worksheets. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_047",
+    "scope": {
+      "base_task_id": "task_047"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Scientific Committee meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Scientific Committee meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: Scientific Committee meetings ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_048",
+    "scope": {
+      "base_task_id": "task_048"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Entity Exco meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Entity Exco meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: Entity Exco meetings ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_049",
+    "scope": {
+      "base_task_id": "task_049"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Research Focus Area/Unit Management Committee meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Research Focus Area/Unit Management Committee meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: Research Focus Area/Unit Management Committee meetings ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_050",
+    "scope": {
+      "base_task_id": "task_050"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "Nice work For the task Research Focus Area/Entity meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "Nice work For the task Research Focus Area/Entity meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: Research Focus Area/Entity meetings ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_051",
+    "scope": {
+      "base_task_id": "task_051"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Mentorship meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Mentorship meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: Mentorship meetings ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_052",
+    "scope": {
+      "base_task_id": "task_052"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task School Management Committee, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing.",
+      "detailed": "For the task School Management Committee, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing.",
+      "coach": "Coach tip For Committee: School Management Committee ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_053",
+    "scope": {
+      "base_task_id": "task_053"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Subject Group meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Subject Group meetings, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: Subject Group meetings ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_054",
+    "scope": {
+      "base_task_id": "task_054"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "Lovely work For the task School meetings and functions, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing.",
+      "detailed": "Lovely work For the task School meetings and functions, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing.",
+      "coach": "Coach tip For Committee: School meetings and functions ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_055",
+    "scope": {
+      "base_task_id": "task_055"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Faculty Forums, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Faculty Forums, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: Faculty Forums ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_056",
+    "scope": {
+      "base_task_id": "task_056"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Professional development (in accordance with PDP), consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Professional development (in accordance with PDP), consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: Professional development (in accordance with PDP) ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_057",
+    "scope": {
+      "base_task_id": "task_057"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task SASHT exco committee, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task SASHT exco committee, consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee: SASHT exco committee ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_058",
+    "scope": {
+      "base_task_id": "task_058"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task , consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task , consider meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Committee:  ask for meeting, minutes or committee. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_059",
+    "scope": {
+      "base_task_id": "task_059"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Midyear performance reviews & staff development, consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Midyear performance reviews & staff development, consider an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Mid-year performance reviews & staff development ask for an assessment rubric, a short student feedback excerpt or a marking sample or moderation note. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_060",
+    "scope": {
+      "base_task_id": "task_060"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Yearend performance review & annual planning, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Yearend performance review & annual planning, consider a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Year-end performance review & annual planning ask for a gradebook export, an outreach report or exam paper or mark sheet. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_061",
+    "scope": {
+      "base_task_id": "task_061"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task HISE 411, HISE 322, consider module leadership, an outreach report or a lesson plan. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task HISE 411, HISE 322, consider module leadership, an outreach report or a lesson plan. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Module Leadership: HISE 411, HISE 322 ask for module leadership, an outreach report or a lesson plan. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_062",
+    "scope": {
+      "base_task_id": "task_062"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Ntombiyoxolo Mqadi, consider mentorship, mentee or meeting. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Ntombiyoxolo Mqadi, consider mentorship, mentee or meeting. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Research Mentorship: Ntombiyoxolo Mqadi ask for mentorship, mentee or meeting. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_063",
+    "scope": {
+      "base_task_id": "task_063"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Dawid Olivier, consider mentorship, mentee or meeting. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Dawid Olivier, consider mentorship, mentee or meeting. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Research Mentorship: Dawid Olivier ask for mentorship, mentee or meeting. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_064",
+    "scope": {
+      "base_task_id": "task_064"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task Programme accreditation & quality assurance, consider accreditation, quality assurance or programme review. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "detailed": "For the task Programme accreditation & quality assurance, consider accreditation, quality assurance or programme review. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup.",
+      "coach": "Coach tip For Programme accreditation & quality assurance ask for accreditation, quality assurance or programme review. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_065",
+    "scope": {
+      "base_task_id": "task_065"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "Solid work For the task SASHT website management, consider community, engagement or an outreach report. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing.",
+      "detailed": "Solid work For the task SASHT website management, consider community, engagement or an outreach report. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing.",
+      "coach": "Coach tip For SASHT website management ask for community, engagement or an outreach report. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  },
+  {
+    "template_id": "human_task_task_066",
+    "scope": {
+      "base_task_id": "task_066"
+    },
+    "priority": 5000,
+    "metadata": {
+      "author": "generated-human",
+      "version": "1.0",
+      "locale": "en",
+      "created_at": "2025-12-19T11:36:07.237649Z"
+    },
+    "template_variants": {
+      "short": "For the task SASHT webinar coordination, consider community, engagement or an outreach report. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing.",
+      "detailed": "For the task SASHT webinar coordination, consider community, engagement or an outreach report. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing.",
+      "coach": "Coach tip For SASHT webinar coordination ask for community, engagement or an outreach report. This helps reviewers understand what you did and when. Add a short one line note to each file stating what it is and the date. Name files so they include the module code or task name for easy lookup. For external partners check goodwill permission or an MoU before sharing. and a short 1 line reflection linking the artefact to the task outcome"
+    },
+    "placeholders": {
+      "title": "Task title",
+      "month": "Month"
+    }
+  }
+]
