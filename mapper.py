@@ -41,20 +41,92 @@ def ensure_tasks(
     expectations: Optional[Dict[str, Any]] = None,
 ) -> int:
     """Ensure a staff/year task catalog exists in sqlite; return count inserted."""
-    # Clear existing tasks for this staff/year to prevent duplication
+    # Preserve persisted asserted mappings for this staff/year so user-asserted mappings survive a rebuild
+    preserved_mappings: List[Tuple[str, str, str, float, str]] = []
     try:
-        deleted = store.clear_tasks_for_staff_year(staff_id, int(year))
+        try:
+            preserved_mappings = store.get_asserted_mappings_for_staff_year(staff_id, int(year))
+        except Exception:
+            preserved_mappings = []
+
+        # Preserve task_ids referenced by asserted mappings so user-locked tasks survive rebuilds
+        preserve_task_ids = list({m[1] for m in preserved_mappings if len(m) >= 2 and m[1]})
+        try:
+            deleted = store.clear_tasks_for_staff_year_preserve(staff_id, int(year), preserve_task_ids)
+        except Exception:
+            deleted = store.clear_tasks_for_staff_year(staff_id, int(year))
+
         if deleted > 0:
             print(f"Cleared {deleted} existing tasks for staff {staff_id} year {year}")
     except Exception as e:
         print(f"Warning: could not clear existing tasks: {e}")
-    
+
+    # Insert new task rows
     if expectations:
         rows = tasks_from_expectations(staff_id, int(year), expectations)
         if rows:
-            return store.upsert_tasks(rows)
-    # fallback
-    return store.upsert_tasks(default_tasks_for_year(staff_id, int(year)))
+            inserted = store.upsert_tasks(rows)
+        else:
+            inserted = store.upsert_tasks(default_tasks_for_year(staff_id, int(year)))
+    else:
+        inserted = store.upsert_tasks(default_tasks_for_year(staff_id, int(year)))
+
+    # Restore preserved mappings where the task still exists in the tasks table
+    try:
+        # Get current task ids and titles for the year
+        current_task_rows = store.list_tasks_for_window(int(year), list(range(1, 13)), kpa_code=None)
+        current_task_ids = set([r["task_id"] for r in current_task_rows])
+        # Helper: simple token overlap title matcher
+        def _title_tokens(s: str) -> set:
+            return set(re.findall(r"[a-z0-9]{3,}", (s or "").lower()))
+
+        for entry in preserved_mappings:
+            # preserved_mappings entries may be (evidence_id, task_id, mapped_by, confidence) or include title
+            if len(entry) == 5:
+                evidence_id, task_id, mapped_by, confidence, old_title = entry
+            else:
+                evidence_id, task_id, mapped_by, confidence = entry
+                old_title = ""
+
+            if task_id in current_task_ids:
+                try:
+                    store.upsert_mapping(evidence_id, task_id, mapped_by=mapped_by, confidence=confidence)
+                    continue
+                except Exception:
+                    continue
+
+            # Try to find a candidate by exact title match first
+            candidate_id = None
+            old_tokens = _title_tokens(old_title)
+            if old_title:
+                for r in current_task_rows:
+                    if (r.get("title") or "").strip().lower() == old_title.strip().lower():
+                        candidate_id = r["task_id"]
+                        break
+
+            # If no exact match, fallback to token overlap heuristic
+            if not candidate_id and old_tokens:
+                best = (0.0, None)
+                for r in current_task_rows:
+                    t_tokens = _title_tokens(r.get("title") or "")
+                    if not t_tokens:
+                        continue
+                    overlap = len(old_tokens.intersection(t_tokens))
+                    score = overlap / max(1, len(t_tokens))
+                    if score > best[0]:
+                        best = (score, r["task_id"]) 
+                if best[0] >= 0.4:
+                    candidate_id = best[1]
+
+            if candidate_id:
+                try:
+                    store.upsert_mapping(evidence_id, candidate_id, mapped_by=mapped_by, confidence=confidence)
+                except Exception:
+                    continue
+    except Exception:
+        pass
+
+    return inserted
 
 
 def _text_signal(meta: Dict[str, Any]) -> str:

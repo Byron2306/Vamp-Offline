@@ -1,0 +1,212 @@
+{
+  "kpa_summary": {
+    "KPA3": {
+      "name": "Personal Research, Innovation and/or Creative Outputs",
+      "hours": 370.0,
+      "weight_pct": 17.7
+    },
+    "KPA1": {
+      "name": "Teaching and Learning (including supervision)",
+      "hours": 792.99,
+      "weight_pct": 37.94
+    },
+    "KPA5": {
+      "name": "Social Responsiveness (Community Engagement / Industry)",
+      "hours": 30.0,
+      "weight_pct": 1.44
+    },
+    "KPA4": {
+      "name": "Academic Leadership and Administration",
+      "hours": 895.0,
+      "weight_pct": 42.83
+    },
+    "KPA2": {
+      "name": "Occupational Health & Safety",
+      "hours": 2.0,
+      "weight_pct": 0.1,
+      "teaching_modules": [
+        {
+          "code": "HISE322",
+          "students": 40,
+          "hours": 117.92000000000002
+        },
+        {
+          "code": "HISE411",
+          "students": 35,
+          "hours": 117.07
+        },
+        {
+          "code": "ERTP 671",
+          "students": 1,
+          "hours": 25.0
+        },
+        {
+          "code": "LERP 671",
+          "students": 1,
+          "hours": 25.0
+        }
+      ]
+    }
+  },
+  "teaching": [
+    "Presentation: 1 hour per presentation",
+    "Preparation: 1 hour per presentation",
+    "Facilitator: 1 hour per presentation (assisting presenter)",
+    "Material development: 5 hours per theme"
+  ],
+  "teaching_ror": [
+    "Presentation: 1 hour per presentation times  number of presentations divided by number of presenters",
+    "Preparation: 1 hour preparation per presentation"
+  ],
+  "supervision": [
+    "C. Choba",
+    "S. Manana",
+    "V van Rensberg",
+    "P. Motsosi"
+  ],
+  "research": [
+    "Level Up Learning: Enhancing Self-Directed Learning in Computer Applications Technology with Classcraft",
+    "Game-Based Learning in History Education: Insights from \u201cDogs of War\u201d",
+    "Revitalizing Classrooms: Integrating Indigenous Knowledge and Ubuntu in Social Sciences Education",
+    "Prosper GREAT project",
+    "Citesaga project, Renewable Rangers project",
+    "ECGBL",
+    "SDL",
+    "Play with purpose, B Bunt and L Bunt, SDL OEP book for 2025",
+    "Open Educational Practices (OEPs) in the Era of the Fourth Industrial Revolution (4IR): Empowering Self-Directed Learning (SDL)",
+    "ERTP/LERP Research proposals (2 assignments) @ 30min (0,5 hours) per student 2",
+    "ERTP/LERP Research reports @ 2 hours per student 2",
+    "Attendance of research colloquims, writing schools, workshops (eg. Ethics, Integrity, Turnitin): Maximum of 60 hours",
+    "Play-based SDL sub area leader"
+  ],
+  "leadership": [
+    "SDL scientific committee 5",
+    "Faculty Board: 12 hours",
+    "Teaching and Learning Committee: 18 hours",
+    "Scientific Committee meetings: 55 hours per entity",
+    "Entity Exco meetings: 30 hours",
+    "Research Focus Area/Unit Management Committee meetings: \nMaximum of 20 hours",
+    "Research Focus Area/Entity meetings: Maximum of 10 hours",
+    "Mentorship meetings: 8 hours",
+    "School Management Committee: 24 hours",
+    "Subject Group meetings: 22 hours",
+    "School meetings and functions: 10 hours",
+    "Faculty Forums: Maximum of 6 hours",
+    "Professional development (in accordance with PDP): Maximum of 10 hours",
+    "SASHT exco committee",
+    ""
+  ],
+  "module_leadership": [
+    {
+      "modules": "HISE 411, HISE 322",
+      "hours": 40.0
+    }
+  ],
+  "mentorship": [
+    {
+      "name": "Ntombiyoxolo Mqadi",
+      "hours": 10.0
+    },
+    {
+      "name": "Dawid Olivier",
+      "hours": 10.0
+    }
+  ],
+  "social": [
+    "SASHT website management",
+    "SASHT webinar coordination"
+  ],
+  "ohs": [
+    ""
+  ],
+  "norm_hours": 1728.0,
+  "teaching_modules": [
+    {
+      "code": "HISE322",
+      "students": 40,
+      "hours": 117.92000000000002
+    },
+    {
+      "code": "HISE411",
+      "students": 35,
+      "hours": 117.07
+    },
+    {
+      "code": "ERTP 671",
+      "students": 1,
+      "hours": 25.0
+    },
+    {
+      "code": "LERP 671",
+      "students": 1,
+      "hours": 25.0
+    }
+  ],
+  "teaching_practice_windows": [
+    "April",
+    "July"
+  ],
+  "people_management": [
+    ""
+  ],
+  "ta_parse_report": {
+    "1": {
+      "blocks_detected": [
+        "committee_roles",
+        "research_block"
+      ],
+      "rows_consumed": 10,
+      "rows_unconsumed": 0,
+      "unconsumed_examples": []
+    },
+    "2": {
+      "blocks_detected": [
+        "committee_roles",
+        "module_table",
+        "research_block",
+        "ror_teaching",
+        "supervision",
+        "teaching_practice_windows"
+      ],
+      "rows_consumed": 21,
+      "rows_unconsumed": 0,
+      "unconsumed_examples": []
+    },
+    "3": {
+      "blocks_detected": [],
+      "rows_consumed": 2,
+      "rows_unconsumed": 0,
+      "unconsumed_examples": []
+    },
+    "4": {
+      "blocks_detected": [
+        "committee_roles",
+        "mentorship",
+        "module_leadership",
+        "research_block"
+      ],
+      "rows_consumed": 18,
+      "rows_unconsumed": 0,
+      "unconsumed_examples": []
+    },
+    "5": {
+      "blocks_detected": [
+        "committee_roles",
+        "ohs_block"
+      ],
+      "rows_consumed": 1,
+      "rows_unconsumed": 0,
+      "unconsumed_examples": []
+    },
+    "6": {
+      "blocks_detected": [],
+      "rows_consumed": 1,
+      "rows_unconsumed": 0,
+      "unconsumed_examples": []
+    }
+  },
+  "warnings": [
+    "Over-norm workload: +362.0 hours"
+  ],
+  "total_hours": 2089.99
+}

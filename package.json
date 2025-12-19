@@ -23,7 +23,8 @@
   "homepage": "https://github.com/Byron2306/Vamp-Offline#readme",
   "dependencies": {
     "esprima": "^4.0.1",
-    "jsdom": "^27.3.0",
+    "iconv-lite": "^0.7.1",
+    "jsdom": "^20.0.3",
     "node-fetch": "^2.7.0"
   }
 }

@@ -71,11 +71,44 @@ function restoreScanPanelHome({ hide = true } = {}) {
 }
 
 function attachScanPanelTo(hostEl) {
+  // To avoid losing file input selection when moving elements between
+  // containers (browsers often clear file inputs on DOM move), do NOT
+  // physically move the scan section. Instead, insert a lightweight
+  // anchor in the requested host which shows the fixed scan panel when
+  // the user clicks it. This preserves any selected files and keeps
+  // event listeners intact.
   const section = $("scanEvidenceSection");
   if (!section || !hostEl) return;
   rememberScanPanelHome();
-  hostEl.appendChild(section);
-  section.style.display = "block";
+
+  // Remove any existing inline anchors so we never create duplicates
+  try {
+    document.querySelectorAll('#scanEvidenceSectionInlineAnchor').forEach(a => a.remove());
+  } catch (e) {
+    // ignore
+  }
+
+  // If the section is already displayed (user opened it), nothing more to do
+  if (section.style.display === 'block') {
+    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // Create an inline anchor button that opens the scan panel in its fixed location
+  const anchor = document.createElement('div');
+  anchor.id = 'scanEvidenceSectionInlineAnchor';
+  anchor.style.cssText = 'margin-bottom:8px;';
+  anchor.innerHTML = `<button class="btn" style="width:100%;" aria-label="Open scan panel">Open Scan Panel ⤴</button>`;
+  anchor.querySelector('button').addEventListener('click', () => {
+    // Show the fixed scan panel in its original home and scroll it into view
+    section.style.display = 'block';
+    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Reveal target task label if set
+    const targetLabel = $("scanTargetTaskLabel");
+    if (targetLabel && targetLabel.style.display === 'none') targetLabel.style.display = 'block';
+  });
+
+  hostEl.appendChild(anchor);
 }
 
 function clearTargetedScanState() {
@@ -1523,8 +1556,11 @@ function openAIGuidance(taskId) {
   
   if (!modal) {
     vampSpeak("Error: AI guidance modal not found.");
-    rSearch strategy: try multiple sources since tasks can have different IDs
+    return;
+  }
   let task = null;
+
+  // Search strategy: try multiple sources since tasks can have different IDs
   
   let debugSteps = [];
   // 1. Try current month view first (most likely to match)
@@ -2358,9 +2394,9 @@ function openLockExplanationModal(files, targetTaskId) {
   
   // Get task title from the dropdown
   const taskSelect = $("scanTargetTaskId");
-  const taskTitle = taskSelect?.selectedOptions[0]?.text || "Selected task";
+  const taskTitle = taskSelect?.selectedOptions?.[0]?.text || "Selected task";
   const monthSelect = $("scanMonth");
-  const monthText = monthSelect?.selectedOptions[0]?.text || "Selected month";
+  const monthText = monthSelect?.selectedOptions?.[0]?.text || "Selected month";
   
   // Update modal content
   $("lockModalTaskTitle").textContent = taskTitle;
@@ -2393,20 +2429,34 @@ async function submitLockExplanation() {
     closeLockExplanationModal();
     return;
   }
-  
+  // Ensure files are present and capture targetTaskId defensively
+  const files = pendingScanData.files || [];
+  const targetTaskId = pendingScanData.targetTaskId || $("scanTargetTaskId")?.value || currentScanTargetTaskId || null;
+  if (!files || (files.length === 0)) {
+    vampSpeak("No files selected for scan.");
+    closeLockExplanationModal();
+    pendingScanData = null;
+    return;
+  }
+
   // Close modal
   closeLockExplanationModal();
-  
-  // Perform the scan with explanation
-  await performScan(
-    pendingScanData.files,
-    pendingScanData.targetTaskId,
-    explanation,
-    true  // isLocked
-  );
-  
-  // Clear pending data
-  pendingScanData = null;
+
+  // Perform the scan with explanation (guard in try/catch to surface errors)
+  try {
+    await performScan(
+      files,
+      targetTaskId,
+      explanation,
+      true // isLocked
+    );
+  } catch (e) {
+    console.error('submitLockExplanation: performScan failed', e);
+    vampSpeak('Scan failed. Check server logs.');
+  } finally {
+    // Clear pending data
+    pendingScanData = null;
+  }
 }
 
 // Close modal on background click

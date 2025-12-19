@@ -298,9 +298,67 @@ def import_task_agreement():
         if not staff_id or not cycle_year:
             return jsonify({"error": "Missing staff_id or cycle_year"}), 400
         
-        # First check if contract already exists (faster)
+        # Prefer uploaded file when provided. If no uploaded file, fall back to existing contract.
         contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{cycle_year}.json"
-        
+
+        uploaded_file = request.files.get('file') if 'file' in request.files else None
+
+        if uploaded_file and getattr(uploaded_file, 'filename', None):
+            # Process uploaded TA (overrides any existing contract)
+            filename = secure_filename(uploaded_file.filename)
+            filepath = UPLOAD_FOLDER / filename
+            uploaded_file.save(str(filepath))
+
+            if EXPECTATION_ENGINE_AVAILABLE and parse_task_agreement and build_expectations_from_ta:
+                try:
+                    ta_summary = parse_task_agreement(str(filepath))
+                    expectations = build_expectations_from_ta(staff_id, int(cycle_year), ta_summary)
+
+                    # Save expectations (backup existing file first)
+                    expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{cycle_year}.json"
+                    expectations_file.parent.mkdir(parents=True, exist_ok=True)
+                    if expectations_file.exists():
+                        try:
+                            bak = expectations_file.with_suffix('.json.bak')
+                            bak_name = expectations_file.with_name(f"{expectations_file.stem}.{int(time.time())}.bak")
+                            expectations_file.rename(bak_name)
+                        except Exception:
+                            pass
+
+                    with open(expectations_file, 'w') as f:
+                        json.dump(expectations, f, indent=2)
+
+                    # Also save TA summary
+                    ta_file = CONTRACTS_FOLDER / f"ta_summary_{staff_id}_{cycle_year}.json"
+                    ta_file.parent.mkdir(parents=True, exist_ok=True)
+                    with open(ta_file, 'w') as f:
+                        json.dump(ta_summary, f, indent=2)
+
+                    # Immediately ensure tasks are present in the progress DB
+                    try:
+                        from progress_store import ProgressStore
+                        from mapper import ensure_tasks
+                        store = ProgressStore()
+                        ensure_tasks(store, staff_id=staff_id, year=int(cycle_year), expectations=expectations)
+                    except Exception as e:
+                        print(f"Warning: could not upsert tasks after import: {e}")
+
+                    return jsonify({
+                        "status": "success",
+                        "tasks_count": len(expectations.get('tasks', [])),
+                        "kpas_count": len(expectations.get('kpa_summary', {})),
+                        "expectations_path": str(expectations_file),
+                        "message": "Uploaded TA parsed and persisted; existing contract (if any) was ignored."
+                    })
+                except Exception as parse_error:
+                    print(f"TA parsing failed: {parse_error}")
+                    import traceback
+                    traceback.print_exc()
+            else:
+                print("TA parser not available.")
+                return jsonify({"error": "Task Agreement parser not available. Please ensure the expectation engine is installed and import a TA."}), 500
+
+        # If no uploaded file, try using existing contract (if present)
         if contract_file.exists():
             # Use existing contract
             with open(contract_file, 'r') as f:
@@ -309,9 +367,15 @@ def import_task_agreement():
             if EXPECTATION_ENGINE_AVAILABLE and build_expectations_from_ta:
                 expectations = build_expectations_from_ta(staff_id, int(cycle_year), ta_summary)
 
-                # Save expectations
+                # Save expectations (backup existing file first)
                 expectations_file = CONTRACTS_FOLDER.parent / "staff_expectations" / f"expectations_{staff_id}_{cycle_year}.json"
                 expectations_file.parent.mkdir(parents=True, exist_ok=True)
+                if expectations_file.exists():
+                    try:
+                        bak_name = expectations_file.with_name(f"{expectations_file.stem}.{int(time.time())}.bak")
+                        expectations_file.rename(bak_name)
+                    except Exception:
+                        pass
 
                 with open(expectations_file, 'w') as f:
                     json.dump(expectations, f, indent=2)
@@ -1121,22 +1185,15 @@ def scan_upload():
                     file_text = f"File: {filename}"
                     extraction_method = "failed"
                 
-                # AI Classification using Ollama (skip if asserted mapping)
+                # Prepare user-impact text; still run AI + brain scoring even when asserted
+                impact_text = None
                 if asserted_mapping and target_task_id:
-                    # User asserted this evidence belongs to the target task with user explanation
                     impact_text = "Evidence directly linked to task by user (asserted relevance)"
                     if user_explanation:
                         impact_text = f"User explanation: {user_explanation[:200]}... | {impact_text}"
-                    
-                    classification = {
-                        "kpa": "Asserted",
-                        "task": "User-selected task",
-                        "tier": "User-Asserted",
-                        "impact_summary": impact_text,
-                        "confidence": 1.0
-                    }
-                    use_brain = False  # Skip brain scorer too
-                elif use_contextual:
+
+                # AI Classification using Ollama (use contextual if requested)
+                if use_contextual:
                     try:
                         classification = classify_with_ollama(filename, file_text)
                     except Exception as e:
@@ -1158,10 +1215,18 @@ def scan_upload():
                         "confidence": 0.75
                     }
 
+                # Prepend user impact text if present so user assertions are visible in meta
+                if impact_text:
+                    try:
+                        classification["impact_summary"] = f"{impact_text} | {classification.get('impact_summary','') }"
+                    except Exception:
+                        pass
+
                 # Deterministic NWU Brain scoring (prioritize this for accuracy)
                 # Skip brain scorer if user has asserted the mapping to respect their decision
                 brain_ctx = None
-                if brain_enabled and not (asserted_mapping and target_task_id):
+                # Always run brain scoring when available to produce rating/tier, even for asserted mappings
+                if brain_enabled:
                     try:
                         brain_ctx = brain_score_evidence(path=Path(filepath), full_text=file_text, kpa_hint_code=None)
                         # Update classification with brain scorer results if more confident
@@ -1219,8 +1284,77 @@ def scan_upload():
                         import traceback
                         traceback.print_exc()
                         brain_ctx = None
-                
-                # Map KPA name to KPA code (from brain first, else from Ollama classification)
+
+                    # Also request a richer Ollama classification (longer, structured JSON)
+                    ai_ctx = None
+                    if use_contextual:
+                        try:
+                            print(f"[OLLAMA] Requesting detailed classification for {filename}")
+                            # Build a prompt that prioritises the user's explanation when present
+                            prompt = f"""Provide a JSON classification for this evidence file.
+    Include fields: kpa (human-friendly), task, tier, impact_summary, confidence (0.0-1.0).
+
+    USER_EXPLANATION: {user_explanation or ''}
+    FILENAME: {filename}
+    CONTENT_PREVIEW: {file_text[:2000]}
+
+    Return only valid JSON."""
+                            try:
+                                ai_ctx = classify_with_ollama_raw(prompt)
+                            except Exception as e:
+                                print(f"[OLLAMA ERROR] classify_with_ollama_raw failed for {filename}: {e}")
+                                ai_ctx = None
+
+                            if ai_ctx:
+                                try:
+                                    print(f"[OLLAMA] Response for {filename}: {str(ai_ctx)[:400]}")
+                                    # Merge AI classification into the existing classification
+                                    # Brain scorer remains authoritative for rating/tier when present
+                                    classification["kpa"] = ai_ctx.get("kpa", classification.get("kpa"))
+                                    classification["task"] = ai_ctx.get("task", classification.get("task"))
+                                    # Only override tier if brain did not provide a tier
+                                    if not brain_ctx:
+                                        classification["tier"] = ai_ctx.get("tier", classification.get("tier"))
+                                    # Blend confidence
+                                    classification["confidence"] = max(classification.get("confidence", 0.0), float(ai_ctx.get("confidence", 0.0)))
+                                    # Build an enhanced impact summary combining user, AI and brain
+                                    classification["impact_summary"] = _build_enhanced_impact_summary(
+                                        user_description=user_explanation or "",
+                                        ai_summary=ai_ctx.get("impact_summary", classification.get("impact_summary","")),
+                                        brain_ctx=brain_ctx,
+                                        filename=filename,
+                                        tier=classification.get("tier", "")
+                                    )
+                                except Exception as e:
+                                    print(f"[OLLAMA MERGE ERROR] {e}")
+                        except Exception as e:
+                            print(f"[OLLAMA ERROR] Detailed Ollama classification failed for {filename}: {e}")
+                            ai_ctx = None
+
+                    # Ensure we always persist a meaningful `ollama` entry.
+                    if not ai_ctx:
+                        # Build a richer fallback from user + brain + classification so UI shows something meaningful
+                        try:
+                            enhanced_summary = _build_enhanced_impact_summary(
+                                user_description=user_explanation or "",
+                                ai_summary=classification.get("impact_summary", ""),
+                                brain_ctx=brain_ctx,
+                                filename=filename,
+                                tier=classification.get("tier", "")
+                            )
+                            ai_ctx = {
+                                "kpa": classification.get("kpa"),
+                                "task": classification.get("task"),
+                                "tier": classification.get("tier"),
+                                "impact_summary": enhanced_summary,
+                                "confidence": float(classification.get("confidence", 0.0)),
+                                "fallback": True,
+                            }
+                            print(f"[OLLAMA FALLBACK] Using enriched fallback AI ctx for {filename}")
+                        except Exception:
+                            ai_ctx = {"impact_summary": classification.get("impact_summary", ""), "fallback": True}
+
+                    # Map KPA name to KPA code (from brain first, else from Ollama classification)
                 # Use exact matching to avoid false positives (e.g., "teaching" in "teaching practice")
                 kpa_code = None
                 if brain_ctx and brain_ctx.get("primary_kpa_code"):
@@ -1313,8 +1447,31 @@ def scan_upload():
                             "task": classification["task"],
                             "target_task_id": target_task_id or "",
                             "brain": brain_ctx or {},
+                            "ollama": ai_ctx or {},
                         }
                     )
+
+                    # If we used a fallback Ollama result, schedule background retries
+                    try:
+                        if ai_ctx and isinstance(ai_ctx, dict) and ai_ctx.get("fallback"):
+                            import threading
+                            thread = threading.Thread(
+                                target=_retry_ollama_and_update,
+                                args=(
+                                    evidence_id,
+                                    filename,
+                                    file_text,
+                                    user_explanation or "",
+                                    staff_id,
+                                    int(month[:4]),
+                                    month,
+                                ),
+                            )
+                            thread.daemon = True
+                            thread.start()
+                            print(f"[OLLAMA RETRY] Scheduled background retry for {evidence_id}")
+                    except Exception as e:
+                        print(f"[OLLAMA RETRY] Failed to schedule retry thread: {e}")
                     
                     # Map evidence to tasks
                     # Skip generic mapping if user has asserted a specific task (respect user decision)
@@ -1533,12 +1690,125 @@ def _build_enhanced_impact_summary(
     return " • ".join(parts) if parts else "Evidence uploaded"
 
 
+def _guess_kpa_from_text(text: str) -> str:
+    """Simple heuristic to guess a human-friendly KPA label from free text."""
+    t = (text or "").lower()
+    if any(w in t for w in ["lecture", "tutorial", "assessment", "curriculum", "student", "teaching"]):
+        return "Teaching & Learning"
+    if any(w in t for w in ["publication", "journal", "conference", "research", "study", "manuscript"]):
+        return "Research"
+    if any(w in t for w in ["community", "engagement", "outreach", "service"]):
+        return "Community Engagement"
+    if any(w in t for w in ["lead", "chair", "management", "committee"]):
+        return "Leadership & Management"
+    if any(w in t for w in ["innovation", "impact", "project"]):
+        return "Innovation & Impact"
+    return "Teaching & Learning"
+
+
+def _retry_ollama_and_update(
+    evidence_id: str,
+    filename: str,
+    file_text: str,
+    user_explanation: str,
+    staff_id: str,
+    year: int,
+    month_bucket: str,
+    initial_delay: int = 10,
+    max_retries: int = 6,
+):
+    """Background retry loop that attempts to call Ollama and update evidence meta when available."""
+    import time
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent))
+    from progress_store import ProgressStore
+
+    store = ProgressStore()
+    delay = initial_delay
+    for attempt in range(1, max_retries + 1):
+        try:
+            print(f"[OLLAMA RETRY] Attempt {attempt} for {evidence_id} (waiting {delay}s before call)")
+            time.sleep(delay)
+
+            prompt = f"""Provide a JSON classification for this evidence file.
+Include fields: kpa (human-friendly), task, tier, impact_summary, confidence (0.0-1.0).
+
+USER_EXPLANATION: {user_explanation or ''}
+FILENAME: {filename}
+CONTENT_PREVIEW: {file_text[:2000]}
+
+Return only valid JSON."""
+
+            ai_result = None
+            try:
+                ai_result = classify_with_ollama_raw(prompt)
+            except Exception as e:
+                print(f"[OLLAMA RETRY] call failed on attempt {attempt}: {e}")
+                ai_result = None
+
+            # If we got a meaningful structured result (not just a fallback), update DB and stop
+            if ai_result and isinstance(ai_result, dict) and not ai_result.get("fallback"):
+                try:
+                    # Build enhanced impact summary combining user + ai + brain
+                    # Fetch current evidence to obtain brain context
+                    ev = store.get_evidence(evidence_id)
+                    brain_ctx = {}
+                    meta = {}
+                    if ev:
+                        try:
+                            meta = json.loads(ev["meta_json"] or "{}")
+                        except Exception:
+                            meta = {}
+                        brain_ctx = meta.get("brain", {}) or {}
+
+                    enhanced = _build_enhanced_impact_summary(
+                        user_description=user_explanation or "",
+                        ai_summary=ai_result.get("impact_summary", ""),
+                        brain_ctx=brain_ctx,
+                        filename=filename,
+                        tier=ai_result.get("tier", "")
+                    )
+
+                    ai_result["impact_summary"] = enhanced
+
+                    # Persist updated ollama meta into evidence (merge via insert_evidence)
+                    store.insert_evidence(
+                        evidence_id=evidence_id,
+                        sha1=meta.get("sha1", ""),
+                        staff_id=staff_id,
+                        year=int(year),
+                        month_bucket=month_bucket,
+                        kpa_code=meta.get("kpa_code", ""),
+                        rating=meta.get("rating", ""),
+                        tier=meta.get("tier", ""),
+                        file_path=meta.get("file_path", ""),
+                        meta={
+                            **meta,
+                            "ollama": ai_result,
+                            "impact_summary": enhanced,
+                        },
+                    )
+                    print(f"[OLLAMA RETRY] Updated evidence {evidence_id} with live Ollama result on attempt {attempt}")
+                    return
+                except Exception as e:
+                    print(f"[OLLAMA RETRY] Failed to persist Ollama result: {e}")
+
+            # Not successful — backoff and retry
+            delay = min(delay * 2, 300)
+        except Exception as e:
+            print(f"[OLLAMA RETRY] Unexpected error during retry loop: {e}")
+            delay = min(delay * 2, 300)
+
+    print(f"[OLLAMA RETRY] Exhausted retries for {evidence_id}; leaving fallback ollama meta in place")
+
+
 def classify_with_ollama_raw(prompt: str) -> Dict:
     """
     Raw Ollama classification with custom prompt.
     Returns parsed JSON classification result.
     """
     try:
+        # Allow longer time for robust classification on larger files or busy Ollama
         response = requests.post(
             f"{OLLAMA_BASE_URL}/api/generate",
             json={
@@ -1547,29 +1817,73 @@ def classify_with_ollama_raw(prompt: str) -> Dict:
                 "stream": False,
                 "format": "json"
             },
-            timeout=30
+            timeout=60
         )
-        
+
+        # Debug: log status and raw body for troubleshooting
+        try:
+            print(f"[OLLAMA RAW] status={response.status_code} for prompt(len={len(prompt)})")
+            print(f"[OLLAMA RAW] body: {response.text[:2000]}")
+        except Exception:
+            pass
+
         if response.status_code == 200:
-            data = response.json()
-            ai_response = data.get("response", "").strip()
-            
-            # Parse JSON response
-            import json
+            # Try to parse a variety of response shapes
             try:
-                return json.loads(ai_response)
-            except json.JSONDecodeError:
-                # Fallback if not valid JSON
+                data = response.json()
+            except Exception:
+                # Not JSON from Ollama; fall back to raw text
+                raw = response.text.strip()
                 return {
-                    "kpa": "KPA1",
-                    "task": "Classification failed",
+                    "kpa": _guess_kpa_from_text(raw),
+                    "task": "AI raw response",
                     "tier": "Unknown",
-                    "impact_summary": ai_response[:200],
-                    "confidence": 0.5
+                    "impact_summary": raw[:2000],
+                    "confidence": 0.6,
+                    "raw": raw,
+                }
+
+            # Common field locations
+            ai_response = None
+            if isinstance(data, dict):
+                ai_response = data.get("response") or data.get("output") or data.get("text") or data.get("results")
+            else:
+                ai_response = data
+
+            # If ai_response is already structured (dict), return or normalize
+            if isinstance(ai_response, dict):
+                return ai_response
+
+            # If ai_response is a list, try to extract text from first element
+            if isinstance(ai_response, list) and ai_response:
+                first = ai_response[0]
+                if isinstance(first, dict) and "content" in first:
+                    raw_text = first.get("content", "")
+                else:
+                    raw_text = str(first)
+            else:
+                raw_text = str(ai_response or data.get("response", "") or "")
+
+            # Attempt to parse JSON embedded in raw_text
+            import json as _json
+            try:
+                parsed = _json.loads(raw_text)
+                if isinstance(parsed, dict):
+                    return parsed
+            except Exception:
+                # Not JSON — construct a helpful structured result
+                raw = raw_text.strip()
+                return {
+                    "kpa": _guess_kpa_from_text(raw),
+                    "task": (raw.split('\n', 1)[0])[:200],
+                    "tier": "Unknown",
+                    "impact_summary": raw[:2000],
+                    "confidence": 0.6,
+                    "raw": raw,
                 }
         else:
             raise Exception(f"Ollama returned status {response.status_code}")
-            
+
     except Exception as e:
         print(f"Ollama raw classification error: {e}")
         raise
@@ -2135,6 +2449,22 @@ def ai_guidance():
                     except Exception as _e:
                         print(f"Error while attempting to recover task from expectations file: {_e}")
 
+        # Ensure context.task is always present (empty dict if unresolved)
+        if not task_info:
+            # Try to recover minimal task id if present so templates/LLM have something
+            alt_id = context.get('task_id') or context.get('id') or context.get('task') or None
+            task_info = {'id': alt_id} if alt_id else {}
+            print("⚠️ WARNING: No task information in context; proceeding with minimal context.")
+
+        if task_info is None:
+            task_info = {}
+
+        # Place task_info back into context early so template/generator can use it
+        try:
+            context['task'] = task_info
+        except Exception:
+            pass
+
         if task_info:
             # Ensure we attach a _baseId when possible so template scope matching works
             try:
@@ -2640,6 +2970,51 @@ def ask_vamp_voice():
         print(f"Ask VAMP voice error: {e}")
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/api/debug/status', methods=['GET'])
+def debug_status():
+    """Lightweight diagnostics endpoint to assist debugging (contracts, Ollama, ElevenLabs)."""
+    try:
+        contracts = []
+        expectations = []
+        try:
+            if CONTRACTS_FOLDER.exists():
+                contracts = [p.name for p in CONTRACTS_FOLDER.iterdir() if p.is_file()]
+        except Exception:
+            contracts = []
+
+        staff_expect_folder = CONTRACTS_FOLDER.parent / 'staff_expectations'
+        try:
+            if staff_expect_folder.exists():
+                expectations = [p.name for p in staff_expect_folder.iterdir() if p.is_file()]
+        except Exception:
+            expectations = []
+
+        # Check Ollama reachability with a lightweight POST (short timeout)
+        ollama_ok = False
+        ollama_error = None
+        try:
+            chk = requests.post(
+                f"{OLLAMA_BASE_URL}/api/generate",
+                json={"model": OLLAMA_MODEL, "prompt": "Ping", "stream": False},
+                timeout=3
+            )
+            ollama_ok = chk.ok
+        except Exception as e:
+            ollama_error = str(e)
+
+        return jsonify({
+            "ok": True,
+            "contracts": contracts,
+            "expectations_files": expectations,
+            "ollama_ok": ollama_ok,
+            "ollama_error": ollama_error,
+            "elevenlabs_available": ELEVENLABS_AVAILABLE
+        })
+    except Exception as e:
+        print(f"Debug status error: {e}")
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 # ============================================================
 # SERVER-SENT EVENTS
 # ============================================================
@@ -2673,6 +3048,54 @@ def send_event(data: Dict):
 # MAIN
 # ============================================================
 
+def sync_expectations_to_db():
+    """
+    Read all files in backend/data/staff_expectations/ and ensure the
+    ProgressStore contains the canonical per-month tasks derived from
+    each expectations JSON. This makes the DB deterministic on startup.
+    """
+    try:
+        from progress_store import ProgressStore
+        from mapper import ensure_tasks
+    except Exception as e:
+        print(f"Startup sync: could not import ProgressStore/ensure_tasks: {e}")
+        return
+
+    expect_dir = CONTRACTS_FOLDER.parent / "staff_expectations"
+    if not expect_dir.exists():
+        return
+
+    for p in sorted(expect_dir.glob('expectations_*.json')):
+        try:
+            with open(p, 'r', encoding='utf-8') as fh:
+                data = json.load(fh)
+
+            staff_id = data.get('staff_id') or None
+            year = data.get('year') or None
+            # Fallback to filename parse if missing
+            if (not staff_id or not year) and p.stem:
+                parts = p.stem.split('_')
+                try:
+                    # expectations_{staff}_{year}
+                    staff_id = staff_id or parts[1]
+                    year = year or int(parts[2])
+                except Exception:
+                    pass
+
+            if not staff_id or not year:
+                print(f"Startup sync: skipping {p} (no staff_id/year)")
+                continue
+
+            print(f"Startup sync: ensuring tasks for {staff_id}/{year} from {p.name}")
+            store = ProgressStore()
+            try:
+                ensure_tasks(store, staff_id=str(staff_id), year=int(year), expectations=data)
+            except Exception as e:
+                print(f"Startup sync: ensure_tasks failed for {staff_id}/{year}: {e}")
+        except Exception as e:
+            print(f"Startup sync: failed to process {p}: {e}")
+
+
 if __name__ == '__main__':
     print("=" * 60)
     print("VAMP Web Server Starting")
@@ -2687,6 +3110,12 @@ if __name__ == '__main__':
     print("\nPress Ctrl+C to stop")
     print("=" * 60)
     
+    # Run a startup sync to make sure the DB matches on-disk expectations
+    try:
+        sync_expectations_to_db()
+    except Exception as _e:
+        print(f"Startup sync error: {_e}")
+
     # Run without the debug auto-reloader for stable testing sessions.
     # Keep threaded=True for concurrency; explicit `use_reloader=False` prevents restarts.
     app.run(host='0.0.0.0', port=PORT, debug=False, use_reloader=False, threaded=True)

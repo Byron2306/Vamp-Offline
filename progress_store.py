@@ -118,6 +118,18 @@ class ProgressStore:
                     CREATE INDEX IF NOT EXISTS idx_evidence_staff_year ON evidence(staff_id, year);
                     CREATE INDEX IF NOT EXISTS idx_evidence_month ON evidence(month_bucket);
                     CREATE INDEX IF NOT EXISTS idx_tasks_kpa ON tasks(kpa_code);
+                    
+                    CREATE TABLE IF NOT EXISTS asserted_mappings(
+                        evidence_id TEXT NOT NULL,
+                        task_id TEXT NOT NULL,
+                        mapped_by TEXT NOT NULL,
+                        confidence REAL NOT NULL,
+                        staff_id TEXT,
+                        year INTEGER,
+                        created_at TEXT NOT NULL,
+                        PRIMARY KEY (evidence_id, task_id)
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_asserted_staff_year ON asserted_mappings(staff_id, year);
                     """
                 )
                 con.commit()
@@ -139,6 +151,27 @@ class ProgressStore:
                     "DELETE FROM tasks WHERE window_start LIKE ?",
                     (year_prefix + "%",)
                 )
+                deleted = cur.rowcount if cur.rowcount is not None else 0
+                con.commit()
+                return deleted
+            finally:
+                con.close()
+
+    def clear_tasks_for_staff_year_preserve(self, staff_id: str, year: int, preserve_task_ids: Optional[List[str]] = None) -> int:
+        """Delete tasks for a staff/year but preserve any task_ids in preserve_task_ids.
+        Returns number of rows deleted."""
+        with self._lock:
+            con = self._connect()
+            try:
+                cur = con.cursor()
+                year_prefix = f"{int(year):04d}-"
+                if preserve_task_ids:
+                    placeholders = ",".join(["?" for _ in preserve_task_ids])
+                    q = f"DELETE FROM tasks WHERE window_start LIKE ? AND task_id NOT IN ({placeholders})"
+                    args = [year_prefix + "%"] + list(preserve_task_ids)
+                    cur.execute(q, args)
+                else:
+                    cur.execute("DELETE FROM tasks WHERE window_start LIKE ?", (year_prefix + "%",))
                 deleted = cur.rowcount if cur.rowcount is not None else 0
                 con.commit()
                 return deleted
@@ -215,10 +248,38 @@ class ProgressStore:
         file_path: str,
         meta: Dict[str, Any],
     ) -> None:
-        meta_json = json.dumps(meta or {}, ensure_ascii=False)
+        # Merge with any existing evidence metadata to avoid losing user-asserted fields
+        new_meta = dict(meta or {})
         with self._lock:
             con = self._connect()
             try:
+                # Fetch existing row if present
+                cur = con.execute("SELECT meta_json, rating, tier FROM evidence WHERE evidence_id=?", (evidence_id,))
+                existing = cur.fetchone()
+                if existing:
+                    try:
+                        existing_meta = json.loads(existing["meta_json"] or "{}")
+                    except Exception:
+                        existing_meta = {}
+
+                    # Preserve user-asserted explanatory fields unless new_meta explicitly provides them
+                    for key in ("user_explanation", "target_task_id"):
+                        if key in existing_meta and key not in new_meta:
+                            new_meta[key] = existing_meta.get(key)
+
+                    # Preserve previous rating/tier if new values are empty or generic
+                    if (not rating or str(rating).strip().lower() in ("", "n/a", "none")) and existing.get("rating"):
+                        rating = existing["rating"]
+                    if (not tier or str(tier).strip().lower() in ("", "n/a", "none")) and existing.get("tier"):
+                        tier = existing["tier"]
+
+                    # Also merge other meta keys, preferring new_meta values
+                    merged = dict(existing_meta)
+                    merged.update(new_meta)
+                    meta_json = json.dumps(merged or {}, ensure_ascii=False)
+                else:
+                    meta_json = json.dumps(new_meta or {}, ensure_ascii=False)
+
                 con.execute(
                     """
                     INSERT OR REPLACE INTO evidence
@@ -264,15 +325,53 @@ class ProgressStore:
         with self._lock:
             con = self._connect()
             try:
-                con.execute(
-                    """
-                    INSERT OR REPLACE INTO evidence_task
-                    (evidence_id, task_id, mapped_by, confidence, created_at)
-                    VALUES (?, ?, ?, ?, ?)
-                    """,
-                    (evidence_id, task_id, mapped_by, float(confidence), _utc_now_iso()),
-                )
+                # If this is an asserted mapping, persist it first so it survives cases
+                # where the target task does not exist (foreign key would block evidence_task insert).
+                try:
+                    if isinstance(mapped_by, str) and "asserted" in mapped_by:
+                        cur = con.execute("SELECT staff_id, year FROM evidence WHERE evidence_id=?", (evidence_id,))
+                        ev = cur.fetchone()
+                        staff = ev["staff_id"] if ev else None
+                        yr = int(ev["year"]) if ev and ev["year"] is not None else None
+                        con.execute(
+                            """
+                            INSERT OR REPLACE INTO asserted_mappings
+                            (evidence_id, task_id, mapped_by, confidence, staff_id, year, created_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)
+                            """,
+                            (evidence_id, task_id, mapped_by, float(confidence), staff, yr, _utc_now_iso()),
+                        )
+                except Exception:
+                    pass
+
+                # Then attempt to create the evidence_task edge; it may fail if the task doesn't exist.
+                try:
+                    con.execute(
+                        """
+                        INSERT OR REPLACE INTO evidence_task
+                        (evidence_id, task_id, mapped_by, confidence, created_at)
+                        VALUES (?, ?, ?, ?, ?)
+                        """,
+                        (evidence_id, task_id, mapped_by, float(confidence), _utc_now_iso()),
+                    )
+                except Exception:
+                    # Don't let task FK failures stop asserted mapping persistence.
+                    pass
                 con.commit()
+            finally:
+                con.close()
+
+    def get_asserted_mappings_for_staff_year(self, staff_id: str, year: int) -> List[Tuple[str, str, str, float]]:
+        """Return persisted asserted mappings for a staff/year as (evidence_id, task_id, mapped_by, confidence, task_title).
+        The task_title may be empty; caller can attempt remapping by title or other heuristics."""
+        with self._lock:
+            con = self._connect()
+            try:
+                rows = con.execute(
+                    "SELECT evidence_id, task_id, mapped_by, confidence FROM asserted_mappings WHERE staff_id=? AND year=?",
+                    (staff_id, int(year)),
+                ).fetchall()
+                return [(r["evidence_id"], r["task_id"], r["mapped_by"], float(r["confidence"])) for r in rows]
             finally:
                 con.close()
 
@@ -292,6 +391,26 @@ class ProgressStore:
                         (evidence_id,),
                     ).fetchall()
                 )
+            finally:
+                con.close()
+
+    def get_mappings_for_staff_year(self, staff_id: str, year: int) -> List[Tuple[str, str, str, float, str]]:
+        """Return list of (evidence_id, task_id, mapped_by, confidence, task_title) for a staff/year."""
+        with self._lock:
+            con = self._connect()
+            try:
+                q = """
+                    SELECT et.evidence_id, et.task_id, et.mapped_by, et.confidence, t.title
+                    FROM evidence_task et
+                    JOIN evidence e ON e.evidence_id = et.evidence_id
+                    LEFT JOIN tasks t ON t.task_id = et.task_id
+                    WHERE e.staff_id=? AND e.year=?
+                """
+                rows = con.execute(q, (staff_id, int(year))).fetchall()
+                return [
+                    (r["evidence_id"], r["task_id"], r["mapped_by"], float(r["confidence"]), r["title"] or "")
+                    for r in rows
+                ]
             finally:
                 con.close()
 

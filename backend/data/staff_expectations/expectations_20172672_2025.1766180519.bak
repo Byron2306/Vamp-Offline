@@ -1,0 +1,322 @@
+{
+  "ok": true,
+  "staff_id": "20172672",
+  "year": 2025,
+  "kpa_summary": {
+    "KPA1": {
+      "name": "Teaching and Learning (including supervision)",
+      "hours": 0.0,
+      "weight_pct": 0.0
+    },
+    "KPA2": {
+      "name": "Occupational Health & Safety",
+      "hours": 0.0,
+      "weight_pct": 0.0
+    },
+    "KPA3": {
+      "name": "Personal Research, Innovation and/or Creative Outputs",
+      "hours": 0.0,
+      "weight_pct": 0.0
+    },
+    "KPA4": {
+      "name": "Academic Leadership and Administration",
+      "hours": 0.0,
+      "weight_pct": 0.0
+    },
+    "KPA5": {
+      "name": "Social Responsiveness (Community Engagement / Industry)",
+      "hours": 0.0,
+      "weight_pct": 0.0
+    }
+  },
+  "tasks": [
+    {
+      "id": "task_001",
+      "kpa_code": "KPA2",
+      "kpa_name": "Occupational Health & Safety",
+      "title": "OHS compliance check",
+      "cadence": "quarterly",
+      "months": [
+        2
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "ohs",
+        "safety",
+        "compliance",
+        "training",
+        "popia",
+        "dalro"
+      ],
+      "outputs": "OHS compliance activities",
+      "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+      "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
+    },
+    {
+      "id": "task_002",
+      "kpa_code": "KPA2",
+      "kpa_name": "Occupational Health & Safety",
+      "title": "OHS compliance check",
+      "cadence": "quarterly",
+      "months": [
+        5
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "ohs",
+        "safety",
+        "compliance",
+        "training",
+        "popia",
+        "dalro"
+      ],
+      "outputs": "OHS compliance activities",
+      "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+      "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
+    },
+    {
+      "id": "task_003",
+      "kpa_code": "KPA2",
+      "kpa_name": "Occupational Health & Safety",
+      "title": "OHS compliance check",
+      "cadence": "quarterly",
+      "months": [
+        8
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "ohs",
+        "safety",
+        "compliance",
+        "training",
+        "popia",
+        "dalro"
+      ],
+      "outputs": "OHS compliance activities",
+      "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+      "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
+    },
+    {
+      "id": "task_004",
+      "kpa_code": "KPA2",
+      "kpa_name": "Occupational Health & Safety",
+      "title": "OHS compliance check",
+      "cadence": "quarterly",
+      "months": [
+        11
+      ],
+      "minimum_count": 1,
+      "stretch_count": 1,
+      "evidence_hints": [
+        "ohs",
+        "safety",
+        "compliance",
+        "training",
+        "popia",
+        "dalro"
+      ],
+      "outputs": "OHS compliance activities",
+      "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+      "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
+    }
+  ],
+  "by_month": {
+    "2025-01": {
+      "month": "2025-01",
+      "tasks": [],
+      "task_count": 0
+    },
+    "2025-02": {
+      "month": "2025-02",
+      "tasks": [
+        {
+          "id": "task_001",
+          "kpa_code": "KPA2",
+          "kpa_name": "Occupational Health & Safety",
+          "title": "OHS compliance check",
+          "cadence": "quarterly",
+          "months": [
+            2
+          ],
+          "minimum_count": 1,
+          "stretch_count": 1,
+          "evidence_hints": [
+            "ohs",
+            "safety",
+            "compliance",
+            "training",
+            "popia",
+            "dalro"
+          ],
+          "outputs": "OHS compliance activities",
+          "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+          "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
+        }
+      ],
+      "task_count": 1
+    },
+    "2025-03": {
+      "month": "2025-03",
+      "tasks": [],
+      "task_count": 0
+    },
+    "2025-04": {
+      "month": "2025-04",
+      "tasks": [],
+      "task_count": 0
+    },
+    "2025-05": {
+      "month": "2025-05",
+      "tasks": [
+        {
+          "id": "task_002",
+          "kpa_code": "KPA2",
+          "kpa_name": "Occupational Health & Safety",
+          "title": "OHS compliance check",
+          "cadence": "quarterly",
+          "months": [
+            5
+          ],
+          "minimum_count": 1,
+          "stretch_count": 1,
+          "evidence_hints": [
+            "ohs",
+            "safety",
+            "compliance",
+            "training",
+            "popia",
+            "dalro"
+          ],
+          "outputs": "OHS compliance activities",
+          "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+          "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
+        }
+      ],
+      "task_count": 1
+    },
+    "2025-06": {
+      "month": "2025-06",
+      "tasks": [],
+      "task_count": 0
+    },
+    "2025-07": {
+      "month": "2025-07",
+      "tasks": [],
+      "task_count": 0
+    },
+    "2025-08": {
+      "month": "2025-08",
+      "tasks": [
+        {
+          "id": "task_003",
+          "kpa_code": "KPA2",
+          "kpa_name": "Occupational Health & Safety",
+          "title": "OHS compliance check",
+          "cadence": "quarterly",
+          "months": [
+            8
+          ],
+          "minimum_count": 1,
+          "stretch_count": 1,
+          "evidence_hints": [
+            "ohs",
+            "safety",
+            "compliance",
+            "training",
+            "popia",
+            "dalro"
+          ],
+          "outputs": "OHS compliance activities",
+          "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+          "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
+        }
+      ],
+      "task_count": 1
+    },
+    "2025-09": {
+      "month": "2025-09",
+      "tasks": [],
+      "task_count": 0
+    },
+    "2025-10": {
+      "month": "2025-10",
+      "tasks": [],
+      "task_count": 0
+    },
+    "2025-11": {
+      "month": "2025-11",
+      "tasks": [
+        {
+          "id": "task_004",
+          "kpa_code": "KPA2",
+          "kpa_name": "Occupational Health & Safety",
+          "title": "OHS compliance check",
+          "cadence": "quarterly",
+          "months": [
+            11
+          ],
+          "minimum_count": 1,
+          "stretch_count": 1,
+          "evidence_hints": [
+            "ohs",
+            "safety",
+            "compliance",
+            "training",
+            "popia",
+            "dalro"
+          ],
+          "outputs": "OHS compliance activities",
+          "what_to_do": "Complete the compliance activity and retain proof (checklists, certificates, or emails).",
+          "evidence_required": "Output evidence: OHS compliance activities; OHS checklist / inspection evidence; training certificate; compliance communication; incident/near-miss report (if applicable); ohs; safety; compliance; training; popia"
+        }
+      ],
+      "task_count": 1
+    },
+    "2025-12": {
+      "month": "2025-12",
+      "tasks": [],
+      "task_count": 0
+    }
+  },
+  "lead_lag": {
+    "KPA1": {
+      "lead": "Teaching delivery",
+      "lag": "Assessment completion"
+    },
+    "KPA2": {
+      "lead": "Training completion",
+      "lag": "Compliance verification"
+    },
+    "KPA3": {
+      "lead": "Research activities",
+      "lag": "Publications/outputs"
+    },
+    "KPA4": {
+      "lead": "Meeting attendance",
+      "lag": "Administrative deliverables"
+    },
+    "KPA5": {
+      "lead": "Engagement activities",
+      "lag": "Impact reports"
+    }
+  },
+  "teaching_modules": [],
+  "task_count": 4,
+  "months": [
+    "2025-01",
+    "2025-02",
+    "2025-03",
+    "2025-04",
+    "2025-05",
+    "2025-06",
+    "2025-07",
+    "2025-08",
+    "2025-09",
+    "2025-10",
+    "2025-11",
+    "2025-12"
+  ]
+}
