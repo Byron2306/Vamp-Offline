@@ -64,8 +64,23 @@ EVIDENCE_FOLDER = DATA_FOLDER / "evidence"
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")  # Faster and better than 1b
+# Use a single effective model across the app. If `OLLAMA_QUICK_MODEL` is set
+# prefer it (smaller/fast local manifest); otherwise honor `OLLAMA_MODEL` or
+# fall back to a sensible default.
+OLLAMA_QUICK_MODEL = os.getenv("OLLAMA_QUICK_MODEL", "registry.ollama.ai/library/llama3.2:1b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL") or OLLAMA_QUICK_MODEL or "llama3.2:3b"
 OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "180"))
+OLLAMA_QUICK_TIMEOUT = float(os.getenv("OLLAMA_QUICK_TIMEOUT", "30"))
+OLLAMA_LONG_TIMEOUT = float(os.getenv("OLLAMA_LONG_TIMEOUT", "60"))
+
+# Blending weights (configurable)
+BRAIN_WEIGHT = float(os.getenv("BRAIN_WEIGHT", "0.75"))
+AI_WEIGHT = float(os.getenv("AI_WEIGHT", "0.20"))
+USER_WEIGHT = float(os.getenv("USER_WEIGHT", "0.05"))
+
+# Promotion rules
+IMPACT_PROMOTE_THRESHOLD = float(os.getenv("IMPACT_PROMOTE_THRESHOLD", "0.7"))
+PROMOTE_BOOST = float(os.getenv("PROMOTE_BOOST", "0.8"))
 PORT = int(os.getenv("PORT", "5000"))
 
 # Global state
@@ -73,6 +88,9 @@ profiles = {}
 expectations_cache = {}
 evidence_store = None
 event_clients = []
+# Ollama availability flag (set True to disable Ollama calls temporarily)
+OLLAMA_DISABLED = False
+OLLAMA_DISABLED_UNTIL = 0
 
 # Debug flag (set VAMP_DEBUG=true to enable)
 DEBUG = os.getenv('VAMP_DEBUG', 'false').lower() == 'true'
@@ -1159,13 +1177,11 @@ def scan_upload():
         asserted_mapping = request.form.get('asserted_mapping') == 'true'  # User pre-locked evidence to task
         user_explanation = request.form.get('user_explanation', '').strip()  # User's explanation for locked evidence
 
-        # Enforce explicit assertion when a target task is provided to avoid
-        # ambiguous metadata-only locks. Clients must set `asserted_mapping=true`
-        # when they intend to lock evidence to a specific task.
-        if target_task_id and not asserted_mapping:
-            return jsonify({
-                "error": "When providing target_task_id you must also set asserted_mapping=true."
-            }), 400
+        # If a client provides a `target_task_id`, treat the mapping as asserted
+        # regardless of whether the client set `asserted_mapping`. This simplifies
+        # the client UX and ensures mappings persist as asserted.
+        if target_task_id:
+            asserted_mapping = True
         
         results = []
         
@@ -1199,6 +1215,11 @@ def scan_upload():
                     impact_text = "Evidence directly linked to task by user (asserted relevance)"
                     if user_explanation:
                         impact_text = f"User explanation: {user_explanation[:200]}... | {impact_text}"
+
+                # If this evidence is asserted to a specific task, capture the
+                # human-friendly KPA name from the task so we can prefer it
+                # in UI-facing classification (do not let brain/AI override).
+                asserted_kpa_name = None
 
                 # AI Classification using Ollama (use contextual if requested)
                 if use_contextual:
@@ -1241,7 +1262,13 @@ def scan_upload():
                         if brain_ctx:
                             # Brain scorer provides deterministic KPA routing
                             old_kpa = classification.get("kpa")
-                            classification["kpa"] = brain_ctx.get("primary_kpa_name", classification.get("kpa"))
+                            # If the user explicitly asserted a target task, prefer
+                            # the task's KPA name collected earlier and do not allow
+                            # the brain/AI to overwrite it in the UI classification.
+                            if asserted_mapping and target_task_id and asserted_kpa_name:
+                                classification["kpa"] = asserted_kpa_name
+                            else:
+                                classification["kpa"] = brain_ctx.get("primary_kpa_name", classification.get("kpa"))
                             classification["tier"] = brain_ctx.get("tier_label", classification.get("tier"))
                             
                             # Boost confidence significantly when brain scorer has high route scores
@@ -1297,8 +1324,20 @@ def scan_upload():
                     ai_ctx = None
                     if use_contextual:
                         try:
+                            print(f"[OLLAMA] Quick classification for {filename}")
+                            # First do a quick Ollama call to get impact_strength and basic fields
+                            try:
+                                quick_ctx = classify_with_ollama_quick(filename, file_text, user_explanation or "")
+                            except Exception as _e:
+                                print(f"[OLLAMA QUICK ERROR] {_e}")
+                                quick_ctx = None
+
+                            # Prefer quick_ctx as an initial ai_ctx so the UI always has something fast
+                            if quick_ctx:
+                                ai_ctx = quick_ctx
+
+                            # Then request detailed classification (longer, structured JSON) in-line
                             print(f"[OLLAMA] Requesting detailed classification for {filename}")
-                            # Build a prompt that prioritises the user's explanation when present
                             prompt = f"""Provide a JSON classification for this evidence file.
     Include fields: kpa (human-friendly), task, tier, impact_summary, confidence (0.0-1.0).
 
@@ -1308,24 +1347,28 @@ def scan_upload():
 
     Return only valid JSON."""
                             try:
-                                ai_ctx = classify_with_ollama_raw(prompt)
+                                detailed_ctx = classify_with_ollama_raw(prompt)
+                                if detailed_ctx:
+                                    ai_ctx = detailed_ctx
                             except Exception as e:
                                 print(f"[OLLAMA ERROR] classify_with_ollama_raw failed for {filename}: {e}")
-                                ai_ctx = None
+                                # keep quick_ctx in ai_ctx if available
+                                pass
 
+                            # Merge ai_ctx into classification if present
                             if ai_ctx:
                                 try:
                                     print(f"[OLLAMA] Response for {filename}: {str(ai_ctx)[:400]}")
-                                    # Merge AI classification into the existing classification
-                                    # Brain scorer remains authoritative for rating/tier when present
-                                    classification["kpa"] = ai_ctx.get("kpa", classification.get("kpa"))
+                                    # Respect user-asserted mapping: do not overwrite the
+                                    # UI-facing KPA if the evidence is locked to a task.
+                                    if not (asserted_mapping and target_task_id and asserted_kpa_name):
+                                        classification["kpa"] = ai_ctx.get("kpa", classification.get("kpa"))
+                                    else:
+                                        classification["kpa"] = asserted_kpa_name
                                     classification["task"] = ai_ctx.get("task", classification.get("task"))
-                                    # Only override tier if brain did not provide a tier
                                     if not brain_ctx:
                                         classification["tier"] = ai_ctx.get("tier", classification.get("tier"))
-                                    # Blend confidence
-                                    classification["confidence"] = max(classification.get("confidence", 0.0), float(ai_ctx.get("confidence", 0.0)))
-                                    # Build an enhanced impact summary combining user, AI and brain
+                                    classification["confidence"] = max(classification.get("confidence", 0.0), float(ai_ctx.get("confidence", 0.0) or 0.0))
                                     classification["impact_summary"] = _build_enhanced_impact_summary(
                                         user_description=user_explanation or "",
                                         ai_summary=ai_ctx.get("impact_summary", classification.get("impact_summary","")),
@@ -1337,7 +1380,7 @@ def scan_upload():
                                     print(f"[OLLAMA MERGE ERROR] {e}")
                         except Exception as e:
                             print(f"[OLLAMA ERROR] Detailed Ollama classification failed for {filename}: {e}")
-                            ai_ctx = None
+                            ai_ctx = ai_ctx or None
 
                     # Ensure we always persist a meaningful `ollama` entry.
                     if not ai_ctx:
@@ -1430,11 +1473,103 @@ def scan_upload():
                             if task_row is not None:
                                 # Override KPA code to match the target task's KPA
                                 kpa_code = task_row["kpa_code"]
+                                # Also store a human-friendly KPA name to prefer
+                                # in the UI classification so brain/AI don't override.
+                                try:
+                                    from backend.nwu_brain_scorer import load_brain
+                                    inst = load_brain().institution_profile
+                                    asserted_kpa_name = inst.get("kpas", {}).get(kpa_code)
+                                except Exception:
+                                    asserted_kpa_name = None
                                 print(f"[ASSERTION] Overriding KPA to {kpa_code} based on target task {target_task_id}")
                         except Exception as e:
                             print(f"[ASSERTION WARNING] Could not extract KPA from target task: {e}")
 
-                    # Insert evidence
+                    # Compute a combined final rating that blends brain score, Ollama confidence,
+                    # and a small user-explanation boost so that the AI + user signal can move
+                    # an item from "3 - Achieved" toward 4/5 when impact is evident.
+                    final_rating_raw = None
+                    final_rating_label = None
+                    final_tier_label = None
+                    try:
+                        # Brain numeric rating (0..5)
+                        brain_rating = None
+                        if brain_ctx and isinstance(brain_ctx.get("rating"), (int, float)):
+                            brain_rating = float(brain_ctx.get("rating"))
+
+                        # Ollama impact_strength (preferred) 0..1 -> scale to 0..5
+                        ai_impact = 0.0
+                        if ai_ctx and isinstance(ai_ctx, dict):
+                            try:
+                                # prefer an explicit impact_strength (0..1)
+                                if ai_ctx.get("impact_strength") is not None:
+                                    ai_impact = float(ai_ctx.get("impact_strength", 0.0))
+                                else:
+                                    ai_impact = float(ai_ctx.get("confidence", 0.0))
+                            except Exception:
+                                ai_impact = 0.0
+
+                        # User explanation boost (presence + length)
+                        user_boost = 0.0
+                        if user_explanation and len(user_explanation) > 30:
+                            user_boost = 0.25  # small additive boost on 0..5 scale
+
+                        # If brain rating exists, blend; otherwise rely more on AI confidence
+                        if brain_rating is not None:
+                            # weights: brain 0.75, ai_impact 0.20, user 0.05
+                            final_rating_raw = (brain_rating * 0.75) + (ai_impact * 5.0 * 0.20) + (user_boost * 0.05)
+                        else:
+                            final_rating_raw = (ai_impact * 5.0) + (user_boost * 0.05)
+
+                        # Map numeric rating to label using institution_profile bands from brain config
+                        try:
+                            from backend.nwu_brain_scorer import load_brain
+                            inst = load_brain().institution_profile
+                            bands = inst.get("rating_scale", {}).get("bands", [])
+                            final_rating_label = None
+                            for band in bands:
+                                if band.get("min", 0) <= final_rating_raw <= band.get("max", 5):
+                                    final_rating_label = band.get("label")
+                                    break
+                        except Exception:
+                            final_rating_label = None
+
+                        # Tier label: prefer brain tier if present, else derive from label
+                        final_tier_label = brain_ctx.get("tier_label") if brain_ctx and brain_ctx.get("tier_label") else classification.get("tier")
+                    except Exception as _e:
+                        print(f"[RATING BLEND ERROR] {_e}")
+
+                    # Promotion rules: if AI indicates strong impact and brain shows at least basic coverage,
+                    # promote an evidence from ~3 up toward 4/5.
+                    try:
+                        impact_strength = 0.0
+                        if ai_ctx and isinstance(ai_ctx, dict):
+                            impact_strength = float(ai_ctx.get("impact_strength") or ai_ctx.get("confidence") or 0.0)
+
+                        values_score = 0.0
+                        policy_hits = 0
+                        if brain_ctx and isinstance(brain_ctx, dict):
+                            values_score = float(brain_ctx.get("values_detail", {}).get("score", 0.0) or 0.0)
+                            policy_hits = len(brain_ctx.get("policy_hits") or [])
+
+                        # If impact strong and either values or policy evidence present, boost rating
+                        if impact_strength >= 0.7 and (values_score >= 0.5 or policy_hits >= 1):
+                            final_rating_raw = min(5.0, (final_rating_raw or 0.0) + 0.8)
+                            # Recompute label
+                            try:
+                                from backend.nwu_brain_scorer import load_brain
+                                inst = load_brain().institution_profile
+                                bands = inst.get("rating_scale", {}).get("bands", [])
+                                for band in bands:
+                                    if band.get("min", 0) <= final_rating_raw <= band.get("max", 5):
+                                        final_rating_label = band.get("label")
+                                        break
+                            except Exception:
+                                pass
+                    except Exception:
+                        pass
+
+                    # Insert evidence with combined rating info persisted
                     store.insert_evidence(
                         evidence_id=evidence_id,
                         sha1=sha1,
@@ -1442,8 +1577,8 @@ def scan_upload():
                         year=int(month[:4]),
                         month_bucket=month,
                         kpa_code=kpa_code,
-                        rating=(brain_ctx.get("rating_label") if brain_ctx else classification.get("tier")),
-                        tier=(brain_ctx.get("tier_label") if brain_ctx else classification.get("tier")),
+                        rating=(final_rating_label or (brain_ctx.get("rating_label") if brain_ctx else classification.get("tier"))),
+                        tier=(final_tier_label or (brain_ctx.get("tier_label") if brain_ctx else classification.get("tier"))),
                         file_path=str(filepath),
                         meta={
                             "filename": filename,
@@ -1456,6 +1591,8 @@ def scan_upload():
                             "target_task_id": target_task_id or "",
                             "brain": brain_ctx or {},
                             "ollama": ai_ctx or {},
+                            "final_rating": round(final_rating_raw, 2) if final_rating_raw is not None else None,
+                            "final_rating_label": final_rating_label,
                         }
                     )
 
@@ -1515,6 +1652,22 @@ def scan_upload():
                                 mapped_by=mapped_by_value,
                                 confidence=0.95,
                             )
+                            # If user asserted this mapping, remove any other mappings for this evidence
+                            # so the user's explicit choice is the single authoritative mapping.
+                            if asserted_mapping:
+                                try:
+                                    deleted = store.delete_mappings_except(evidence_id, [target_task_id])
+                                    if deleted:
+                                        print(f"[ASSERTION CLEANUP] Removed {deleted} non-target mappings for {evidence_id}")
+                                except Exception as _e:
+                                    print(f"[ASSERTION CLEANUP] Failed to clean old mappings for {evidence_id}: {_e}")
+                                # Also clean persisted asserted_mappings so prior asserted links don't persist
+                                try:
+                                    deleted_asserted = store.delete_asserted_mappings_except(evidence_id, [target_task_id])
+                                    if deleted_asserted:
+                                        print(f"[ASSERTION CLEANUP] Removed {deleted_asserted} non-target asserted mappings for {evidence_id}")
+                                except Exception as _e:
+                                    print(f"[ASSERTION CLEANUP] Failed to clean old asserted_mappings for {evidence_id}: {_e}")
                             # Ensure UI acknowledges mapping immediately (scan results use mapped_tasks length)
                             try:
                                 # Get the actual task title from the store
@@ -1659,9 +1812,29 @@ def _build_enhanced_impact_summary(
     if user_description:
         parts.append(f"User: {user_description.strip()}")
     
-    # Add AI-generated summary if different from user description
-    if ai_summary and ai_summary.lower() not in user_description.lower():
-        parts.append(f"Analysis: {ai_summary.strip()}")
+    # Clean up AI summary values like 'None'/'N/A' so we don't show meaningless analysis.
+    ai_summary_clean = (ai_summary or "").strip()
+    if ai_summary_clean.lower() in ("none", "n/a", "null", ""):
+        ai_summary_clean = ""
+
+    # Add AI-generated summary if different from user description. If AI summary is empty,
+    # fall back to a concise brain-based analysis when possible so UI always shows an analysis.
+    if ai_summary_clean and ai_summary_clean.lower() not in (user_description or "").lower():
+        parts.append(f"Analysis: {ai_summary_clean}")
+    elif not ai_summary_clean:
+        # Build a minimal analysis from brain scorer context to avoid 'Analysis: None'
+        if brain_ctx:
+            try:
+                pk = brain_ctx.get("primary_kpa_name") or brain_ctx.get("primary_kpa_code") or ""
+                rating = brain_ctx.get("rating")
+                rating_part = f" Rating {rating:.1f}/5.0" if isinstance(rating, (int, float)) else ""
+                values = brain_ctx.get("values_hits", []) or []
+                values_part = f"; demonstrates: {', '.join(values[:3])}" if values else ""
+                brief = f"Brain indicates {pk}{rating_part}{values_part}".strip()
+                if brief:
+                    parts.append(f"Analysis: {brief}")
+            except Exception:
+                pass
     
     # Add brain scorer insights
     if brain_ctx:
@@ -1877,6 +2050,14 @@ def classify_with_ollama_raw(prompt: str) -> Dict:
             try:
                 parsed = _json.loads(raw_text)
                 if isinstance(parsed, dict):
+                    # If AI returns structured JSON but doesn't include impact_strength,
+                    # compute a heuristic score from the impact_summary if present.
+                    if isinstance(parsed, dict) and "impact_strength" not in parsed:
+                        im = parsed.get("impact_summary") or parsed.get("impact") or ""
+                        try:
+                            parsed["impact_strength"] = _compute_impact_strength(im)
+                        except Exception:
+                            parsed["impact_strength"] = float(parsed.get("confidence", 0.0)) if parsed.get("confidence") else 0.0
                     return parsed
             except Exception:
                 # Not JSON — construct a helpful structured result
@@ -1887,6 +2068,7 @@ def classify_with_ollama_raw(prompt: str) -> Dict:
                     "tier": "Unknown",
                     "impact_summary": raw[:2000],
                     "confidence": 0.6,
+                    "impact_strength": _compute_impact_strength(raw[:2000]),
                     "raw": raw,
                 }
         else:
@@ -1895,6 +2077,163 @@ def classify_with_ollama_raw(prompt: str) -> Dict:
     except Exception as e:
         print(f"Ollama raw classification error: {e}")
         raise
+
+
+def _compute_impact_strength(text: str) -> float:
+    """
+    Heuristic to compute an impact strength (0.0-1.0) from an AI-produced impact summary or other text.
+    Short, generic summaries return low strength; substantive summaries with impact verbs/numbers return higher.
+    """
+    try:
+        if not text:
+            return 0.0
+        t = str(text).strip()
+        lower = t.lower()
+
+        # Base by length and presence of explanatory content
+        ln = len(lower)
+        if ln < 40:
+            base = 0.05
+        elif ln < 120:
+            base = 0.25
+        else:
+            base = 0.45
+
+        bonus = 0.0
+
+        # Use NWU brain tier keywords to detect transformational/developmental signals
+        try:
+            from backend.nwu_brain_scorer import load_brain
+            brain = load_brain()
+            tk = brain.tier_keywords
+        except Exception:
+            tk = None
+
+        # If tier keywords are available, score matches
+        if isinstance(tk, dict):
+            trans = tk.get('Transformational', [])
+            dev = tk.get('Developmental', [])
+            comp = tk.get('Compliance', [])
+
+            t_matches = sum(1 for kw in trans if kw.lower() in lower)
+            d_matches = sum(1 for kw in dev if kw.lower() in lower)
+            c_matches = sum(1 for kw in comp if kw.lower() in lower)
+
+            bonus += min(0.6, t_matches * 0.12)
+            bonus += min(0.25, d_matches * 0.06)
+            bonus -= min(0.12, c_matches * 0.04)
+
+        # Boost for explicit impact words and verbs
+        kws = ["impact", "improve", "increase", "reduc", "outcome", "result", "pass rate", "throughput", "citations", "grant", "funding", "patent", "commercial", "policy", "adopted", "scaled", "national", "international", "deploy"]
+        for w in kws:
+            if w in lower:
+                bonus += 0.06
+
+        # Numeric evidence/quantifiers boost
+        if any(x in lower for x in ["%", "percent", "n=", "n =", "students", "graduat", "rates", "increase", "decrease", "uptake", "citations", "grant"]):
+            bonus += 0.12
+
+        # Penalise extremely short or generic summaries further
+        if ln < 20:
+            bonus -= 0.05
+
+        val = max(0.0, min(1.0, base + bonus))
+        return round(float(val), 2)
+    except Exception:
+        return 0.0
+
+
+def _derive_tier_from_text(text: str) -> str:
+    """Derive a tier label (Transformational/Developmental/Compliance) from text using brain tier keywords."""
+    try:
+        lower = (text or "").lower()
+        from backend.nwu_brain_scorer import load_brain
+        brain = load_brain()
+        tk = brain.tier_keywords or {}
+
+        scores = {"Transformational": 0, "Developmental": 0, "Compliance": 0}
+        for tier_name in scores.keys():
+            for kw in tk.get(tier_name, []):
+                if kw.lower() in lower:
+                    scores[tier_name] += 1
+
+        # Pick highest score; fall back to Developmental
+        best = max(scores, key=scores.get)
+        if scores[best] == 0:
+            return "Developmental"
+        return best
+    except Exception:
+        return "Developmental"
+
+
+def _extract_impact_summary_from_text(text: str) -> str:
+    """Try to extract the most impact-specific sentences from text to form a richer impact_summary."""
+    try:
+        import re
+        if not text:
+            return ""
+        sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+        lower = text.lower()
+        # Impact cues
+        cues = ["impact", "increase", "improve", "%", "grant", "funding", "patent", "policy", "adopted", "citations", "decrease", "reduction", "uptake", "deploy", "national", "international"]
+        hits = [s for s in sentences if any(c in s.lower() for c in cues)]
+        if hits:
+            summary = ' '.join(hits)[:2000]
+            return summary
+        # fallback: return first two sentences
+        return ' '.join(sentences[:2])[:2000]
+    except Exception:
+        return text[:2000]
+
+
+def _apply_evidence_taxonomy_adjustments(parsed: dict, content: str, user_explanation: str) -> dict:
+    """Use `evidence_taxonomy.json` cues to adjust `parsed` KPA, impact_strength and tier."""
+    try:
+        import json
+        from pathlib import Path
+        combo = ' '.join([str(parsed.get('impact_summary') or ''), user_explanation or '', content or '']).lower()
+        tax_path = Path(__file__).parent.parent / 'evidence_taxonomy.json'
+        if not tax_path.exists():
+            return parsed
+        tax = json.loads(tax_path.read_text(encoding='utf-8'))
+        cats = tax.get('evidence_categories', {})
+
+        # scan categories for matching file_patterns/examples
+        best_match = None
+        best_weight = 0.0
+        for cat_key, cat in cats.items():
+            types = cat.get('evidence_types', {})
+            for tkey, tcfg in types.items():
+                patterns = tcfg.get('file_patterns', []) + tcfg.get('examples', [])
+                cred = float(tcfg.get('credibility_weight', 0.0))
+                for p in patterns:
+                    p_lower = p.lower()
+                    if p_lower and p_lower in combo:
+                        # choose highest credibility match
+                        if cred > best_weight:
+                            best_weight = cred
+                            best_match = (cat, tcfg)
+        if best_match:
+            cat, tcfg = best_match
+            # Set KPA from taxonomy category
+            kpa_name = cat.get('kpa_name') or cat.get('kpa_code') or parsed.get('kpa')
+            parsed['kpa'] = kpa_name
+
+            # Boost impact_strength proportionally to credibility weight
+            try:
+                cur = float(parsed.get('impact_strength') or 0.0)
+            except Exception:
+                cur = 0.0
+            boost = min(0.6, best_weight * 0.2)
+            parsed['impact_strength'] = round(min(1.0, max(cur, cur + boost)), 2)
+
+            # If the evidence type strongly indicates published/accepted (cred>=1.2 and pattern includes 'article' etc.)
+            if best_weight >= 1.2 and any(x in ' '.join(tcfg.get('examples', [])).lower() for x in ['published', 'accepted', 'article', 'journal']):
+                parsed['tier'] = 'Transformational'
+
+        return parsed
+    except Exception:
+        return parsed
 
 
 def classify_with_ollama(filename: str, content: str) -> Dict:
@@ -2007,6 +2346,276 @@ Reply with ONLY the category name."""
             "impact_summary": f"Classification failed: {str(e)[:100]}",
             "confidence": 0.3
         }
+
+
+def classify_with_ollama_quick(filename: str, content: str, user_explanation: str = "") -> Dict:
+    """Quick Ollama call asking specifically for an `impact_strength` (0..1).
+    Tries a lightweight quick model first (configurable). Falls back to a heuristic when Ollama is unavailable.
+    """
+    # Strongly-worded JSON-only prompt to encourage machine-parseable output
+    prompt = f"""
+Return valid JSON ONLY (no commentary, no markdown). JSON fields required:
+  - kpa (string)
+  - task (string)
+  - tier (string)
+  - impact_summary (string)
+  - confidence (number between 0.0 and 1.0)
+  - impact_strength (number between 0.0 and 1.0)
+
+If you cannot determine a numeric `impact_strength`, set it explicitly to 0.0. Do not include any extra keys.
+
+Filename: {filename}
+User explanation: {user_explanation[:500]}
+Content preview: {content[:500]}
+
+Return a single JSON object.
+"""
+
+    # Build candidate list: prefer explicit quick model, then any installed manifests, then `ollama list` output
+    candidate_models = [OLLAMA_QUICK_MODEL]
+
+    # Try to read manifest-based installed models to form full names like
+    # registry.ollama.ai/library/llama3.2:1b which avoid ambiguous short names
+    try:
+        from pathlib import Path
+        manifests_root = Path(os.getenv('OLLAMA_MODELS', str(Path.home() / '.ollama' / 'models'))) / 'manifests'
+        if manifests_root.exists():
+            for registry_dir in manifests_root.iterdir():
+                if not registry_dir.is_dir():
+                    continue
+                for lib_dir in registry_dir.iterdir():
+                    if not lib_dir.is_dir():
+                        continue
+                    for model_dir in lib_dir.iterdir():
+                        if not model_dir.is_dir():
+                            continue
+                        for tag_file in model_dir.iterdir():
+                            if not tag_file.is_file():
+                                continue
+                            model_name = f"{registry_dir.name}/{lib_dir.name}/{model_dir.name}:{tag_file.name}"
+                            if model_name not in candidate_models:
+                                candidate_models.append(model_name)
+    except Exception:
+        pass
+
+    # Finally, try `ollama list` (if available) to include any runtime-registered names
+    try:
+        import subprocess
+        out = subprocess.check_output(["ollama", "list"], text=True)
+        installed = []
+        for i, ln in enumerate(out.splitlines()):
+            if i == 0 and ln.strip().upper().startswith("NAME"):
+                continue
+            parts = ln.split()
+            if parts:
+                installed.append(parts[0])
+        for m in installed:
+            if m not in candidate_models:
+                candidate_models.append(m)
+    except Exception:
+        # Fall back to configured full model name
+        if OLLAMA_MODEL and OLLAMA_MODEL not in candidate_models:
+            candidate_models.append(OLLAMA_MODEL)
+
+    last_exc = None
+    import json as _json
+    global OLLAMA_DISABLED, OLLAMA_DISABLED_UNTIL
+    # If Ollama is temporarily disabled due to repeated runner failures, skip attempts
+    try:
+        import time as _time
+        if OLLAMA_DISABLED and _time.time() < OLLAMA_DISABLED_UNTIL:
+            combined = (user_explanation or "") + "\n" + (content or "")
+            return {"kpa": _guess_kpa_from_text(combined), "task": "Quick fallback classification", "tier": "Unknown", "impact_summary": "Fallback classification (Ollama temporarily unavailable)", "confidence": 0.45, "impact_strength": _compute_impact_strength(combined)}
+    except Exception:
+        pass
+
+    for model_name in candidate_models:
+        try:
+            resp = requests.post(
+                f"{OLLAMA_BASE_URL}/api/generate",
+                json={"model": model_name, "prompt": prompt, "stream": False},
+                timeout=OLLAMA_QUICK_TIMEOUT,
+            )
+            if resp.status_code != 200:
+                raise Exception(f"Ollama returned status {resp.status_code}")
+
+            try:
+                data = resp.json()
+            except Exception:
+                data = None
+
+            ai_response = None
+            if isinstance(data, dict):
+                ai_response = data.get("response") or data.get("output") or data.get("text") or data
+
+            # If a dict-like structure was returned directly
+            if isinstance(ai_response, dict):
+                parsed = ai_response
+            else:
+                # Try to parse JSON from the response text
+                parsed = None
+                try:
+                    parsed = _json.loads(str(ai_response or data or ""))
+                except Exception:
+                    parsed = None
+
+            if isinstance(parsed, dict):
+                # Normalize `kpa` field: accept numeric or short codes and map to human-friendly names
+                try:
+                    kpa_raw = parsed.get("kpa")
+                    if isinstance(kpa_raw, (int, float)):
+                        kpa_num = int(kpa_raw)
+                        if 1 <= kpa_num <= 5:
+                            try:
+                                from backend.nwu_brain_scorer import load_brain
+                                kpas_map = load_brain().institution_profile.get("kpas", {})
+                                kpa_code = f"KPA{kpa_num}"
+                                parsed["kpa"] = kpas_map.get(kpa_code, kpa_code)
+                            except Exception:
+                                parsed["kpa"] = f"KPA{kpa_num}"
+                        else:
+                            parsed["kpa"] = _guess_kpa_from_text(parsed.get("impact_summary") or "")
+                    elif isinstance(kpa_raw, str):
+                        s = kpa_raw.strip()
+                        # Accept forms like '1', 'KPA1', 'kpa_1', etc.
+                        import re
+                        m = re.match(r'^(?:kpa[_\s-]*)?(\d+)$', s, re.IGNORECASE)
+                        if m:
+                            kpa_num = int(m.group(1))
+                            if 1 <= kpa_num <= 5:
+                                try:
+                                    from backend.nwu_brain_scorer import load_brain
+                                    kpas_map = load_brain().institution_profile.get("kpas", {})
+                                    kpa_code = f"KPA{kpa_num}"
+                                    parsed["kpa"] = kpas_map.get(kpa_code, kpa_code)
+                                except Exception:
+                                    parsed["kpa"] = f"KPA{kpa_num}"
+                            else:
+                                parsed["kpa"] = _guess_kpa_from_text(s)
+                        else:
+                            # If kpa looks like an unexpected token (e.g., '12'), fallback to heuristic
+                            if s.isdigit():
+                                try:
+                                    n = int(s)
+                                    if 1 <= n <= 5:
+                                        from backend.nwu_brain_scorer import load_brain
+                                        kpas_map = load_brain().institution_profile.get("kpas", {})
+                                        parsed["kpa"] = kpas_map.get(f"KPA{n}", f"KPA{n}")
+                                    else:
+                                        parsed["kpa"] = _guess_kpa_from_text(parsed.get("impact_summary") or "")
+                                except Exception:
+                                    parsed["kpa"] = _guess_kpa_from_text(parsed.get("impact_summary") or "")
+                            else:
+                                # Keep the string as-is (may already be human-friendly)
+                                parsed["kpa"] = s
+                except Exception:
+                    parsed["kpa"] = _guess_kpa_from_text(parsed.get("impact_summary") or "")
+
+                # Sanitize KPA: if returned value looks like a currency, number, or other junk,
+                # fallback to heuristic guess from the impact summary/content.
+                try:
+                    kp = parsed.get("kpa") or ""
+                    if isinstance(kp, str) and (any(ch.isdigit() for ch in kp) or any(c in kp.lower() for c in ['r', '$', '€', '£', 'rand', ','])):
+                        parsed["kpa"] = _guess_kpa_from_text(parsed.get("impact_summary") or (user_explanation or ""))
+                except Exception:
+                    pass
+
+                # Apply taxonomy-based adjustments (evidence types, credibility weights)
+                try:
+                    parsed = _apply_evidence_taxonomy_adjustments(parsed, content, user_explanation)
+                except Exception:
+                    pass
+
+                # If model didn't provide a numeric impact_strength or it's very small,
+                # compute a brain-informed heuristic and prefer it when larger.
+                try:
+                    computed_strength = _compute_impact_strength(parsed.get("impact_summary") or "")
+                    existing = parsed.get("impact_strength")
+                    existing_val = None
+                    if existing is None:
+                        existing_val = None
+                    else:
+                        try:
+                            existing_val = float(existing)
+                        except Exception:
+                            existing_val = None
+
+                    if existing_val is None or existing_val < computed_strength:
+                        parsed["impact_strength"] = computed_strength
+                    else:
+                        parsed["impact_strength"] = existing_val
+                except Exception:
+                    parsed["impact_strength"] = _compute_impact_strength(parsed.get("impact_summary") or "")
+
+                # Normalize confidence to numeric
+                try:
+                    conf = parsed.get("confidence")
+                    if isinstance(conf, str):
+                        parsed["confidence"] = float(conf) if conf.replace('.', '', 1).isdigit() else 0.0
+                    elif isinstance(conf, (int, float)):
+                        parsed["confidence"] = float(conf)
+                    else:
+                        parsed["confidence"] = 0.0
+                except Exception:
+                    parsed["confidence"] = 0.0
+
+                # Improve impact_summary if too short or generic
+                try:
+                    imsum = parsed.get("impact_summary") or ""
+                    if (not imsum) or (isinstance(imsum, str) and (len(imsum) < 40 or 'fallback' in imsum.lower())):
+                        combined_txt = (user_explanation or "") + "\n" + (content or "")
+                        parsed["impact_summary"] = _extract_impact_summary_from_text(combined_txt)
+                except Exception:
+                    pass
+
+                # Derive tier if not provided or looks non-standard
+                try:
+                    tier_val = parsed.get("tier") or ""
+                    if not tier_val or str(tier_val).strip().lower() in ("unknown", "n/a", "new", "none"):
+                        parsed["tier"] = _derive_tier_from_text(parsed.get("impact_summary") or (user_explanation or ""))
+                except Exception:
+                    parsed["tier"] = _derive_tier_from_text(parsed.get("impact_summary") or (user_explanation or ""))
+                else:
+                    # Normalize free-text tier values into canonical brain tiers
+                    try:
+                        tval = str(tier_val).lower()
+                        if any(x in tval for x in ["transform", "national", "international", "major", "scale", "scale"]):
+                            parsed["tier"] = "Transformational"
+                        elif any(x in tval for x in ["develop", "pilot", "improve", "module", "department", "local", "project"]):
+                            parsed["tier"] = "Developmental"
+                        elif any(x in tval for x in ["compliance", "policy", "statut", "baseline", "minimum"]):
+                            parsed["tier"] = "Compliance"
+                        else:
+                            # fallback to derived
+                            parsed["tier"] = _derive_tier_from_text(parsed.get("impact_summary") or (user_explanation or ""))
+                    except Exception:
+                        parsed["tier"] = _derive_tier_from_text(parsed.get("impact_summary") or (user_explanation or ""))
+
+                return parsed
+
+            # If parsing failed, fall back to heuristic extraction from the response text
+            raw = str(ai_response or data or "")
+            return {"kpa": _guess_kpa_from_text(raw), "task": raw[:200], "tier": "Unknown", "impact_summary": raw[:2000], "confidence": 0.6, "impact_strength": _compute_impact_strength(raw[:2000])}
+
+        except Exception as e:
+            print(f"[OLLAMA QUICK] call failed for model={model_name}: {e}")
+            last_exc = e
+            # If we see the runner termination error or a 500, disable Ollama for a short window
+            try:
+                emsg = str(e).lower()
+                if 'runner process has terminated' in emsg or '500' in emsg or 'read timed out' in emsg:
+                    import time as _time
+                    OLLAMA_DISABLED = True
+                    OLLAMA_DISABLED_UNTIL = _time.time() + 60  # disable for 60s
+                    print('[OLLAMA QUICK] Disabling Ollama calls for 60s due to repeated errors. Consider pulling a smaller model with `ollama pull <model>` or increasing host resources.')
+            except Exception:
+                pass
+            continue
+
+    # Exhausted candidates — return a local heuristic classification
+    combined = (user_explanation or "") + "\n" + (content or "")
+    print(f"[OLLAMA QUICK] Exhausted quick models, returning fallback heuristic: {last_exc}")
+    return {"kpa": _guess_kpa_from_text(combined), "task": "Quick fallback classification", "tier": "Unknown", "impact_summary": "Fallback classification (Ollama unavailable)", "confidence": 0.45, "impact_strength": _compute_impact_strength(combined)}
 
 # ============================================================
 # EVIDENCE STORE
@@ -2714,21 +3323,164 @@ def ai_guidance():
                     tmpl = None
                 if not tmpl:
                     tmpl = get_rendered_template(DATA_FOLDER / 'guidance_templates.json', context, variant='short')
-                if tmpl and tmpl.get('text'):
-                    return jsonify({"guidance": tmpl.get('text'), "source": "template", "template_id": tmpl.get('template_id')})
+                # If a template exists, we will prefer to generate task-specific
+                # guidance via Ollama below rather than short-circuiting with the
+                # static template. This ensures guidance is tailored to the task.
 
                 # If no strict template match, generate a concise, personal guidance
                 gen = generate_qualitative_guidance(context, variant='short_personal')
-                if gen and gen.get('text'):
-                    return jsonify({"guidance": gen.get('text'), "source": "generated", "template_id": gen.get('template_id')})
+                if tmpl and tmpl.get('text'):
+                    # Instead of returning the static template, ask Ollama to
+                    # generate guidance directly from the task description so
+                    # responses are task-specific and more helpful.
+                    guidance_text = None
+                    try:
+                        task_summary = task_info.get('task_summary') or task_info.get('title') or ''
+                        evidence_hints = task_info.get('evidence_hints') or []
+                        min_req = task_info.get('minimum_count') or task_info.get('min_required') or None
+                        stretch = task_info.get('stretch_count') or task_info.get('stretch_target') or None
+
+                        llm_prompt = f"You are VAMP, an assistant for academic performance management.\nContext:\n- Task summary: {task_summary}\n- KPA: {task_info.get('kpa') or ''}\n- Evidence hints: {', '.join(evidence_hints[:6])}\n- Minimum required: {min_req}\n- Stretch target: {stretch}\n\nUser question: {question}\n\nProvide a single concise, human-friendly paragraph of actionable guidance tailored to this task. Keep it natural, specific, and avoid generic phrasing."
+
+                        llm_resp = query_ollama(llm_prompt, context)
+                        if isinstance(llm_resp, str) and llm_resp.strip():
+                            guidance_text = llm_resp.strip()
+                    except Exception as _e:
+                        print(f"Ollama generation for template-based guidance failed: {_e}")
+                        guidance_text = tmpl.get('text')
+
+                    # Generate voice from the LLM-produced guidance if available
+                    audio_url = None
+                    try:
+                        spoken_text = guidance_text or tmpl.get('text')
+                        if ELEVENLABS_AVAILABLE and sanitize_for_speech:
+                            spoken_text = sanitize_for_speech(spoken_text)
+                        if ELEVENLABS_AVAILABLE:
+                            try:
+                                audio_path = text_to_speech(spoken_text)
+                                if audio_path:
+                                    audio_url = f"/api/voice/audio/{audio_path.name}"
+                            except Exception as _voice_err:
+                                print(f"ElevenLabs generation failed for template guidance (non-fatal): {_voice_err}")
+                    except Exception:
+                        audio_url = None
+
+                    return jsonify({
+                        "answer": guidance_text or tmpl.get('text'),
+                        "audio_url": audio_url,
+                        "has_voice": audio_url is not None,
+                        "voice_engine": "elevenlabs" if ELEVENLABS_AVAILABLE else "none",
+                        "source": "template_llm",
+                        "template_id": tmpl.get('template_id')
+                    })
             except Exception as _e:
                 print(f"Template/Generator error: {_e}")
         except Exception as _e:
             print(f"Template rendering error: {_e}")
 
-        # Fallback: Query Ollama
+        # Fallback: Query Ollama. For task-specific requests prefer a structured
+        # JSON response containing guidance, checklist and evidence examples.
+        try:
+            from backend.llm.ollama_client import extract_json_object
+        except Exception:
+            extract_json_object = None
+
+        # Build a structured prompt when we have task context so the model
+        # returns deterministic, UI-friendly fields.
+        if task_info:
+            task_summary = task_info.get('task_summary') or task_info.get('title') or ''
+            evidence_hints = task_info.get('evidence_hints') or []
+            min_req = task_info.get('minimum_count') or task_info.get('min_required') or None
+            stretch = task_info.get('stretch_count') or task_info.get('stretch_target') or None
+
+            structured_prompt = f"""
+You are VAMP (Virtual Academic Management Partner), an assistant for academic performance management.
+Context:
+- Task summary: {task_summary}
+- KPA: {task_info.get('kpa') or task_info.get('kpa_name') or ''}
+- Evidence hints: {', '.join(evidence_hints[:6])}
+- Minimum required: {min_req}
+- Stretch target: {stretch}
+
+User question: {question}
+
+Return ONLY a single valid JSON object with these keys:
+ - guidance: short one-paragraph actionable guidance (string)
+ - checklist: array of up to 6 concise action items (array of strings)
+ - evidence_examples: array of example artefacts (array of strings)
+ - required_count: integer (if known) or null
+ - stretch_target: integer or null
+ - confidence: number between 0.0 and 1.0 indicating model confidence
+
+If you cannot answer, set confidence to 0.0 and ask one clarifying question in 'guidance'. Keep answers concise and do not include markdown or extraneous commentary.
+"""
+
+            raw = query_ollama(structured_prompt, context)
+            parsed = None
+            if extract_json_object:
+                try:
+                    parsed = extract_json_object(raw)
+                except Exception:
+                    parsed = None
+
+            # If parsing succeeded and we have a dict, return structured response
+            if isinstance(parsed, dict):
+                # Convert structured response to a human-friendly text blob
+                try:
+                    guidance_text = parsed.get('guidance') or ''
+                    checklist = parsed.get('checklist') or []
+                    if checklist:
+                        guidance_text = guidance_text.strip() + "\n\nChecklist:\n" + "\n".join([f"- {c}" for c in checklist])
+                except Exception:
+                    guidance_text = json.dumps(parsed)
+
+                # Optionally generate voice using ElevenLabs and return same shape as ask_vamp_voice
+                audio_url = None
+                try:
+                    clean_answer = guidance_text
+                    if ELEVENLABS_AVAILABLE and sanitize_for_speech:
+                        clean_answer = sanitize_for_speech(guidance_text)
+                    if ELEVENLABS_AVAILABLE:
+                        try:
+                            audio_path = text_to_speech(clean_answer)
+                            if audio_path:
+                                audio_url = f"/api/voice/audio/{audio_path.name}"
+                        except Exception as _voice_err:
+                            print(f"ElevenLabs generation failed for task guidance (non-fatal): {_voice_err}")
+                except Exception:
+                    audio_url = None
+
+                return jsonify({
+                    "answer": guidance_text,
+                    "audio_url": audio_url,
+                    "has_voice": audio_url is not None,
+                    "voice_engine": "elevenlabs" if ELEVENLABS_AVAILABLE else "none",
+                    "source": "llm_structured",
+                    "raw": parsed,
+                })
+
+            # Fall back to plain text if parsing failed
+            guidance = raw
+            # produce voice as above
+            audio_url = None
+            try:
+                clean_answer = guidance
+                if ELEVENLABS_AVAILABLE and sanitize_for_speech:
+                    clean_answer = sanitize_for_speech(guidance)
+                if ELEVENLABS_AVAILABLE:
+                    try:
+                        audio_path = text_to_speech(clean_answer)
+                        if audio_path:
+                            audio_url = f"/api/voice/audio/{audio_path.name}"
+                    except Exception as _voice_err:
+                        print(f"ElevenLabs generation failed for fallback guidance (non-fatal): {_voice_err}")
+            except Exception:
+                audio_url = None
+
+            return jsonify({"answer": guidance, "audio_url": audio_url, "has_voice": audio_url is not None, "voice_engine": "elevenlabs" if ELEVENLABS_AVAILABLE else "none", "source": "llm"})
+
+        # No task context: use the general prompt (legacy behavior)
         guidance = query_ollama(f"Provide guidance: {question}", context)
-        
         return jsonify({"guidance": guidance, "source": "llm"})
     
     except Exception as e:

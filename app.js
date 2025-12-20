@@ -1136,22 +1136,21 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
   }
   
   const targetTaskId = $("scanTargetTaskId")?.value;
-  const lockToTask = $("scanLockToTask")?.checked;
-  
-  // If locking to task, show explanation modal first
-  if (lockToTask && targetTaskId) {
-    // Store scan parameters for later
+
+  // If a target task is selected we require the user to assert and explain
+  if (targetTaskId) {
+    // Store scan parameters for later (always enable brain and contextual AI)
     pendingScanData = {
       files: files,
       targetTaskId: targetTaskId,
       month: $("scanMonth").value,
-      useBrain: $("scanUseBrain").checked,
-      useContextual: $("scanUseContextual").checked
+      useBrain: true,
+      useContextual: true
     };
-    
-    // Open explanation modal
+
+    // Open explanation modal (user must provide mapping explanation)
     openLockExplanationModal(files, targetTaskId);
-    return;  // Don't proceed with scan yet
+    return; // Wait for user explanation before scanning
   }
   
   // Regular scan (not locked)
@@ -1172,8 +1171,9 @@ async function performScan(files, targetTaskId, userExplanation, isLocked) {
   }
   fd.append("staff_id", $("staffId").value);
   fd.append("month", $("scanMonth").value);
-  fd.append("use_brain", $("scanUseBrain").checked);
-  fd.append("use_contextual", $("scanUseContextual").checked);
+  // Always use NWU brain and contextual (Ollama) classification
+  fd.append("use_brain", "true");
+  fd.append("use_contextual", "true");
 
   if (targetTaskId) {
     fd.append("target_task_id", targetTaskId);
@@ -1692,12 +1692,12 @@ function openResolveModal(resultIndex) {
   log(`Opened resolve modal for: ${item.file}`);
 }
 
-function closeModal(modalId) {
+function closeModal(modalId, { preserveAIGuidanceTask = false } = {}) {
   const modal = $(modalId);
   modal?.classList.remove("active");
-  
-  // Clear AI guidance task when AI modal closes
-  if (modalId === "aiGuidanceModal") {
+
+  // Clear AI guidance task when AI modal closes unless caller requests preservation
+  if (modalId === "aiGuidanceModal" && !preserveAIGuidanceTask) {
     currentAIGuidanceTask = null;
   }
 }
@@ -1707,7 +1707,9 @@ $("submitGuidanceBtn")?.addEventListener("click", async () => {
   const question = $("aiGuidanceInput")?.value.trim();
   if (!question) return;
   
-  vampBusy("Consulting VAMP…");
+  // Close the guidance modal and show the Ask-VAMP loading overlay
+  closeModal("aiGuidanceModal", { preserveAIGuidanceTask: true });
+  vampBusy("Consulting the archives…");
   
   try {
     const res = await fetch("/api/ai/guidance", {
@@ -1726,13 +1728,20 @@ $("submitGuidanceBtn")?.addEventListener("click", async () => {
     const responseSection = $("aiGuidanceResponse");
     const responseDiv = responseSection?.querySelector(".modal-response");
     
+    let answerText = data.guidance || data.answer || "No guidance available.";
     if (responseDiv) {
-      responseDiv.textContent = data.guidance || data.answer || "No guidance available.";
+      responseDiv.textContent = answerText;
       responseSection.style.display = "block";
     }
-    
-    vampSpeak("I have provided guidance in the modal.");
-    log("AI guidance received");
+
+    // Present the guidance in the main Ask VAMP area (same behaviour as Ask-VAMP)
+    vampSpeak(answerText);
+    // Play ElevenLabs audio if returned
+    if (data.audio_url) {
+      playVoiceResponse(data.audio_url);
+    }
+
+    log("AI guidance received and presented in Ask VAMP area");
   } catch (e) {
     vampSpeak("Could not get AI guidance. Ensure Ollama is running.");
     log("AI guidance error: " + e.message);
