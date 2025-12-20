@@ -172,13 +172,8 @@
             <label>Month bucket</label>
             <input id="scanMonth" value="2025-01" placeholder="YYYY-MM"/>
             <div class="row" style="margin-top:6px;">
-              <label class="chk"><input type="checkbox" id="scanUseBrain" checked/> Use NWU Brain</label>
-              <label class="chk"><input type="checkbox" id="scanUseContextual" checked/> Use Ollama</label>
-            </div>
-            <div class="row" style="margin-top:6px;">
-              <label class="chk" title="When enabled, bypasses AI classification and directly links evidence to selected task with 100% confidence">
-                <input type="checkbox" id="scanLockToTask"/> 🔒 Lock to selected task (asserted relevance)
-              </label>
+              <div class="muted">NWU Brain and Ollama are used automatically for classification.</div>
+              <div class="muted">To lock evidence to a task, select the task and you will be prompted to assert and explain the mapping.</div>
             </div>
           </div>
         </div>

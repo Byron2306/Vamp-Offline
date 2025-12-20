@@ -1158,6 +1158,14 @@ def scan_upload():
         use_contextual = request.form.get('use_contextual') == 'true'
         asserted_mapping = request.form.get('asserted_mapping') == 'true'  # User pre-locked evidence to task
         user_explanation = request.form.get('user_explanation', '').strip()  # User's explanation for locked evidence
+
+        # Enforce explicit assertion when a target task is provided to avoid
+        # ambiguous metadata-only locks. Clients must set `asserted_mapping=true`
+        # when they intend to lock evidence to a specific task.
+        if target_task_id and not asserted_mapping:
+            return jsonify({
+                "error": "When providing target_task_id you must also set asserted_mapping=true."
+            }), 400
         
         results = []
         
