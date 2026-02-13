@@ -1,0 +1,89 @@
+{
+  "staff_id": "tester1",
+  "name": "Test User",
+  "position": "Lecturer",
+  "cycle_year": 2024,
+  "faculty": "",
+  "line_manager": "",
+  "kpas": [
+    {
+      "code": "KPA1",
+      "name": "Teaching and Learning",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {
+        "name": "Teaching and Learning",
+        "hours": 100.0,
+        "weight_pct": 40.0,
+        "norm_hours": 1728.0,
+        "teaching": [
+          "Teach ABC123"
+        ],
+        "supervision": [
+          "Supervise 2 MEd"
+        ]
+      }
+    },
+    {
+      "code": "KPA2",
+      "name": "Occupational Health and Safety",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {
+        "norm_hours": 1728.0
+      }
+    },
+    {
+      "code": "KPA3",
+      "name": "Research and Innovation / Creative Outputs",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {
+        "name": "Research",
+        "hours": 50.0,
+        "weight_pct": 20.0,
+        "norm_hours": 1728.0,
+        "research": [
+          "Publish article"
+        ]
+      }
+    },
+    {
+      "code": "KPA4",
+      "name": "Academic Leadership and Management",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {
+        "norm_hours": 1728.0,
+        "leadership": [
+          "Committee work"
+        ]
+      }
+    },
+    {
+      "code": "KPA5",
+      "name": "Social Responsiveness / Community and Industry Engagement",
+      "weight": null,
+      "hours": null,
+      "kpis": [],
+      "context": {},
+      "ta_context": {
+        "norm_hours": 1728.0,
+        "social": [
+          "Community outreach"
+        ]
+      }
+    }
+  ],
+  "flags": [
+    "TA_IMPORTED"
+  ]
+}

@@ -45,7 +45,9 @@ This will:
 
 ### Option 2: Start the Web Server
 ```bash
-# Make sure Ollama is running with the 3b model
+# Make sure an LLM is available. VAMP prefers Groq cloud (set GROQ_API_KEY),
+# or run a local Ollama instance if you need an offline fallback:
+# For Ollama (optional):
 ollama pull llama3.2:3b
 ollama serve
 
@@ -227,16 +229,17 @@ Your voice "Drac funny" (ID: 41uEhuPgfdTWTT6XXBCv) has:
 1. **Cache is your friend**: Identical text reuses cached audio instantly
 2. **Keep responses concise**: Shorter responses = faster + cheaper
 3. **Monitor quota**: Check `/api/voice/status` periodically
-4. **Ollama must be running**: Start with `ollama serve` before using VAMP
+4. **LLM must be available**: Set `GROQ_API_KEY` for Groq cloud or start local `ollama serve` as an optional fallback
 
 ## 🐛 Troubleshooting
 
-### "Cannot reach Ollama"
+### "Cannot reach LLM"
 ```bash
-# Start Ollama service
+# If using Groq cloud, ensure `GROQ_API_KEY` is set.
+# If using local Ollama, start the service:
 ollama serve
 
-# In another terminal
+# In another terminal, pull the model if needed:
 ollama pull llama3.2:3b
 ```
 

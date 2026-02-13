@@ -12,6 +12,17 @@ except Exception as exc:  # pragma: no cover - handled at runtime
     requests = None
     _REQUESTS_IMPORT_ERROR = exc
 
+# LLM Provider Configuration
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")  # "groq" or "ollama"
+
+# Groq configuration (free cloud API)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_TIMEOUT = float(os.getenv("GROQ_TIMEOUT", "60"))
+GROQ_RETRIES = int(os.getenv("GROQ_RETRIES", "2"))
+GROQ_BACKOFFS = [2, 6]
+
 
 def _get_ollama_host():
     """Determine the best Ollama host URL for the current environment."""
@@ -48,12 +59,77 @@ OLLAMA_RETRIES = int(os.getenv("OLLAMA_RETRIES", "2"))
 OLLAMA_BACKOFFS = [2, 6]
 
 
-def query_ollama(prompt: str, *, model: Optional[str] = None, format: Optional[str] = None,
-                 timeout: Optional[float] = None, num_predict: Optional[int] = None) -> str:
-    """Send a prompt to an Ollama instance and return the raw response text.
+def _query_groq(prompt: str, *, model: Optional[str] = None, 
+                timeout: Optional[float] = None, format: Optional[str] = None) -> str:
+    """Send a prompt to Groq's API and return the response text."""
+    if requests is None:
+        raise RuntimeError(
+            "The 'requests' dependency is required for Groq calls; install it to continue."
+        )
+    
+    if not GROQ_API_KEY:
+        raise RuntimeError(
+            "GROQ_API_KEY environment variable is required. "
+            "Get a free API key at https://console.groq.com"
+        )
+    
+    # If JSON format requested, add instruction
+    if format == "json":
+        prompt = f"{prompt}\n\nIMPORTANT: Respond with valid JSON only. No markdown, no code blocks, just raw JSON."
+    
+    payload = {
+        "model": model or GROQ_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": float(os.getenv("VAMP_LLM_TEMPERATURE", "0.25")),
+        "max_tokens": OLLAMA_NUM_PREDICT,
+    }
+    
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    last_error: Optional[Exception] = None
+    attempts = max(0, GROQ_RETRIES) + 1
+    
+    for attempt in range(attempts):
+        try:
+            response = requests.post(
+                GROQ_API_URL,
+                json=payload,
+                headers=headers,
+                timeout=timeout or GROQ_TIMEOUT
+            )
+            response.raise_for_status()
+            data = response.json()
+            choices = data.get("choices", [])
+            if choices:
+                return (choices[0].get("message", {}).get("content", "") or "").strip()
+            return ""
+            
+        except requests.exceptions.HTTPError as e:
+            if e.response is not None and e.response.status_code == 429:
+                retry_after = int(e.response.headers.get("Retry-After", 5))
+                time.sleep(retry_after)
+                continue
+            last_error = e
+        except Exception as exc:
+            last_error = exc
+            
+        if attempt < attempts - 1:
+            backoff_idx = min(attempt, len(GROQ_BACKOFFS) - 1)
+            time.sleep(GROQ_BACKOFFS[backoff_idx])
+            continue
+        raise last_error or RuntimeError("Unknown Groq error")
+    
+    if last_error:
+        raise last_error
+    raise RuntimeError("Unknown Groq error")
 
-    Parameters allow overrides but default to environment-configured settings.
-    """
+
+def _query_ollama_direct(prompt: str, *, model: Optional[str] = None, format: Optional[str] = None,
+                         timeout: Optional[float] = None, num_predict: Optional[int] = None) -> str:
+    """Send a prompt directly to Ollama instance."""
     if requests is None:
         raise RuntimeError(
             "The 'requests' dependency is required for Ollama calls; install it to continue."
@@ -80,7 +156,7 @@ def query_ollama(prompt: str, *, model: Optional[str] = None, format: Optional[s
             response.raise_for_status()
             data = response.json()
             return (data.get("response") or "").strip()
-        except Exception as exc:  # requests.RequestException | json.JSONDecodeError
+        except Exception as exc:
             last_error = exc
             if attempt < attempts - 1:
                 backoff_idx = min(attempt, len(OLLAMA_BACKOFFS) - 1)
@@ -91,6 +167,21 @@ def query_ollama(prompt: str, *, model: Optional[str] = None, format: Optional[s
     if last_error:
         raise last_error
     raise RuntimeError("Unknown Ollama error")
+
+
+def query_ollama(prompt: str, *, model: Optional[str] = None, format: Optional[str] = None,
+                 timeout: Optional[float] = None, num_predict: Optional[int] = None) -> str:
+    """Send a prompt to an LLM and return the raw response text.
+    
+    Uses Groq if GROQ_API_KEY is set, otherwise falls back to Ollama.
+    Parameters allow overrides but default to environment-configured settings.
+    """
+    # Use Groq if API key is available
+    if LLM_PROVIDER.lower() == "groq" and GROQ_API_KEY:
+        return _query_groq(prompt, model=model, timeout=timeout, format=format)
+    else:
+        return _query_ollama_direct(prompt, model=model, format=format, 
+                                    timeout=timeout, num_predict=num_predict)
 
 
 def _balanced_brace_slice(text: str) -> str:

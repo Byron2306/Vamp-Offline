@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>VAMP Offline (HTML)</title>
+  <title>EAGI BOT Offline (HTML)</title>
   <link rel="stylesheet" href="./vamp.css"/>
 </head>
 
@@ -16,9 +16,9 @@
   <div class="brand">
     <img src="./NWU-holding-shape-digital-white.png"
          alt="NWU"
-         style="width:40px;height:40px;filter:drop-shadow(0 0 6px rgba(255,0,60,.6));"/>
+         class="nwu-logo"/>
     <div>
-      <div class="title">VAMP Offline</div>
+      <div class="title">EAGI BOT Offline</div>
       <div class="muted">Virtual Academic Management Partner — NWU</div>
     </div>
   </div>
@@ -42,18 +42,22 @@
 
     <div class="vamp-video-frame">
       <video id="vamp-video"
-        src="./vampire.mp4"
         preload="auto"
         muted
-        playsinline>
+        playsinline
+        loop
+        style="border-radius: 18px; box-shadow: 0 0 32px rgba(108,61,145,0.18), 0 0 0 6px rgba(108,61,145,0.16); border: 3px solid var(--nwu-dark); background: transparent; max-width: 220px; margin: 0 auto; display: block; object-fit:cover;">
+        <source src="backend/contracts/02177020232809800000000000000000000ffffac1802049fc990.mp4" type="video/mp4">
+        <source src="./vampire.mp4" type="video/mp4">
+        Your browser does not support the video tag.
       </video>
-    <div class="vamp-glow"></div>
-  </div>
+      <div class="vamp-glow"></div>
+    </div>
 
   <div class="vamp-dialogue">
 
     <div class="vamp-identity">
-      <h1 class="vamp-name">VAMP</h1>
+      <h1 class="vamp-name">EAGI BOT</h1>
       <div class="vamp-role">Your Performance Guide</div>
     </div>
 
@@ -67,10 +71,10 @@
     <!-- ALWAYS AVAILABLE Ask-VAMP -->
     <div class="ask-vamp">
       <textarea id="ask-vamp-input"
-                placeholder="Ask VAMP for guidance, clarification, or support…"
+                placeholder="Ask EAGI BOT for guidance, clarification, or support…"
                 rows="2"></textarea>
       <button id="ask-vamp-btn" class="btn glow">
-        Ask VAMP
+        Ask EAGI BOT
       </button>
     </div>
 
@@ -223,7 +227,11 @@
       <div class="box" style="margin-top:12px;">
         <div class="box-h">AI Month Review</div>
         <div class="evidence" id="monthReviewBox">
-          Upload evidence for the current month, then click "Check Month Status" to have VAMP assess whether you've met your expectations.
+          Upload evidence for the current month, then click "Check Month Status" to have EAGI BOT assess whether you've met your expectations.
+        </div>
+        <div class="row" style="gap:8px;margin-top:12px;">
+          <button class="btn" id="lockMonthBtn" disabled title="Lock this month when all tasks are complete">🔒 Lock Month</button>
+          <span class="pill" id="monthLockPill" style="display:none;">Locked</span>
         </div>
       </div>
     </div>
@@ -244,18 +252,7 @@
             <label>Filter Month:</label>
             <select id="evidenceMonthFilter" style="padding:4px 8px;">
               <option value="all">All Months</option>
-              <option value="2025-01">January 2025</option>
-              <option value="2025-02">February 2025</option>
-              <option value="2025-03">March 2025</option>
-              <option value="2025-04">April 2025</option>
-              <option value="2025-05">May 2025</option>
-              <option value="2025-06">June 2025</option>
-              <option value="2025-07">July 2025</option>
-              <option value="2025-08">August 2025</option>
-              <option value="2025-09">September 2025</option>
-              <option value="2025-10">October 2025</option>
-              <option value="2025-11">November 2025</option>
-              <option value="2025-12">December 2025</option>
+              <!-- Options will be populated dynamically based on cycle year -->
             </select>
             <button class="btn glow" id="evidenceReloadBtn">Reload</button>
           </div>
@@ -294,17 +291,40 @@
     <div class="card">
       <div class="card-h">
         <div>
-          <div class="card-title">Reports & PA Generation</div>
-          <div class="muted">View full expectations and generate Performance Agreement.</div>
+          <div class="card-title">Reports & Reviews</div>
+          <div class="muted">Mid-year review, end-year review, and Performance Agreement generation.</div>
         </div>
-        <div class="right">
-          <button class="btn glow" id="genPABtn">Generate Final PA</button>
+      </div>
+
+      <!-- Mid-Year Review Section -->
+      <div class="box" style="margin-top:16px;border-left:3px solid var(--purple);">
+        <div class="box-h">📊 Mid-Year Review (January - June)</div>
+        <div id="midyearReviewStatus" style="padding:8px 0;">
+          <div class="muted">Loading review status...</div>
+        </div>
+        <div class="row" style="gap:8px;margin-top:12px;">
+          <button class="btn glow" id="checkMidyearBtn">Check Readiness</button>
+          <button class="btn" id="generateMidyearBtn" disabled>Generate Mid-Year Review</button>
+        </div>
+        <div id="midyearReviewContent" style="display:none;margin-top:16px;padding:12px;background:var(--panel);border-radius:4px;">
+          <!-- Mid-year review content will be rendered here -->
+        </div>
+      </div>
+
+      <!-- Month Lock Status -->
+      <div class="box" style="margin-top:16px;">
+        <div class="box-h">🔒 Month Lock Status</div>
+        <div id="monthLockGrid" style="display:grid;grid-template-columns:repeat(6, 1fr);gap:8px;margin-top:12px;">
+          <!-- Month lock indicators will be rendered here -->
         </div>
       </div>
 
       <!-- PA Report Table -->
       <div class="table-container" style="margin-top:16px;">
-        <h3 style="margin-bottom:8px;color:var(--purple);">Performance Agreement Report</h3>
+        <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <h3 style="color:var(--purple);">Performance Agreement Report</h3>
+          <button class="btn glow" id="genPABtn">Generate Final PA</button>
+        </div>
         <table class="vamp-table" id="paExpectationsTable">
           <thead>
             <tr>
@@ -336,7 +356,7 @@
       <div class="card-h">
         <div>
           <div class="card-title">🎙️ Voice Settings</div>
-          <div class="muted">Configure OpenVoice V2 voice cloning for VAMP</div>
+          <div class="muted">Configure OpenVoice V2 voice cloning for EAGI BOT</div>
         </div>
       </div>
 
@@ -561,6 +581,6 @@
   </div>
 </div>
 
-<script src="./app.js?v=20251218"></script>
+  <script src="./app.js?v=20260203"></script>
 </body>
 </html>

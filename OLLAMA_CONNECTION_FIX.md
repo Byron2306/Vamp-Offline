@@ -1,5 +1,7 @@
 # Ollama Connection Setup for Dev Containers
 
+Note: VAMP now supports Groq cloud (preferred) via `GROQ_API_KEY`. Running a local Ollama instance is optional — use Ollama only if you specifically want a local fallback. The instructions below help when you do need a local Ollama instance.
+
 ## Problem
 Your Ollama is running on Windows (127.0.0.1:11434), but the dev container cannot reach it because:
 1. Windows firewall may be blocking external connections

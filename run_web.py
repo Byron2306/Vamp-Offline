@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-VAMP Web Server - Comprehensive API backend with Ollama integration
+VAMP Web Server - Comprehensive API backend with Groq AI integration
 """
 
 import os
 import json
-import logging
 import time
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
@@ -15,6 +15,14 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import requests
 
+# Temporary request logging (for debugging incoming AI prompts)
+REQUEST_LOGGING_ENABLED = True
+REQUEST_LOGGING_DURATION = 60  # seconds to keep logging after server start
+REQUEST_LOGGING_START = time.time()
+REQUEST_LOG_FILE = Path('./logs/eagi_requests.log')
+
+# Temporary safety switch: when True, prevent automatic KPA/weight dumps
+DISABLE_AUTO_KPA = True
 # Import VAMP backend modules
 try:
     from backend.staff_profile import StaffProfile, create_or_load_profile
@@ -30,7 +38,6 @@ try:
     EXPECTATION_ENGINE_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: Could not import expectation_engine: {e}")
-    EXPECTATION_ENGINE_AVAILABLE = False
     parse_task_agreement = None
     build_expectations_from_ta = None
 
@@ -63,8 +70,18 @@ CONTRACTS_FOLDER = DATA_FOLDER / "contracts"
 EVIDENCE_FOLDER = DATA_FOLDER / "evidence"
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 
+# LLM Provider Configuration (Groq by default, fallback to Ollama)
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")  # "groq" or "ollama"
+
+# Groq configuration (free cloud API)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_TIMEOUT = float(os.getenv("GROQ_TIMEOUT", "60"))
+
+# Ollama configuration (local fallback)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")  # Faster and better than 1b
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")
 OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "180"))
 PORT = int(os.getenv("PORT", "5000"))
 
@@ -95,88 +112,267 @@ except Exception as _e:
     dlog(f"Guidance templates not available: {_e}")
 
 # ============================================================
-# OLLAMA INTEGRATION
+# LLM INTEGRATION (centralized wrapper)
 # ============================================================
+try:
+    from backend.llm.ollama_client import query_ollama as central_query_ollama
+    LLM_WRAPPER_AVAILABLE = True
+except Exception as _e:
+    central_query_ollama = None
+    LLM_WRAPPER_AVAILABLE = False
+
 
 def query_ollama(prompt: str, context: Dict = None) -> str:
     """
-    Query Ollama LLM for AI responses
+    Query the configured LLM via the centralized wrapper in `backend.llm.ollama_client`.
+    The wrapper prefers Groq when `GROQ_API_KEY` is set and falls back to Ollama.
     """
-    try:
-        # Build enhanced prompt with context
-        if context:
-            enhanced_prompt = f"""You are VAMP (Virtual Academic Management Partner), an AI assistant for academic performance management at NWU.
+    # Preserve mock behavior
+    use_mock = os.getenv('USE_MOCK_OLLAMA', '0') in ('1', 'true', 'True')
+    if use_mock:
+        return run_mock_ollama(prompt, context)
 
-Context:
-- Staff ID: {context.get('staff_id', 'Unknown')}
-- Cycle Year: {context.get('cycle_year', 'Unknown')}
-- Current Stage: {context.get('stage', 'Unknown')}
-- Current Tab: {context.get('current_tab', 'Unknown')}
-- Expectations Loaded: {context.get('expectations_count', 0)}
-- Scan Results: {context.get('scan_results_count', 0)}
-
-User Question: {prompt}
-
-IMPORTANT: Write in plain text only. NO asterisks (*), underscores (_), markdown, or special symbols. Write naturally as if speaking. Keep responses concise and actionable."""
-        else:
-            enhanced_prompt = f"You are VAMP, an AI assistant for academic performance management. Write in plain text only - no asterisks, markdown, or special symbols. {prompt}"
-        
-        # Call Ollama API
+    # Prepend a simple context block if provided so the centralized wrapper sees it
+    if context:
         try:
-            response = requests.post(
-                f"{OLLAMA_BASE_URL}/api/generate",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "prompt": enhanced_prompt,
-                    "stream": False
-                },
-                timeout=OLLAMA_TIMEOUT
-            )
+            context_lines = []
+            for k, v in (context.items()):
+                context_lines.append(f"- {k}: {v}")
+            ctx = "\n".join(context_lines)
+            prompt = f"Context:\n{ctx}\n\nUser Question: {prompt}"
+        except Exception:
+            pass
 
-            if response.status_code == 200:
-                data = response.json()
-                return data.get("response", "I cannot provide guidance at this time.")
-            else:
-                return "Ollama service is unavailable. Please ensure it is running."
-        except requests.exceptions.RequestException as e:
-            # If a mock is enabled, return a generated canned response
-            use_mock = os.getenv('USE_MOCK_OLLAMA', '0') in ('1', 'true', 'True')
-            if use_mock:
+    if LLM_WRAPPER_AVAILABLE and central_query_ollama:
+        try:
+            return central_query_ollama(prompt)
+        except Exception as e:
+            print(f"Central LLM wrapper error: {e}")
+            try:
                 return run_mock_ollama(prompt, context)
-            print(f"Ollama error: {e}")
-            return "Cannot reach Ollama. Please ensure the service is running on port 11434."
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        return "An unexpected error occurred."
+            except Exception:
+                return "AI service error. Please configure GROQ_API_KEY or ensure Ollama is running."
+
+    return "AI not configured. Please set GROQ_API_KEY or ensure Ollama is running."
 
 
-def run_mock_ollama(prompt: str, context: Dict = None) -> str:
+def build_vamp_prompt(question: str, context: Dict | None = None) -> str:
+    """Build a persona-anchored prompt for Eagi with optional month-review constraints."""
+    ctx = context or {}
+    name = ctx.get('name') or ctx.get('staff_name') or ctx.get('staff') or "there"
+    month = ctx.get('scan_month') or ctx.get('month')
+    q_lc = (question or "").lower()
+
+    is_month_review = False
+    if month and any(kw in q_lc for kw in ["month review", "monthly review", "review for", "review of"]):
+        is_month_review = True
+
+    instructions = [
+        "You are Eagi, an academic performance agreement assistant at North-West University (NWU).",
+        f"Address the user by name in the first sentence (use '{name}').",
+        "Identify yourself as Eagi.",
+        "Keep responses concise and actionable.",
+        "When asked about specific tasks, recommendations, or KPAs, provide detailed, specific answers based on NWU policies and the user's context.",
+        "For general questions, focus exclusively on NWU academic matters, performance agreements, and related administrative processes.",
+        "Do not provide generic or vague responses; always tailor answers to the specific query and user's situation."
+    ]
+
+    if is_month_review:
+        instructions.extend([
+            f"This is a month review for {month}.",
+            "Only discuss this month; do not mention other months or the overall year.",
+            f"Start with the heading: 'Month Review: {month}'.",
+            "Provide specific details about tasks, evidence requirements, and completion status for this month."
+        ])
+
+    return "System Instructions:\n" + "\n".join(f"- {line}" for line in instructions) + f"\n\nUser Question: {question}"
+
+
+def run_mock_ai(prompt: str, context: Dict = None) -> str:
     """
-    Generate a simple, useful canned guidance based on context when Ollama is mocked or unavailable.
+    Generate knowledgeable, system-aware guidance based on VAMP capabilities and NWU context.
     """
+    import random
     try:
-        task = (context or {}).get('task') or {}
-        title = task.get('title') or task.get('task') or 'this task'
-        kpa = task.get('kpa') or task.get('kpa_code') or 'Unknown KPA'
+        ctx = context or {}
+        name = ctx.get('name') or ctx.get('staff_name') or ctx.get('staff') or "there"
+        month = ctx.get('scan_month') or ctx.get('month')
+        current_tab = ctx.get('current_tab') or ''
+        # Extract the actual user question from the prompt to avoid matching
+        # against system instructions that may mention keywords like 'KPA'.
+        prompt_text = (prompt or "").strip()
+        user_text = ""
+        try:
+            user_marker = "user question:"
+            idx = prompt_text.lower().find(user_marker)
+            if idx != -1:
+                user_text = prompt_text[idx + len(user_marker):].strip()
+            else:
+                # Fallback: take the last paragraph (after the last double newline)
+                import re
+                parts = re.split(r'\n\s*\n', prompt_text)
+                if parts:
+                    candidate = parts[-1].strip()
+                    # If the candidate is very long (e.g., whole system block), take last 200 chars
+                    user_text = candidate if len(candidate) < 500 else candidate[-500:]
+                else:
+                    user_text = prompt_text
+        except Exception:
+            user_text = prompt_text
+
+        # Debug: log prompt vs extracted user text to server output and request log file for troubleshooting
+        try:
+            preview_prompt = prompt_text[:800].replace('\n', '\\n')
+            preview_user = user_text[:800].replace('\n', '\\n')
+            print(f"[run_mock_ai] prompt_preview={preview_prompt}")
+            print(f"[run_mock_ai] user_text_preview={preview_user}")
+            # Append to request log if enabled and within duration
+            try:
+                if REQUEST_LOGGING_ENABLED and (time.time() - REQUEST_LOGGING_START) <= REQUEST_LOGGING_DURATION:
+                    REQUEST_LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+                    with open(REQUEST_LOG_FILE, 'a') as lf:
+                        lf.write(f"{datetime.utcnow().isoformat()}\trun_mock_ai\tuser_text:\t{preview_user}\n")
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+        prompt_lc = (user_text or "").lower()
+        
+        # Personalized greeting
+        greeting = f"Hi {name}, Eagi here."
+
+        # Short greeting handler: if the user just said 'hi' or similar, reply briefly
+        short_greetings = ["hi", "hello", "hey", "hiya"]
+        # If the user text is a single short greeting, respond succinctly
+        if prompt_lc.strip() in short_greetings or (len(prompt_lc.split()) <= 2 and any(g in prompt_lc for g in short_greetings)):
+            return f"Hi {name}, I'm Eagi. How can I help you today?"
+        
+        # Evidence log / score questions when on evidence tab
+        evidence_summary = ctx.get('evidence_summary')
+        if evidence_summary and any(kw in prompt_lc for kw in ["score", "rating", "how am i doing", "my evidence", "my progress", "average", "performance"]):
+            avg = float(evidence_summary.get('avg_rating', 0))
+            total = evidence_summary.get('total_evidence', 0)
+            mapped = evidence_summary.get('mapped_evidence', 0)
+            tiers = evidence_summary.get('tier_breakdown', {})
+            month_filter = evidence_summary.get('month_filter', 'all')
+            
+            # Interpret the score based on NWU scale (3 = basic compliance)
+            if avg >= 4.0:
+                interpretation = "Excellent! You're showing real IMPACT beyond basic compliance."
+            elif avg >= 3.0:
+                interpretation = "You're at BASIC compliance level - doing your job. To score higher, show measurable IMPACT."
+            elif avg >= 2.0:
+                interpretation = "Below target. You need more evidence showing you're meeting expectations."
+            else:
+                interpretation = "Needs attention. Upload more evidence demonstrating your work."
+            
+            tier_text = ', '.join([f"{t}: {c}" for t, c in tiers.items()]) if tiers else 'None yet'
+            scope = f"for {month_filter}" if month_filter != 'all' else "across all months"
+            
+            return f"{greeting} Looking at your evidence {scope}: You have {total} files uploaded, {mapped} mapped to tasks. Your average rating is {avg}/5.0. {interpretation} Tier breakdown: {tier_text}. Remember: 3.0 = basic compliance (doing your job), 4.0+ = exceeding expectations (showing impact), 5.0 = exceptional (transformational work)."
+        
+        # Task-specific guidance (check this first so 'task' keyword doesn't trigger month summary)
+        task = ctx.get('task') or {}
+        title = task.get('title') or task.get('task') or ''
+        kpa = task.get('kpa') or task.get('kpa_code') or ''
         hints = task.get('evidence_hints') or []
         evidence_required = task.get('evidence_required') or ''
         min_req = task.get('minimum_count') or task.get('min_required') or 1
-        stretch = task.get('stretch_count') or task.get('stretch_target') or min_req
 
-        guidance_lines = []
-        guidance_lines.append(f"Task: {title} (KPA: {kpa})")
-        guidance_lines.append(f"Minimum required items: {min_req}. Stretch target: {stretch}.")
-        if evidence_required:
-            guidance_lines.append(f"Evidence required: {evidence_required}")
-        if hints:
-            guidance_lines.append("Useful evidence examples: " + ", ".join(hints[:8]))
-        guidance_lines.append("If unsure, upload a clear artefact (document or screenshot) and lock it to this task with an explanation.")
-        guidance_lines.append("If you need a step-by-step checklist, ask a focused question like: 'List 5 pieces of evidence to meet this task'.")
+        if title and any(kw in prompt_lc for kw in ["how do i", "help", "recommend", "what should i", "evidence", "complete this task", "this task"]):
+            response = f"{greeting} For '{title[:60]}{'...' if len(title) > 60 else ''}':"
+            if kpa:
+                response += f" This falls under {kpa}."
+            if min_req:
+                response += f" You need at least {min_req} evidence item(s)."
+            if evidence_required:
+                response += f" Suggested evidence: {evidence_required[:200]}{'...' if len(evidence_required) > 200 else ''}."
+            elif hints:
+                response += f" Good evidence types: {', '.join(hints[:5])}."
+            response += " If you want, I can suggest exact filenames or phrasing for your evidence uploads."
+            return response
 
-        return "\n".join(guidance_lines)
+        # Month tasks context when on expectations tab
+        month_tasks = ctx.get('month_tasks')
+        # Only show month summary when no specific task is present in context
+        if not task and month_tasks and any(kw in prompt_lc for kw in ["this month", "monthly", "what do i need", "expectations", "required", "month review"]):
+            task_month = month_tasks.get('month', month)
+            total = month_tasks.get('total_tasks', 0)
+            by_kpa = month_tasks.get('by_kpa', {})
+            samples = month_tasks.get('sample_tasks', [])
+
+            kpa_breakdown = ', '.join([f"{k}: {v}" for k, v in by_kpa.items()]) if by_kpa else 'None'
+            sample_titles = [s.get('title', '')[:50] for s in samples[:3]]
+
+            return f"{greeting} For {task_month}, you have {total} tasks to complete. Breakdown by KPA: {kpa_breakdown}. Some key tasks: {'; '.join(sample_titles) if sample_titles else 'None yet'}. Upload evidence for each task, then check month status to see what's still needed."
+        
+        # Eagi system knowledge responses
+        if any(kw in prompt_lc for kw in ["what can you do", "what are you", "who are you", "your capabilities", "help me", "how do you work"]):
+            return f"{greeting} I'm Eagi, your academic performance agreement assistant at North-West University. I help you track your Performance Agreement by: 1) Importing your Task Agreement Excel to generate monthly expectations across all 5 KPAs, 2) Scanning and classifying evidence files using NWU Brain scoring, 3) Mapping evidence to specific tasks, 4) Tracking completion per month, and 5) Generating your final PA report with weights and percentages. Just upload your TA, then scan evidence files for each month!"
+        
+        # KPA info: disabled when DISABLE_AUTO_KPA is True; otherwise require explicit question intent
+        if not DISABLE_AUTO_KPA and any(kw in prompt_lc for kw in ["kpa", "key performance", "performance area"]) and any(qw in prompt_lc for qw in ["what", "explain", "describe", "list", "tell me"]):
+            return f"{greeting} NWU uses 5 Key Performance Areas: KPA1 - Teaching & Learning (includes supervision, eFundi, assessments, curriculum development), KPA2 - Occupational Health & Safety (compliance requirements, risk assessments), KPA3 - Research & Innovation (publications, grants, postgraduate supervision, conferences), KPA4 - Academic Leadership & Administration (committees, coordination, quality assurance), KPA5 - Social Responsiveness (community engagement, industry partnerships, professional development). Your specific weights and hours come from your Task Agreement - check the Expectations tab for your personalized breakdown."
+        
+        if any(kw in prompt_lc for kw in ["evidence", "upload", "scan", "document"]):
+            return f"{greeting} To add evidence: 1) Go to Expectations tab, 2) Click 'Scan Evidence', 3) Select your files (PDFs, DOCs, images, etc.), 4) Set the month bucket, 5) Click Upload & Scan. I'll use NWU Brain to classify them by KPA and map them to your tasks. For best results, lock evidence directly to specific tasks using the task's scan button."
+        
+        if any(kw in prompt_lc for kw in ["efundi", "lms", "blackboard"]):
+            return f"{greeting} For eFundi/LMS evidence, export screenshots showing: your course site setup, uploaded resources, gradebook entries, or student submissions. These map well to KPA1 Teaching & Learning tasks. The system recognizes eFundi-related keywords automatically."
+        
+        if any(kw in prompt_lc for kw in ["report", "generate", "pa report", "performance agreement", "final"]):
+            return f"{greeting} To generate your PA Report: 1) Ensure all months have evidence uploaded, 2) Lock completed months, 3) Go to Reports tab, 4) Click Generate Report. The output includes all 5 KPAs with your actual weights (%), hours, outputs from your TA, and completion status. You can export to Excel."
+        
+        if not DISABLE_AUTO_KPA and any(kw in prompt_lc for kw in ["weight", "percentage", "hours", "%"]):
+            return f"{greeting} Your KPA weights and hours come directly from your Task Agreement import. For example, Teaching might be 47% / 793 hours, Research 36% / 525 hours, etc. These are calculated from your contracted teaching load, supervision, research outputs, and other commitments. Check the Expectations tab for your specific breakdown."
+        
+        if any(kw in prompt_lc for kw in ["lock", "complete", "finish", "month done"]):
+            return f"{greeting} To lock a month: 1) Check Month Status to verify all tasks are covered, 2) For tasks with no supporting documents, click 'No Evidence' to mark them, 3) Once all tasks show green or gold, the Lock button enables. Locked months contribute to your mid-year and end-year reviews."
+        
+        # Scoring explanation
+        if any(kw in prompt_lc for kw in ["score", "rating", "scale", "what does", "mean"]):
+            return f"{greeting} NWU scoring works like this: 1-2 = Not meeting expectations (below compliance). 3 = BASIC COMPLIANCE - you're doing your job, meeting minimum requirements. 4 = EXCEEDING - you're showing measurable IMPACT beyond the basics. 5 = EXCEPTIONAL - transformational work with sector-wide or institutional influence. To score above 3, your evidence needs to show outcomes, impact, and how you went beyond just completing tasks."
+        
+        # Month review responses - require explicit month/status intent
+        if not DISABLE_AUTO_KPA and month and any(kw in prompt_lc for kw in ["month review", "monthly review", "review for", "review of", "status", "progress"]) and any(qw in prompt_lc for qw in ["check", "status", "how many", "progress", "review", "what"]):
+            return f"{greeting} For {month}, check the Expectations tab and click 'Check Month Status'. This shows each task's evidence count vs minimum required. Upload more evidence for incomplete tasks, or mark them 'No Evidence' if you genuinely have none. Once all tasks are accounted for, lock the month."
+        
+        # Task-specific guidance
+        task = ctx.get('task') or {}
+        title = task.get('title') or task.get('task') or ''
+        kpa = task.get('kpa') or task.get('kpa_code') or ''
+        hints = task.get('evidence_hints') or []
+        evidence_required = task.get('evidence_required') or ''
+        min_req = task.get('minimum_count') or task.get('min_required') or 1
+        
+        if title:
+            response = f"{greeting} For '{title[:60]}{'...' if len(title) > 60 else ''}':"
+            if kpa:
+                response += f" This is under {kpa}."
+            if min_req:
+                response += f" You need at least {min_req} evidence item(s)."
+            if evidence_required:
+                response += f" Look for: {evidence_required[:150]}{'...' if len(evidence_required) > 150 else ''}"
+            elif hints:
+                response += f" Good evidence types: {', '.join(hints[:5])}."
+            return response
+        
+        # Context-aware generic response
+        if current_tab == 'evidence':
+            return f"{greeting} You're viewing the Evidence Log. Ask me about your scores, what the ratings mean, or how to improve your evidence quality. Remember: 3 = basic compliance, 4+ = showing impact!"
+        elif current_tab == 'expectations':
+            return f"{greeting} You're on Expectations. Ask me about your tasks for {month or 'the selected month'}, what evidence you need, or how to check your month status."
+        
+        # Generic helpful response
+        return f"{greeting} I'm here to help with your NWU Performance Agreement. You can ask me about: your scores and ratings, KPAs and their weights, tasks for this month, how to upload evidence, or generating your PA report. What would you like to know?"
+        
     except Exception as e:
-        print(f"Mock Ollama error: {e}")
-        return "I cannot provide guidance at this time."
+        print(f"Mock AI error: {e}")
+        return "I'm having a moment - please try your question again."
+
+# Alias for backward compatibility
+run_mock_ollama = run_mock_ai
 
 # ============================================================
 # STATIC FILES
@@ -1090,11 +1286,30 @@ def check_month_completion():
         }
         
         # Try to get AI analysis, but don't fail if Ollama is unavailable
-        # Provide default messages that work without AI
+        # Provide natural conversational messages
+        import random
+        name = data.get('name') or 'there'
         if complete:
-            ai_response = f"Great work! All {tasks_met} required tasks for {month} have been completed with {evidence_count} evidence items."
+            success_msgs = [
+                f"Excellent work, {name}! You've nailed all {tasks_met} tasks for {month}. That's {evidence_count} pieces of solid evidence. Time to lock this month and celebrate!",
+                f"Hey {name}, you're all set for {month}! All {tasks_met} tasks are covered with {evidence_count} evidence items. Nice job — go ahead and lock it in.",
+                f"{name}, {month} is looking great! You've hit every target with {evidence_count} evidence pieces across {tasks_met} tasks. Ready to finalize?"
+            ]
+            ai_response = random.choice(success_msgs)
         else:
-            ai_response = f"Progress update: {tasks_met} of {tasks_total} tasks complete. Focus on uploading evidence for the remaining {tasks_total - tasks_met} tasks."
+            pending = tasks_total - tasks_met
+            tasks_incomplete = [t for t in required_tasks if not t['met']]
+            incomplete_sample = tasks_incomplete[:2]  # Show up to 2 examples
+            incomplete_text = ""
+            if incomplete_sample:
+                incomplete_text = f" For example, {', '.join([f'{t['kpa_code']}: {t['title']}' for t in incomplete_sample])}."
+            
+            progress_msgs = [
+                f"Hey {name}, you're making progress on {month}! {tasks_met} of {tasks_total} tasks done so far. {pending} more to go{incomplete_text} Upload more evidence or mark tasks as 'No Evidence' where applicable.",
+                f"{name}, quick update for {month}: {tasks_met} tasks complete, {pending} still need attention{incomplete_text} Let's get those sorted out!",
+                f"Looking at {month}, {name} — you're at {tasks_met}/{tasks_total} tasks{incomplete_text} Keep up the good work!"
+            ]
+            ai_response = random.choice(progress_msgs)
         
         # Try Ollama enhancement (optional)
         try:
@@ -1122,6 +1337,17 @@ def check_month_completion():
                     f"{status_icon} {ts['kpa_code']}: {ts['title'][:50]} ({ts['evidence_count']}/{ts['minimum_required']} items)"
                 )
         
+        # Generate voice audio for the response
+        audio_url = None
+        try:
+            if ELEVENLABS_AVAILABLE and text_to_speech and sanitize_for_speech:
+                clean_text = sanitize_for_speech(ai_response)
+                audio_path = text_to_speech(clean_text)
+                if audio_path:
+                    audio_url = f"/api/voice/audio/{audio_path.name}"
+        except Exception as voice_err:
+            print(f"Voice generation for month check failed: {voice_err}")
+        
         return jsonify({
             "complete": complete,
             "tasks_met": tasks_met,
@@ -1130,12 +1356,495 @@ def check_month_completion():
             "message": ai_response,
             "summary": "\n".join(task_summary_lines) if task_summary_lines else "No tasks for this month",
             "task_status": task_status,
-            "missing": f"{tasks_total - tasks_met} tasks still need evidence" if not complete else ""
+            "missing": f"{tasks_total - tasks_met} tasks still need evidence" if not complete else "",
+            "audio_url": audio_url
         })
     
     except Exception as e:
         print(f"Month check error: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+# ============================================================
+# MONTH LOCKING & NO-EVIDENCE DECLARATIONS
+# ============================================================
+
+@app.route('/api/month/lock', methods=['POST'])
+def lock_month():
+    """Lock a month after all tasks are completed or declared."""
+    try:
+        data = request.json
+        staff_id = data.get('staff_id')
+        month = data.get('month')
+        
+        if not staff_id or not month:
+            return jsonify({"error": "Missing staff_id or month"}), 400
+        
+        year = int(month.split('-')[0])
+        
+        from progress_store import ProgressStore
+        store = ProgressStore()
+        
+        # Check if already locked
+        if store.is_month_locked(staff_id, year, month):
+            return jsonify({"error": "Month is already locked", "locked": True}), 400
+        
+        # Get month completion status first
+        month_num = int(month.split('-')[1])
+        
+        # Count tasks and evidence for this month
+        db_rows = store.list_tasks_for_window(year, [month_num])
+        tasks_total = len(db_rows)
+        
+        # Get evidence count
+        con = store._connect()
+        try:
+            cur = con.execute("""
+                SELECT COUNT(DISTINCT et.task_id) as completed,
+                       COUNT(DISTINCT e.evidence_id) as evidence
+                FROM evidence e
+                LEFT JOIN evidence_task et ON e.evidence_id = et.evidence_id
+                WHERE e.staff_id = ? AND e.year = ? AND e.month_bucket LIKE ?
+            """, (staff_id, year, f"{month}%"))
+            row = cur.fetchone()
+            tasks_completed = row[0] if row else 0
+            evidence_count = row[1] if row else 0
+        finally:
+            con.close()
+        
+        # Also count no-evidence declarations
+        no_evidence_tasks = store.get_no_evidence_tasks(staff_id, year, month)
+        no_evidence_count = len(no_evidence_tasks)
+        
+        # Verify all tasks are accounted for (either evidence or no-evidence)
+        task_ids_with_evidence = set()
+        con = store._connect()
+        try:
+            cur = con.execute("""
+                SELECT DISTINCT et.task_id
+                FROM evidence e
+                JOIN evidence_task et ON e.evidence_id = et.evidence_id
+                WHERE e.staff_id = ? AND e.year = ? AND e.month_bucket LIKE ?
+            """, (staff_id, year, f"{month}%"))
+            for row in cur:
+                task_ids_with_evidence.add(row[0])
+        finally:
+            con.close()
+        
+        no_evidence_task_ids = set(t['task_id'] for t in no_evidence_tasks)
+        all_task_ids = set(r['task_id'] for r in db_rows)
+        accounted_tasks = task_ids_with_evidence | no_evidence_task_ids
+        
+        missing_tasks = all_task_ids - accounted_tasks
+        if missing_tasks:
+            return jsonify({
+                "error": "Cannot lock month - some tasks are not completed or marked as no-evidence",
+                "missing_count": len(missing_tasks),
+                "missing_task_ids": list(missing_tasks)[:5]  # Show first 5
+            }), 400
+        
+        # Lock the month
+        store.lock_month(
+            staff_id, year, month,
+            tasks_completed=len(task_ids_with_evidence),
+            tasks_total=tasks_total,
+            evidence_count=evidence_count
+        )
+        return jsonify({
+            "success": True,
+            "message": f"Month {month} locked successfully",
+            "stats": {
+                "tasks_with_evidence": len(task_ids_with_evidence),
+                "tasks_no_evidence": no_evidence_count,
+                "tasks_total": tasks_total,
+                "evidence_count": evidence_count
+            }
+        })
+        
+    except Exception as e:
+        print(f"Month lock error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/month/unlock', methods=['POST'])
+def unlock_month():
+    """Unlock a previously locked month."""
+    try:
+        data = request.json
+        staff_id = data.get('staff_id')
+        month = data.get('month')
+        
+        if not staff_id or not month:
+            return jsonify({"error": "Missing staff_id or month"}), 400
+        
+        year = int(month.split('-')[0])
+        
+        from progress_store import ProgressStore
+        store = ProgressStore()
+        
+        if store.unlock_month(staff_id, year, month):
+            return jsonify({"success": True, "message": f"Month {month} unlocked"})
+        else:
+            return jsonify({"error": "Month was not locked"}), 400
+            
+    except Exception as e:
+        print(f"Month unlock error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/month/status', methods=['GET'])
+def get_month_lock_status():
+    """Get lock status for all months."""
+    try:
+        staff_id = request.args.get('staff_id')
+        year = request.args.get('year')
+        
+        if not staff_id or not year:
+            return jsonify({"error": "Missing staff_id or year"}), 400
+        
+        from progress_store import ProgressStore
+        store = ProgressStore()
+        
+        locked_months = store.get_locked_months(staff_id, int(year))
+        
+        return jsonify({
+            "staff_id": staff_id,
+            "year": int(year),
+            "locked_months": locked_months
+        })
+        
+    except Exception as e:
+        print(f"Month status error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/task/no-evidence', methods=['POST'])
+def declare_task_no_evidence():
+    """Declare that a task has no evidence available."""
+    try:
+        data = request.json
+        staff_id = data.get('staff_id')
+        task_id = data.get('task_id')
+        month = data.get('month')
+        reason = data.get('reason', '')
+        
+        if not staff_id or not task_id or not month:
+            return jsonify({"error": "Missing staff_id, task_id, or month"}), 400
+        
+        year = int(month.split('-')[0])
+        
+        from progress_store import ProgressStore
+        store = ProgressStore()
+        
+        # Check if month is locked
+        if store.is_month_locked(staff_id, year, month):
+            return jsonify({"error": "Cannot modify - month is locked"}), 400
+        
+        store.declare_no_evidence(staff_id, year, task_id, month, reason)
+        
+        return jsonify({
+            "success": True,
+            "message": f"Task marked as no evidence available"
+        })
+        
+    except Exception as e:
+        print(f"No evidence error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/task/no-evidence', methods=['DELETE'])
+def remove_task_no_evidence():
+    """Remove a no-evidence declaration."""
+    try:
+        data = request.json
+        staff_id = data.get('staff_id')
+        task_id = data.get('task_id')
+        month = data.get('month')
+        
+        if not staff_id or not task_id or not month:
+            return jsonify({"error": "Missing staff_id, task_id, or month"}), 400
+        
+        year = int(month.split('-')[0])
+        
+        from progress_store import ProgressStore
+        store = ProgressStore()
+        
+        # Check if month is locked
+        if store.is_month_locked(staff_id, year, month):
+            return jsonify({"error": "Cannot modify - month is locked"}), 400
+        
+        if store.remove_no_evidence(staff_id, year, task_id, month):
+            return jsonify({"success": True, "message": "No-evidence declaration removed"})
+        else:
+            return jsonify({"error": "Declaration not found"}), 404
+        
+    except Exception as e:
+        print(f"Remove no evidence error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/task/no-evidence/list', methods=['GET'])
+def list_no_evidence_tasks():
+    """List all tasks declared as having no evidence."""
+    try:
+        staff_id = request.args.get('staff_id')
+        year = request.args.get('year')
+        month = request.args.get('month')  # Optional
+        
+        if not staff_id or not year:
+            return jsonify({"error": "Missing staff_id or year"}), 400
+        
+        from progress_store import ProgressStore
+        store = ProgressStore()
+        
+        tasks = store.get_no_evidence_tasks(staff_id, int(year), month)
+        
+        return jsonify({
+            "staff_id": staff_id,
+            "year": int(year),
+            "month": month,
+            "no_evidence_tasks": tasks
+        })
+        
+    except Exception as e:
+        print(f"List no evidence error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+# ============================================================
+# MID-YEAR REVIEW AGGREGATION
+# ============================================================
+
+@app.route('/api/review/midyear', methods=['POST'])
+def generate_midyear_review():
+    """Generate mid-year review aggregating Jan-June data."""
+    try:
+        data = request.json
+        staff_id = data.get('staff_id')
+        year = data.get('year')
+        
+        if not staff_id or not year:
+            return jsonify({"error": "Missing staff_id or year"}), 400
+        
+        year = int(year)
+        midyear_months = [f"{year}-{m:02d}" for m in range(1, 7)]  # Jan-June
+        
+        from progress_store import ProgressStore
+        store = ProgressStore()
+        
+        # Check which months are locked
+        locked_months = store.get_locked_months(staff_id, year)
+        locked_month_set = set(m['month'] for m in locked_months)
+        
+        unlocked = [m for m in midyear_months if m not in locked_month_set]
+        if unlocked:
+            return jsonify({
+                "error": "Cannot generate mid-year review - not all months are locked",
+                "unlocked_months": unlocked,
+                "message": f"Please lock months: {', '.join(unlocked)}"
+            }), 400
+        
+        # Aggregate data from Jan-June
+        aggregate = {
+            "staff_id": staff_id,
+            "year": year,
+            "review_type": "midyear",
+            "period": "January - June",
+            "months": midyear_months,
+            "by_month": {},
+            "by_kpa": {},
+            "totals": {
+                "tasks_completed": 0,
+                "tasks_total": 0,
+                "tasks_no_evidence": 0,
+                "evidence_count": 0,
+                "completion_rate": 0.0
+            }
+        }
+        
+        # Get per-month stats from locked data
+        for lock in locked_months:
+            if lock['month'] in midyear_months:
+                aggregate["by_month"][lock['month']] = {
+                    "tasks_completed": lock['tasks_completed'],
+                    "tasks_total": lock['tasks_total'],
+                    "evidence_count": lock['evidence_count'],
+                    "locked_at": lock['locked_at']
+                }
+                aggregate["totals"]["tasks_completed"] += lock['tasks_completed']
+                aggregate["totals"]["tasks_total"] += lock['tasks_total']
+                aggregate["totals"]["evidence_count"] += lock['evidence_count']
+        
+        # Get no-evidence count
+        no_evidence = store.get_no_evidence_tasks(staff_id, year)
+        midyear_no_evidence = [t for t in no_evidence if t['month'] in midyear_months]
+        aggregate["totals"]["tasks_no_evidence"] = len(midyear_no_evidence)
+        
+        # Calculate completion rate
+        total = aggregate["totals"]["tasks_total"]
+        completed = aggregate["totals"]["tasks_completed"] + aggregate["totals"]["tasks_no_evidence"]
+        aggregate["totals"]["completion_rate"] = round(100.0 * completed / total, 1) if total > 0 else 0.0
+        
+        # Get KPA breakdown
+        month_nums = list(range(1, 7))
+        for month_num in month_nums:
+            month_key = f"{year}-{month_num:02d}"
+            db_rows = store.list_tasks_for_window(year, [month_num])
+            
+            for row in db_rows:
+                kpa = row['kpa_code']
+                if kpa not in aggregate["by_kpa"]:
+                    aggregate["by_kpa"][kpa] = {
+                        "tasks_total": 0,
+                        "tasks_completed": 0,
+                        "completion_rate": 0.0
+                    }
+                aggregate["by_kpa"][kpa]["tasks_total"] += 1
+        
+        # Count completed tasks by KPA
+        con = store._connect()
+        try:
+            for month_num in month_nums:
+                month_key = f"{year}-{month_num:02d}"
+                cur = con.execute("""
+                    SELECT t.kpa_code, COUNT(DISTINCT et.task_id) as completed
+                    FROM evidence e
+                    JOIN evidence_task et ON e.evidence_id = et.evidence_id
+                    JOIN tasks t ON t.task_id = et.task_id
+                    WHERE e.staff_id = ? AND e.year = ? AND e.month_bucket LIKE ?
+                    GROUP BY t.kpa_code
+                """, (staff_id, year, f"{month_key}%"))
+                
+                for row in cur:
+                    kpa = row[0]
+                    if kpa in aggregate["by_kpa"]:
+                        aggregate["by_kpa"][kpa]["tasks_completed"] += row[1]
+        finally:
+            con.close()
+        
+        # Calculate KPA completion rates
+        for kpa, stats in aggregate["by_kpa"].items():
+            if stats["tasks_total"] > 0:
+                stats["completion_rate"] = round(100.0 * stats["tasks_completed"] / stats["tasks_total"], 1)
+        
+        # Generate AI summary
+        try:
+            summary_prompt = f"""Generate a brief mid-year performance review summary for a staff member:
+- Period: January to June {year}
+- Tasks Completed: {aggregate['totals']['tasks_completed']} of {aggregate['totals']['tasks_total']}
+- Tasks Marked No Evidence: {aggregate['totals']['tasks_no_evidence']}
+- Evidence Items: {aggregate['totals']['evidence_count']}
+- Overall Completion: {aggregate['totals']['completion_rate']}%
+
+Provide 2-3 sentences of constructive feedback. Write in plain text, no markdown."""
+            
+            ai_summary = query_ollama(summary_prompt)
+            if ai_summary and "Cannot reach" not in ai_summary and "error" not in ai_summary.lower():
+                aggregate["ai_summary"] = ai_summary
+            else:
+                aggregate["ai_summary"] = f"Mid-year review complete. {aggregate['totals']['tasks_completed']} tasks completed with {aggregate['totals']['evidence_count']} evidence items across January-June."
+        except Exception:
+            aggregate["ai_summary"] = f"Mid-year review complete. {aggregate['totals']['tasks_completed']} tasks completed with {aggregate['totals']['evidence_count']} evidence items across January-June."
+        
+        # Save the snapshot
+        store.save_review_snapshot(staff_id, year, "midyear", midyear_months, aggregate)
+        
+        return jsonify(aggregate)
+        
+    except Exception as e:
+        print(f"Mid-year review error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/review/midyear', methods=['GET'])
+def get_midyear_review():
+    """Get existing mid-year review if available."""
+    try:
+        staff_id = request.args.get('staff_id')
+        year = request.args.get('year')
+        
+        if not staff_id or not year:
+            return jsonify({"error": "Missing staff_id or year"}), 400
+        
+        from progress_store import ProgressStore
+        store = ProgressStore()
+        
+        snapshot = store.get_review_snapshot(staff_id, int(year), "midyear")
+        
+        if snapshot:
+            return jsonify(snapshot["summary"])
+        else:
+            return jsonify({"exists": False, "message": "No mid-year review generated yet"})
+        
+    except Exception as e:
+        print(f"Get mid-year review error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/review/status', methods=['GET'])
+def get_review_status():
+    """Get status of mid-year and end-year reviews."""
+    try:
+        staff_id = request.args.get('staff_id')
+        year = request.args.get('year')
+        
+        if not staff_id or not year:
+            return jsonify({"error": "Missing staff_id or year"}), 400
+        
+        year = int(year)
+        
+        from progress_store import ProgressStore
+        store = ProgressStore()
+        
+        # Get locked months
+        locked = store.get_locked_months(staff_id, year)
+        locked_months = set(m['month'] for m in locked)
+        
+        # Check mid-year readiness (Jan-June)
+        midyear_months = [f"{year}-{m:02d}" for m in range(1, 7)]
+        midyear_locked = [m for m in midyear_months if m in locked_months]
+        midyear_ready = len(midyear_locked) == 6
+        
+        # Check end-year readiness (Jul-Dec)
+        endyear_months = [f"{year}-{m:02d}" for m in range(7, 13)]
+        endyear_locked = [m for m in endyear_months if m in locked_months]
+        endyear_ready = len(endyear_locked) == 6 and midyear_ready
+        
+        # Get existing reviews
+        midyear_review = store.get_review_snapshot(staff_id, year, "midyear")
+        endyear_review = store.get_review_snapshot(staff_id, year, "endyear")
+        
+        return jsonify({
+            "staff_id": staff_id,
+            "year": year,
+            "midyear": {
+                "ready": midyear_ready,
+                "locked_count": len(midyear_locked),
+                "required_count": 6,
+                "months_locked": midyear_locked,
+                "months_unlocked": [m for m in midyear_months if m not in locked_months],
+                "review_exists": midyear_review is not None,
+                "review_date": midyear_review["created_at"] if midyear_review else None
+            },
+            "endyear": {
+                "ready": endyear_ready,
+                "locked_count": len(endyear_locked),
+                "required_count": 6,
+                "months_locked": endyear_locked,
+                "months_unlocked": [m for m in endyear_months if m not in locked_months],
+                "review_exists": endyear_review is not None,
+                "review_date": endyear_review["created_at"] if endyear_review else None
+            }
+        })
+        
+    except Exception as e:
+        print(f"Review status error: {e}")
+        return jsonify({"error": str(e)}), 500
+
 
 # ============================================================
 # EVIDENCE SCANNING
@@ -1159,13 +1868,8 @@ def scan_upload():
         asserted_mapping = request.form.get('asserted_mapping') == 'true'  # User pre-locked evidence to task
         user_explanation = request.form.get('user_explanation', '').strip()  # User's explanation for locked evidence
 
-        # Enforce explicit assertion when a target task is provided to avoid
-        # ambiguous metadata-only locks. Clients must set `asserted_mapping=true`
-        # when they intend to lock evidence to a specific task.
-        if target_task_id and not asserted_mapping:
-            return jsonify({
-                "error": "When providing target_task_id you must also set asserted_mapping=true."
-            }), 400
+        # Allow target_task_id without explicit assertion for soft-linking;
+        # asserted_mapping upgrades the mapping to user-confirmed/locked status.
         
         results = []
         
@@ -1816,81 +2520,75 @@ def classify_with_ollama_raw(prompt: str) -> Dict:
     Returns parsed JSON classification result.
     """
     try:
-        # Allow longer time for robust classification on larger files or busy Ollama
-        response = requests.post(
-            f"{OLLAMA_BASE_URL}/api/generate",
-            json={
-                "model": OLLAMA_MODEL,
-                "prompt": prompt,
-                "stream": False,
-                "format": "json"
-            },
-            timeout=60
-        )
-
-        # Debug: log status and raw body for troubleshooting
+        # Use centralized LLM wrapper (preferred) and allow longer timeouts in wrapper
+        raw_text = None
         try:
-            print(f"[OLLAMA RAW] status={response.status_code} for prompt(len={len(prompt)})")
-            print(f"[OLLAMA RAW] body: {response.text[:2000]}")
+            raw_text = query_ollama(prompt)
+        except Exception as e:
+            print(f"Central LLM call failed for raw classification: {e}")
+            raw_text = ""
+
+        if not raw_text:
+            return {
+                "kpa": _guess_kpa_from_text("") ,
+                "task": "AI raw response",
+                "tier": "Unknown",
+                "impact_summary": "",
+                "confidence": 0.6,
+                "raw": "",
+            }
+
+        # Try to parse a variety of response shapes
+        try:
+            data = json.loads(raw_text)
         except Exception:
-            pass
+            # Not JSON from LLM; treat as raw text
+            raw = raw_text.strip()
+            return {
+                "kpa": _guess_kpa_from_text(raw),
+                "task": "AI raw response",
+                "tier": "Unknown",
+                "impact_summary": raw[:2000],
+                "confidence": 0.6,
+                "raw": raw,
+            }
 
-        if response.status_code == 200:
-            # Try to parse a variety of response shapes
-            try:
-                data = response.json()
-            except Exception:
-                # Not JSON from Ollama; fall back to raw text
-                raw = response.text.strip()
-                return {
-                    "kpa": _guess_kpa_from_text(raw),
-                    "task": "AI raw response",
-                    "tier": "Unknown",
-                    "impact_summary": raw[:2000],
-                    "confidence": 0.6,
-                    "raw": raw,
-                }
-
-            # Common field locations
-            ai_response = None
-            if isinstance(data, dict):
-                ai_response = data.get("response") or data.get("output") or data.get("text") or data.get("results")
-            else:
-                ai_response = data
-
-            # If ai_response is already structured (dict), return or normalize
-            if isinstance(ai_response, dict):
-                return ai_response
-
-            # If ai_response is a list, try to extract text from first element
-            if isinstance(ai_response, list) and ai_response:
-                first = ai_response[0]
-                if isinstance(first, dict) and "content" in first:
-                    raw_text = first.get("content", "")
-                else:
-                    raw_text = str(first)
-            else:
-                raw_text = str(ai_response or data.get("response", "") or "")
-
-            # Attempt to parse JSON embedded in raw_text
-            import json as _json
-            try:
-                parsed = _json.loads(raw_text)
-                if isinstance(parsed, dict):
-                    return parsed
-            except Exception:
-                # Not JSON — construct a helpful structured result
-                raw = raw_text.strip()
-                return {
-                    "kpa": _guess_kpa_from_text(raw),
-                    "task": (raw.split('\n', 1)[0])[:200],
-                    "tier": "Unknown",
-                    "impact_summary": raw[:2000],
-                    "confidence": 0.6,
-                    "raw": raw,
-                }
+        # Common field locations
+        ai_response = None
+        if isinstance(data, dict):
+            ai_response = data.get("response") or data.get("output") or data.get("text") or data.get("results")
         else:
-            raise Exception(f"Ollama returned status {response.status_code}")
+            ai_response = data
+
+        # If ai_response is already structured (dict), return or normalize
+        if isinstance(ai_response, dict):
+            return ai_response
+
+        # If ai_response is a list, try to extract text from first element
+        if isinstance(ai_response, list) and ai_response:
+            first = ai_response[0]
+            if isinstance(first, dict) and "content" in first:
+                raw_text = first.get("content", "")
+            else:
+                raw_text = str(first)
+        else:
+            raw_text = str(ai_response or data.get("response", "") or "")
+
+        # Attempt to parse JSON embedded in raw_text
+        try:
+            parsed = json.loads(raw_text)
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception:
+            raw = raw_text.strip()
+            return {
+                "kpa": _guess_kpa_from_text(raw),
+                "task": (raw.split('\n', 1)[0])[:200],
+                "tier": "Unknown",
+                "impact_summary": raw[:2000],
+                "confidence": 0.6,
+                "raw": raw,
+            }
 
     except Exception as e:
         print(f"Ollama raw classification error: {e}")
@@ -1946,21 +2644,15 @@ Filename: {filename}
 Content: {content[:300]}
 
 Reply with ONLY the category name."""
-            
-            response = requests.post(
-                f"{OLLAMA_BASE_URL}/api/generate",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "prompt": prompt,
-                    "stream": False
-                },
-                timeout=10  # Short timeout
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                ai_response = data.get("response", "").strip()
-                
+            ai_response = ""
+            try:
+                ai_response = query_ollama(prompt) or ""
+            except Exception as e:
+                print(f"LLM classification error for {filename}: {e}")
+                ai_response = ""
+
+            ai_response = (ai_response or "").strip()
+            if ai_response:
                 # Check if response contains a valid KPA
                 if "Teaching" in ai_response or "Learning" in ai_response:
                     kpa = "Teaching & Learning"
@@ -1977,11 +2669,9 @@ Reply with ONLY the category name."""
                 elif "Leadership" in ai_response or "Management" in ai_response:
                     kpa = "Leadership & Management"
                     confidence = 0.85
-        
-        except requests.exceptions.Timeout:
-            print(f"Ollama timeout for {filename}, using keyword classification")
+
         except Exception as ollama_error:
-            print(f"Ollama error for {filename}: {ollama_error}, using keyword classification")
+            print(f"LLM error for {filename}: {ollama_error}, using keyword classification")
         
         # Determine tier based on keywords
         tier = "Tier 2"
@@ -2387,8 +3077,16 @@ def ask_vamp():
         if not question:
             return jsonify({"error": "No question provided"}), 400
         
-        # Query Ollama
-        answer = query_ollama(question, context)
+        # Short-greeting shortcut: avoid calling LLM for simple greetings
+        q_lc = (question or "").strip().lower()
+        short_greetings = {"hi", "hello", "hey", "hiya", "hi eagi", "hello eagi", "hey eagi"}
+        name = context.get('name') or context.get('staff_name') or 'there'
+        if q_lc in short_greetings or (len(q_lc.split()) <= 2 and any(g in q_lc for g in short_greetings)):
+            return jsonify({"answer": f"Hi {name}, I'm Eagi. How can I help you today?"})
+
+        # Query Ollama with VAMP persona instructions
+        prompt = build_vamp_prompt(question, context)
+        answer = query_ollama(prompt, context)
         
         return jsonify({"answer": answer})
     
@@ -2744,7 +3442,7 @@ def ai_guidance():
 @app.route('/api/report/generate', methods=['GET'])
 def generate_report():
     """
-    Generate Performance Agreement report matching Excel format
+    Generate Performance Agreement report matching Excel format with actual weights and KPIs
     """
     try:
         staff_id = request.args.get('staff_id')
@@ -2753,13 +3451,24 @@ def generate_report():
         if not staff_id or not year:
             return jsonify({"error": "Missing staff_id or year"}), 400
         
-        # Load contract data
+        # Try expectations file first (has richer data with weights)
+        expectations_file = Path("backend/data/staff_expectations") / f"expectations_{staff_id}_{year}.json"
         contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{year}.json"
-        if not contract_file.exists():
-            return jsonify({"error": "Contract not found"}), 404
         
-        with open(contract_file, 'r') as f:
-            contract_data = json.load(f)
+        contract_data = None
+        if expectations_file.exists():
+            with open(expectations_file, 'r') as f:
+                expectations_data = json.load(f)
+            # Build contract_data from expectations for PA generator
+            contract_data = {
+                "kpa_summary": expectations_data.get("kpa_summary", {}),
+                "tasks": expectations_data.get("tasks", [])
+            }
+        elif contract_file.exists():
+            with open(contract_file, 'r') as f:
+                contract_data = json.load(f)
+        else:
+            return jsonify({"error": "No contract or expectations data found"}), 404
         
         # Generate PA report
         from backend.contracts.pa_report_generator import generate_pa_report, export_pa_to_excel
@@ -2947,8 +3656,31 @@ def ask_vamp_voice():
         if not question:
             return jsonify({"error": "No question provided"}), 400
         
-        # Query Ollama for text response
-        answer = query_ollama(question, context)
+        # Short-greeting shortcut: avoid calling LLM for simple greetings
+        q_lc = (question or "").strip().lower()
+        short_greetings = {"hi", "hello", "hey", "hiya", "hi eagi", "hello eagi", "hey eagi"}
+        name = context.get('name') or context.get('staff_name') or 'there'
+        if q_lc in short_greetings or (len(q_lc.split()) <= 2 and any(g in q_lc for g in short_greetings)):
+            clean_answer = f"Hi {name}, I'm Eagi. How can I help you today?"
+            audio_url = None
+            # Try to generate voice for the greeting if ElevenLabs is available
+            if ELEVENLABS_AVAILABLE and sanitize_for_speech:
+                try:
+                    audio_path = text_to_speech(sanitize_for_speech(clean_answer))
+                    if audio_path:
+                        audio_url = f"/api/voice/audio/{audio_path.name}"
+                except Exception as _:
+                    audio_url = None
+            return jsonify({
+                "answer": clean_answer,
+                "audio_url": audio_url,
+                "has_voice": audio_url is not None,
+                "voice_engine": "elevenlabs" if ELEVENLABS_AVAILABLE else "none"
+            })
+
+        # Query Ollama for text response with VAMP persona instructions
+        prompt = build_vamp_prompt(question, context)
+        answer = query_ollama(prompt, context)
         
         # Sanitize text for speech (remove asterisks, markdown, etc.)
         if ELEVENLABS_AVAILABLE and sanitize_for_speech:
@@ -2998,16 +3730,12 @@ def debug_status():
         except Exception:
             expectations = []
 
-        # Check Ollama reachability with a lightweight POST (short timeout)
+        # Check LLM reachability via centralized wrapper (short ping)
         ollama_ok = False
         ollama_error = None
         try:
-            chk = requests.post(
-                f"{OLLAMA_BASE_URL}/api/generate",
-                json={"model": OLLAMA_MODEL, "prompt": "Ping", "stream": False},
-                timeout=3
-            )
-            ollama_ok = chk.ok
+            ping_resp = query_ollama("Ping")
+            ollama_ok = bool(ping_resp and str(ping_resp).strip())
         except Exception as e:
             ollama_error = str(e)
 
@@ -3108,8 +3836,9 @@ if __name__ == '__main__':
     print("=" * 60)
     print("VAMP Web Server Starting")
     print("=" * 60)
-    print(f"Ollama URL: {OLLAMA_BASE_URL}")
-    print(f"Ollama Model: {OLLAMA_MODEL}")
+    print(f"AI Provider: Groq (Cloud)")
+    print(f"AI Model: {GROQ_MODEL}")
+    print(f"API Key: {'Configured ✓' if GROQ_API_KEY else 'NOT SET - Get free key at https://console.groq.com'}")
     print(f"Upload Folder: {UPLOAD_FOLDER}")
     print(f"Data Folder: {DATA_FOLDER}")
     print("=" * 60)

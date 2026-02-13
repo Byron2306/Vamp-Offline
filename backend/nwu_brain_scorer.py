@@ -262,44 +262,45 @@ def _score_policies(text: str) -> Dict[str, Any]:
 # ---------- Rating / band aggregation ----------
 
 def _aggregate_score(tier_label: str, values_score: float, policy_hits: Dict[str, Any]) -> Tuple[float, str]:
+    """
+    Aggregate scoring components into a 0-5 rating.
+    
+    NWU Scale interpretation:
+    - 1-2: Not meeting expectations (below compliance)
+    - 3: BASIC COMPLIANCE - doing the job, meeting minimum requirements
+    - 4: EXCEEDING - showing measurable IMPACT beyond basics
+    - 5: EXCEPTIONAL - transformational work with sector/institutional influence
+    
+    Most evidence should score around 3 (compliance) unless it shows impact.
+    """
     brain = load_brain()
     inst = brain.institution_profile
     weights = inst.get("weights", {})
 
-    # Tier → 0..1
-    tier_map = {
-        "Transformational": 1.0,
-        "Developmental": 0.7,
-        "Compliance": 0.4,
+    # Tier determines the BASE score
+    # Compliance (default for most evidence) → base of 3.0
+    # Developmental (shows some growth) → base of 3.5
+    # Transformational (shows impact) → base of 4.5
+    tier_base_map = {
+        "Compliance": 3.0,      # Basic compliance - doing the job
+        "Developmental": 3.5,   # Some growth/development shown
+        "Transformational": 4.5, # Impact and transformation shown
     }
-    tier_component = tier_map.get(tier_label, 0.6)
+    base_score = tier_base_map.get(tier_label, 3.0)
 
-    # Policy component: more hits → higher, with simple cap
+    # Bonus for policy alignment (up to +0.3)
     hits = policy_hits.get("hits", [])
     n_hits = len(hits)
-    policy_component = min(1.0, n_hits / 3.0) if n_hits > 0 else 0.0
+    policy_bonus = min(0.3, n_hits * 0.1) if n_hits > 0 else 0.0
 
-    # Values component: already 0..1
-    values_component = values_score
+    # Bonus for NWU values alignment (up to +0.2)
+    values_bonus = min(0.2, values_score * 0.3)
 
-    # KPA coverage: for a single artefact we treat as fully contributing
-    kpa_coverage = 1.0
+    # Total rating
+    rating_raw = base_score + policy_bonus + values_bonus
+    rating_raw = min(5.0, max(0.0, rating_raw))  # Clamp to 0-5
 
-    tier_w = float(weights.get("tier", 0.4))
-    pol_w = float(weights.get("policy", 0.3))
-    val_w = float(weights.get("values", 0.2))
-    kpa_w = float(weights.get("kpa_coverage", 0.1))
-
-    composite_0_to_1 = (
-        tier_component * tier_w
-        + policy_component * pol_w
-        + values_component * val_w
-        + kpa_coverage * kpa_w
-    )
-
-    # Map 0..1 → 0..5 scale then into institutional bands
-    rating_raw = composite_0_to_1 * 5.0
-
+    # Map into institutional bands
     bands = inst.get("rating_scale", {}).get("bands", [])
     band_label = "Unrated"
     for band in bands:

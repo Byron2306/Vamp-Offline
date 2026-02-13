@@ -14,7 +14,7 @@
 
 ### Concept
 Allow users to describe how evidence covers expectations, then use their description to:
-- Improve AI classification via Ollama
+- Improve AI classification via Groq cloud (preferred) or local Ollama fallback
 - Boost confidence scores appropriately
 - Create semantic mappings instead of keyword-based ones
 

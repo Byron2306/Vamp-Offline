@@ -5,15 +5,22 @@ echo "VAMP Web GUI - Startup Script"
 echo "======================================"
 echo ""
 
-# Check if Ollama is running
-echo "Checking Ollama service..."
-if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
-    echo "✓ Ollama is running"
+# Respect LLM provider selection: skip Ollama check if using Groq or GROQ_API_KEY is present
+echo "Checking LLM provider..."
+LLM_PROVIDER=${LLM_PROVIDER:-$(printenv LLM_PROVIDER || echo "groq")}
+GROQ_KEY=$(printenv GROQ_API_KEY || true)
+if [ "$LLM_PROVIDER" = "ollama" ] || [ -z "$GROQ_KEY" -a "$LLM_PROVIDER" != "groq" ]; then
+    echo "Checking Ollama service..."
+    if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
+        echo "✓ Ollama is running"
+    else
+        echo "⚠️  Ollama is not running. Starting Ollama..."
+        echo "   Run: ollama serve"
+        echo "   Then run this script again."
+        exit 1
+    fi
 else
-    echo "⚠️  Ollama is not running. Starting Ollama..."
-    echo "   Run: ollama serve"
-    echo "   Then run this script again."
-    exit 1
+    echo "Using Groq (cloud) or GROQ_API_KEY present; skipping Ollama check"
 fi
 
 echo ""

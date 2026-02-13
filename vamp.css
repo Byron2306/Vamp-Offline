@@ -1,1232 +1,924 @@
 /* ============================================================
-   FONTS — IDENTITY (Cloister + Cinzel)
+   EAGI BOT (NWU) — FULL WORKING THEME CSS
+   Goal: colourful, high-contrast, NOT whitewashed, user-friendly.
+   Works with your current index.html structure:
+   #vamp-agent, .vamp-video-frame, #vamp-video, .vamp-dialogue,
+   .tabs/.tab, .panel/.card, .btn/.pill, #scanEvidenceSection, etc.
 ============================================================ */
 
-@font-face {
-  font-family: 'Cloister';
-  src: url('./CloisterBlackLight-axjg.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Cinzel';
-  src: url('./Cinzel-VariableFont_wght.ttf') format('truetype');
-  font-weight: 200 900;
-  font-style: normal;
-}
+/* ---------- Fonts (safe fallbacks) ---------- */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap");
 
 /* ============================================================
-   ROOT THEME
+   1) THEME TOKENS (incl. legacy var aliases used inline in HTML)
 ============================================================ */
-
 :root {
-  --bg-black: #050307;
-  --bg-panel: #0b070d;
-  --bg-card: #0f0b14;
+  /* Official NWU palette (as provided) */
+  --nwu-purple: #6c3d91;          /* Pantone 2603 approx */
+  --nwu-purple-deep: #552f76;
+  --nwu-turquoise: #00889c;
+  --nwu-grey: #78848e;
 
-  --red-main: #c0002f;
-  --red-glow: rgba(200, 0, 50, 0.7);
-  --red-soft: rgba(200, 0, 50, 0.25);
+  /* Text */
+  --text: #1a1f26;
+  --text-strong: #11151b;
+  --text-muted: rgba(26,31,38,0.62);
 
-  --grey-text: #e0d8df;
-  --grey-muted: #a39aa3;
-  --grey-dim: #6d6770;
+  /* Background + surfaces (non-whitewash) */
+  --bg-0: #dfe6ec;               /* page */
+  --bg-1: rgba(120,132,142,0.14);/* soft grey fill */
+  --surface-0: rgba(255,255,255,0.58); /* cards */
+  --surface-1: rgba(255,255,255,0.46); /* secondary */
+  --surface-2: rgba(120,132,142,0.10); /* tinted */
+  --stroke: rgba(120,132,142,0.26);
+  --stroke-soft: rgba(120,132,142,0.18);
 
-  --border-dark: rgba(255,255,255,0.06);
-  --border-red: rgba(200,0,50,0.35);
-  --green: #7bed9f;
-  --neon-green: rgba(120, 255, 140, 0.18);
+  /* Accents */
+  --accent: var(--nwu-turquoise);
+  --accent-soft: rgba(0,136,156,0.18);
+  --accent-stroke: rgba(0,136,156,0.38);
+  --purple-soft: rgba(108,61,145,0.16);
+  --purple-stroke: rgba(108,61,145,0.30);
+
+  /* Effects */
+  --shadow-0: 0 10px 26px rgba(16,12,28,0.12);
+  --shadow-1: 0 16px 48px rgba(16,12,28,0.12);
+
+  /* Radius */
+  --r-xl: 22px;
+  --r-lg: 18px;
+  --r-md: 14px;
+  --r-sm: 10px;
+
+  /* HERO height knob (aligns media square + dialogue panel) */
+  --hero-h: 430px; /* tweak 400–520 */
+
+  /* ---------- Legacy aliases used in index.html inline styles ---------- */
+  --purple: var(--nwu-purple);
+  --panel-dark: rgba(120,132,142,0.12);
+  --panel: var(--surface-0);
+  --grey: var(--stroke);
+  --grey-text: var(--text);
+  --grey-muted: rgba(26,31,38,0.66);
+  --grey-dim: rgba(26,31,38,0.46);
+  --nwu-dark: var(--nwu-purple-deep);
+  --nwu-white: #ffffff;
+  --nwu-border: var(--stroke);
+  --nwu-shadow: var(--shadow-0);
+
+  /* old “red” vars some earlier css used — map them safely to NWU */
+  --border-red: var(--purple-stroke);
+  --red-main: var(--nwu-purple);
+  --red-glow: var(--purple-soft);
 }
 
 /* ============================================================
-   BASE RESET
+   2) BASE / PAGE BACKGROUND (COLOURFUL, NOT WHITE)
 ============================================================ */
-
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html, body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(180deg, #030003, #090407);
-  color: var(--grey-text);
-  /* Use Cinzel and Cloister across the UI */
-  font-family: 'Cinzel', 'Cloister', serif;
+  font-family: "Nunito", "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(1100px 560px at 12% 14%, rgba(0,136,156,0.18), transparent 55%),
+    radial-gradient(920px 520px at 86% 10%, rgba(108,61,145,0.18), transparent 58%),
+    linear-gradient(180deg, var(--bg-0), #d7e0e8 60%, #d1dae3);
 }
 
-/* ============================================================
-   TOPBAR
-============================================================ */
+a { color: var(--nwu-turquoise); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
+.muted { color: var(--text-muted) !important; font-size: 13px; }
+.small { font-size: 12px; color: var(--text-muted); }
+
+/* ============================================================
+   3) TOP BAR
+============================================================ */
 .topbar {
   display: flex;
   align-items: center;
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--border-red);
-  background: linear-gradient(
-    180deg,
-    #0b060f,
-    #050307
-  );
-  box-shadow: 0 0 20px rgba(200,0,50,0.25);
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 14px 18px;
+  background: linear-gradient(90deg, var(--nwu-purple) 0%, var(--nwu-purple-deep) 100%);
+  color: #fff;
+
+  border-bottom: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 14px 40px rgba(16,12,28,0.18);
 }
 
-.brand {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+.topbar .muted { color: rgba(255,255,255,0.78) !important; }
+
+/* If your logo uses .nwu-logo */
+.nwu-logo {
+  border-radius: 14px;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 10px 22px rgba(16,12,28,0.18);
 }
 
-.title {
-  font-family: 'Cinzel', serif;
-  font-size: 18px;
-  letter-spacing: 1.5px;
-  color: var(--grey-text);
-}
-
-.muted {
-  color: var(--grey-muted);
-  font-size: 12px;
-}
-
-/* ============================================================
-   PILL / STATUS
-============================================================ */
-
+/* Stage pill in the topbar */
 .pill {
-  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
   border-radius: 999px;
+  font-weight: 800;
   font-size: 12px;
-  border: 1px solid var(--border-dark);
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.10);
+  color: #fff;
 }
-
-.pill.bad {
-  border-color: var(--red-soft);
-  color: #ff8a9a;
-}
-
 .pill.ok {
-  border-color: rgba(80,200,120,.5);
-  color: #8ff0b2;
+  background: rgba(0,136,156,0.22);
+  border-color: rgba(0,136,156,0.42);
 }
-
-/* Neon green highlight for completed KPA windows */
-.neon-complete {
-  box-shadow: 0 0 28px rgba(120,255,140,0.14), inset 0 0 18px rgba(120,255,140,0.06);
-  border: 1px solid rgba(120,255,140,0.22) !important;
-  outline: 4px solid rgba(120,255,140,0.06);
-  transition: box-shadow 0.35s ease, transform 0.2s ease;
+.pill.bad {
+  background: rgba(108,61,145,0.20);
+  border-color: rgba(255,255,255,0.22);
 }
-
-/* Subtle pulse when KPA section becomes complete */
-@keyframes kpaPulse {
-  0% { box-shadow: 0 0 0px rgba(120,255,140,0.06); transform: translateY(0); }
-  40% { box-shadow: 0 0 28px rgba(120,255,140,0.12), inset 0 0 18px rgba(120,255,140,0.05); transform: translateY(-4px); }
-  100% { box-shadow: 0 0 18px rgba(120,255,140,0.08); transform: translateY(0); }
-}
-.neon-complete.animate {
-  animation: kpaPulse 750ms ease;
-}
-
-/* Expanded evidence detail row */
-.evidence-expanded {
-  background: linear-gradient(180deg, rgba(10,20,10,0.4), rgba(5,8,5,0.2));
-  border-top: 1px solid rgba(255,255,255,0.03);
-  padding: 10px 16px;
-  font-size: 13px;
-  color: var(--grey-muted);
-}
-.evidence-expanded .mapped-list { display:flex; gap:8px; flex-wrap:wrap; }
-.mapped-item { padding:6px 8px; border-radius:6px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); font-size:12px; }
-.mapped-item .conf { margin-left:8px; color:var(--grey-dim); font-weight:600; }
-
-/* Smooth expand/collapse for evidence details */
-.evidence-expanded-row .evidence-expanded { max-height: 0; overflow: hidden; transition: max-height 300ms ease, opacity 200ms ease; opacity: 0; }
-.evidence-expanded-row.expanded .evidence-expanded { max-height: 420px; opacity: 1; }
-
-/* Mapped-pill chevron */
-.mapped-pill { display:inline-flex; align-items:center; gap:8px; }
-.mapped-pill .chev { display:inline-block; transition: transform 220ms ease; font-size:12px; color:var(--grey-dim); }
-.mapped-pill.expanded .chev { transform: rotate(180deg); color:var(--grey-text); }
-
-.recent-scan { background: rgba(143, 240, 178, 0.06); }
-
-/* Expand button */
-.expand-btn { background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--grey-muted);padding:6px 8px;border-radius:6px;cursor:pointer }
-.expand-btn:hover { background:rgba(255,255,255,0.02); color:var(--grey-text); }
 
 /* ============================================================
-   VAMP AGENT
+   4) HERO GRID (LEFT MEDIA + RIGHT DIALOGUE)
 ============================================================ */
-
 #vamp-agent {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 420px 1fr;
   gap: 22px;
-  margin: 22px;
-  padding: 22px;
-  background: radial-gradient(
-    circle at top,
-    rgba(200,0,50,0.12),
-    transparent 55%
-  );
-  border: 1px solid var(--border-red);
-  box-shadow:
-    0 0 40px rgba(200,0,50,0.35),
-    inset 0 0 60px rgba(0,0,0,0.75);
+  margin: 20px;
+  padding: 18px;
+
+  background: linear-gradient(135deg, rgba(108,61,145,0.10), rgba(0,136,156,0.08));
+  border: 1px solid rgba(108,61,145,0.16);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-0);
 }
 
+@media (max-width: 980px) {
+  #vamp-agent { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   5) LEFT MEDIA FRAME (MP4/IMG) — BIG SQUARE, ALWAYS
+============================================================ */
 .vamp-video-frame {
   position: relative;
-  border: 1px solid var(--border-red);
+  width: 100%;
+  height: var(--hero-h);
+  border-radius: var(--r-xl);
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06)),
+    radial-gradient(700px 360px at 50% 20%, rgba(0,136,156,0.18), transparent 55%);
+
+  border: 1px solid rgba(0,136,156,0.24);
+  box-shadow: var(--shadow-1);
   overflow: hidden;
-  background: #020102;
+
+  /* centers the media */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.vamp-video-frame video {
+/* IMPORTANT: override inline max-width on #vamp-video */
+#vamp-video {
+  max-width: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+
+  border: 0 !important;
+  border-radius: var(--r-xl) !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  background: rgba(17,12,28,0.06) !important;
+}
+
+/* If you ever swap to an <img> inside the same frame */
+.vamp-video-frame img {
   width: 100%;
   height: 100%;
+  border-radius: var(--r-xl);
   object-fit: cover;
-  filter:
-    brightness(0.85)
-    contrast(1.15)
-    saturate(0.85);
+  object-position: center;
 }
 
-.vamp-glow {
+/* Subtle “tech sheen” (optional) */
+.vamp-video-frame::after {
+  content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 20%,
-      rgba(200,0,50,0.25),
-      transparent 65%);
-}
-
-.vamp-dialogue {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.vamp-name {
-  font-family: 'Cloister', serif;
-  font-size: 38px;
-  letter-spacing: 2px;
-  margin: 0;
-  color: var(--red-main);
-  text-shadow: 0 0 14px var(--red-glow);
-}
-
-/* Stronger Cloister presence: apply to major headings and UI accents */
-.card-title,
-.tab,
-.month-label,
-.month-badge {
-  font-family: 'Cloister', serif;
-}
-
-/* Neon / Tron-style pulsing */
-@keyframes neonPulse {
-  0% { box-shadow: 0 0 6px rgba(200,0,50,0.25), 0 0 24px rgba(200,0,50,0.08); transform: translateY(0); }
-  50% { box-shadow: 0 0 18px rgba(255,60,120,0.45), 0 0 48px rgba(255,60,120,0.12); transform: translateY(-2px); }
-  100% { box-shadow: 0 0 6px rgba(200,0,50,0.25), 0 0 24px rgba(200,0,50,0.08); transform: translateY(0); }
-}
-
-.vamp-video-frame, .vamp-dialogue, .pill, .btn.glow {
-  animation: neonPulse 2.4s ease-in-out infinite;
-}
-
-/* Stronger blood-drop pulse for timeline months */
-.month-badge .blood-drop {
-  display:flex;align-items:center;justify-content:center;
-  width:28px;height:28px;border-radius:50%;background:linear-gradient(180deg,#2a0006,#500012);color:#fff;
-  box-shadow: 0 0 6px rgba(200,0,50,0.2);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.month-badge.done .blood-drop {
-  animation: neonPulse 1.6s ease-in-out infinite;
-  transform: scale(1.08);
-}
-
-/* Tron scanline overlay */
-.vamp-video-frame::after {
-  content: '';
-  position: absolute; inset: 0; pointer-events: none;
-  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 100% 6px;
+    linear-gradient(115deg, rgba(255,255,255,0.22), transparent 40%),
+    radial-gradient(500px 240px at 70% 10%, rgba(108,61,145,0.14), transparent 55%);
   mix-blend-mode: overlay;
-}
-
-/* Month badge neon border */
-.month-badge {
-  padding:8px 10px;border-radius:8px;border:1px solid rgba(255,80,110,0.08);
-  background: linear-gradient(180deg,#07020a,#14030a);
-  color: var(--grey-text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;
-}
-
-/* Pulse vignette on top bar and active tab */
-.topbar { box-shadow: 0 0 30px rgba(200,0,50,0.35), inset 0 0 40px rgba(0,0,0,0.6); }
-.tab.active { box-shadow: 0 6px 32px rgba(255,40,90,0.12); border-color: rgba(255,40,90,0.28); }
-
-/* Make headings use Cloister Black weight if available */
-.vamp-name, .card-title, .tab.active, .month-label { font-weight: 700; }
-
-.vamp-role {
-  font-family: 'Cinzel', serif;
-  letter-spacing: 1.2px;
-  font-size: 13px;
-  color: var(--grey-muted);
+  opacity: 0.65;
 }
 
 /* ============================================================
-   VAMP BUBBLES
+   6) RIGHT DIALOGUE PANEL — SAME HEIGHT AS LEFT (ALIGNED)
 ============================================================ */
+.vamp-dialogue {
+  min-height: var(--hero-h);
+  height: var(--hero-h);
 
+  border-radius: var(--r-xl);
+  background: linear-gradient(180deg, var(--surface-0), rgba(255,255,255,0.34));
+  border: 1px solid rgba(120,132,142,0.22);
+  box-shadow: var(--shadow-1);
+
+  padding: 18px 18px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.vamp-identity { margin-bottom: 8px; }
+
+.vamp-name {
+  margin: 0;
+  font-family: "Inter", "Nunito", system-ui, sans-serif;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: var(--text-strong);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.40);
+}
+
+.vamp-role {
+  margin-top: 4px;
+  color: rgba(26,31,38,0.72);
+  font-weight: 700;
+}
+
+/* Bubbles area fills available space */
 .vamp-bubbles {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, rgba(0,136,156,0.10), rgba(255,255,255,0.26));
+  border: 1px solid rgba(0,136,156,0.18);
+
+  flex: 1;
+  overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 200px;
-  overflow-y: auto;
 }
 
 .vamp-bubble {
-  max-width: 85%;
-  padding: 10px 14px;
-  border-radius: 14px;
-  background: linear-gradient(
-    180deg,
-    #160912,
-    #0b060f
-  );
-  border: 1px solid var(--border-red);
-  box-shadow: 0 0 12px rgba(200,0,50,0.25);
-  animation: bubbleFloat 0.3s ease-out;
-}
+  max-width: 92%;
+  padding: 11px 14px;
+  border-radius: 16px;
 
-.vamp-bubble.idle {
-  opacity: 0.7;
-}
+  background: rgba(255,255,255,0.52);
+  border: 1px solid rgba(120,132,142,0.18);
+  box-shadow: 0 10px 18px rgba(16,12,28,0.06);
 
-@keyframes bubbleFloat {
-  from {
-    transform: translateY(6px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  color: var(--text);
+  font-weight: 700;
 }
+.vamp-bubble.idle { opacity: 0.78; }
 
 /* ============================================================
-   ASK VAMP
+   7) ASK BAR (Bottom of dialogue)
 ============================================================ */
-
 .ask-vamp {
+  margin-top: 12px;
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 10px;
-  margin-top: auto;
+  gap: 12px;
+  align-items: end;
 }
 
 #ask-vamp-input {
-  background: #060308;
-  border: 1px solid var(--border-red);
-  color: var(--grey-text);
-  padding: 10px;
-  resize: none;
-  font-family: system-ui, sans-serif;
-}
+  width: 100%;
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(120,132,142,0.22);
+  border-radius: 16px;
+  padding: 12px 12px;
 
-#ask-vamp-input::placeholder {
-  color: var(--grey-dim);
+  color: var(--text);
+  font-weight: 700;
+  resize: none;
+  outline: none;
+}
+#ask-vamp-input::placeholder { color: rgba(26,31,38,0.52); }
+#ask-vamp-input:focus {
+  border-color: rgba(0,136,156,0.55);
+  box-shadow: 0 0 0 4px rgba(0,136,156,0.16);
 }
 
 #ask-vamp-btn {
-  background: linear-gradient(
-    180deg,
-    #7a001e,
-    #400010
-  );
-  color: #fff;
-  border: 1px solid var(--border-red);
-  padding: 10px 16px;
-  cursor: pointer;
-  box-shadow: 0 0 12px var(--red-glow);
-}
+  border-radius: 16px;
+  padding: 12px 18px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
 
-#ask-vamp-btn:hover {
-  filter: brightness(1.1);
+  background: linear-gradient(90deg, var(--nwu-turquoise), #00798a);
+  border: 1px solid rgba(0,136,156,0.42);
+  color: #fff;
+  box-shadow: 0 14px 26px rgba(0,136,156,0.16);
+  cursor: pointer;
 }
+#ask-vamp-btn:hover { filter: brightness(1.05); }
 
 /* ============================================================
-   EXISTING UI SUPPORT (cards, tabs, etc.)
+   8) MAIN APP CONTAINER BELOW HERO
 ============================================================ */
-
 .container {
-  padding: 18px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.05), transparent);
-  border-top: 1px solid rgba(255,255,255,0.02);
+  margin: 0 20px 24px 20px;
+  padding: 14px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0.14));
+  border: 1px solid rgba(108,61,145,0.14);
+  box-shadow: var(--shadow-0);
 }
 
-/* Bottom area: ensure panels and footer feel dark and vampy */
-.panel {
-  background: linear-gradient(180deg, #070305, #050204);
-  padding-bottom: 28px;
-}
-
+/* Tabs row */
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 14px;
+
+  padding: 12px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(90deg, rgba(108,61,145,0.10), rgba(0,136,156,0.10));
+  border: 1px solid rgba(120,132,142,0.18);
 }
 
 .tab {
+  user-select: none;
   cursor: pointer;
   padding: 10px 16px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(20,8,12,0.2));
-  color: var(--grey-text);
-  font-weight: 600;
-}
+  border-radius: 999px;
 
+  background: rgba(255,255,255,0.40);
+  border: 1px solid rgba(120,132,142,0.18);
+  color: rgba(26,31,38,0.84);
+  font-weight: 900;
+
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+.tab:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(16,12,28,0.10);
+}
 .tab.active {
-  border-color: rgba(200,0,50,0.28);
-  background: linear-gradient(180deg, #2a0006, #120409);
-  box-shadow: 0 6px 22px rgba(200,0,50,0.12);
+  background: linear-gradient(90deg, var(--nwu-purple), var(--nwu-purple-deep));
+  border-color: rgba(0,136,156,0.40);
   color: #fff;
+  box-shadow: 0 18px 32px rgba(108,61,145,0.18);
+  position: relative;
+}
+.tab.active::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: -7px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(0,136,156,0.95);
 }
 
-.panel {
-  display: none;
-}
+/* Panels / cards */
+.panel { display: none; }
+.panel.active { display: block; }
 
-.panel.active {
-  display: block;
+.card, .panel {
+  border-radius: var(--r-xl);
 }
 
 .card {
-  background: linear-gradient(180deg, #0b0609, #090406);
-  border: 1px solid rgba(255,255,255,0.04);
-  padding: 14px;
-  margin-bottom: 16px;
+  padding: 18px;
+  background: linear-gradient(180deg, var(--surface-0), rgba(255,255,255,0.36));
+  border: 1px solid rgba(120,132,142,0.22);
+  box-shadow: 0 14px 36px rgba(16,12,28,0.08);
 }
 
 .card-h {
   display: flex;
   justify-content: space-between;
+  gap: 14px;
   align-items: flex-start;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .card-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--grey-text);
-  margin-bottom: 4px;
+  font-weight: 900;
+  font-size: 15px;
+  color: var(--text-strong);
 }
+
+.right { margin-left: auto; }
 
 /* ============================================================
-   FORMS & INPUTS
+   9) BUTTONS (colourful but readable)
 ============================================================ */
-
-.form {
-  display: grid;
-  gap: 12px;
-}
-
-.grid2 { grid-template-columns: 1fr 1fr; }
-.grid3 { grid-template-columns: repeat(3, 1fr); }
-
-.form label {
-  display: block;
-  font-size: 12px;
-  color: var(--grey-muted);
-  margin-bottom: 4px;
-}
-
-.form input,
-.form select,
-.form textarea {
-  width: 100%;
-  background: #060308;
-  border: 1px solid var(--border-dark);
-  color: var(--grey-text);
-  padding: 8px 10px;
+.btn, .btn-small {
   font-family: inherit;
-}
-
-.form input:focus,
-.form select:focus,
-.form textarea:focus {
-  outline: none;
-  border-color: var(--border-red);
-  box-shadow: 0 0 8px var(--red-soft);
-}
-
-.row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+  font-weight: 900;
+  border-radius: 14px;
+  border: 1px solid rgba(120,132,142,0.22);
+  background: rgba(255,255,255,0.44);
+  color: rgba(26,31,38,0.88);
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
 }
 
 .btn {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-dark);
-  color: var(--grey-text);
-  padding: 8px 14px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: all 0.2s;
+  padding: 10px 14px;
+  box-shadow: 0 10px 20px rgba(16,12,28,0.08);
 }
-
-.btn:hover {
-  border-color: var(--border-red);
-  background: var(--bg-card);
-}
+.btn:hover { transform: translateY(-1px); }
 
 .btn.glow {
-  background: linear-gradient(180deg, #7a001e, #400010);
-  border-color: var(--border-red);
-  box-shadow: 0 0 10px var(--red-glow);
+  background: linear-gradient(90deg, var(--nwu-purple), var(--nwu-purple-deep));
+  border-color: rgba(255,255,255,0.18);
+  color: #fff;
+  box-shadow: 0 18px 30px rgba(108,61,145,0.16);
 }
 
-.btn.glow:hover {
-  filter: brightness(1.2);
-}
-
-.chk {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.btn-small {
+  padding: 7px 10px;
   font-size: 12px;
-  color: var(--grey-muted);
-  cursor: pointer;
 }
 
+/* Expectations header buttons */
+#scanEvidenceBtn {
+  background: rgba(0,136,156,0.18);
+  border-color: rgba(0,136,156,0.32);
+}
+#scanEvidenceBtn:hover { filter: brightness(1.06); }
+
+#rebuildExpBtn {
+  background: linear-gradient(90deg, var(--nwu-purple), var(--nwu-purple-deep));
+  border-color: rgba(255,255,255,0.18);
+  color: #fff;
+}
+
+/* ============================================================
+   10) FORMS / INPUTS (NOT WHITE)
+============================================================ */
+.form { display: grid; gap: 12px; }
+.grid2 { grid-template-columns: 1fr 1fr; }
+.grid3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 820px) {
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+}
+
+label {
+  display: block;
+  font-weight: 900;
+  font-size: 12px;
+  color: rgba(26,31,38,0.70) !important;
+  margin-bottom: 6px;
+}
+
+input, select, textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.50);
+  border: 1px solid rgba(120,132,142,0.24);
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-weight: 700;
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(0,136,156,0.55);
+  box-shadow: 0 0 0 4px rgba(0,136,156,0.16);
+}
+
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* separators */
 .sep {
   border: none;
-  border-top: 1px solid var(--border-dark);
+  border-top: 1px solid rgba(120,132,142,0.18);
   margin: 16px 0;
 }
 
 /* ============================================================
-   YEAR TIMELINE + BLOOD DROP ICON
+   11) EXPECTATIONS: scan section + monthly container (reduce “empty white”)
 ============================================================ */
-.year-timeline {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
+#scanEvidenceSection {
+  background:
+    linear-gradient(180deg, rgba(108,61,145,0.10), rgba(0,136,156,0.08)) !important;
+  border-radius: var(--r-lg) !important;
+  border: 1px solid rgba(108,61,145,0.30) !important;
+  box-shadow: 0 16px 36px rgba(16,12,28,0.10) !important;
 }
 
+#monthlyExpectationsContainer {
+  border-radius: var(--r-lg);
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(120,132,142,0.10), rgba(255,255,255,0.18));
+  border: 1px solid rgba(120,132,142,0.18);
+}
+
+/* ============================================================
+   12) YEAR TIMELINE MONTH BADGES (colourful, not “blood red”)
+============================================================ */
 .month-badge {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: 6px;
+
+  padding: 10px 12px;
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.44);
+  border: 1px solid rgba(120,132,142,0.18);
+  color: rgba(26,31,38,0.84);
+  cursor: pointer;
+  box-shadow: 0 10px 18px rgba(16,12,28,0.06);
+}
+.month-badge:hover { filter: brightness(1.03); }
+
+.month-badge.done {
+  background: linear-gradient(180deg, rgba(0,136,156,0.18), rgba(108,61,145,0.12));
+  border-color: rgba(0,136,156,0.32);
+}
+
+.month-badge .blood-drop {
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #0c0710, #0a0610);
-  border: 1px solid var(--border-dark);
-  cursor: pointer;
-  color: var(--grey-muted);
-  font-size: 12px;
-  transition: all 0.18s ease;
-}
-
-.month-badge:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(200,0,50,0.08);
-  color: var(--grey-text);
-}
-
-.month-badge.done {
-  background: linear-gradient(180deg, rgba(140,200,120,0.06), rgba(80,200,120,0.02));
-  border-color: rgba(80,200,120,0.12);
-  color: var(--grey-text);
-}
-
-.blood-drop {
-  width: 12px;
-  height: 12px;
-  display:inline-block;
-  background: radial-gradient(circle at 30% 20%, #ff6b8a, #c0002f 60%);
-  clip-path: path('M6 0 C9 2.5 11 5.5 11 8.5 C11 11 8.5 12.5 6 12.5 C3.5 12.5 1 11 1 8.5 C1 5.5 3 2.5 6 0 Z');
-  box-shadow: 0 0 8px var(--red-glow);
-}
-
-.month-badge .month-name { font-weight:600; font-size:12px; }
-
-/* ============================================================
-   Subtle glow & pulse animations for a classy vamp UI
-============================================================ */
-
-@keyframes glowPulse {
-  0% { box-shadow: 0 0 6px rgba(200,0,50,0.06), 0 0 0 0 rgba(200,0,50,0.02); }
-  50% { box-shadow: 0 0 20px rgba(200,0,50,0.14), 0 0 28px 6px rgba(200,0,50,0.04); }
-  100% { box-shadow: 0 0 6px rgba(200,0,50,0.06), 0 0 0 0 rgba(200,0,50,0.02); }
-}
-
-@keyframes nameShimmer {
-  0% { text-shadow: 0 0 8px rgba(200,0,50,0.12); transform: translateY(0); }
-  50% { text-shadow: 0 0 18px rgba(200,0,50,0.25); transform: translateY(-2px); }
-  100% { text-shadow: 0 0 8px rgba(200,0,50,0.12); transform: translateY(0); }
-}
-
-/* Topbar subtle breathing glow */
-.topbar {
-  animation: glowPulse 6s ease-in-out infinite;
-}
-
-/* Active tab has a gentle pulse */
-.tab.active {
-  animation: glowPulse 5.5s ease-in-out infinite;
-}
-
-/* Glowing primary buttons */
-.btn.glow {
-  position: relative;
-}
-.btn.glow::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 10px;
-  pointer-events: none;
-  box-shadow: 0 12px 40px rgba(200,0,50,0.04);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.btn.glow:hover::after { opacity: 1; }
-
-/* Vamp name shimmer */
-.vamp-name {
-  animation: nameShimmer 6s ease-in-out infinite;
-}
-
-/* Month badge done state glint */
-.month-badge.done {
-  position: relative;
-}
-.month-badge.done::after {
-  content: '';
-  position: absolute;
-  right: -6px;
-  top: -6px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,120,140,0.9), rgba(200,0,50,0.6) 40%, transparent 60%);
-  filter: blur(6px);
-  opacity: 0.85;
-  transform: scale(1);
-  transition: transform 0.3s ease;
-}
-.month-badge:hover::after { transform: scale(1.05); }
-
-/* Subtle animated background vignette */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 20% 10%, rgba(200,0,50,0.04), transparent 15%), radial-gradient(circle at 80% 90%, rgba(0,0,0,0.18), transparent 20%);
-  mix-blend-mode: overlay;
-  opacity: 0.9;
-  z-index: 0;
-}
-
-
-
-/* Year timeline styles */
-.year-timeline {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-.year-month {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 64px;
-  padding: 6px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-  border: 1px solid var(--border-dark);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-.year-month:hover { transform: translateY(-4px); box-shadow: 0 6px 14px rgba(0,0,0,0.6); }
-.month-label { font-size: 12px; color: var(--grey-muted); margin-top:6px; }
-.month-count { font-weight:700; color: var(--grey-text); font-size:13px; margin-top:4px; }
-
-/* Blood drop icon using emoji for theme-safe rendering */
-.blood-drop {
-  font-size: 20px;
-  line-height: 20px;
-  color: var(--red-main);
-  text-shadow: 0 0 8px var(--red-glow);
-}
-
-.month-complete { border-color: rgba(80,200,120,0.6); box-shadow: 0 0 8px rgba(80,200,120,0.06); }
-.month-incomplete { border-color: rgba(255,107,157,0.25); }
-
-/* ============================================================
-   TABLES
-============================================================ */
-
-.table-container {
-  overflow-x: auto;
-  border: 1px solid var(--border-dark);
-  background: var(--bg-panel);
-}
-
-.vamp-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.vamp-table thead {
-  background: linear-gradient(180deg, #160912, #0b060f);
-  border-bottom: 1px solid var(--border-red);
-}
-
-.vamp-table th {
-  padding: 10px 12px;
-  text-align: left;
-  font-weight: 600;
-  color: var(--grey-text);
-  border-right: 1px solid var(--border-dark);
-}
-
-.vamp-table th:last-child {
-  border-right: none;
-}
-
-.vamp-table tbody tr {
-  border-bottom: 1px solid var(--border-dark);
-  transition: background 0.2s;
-}
-
-.vamp-table tbody tr:hover {
-  background: rgba(200, 0, 50, 0.05);
-}
-
-.vamp-table td {
-  padding: 10px 12px;
-  color: var(--grey-muted);
-  border-right: 1px solid rgba(255,255,255,0.03);
-}
-
-.vamp-table td:last-child {
-  border-right: none;
-}
-
-.vamp-table .no-data {
-  text-align: center;
-  padding: 24px;
-  color: var(--grey-dim);
-  font-style: italic;
-}
-
-.vamp-table .confidence-high {
-  color: #8ff0b2;
-}
-
-.vamp-table .confidence-medium {
-  color: #ffb84d;
-}
-
-.vamp-table .confidence-low {
-  color: #ff8a9a;
-}
-
-.vamp-table .btn-small {
-  padding: 4px 8px;
-  font-size: 11px;
-  border: 1px solid var(--border-red);
-  background: rgba(200, 0, 50, 0.1);
-  color: var(--grey-text);
-  cursor: pointer;
-}
-
-.vamp-table .btn-small:hover {
-  background: rgba(200, 0, 50, 0.2);
-  box-shadow: 0 0 8px var(--red-soft);
-}
-
-/* ============================================================
-   PROGRESS BARS
-============================================================ */
-
-.kpa-progress-container {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.kpa-progress {
-  position: relative;
-}
-
-.kpa-progress-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.kpa-progress-name {
-  font-family: 'Cloister', serif;
-  font-size: 14px;
-  letter-spacing: 1px;
-  color: var(--red-main);
-}
-
-.kpa-progress-stats {
-  font-size: 11px;
-  color: var(--grey-dim);
-}
-
-.kpa-progress-bar-container {
-  height: 20px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--border-red);
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-}
-
-.kpa-progress-bar {
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    rgba(200, 0, 50, 0.4),
-    rgba(200, 0, 50, 0.8)
-  );
-  box-shadow: 0 0 15px var(--red-glow);
-  transition: width 0.4s ease-out;
-  position: relative;
-}
-
-.kpa-progress-bar::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-.kpa-progress-text {
-  position: absolute;
-  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--grey-text);
-  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-}
 
-.task-progress-bar {
-  width: 100px;
-  height: 16px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--border-red);
-  border-radius: 3px;
-  overflow: hidden;
-  position: relative;
-  display: inline-block;
-}
-
-.task-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #7a001e, #c0002f);
-  box-shadow: 0 0 10px var(--red-glow);
-  transition: width 0.3s;
+  background: linear-gradient(180deg, var(--nwu-turquoise), var(--nwu-purple));
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(0,136,156,0.14), 0 12px 22px rgba(16,12,28,0.10);
 }
 
 /* ============================================================
-   MODALS
+   13) BOXES / LOGS / TABLES (if present)
 ============================================================ */
-
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-}
-
-.modal.active {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-content {
-  background: var(--bg-card);
-  border: 1px solid var(--border-red);
-  box-shadow: 0 0 40px var(--red-glow);
-  width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-red);
-  background: linear-gradient(180deg, #160912, #0b060f);
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 18px;
-  font-family: 'Cinzel', serif;
-  letter-spacing: 1px;
-  color: var(--red-main);
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  color: var(--grey-muted);
-  font-size: 28px;
-  cursor: pointer;
-  line-height: 1;
-  transition: color 0.2s;
-}
-
-.modal-close:hover {
-  color: var(--red-main);
-}
-
-.modal-body {
-  padding: 20px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.modal-section {
-  margin-bottom: 16px;
-}
-
-.modal-section label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--grey-text);
-  margin-bottom: 6px;
-}
-
-.modal-section textarea,
-.modal-section .modal-select {
-  width: 100%;
-  background: #060308;
-  border: 1px solid var(--border-dark);
-  color: var(--grey-text);
-  padding: 10px;
-  font-family: system-ui, sans-serif;
-  resize: vertical;
-}
-
-.modal-section textarea:focus,
-.modal-section .modal-select:focus {
-  outline: none;
-  border-color: var(--border-red);
-  box-shadow: 0 0 8px var(--red-soft);
-}
-
-.modal-info {
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.3);
-  border-left: 3px solid var(--border-red);
-  color: var(--grey-muted);
-  font-size: 13px;
-}
-
-.modal-info.warning {
-  border-left-color: #ffb84d;
-  background: rgba(255, 184, 77, 0.1);
-}
-
-.modal-response {
-  padding: 12px;
-  background: rgba(200, 0, 50, 0.1);
-  border: 1px solid var(--border-red);
-  color: var(--grey-text);
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.modal-footer {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  padding: 16px 20px;
-  border-top: 1px solid var(--border-dark);
-  background: var(--bg-panel);
-}
-
-/* ============================================================
-   VAMP OVERLAY (THINKING STATE)
-============================================================ */
-
-.vamp-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(5, 3, 7, 0.9);
-  backdrop-filter: blur(6px);
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.vamp-overlay-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.vamp-spinner {
-  width: 60px;
-  height: 60px;
-  border: 3px solid rgba(200, 0, 50, 0.2);
-  border-top-color: var(--red-main);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.vamp-overlay-text {
-  font-family: 'Cinzel', serif;
-  font-size: 16px;
-  letter-spacing: 2px;
-  color: var(--red-main);
-  text-shadow: 0 0 12px var(--red-glow);
-}
-
-/* ============================================================
-   UTILITY CLASSES
-============================================================ */
-
 .box {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-dark);
-  padding: 12px;
-  margin-top: 12px;
+  border-radius: var(--r-lg);
+  padding: 14px;
+  background: rgba(255,255,255,0.44);
+  border: 1px solid rgba(120,132,142,0.18);
+  box-shadow: 0 12px 22px rgba(16,12,28,0.06);
 }
-
 .box-h {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--grey-text);
+  font-weight: 900;
+  color: var(--text-strong);
   margin-bottom: 10px;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-dark);
-}
-
-.split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-top: 16px;
+  border-bottom: 1px solid rgba(120,132,142,0.14);
 }
 
 .log {
-  background: #020102;
-  border: 1px solid var(--border-dark);
-  padding: 10px;
-  font-family: 'Courier New', monospace;
-  font-size: 11px;
-  color: var(--grey-dim);
-  max-height: 200px;
-  overflow-y: auto;
+  border-radius: var(--r-lg);
+  padding: 12px;
+  background: rgba(17,12,28,0.06);
+  border: 1px solid rgba(120,132,142,0.18);
+  color: rgba(26,31,38,0.88);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 12px;
   white-space: pre-wrap;
-  margin: 0;
-}
-
-.evidence {
-  font-size: 12px;
-  color: var(--grey-muted);
-  line-height: 1.6;
-}
-
-.right {
-  margin-left: auto;
-}
-
-.chips {
-  display: flex;
-  gap: 8px;
-  margin: 0 16px;
+  overflow: auto;
+  max-height: 240px;
 }
 
 /* ============================================================
-   COLLAPSIBLE KPA SECTIONS (for Monthly Expectations)
+   14) RESPONSIVE HERO HEIGHT (optional)
+   If you want it to scale, uncomment below and remove fixed --hero-h above.
+============================================================ */
+/*
+:root{
+  --hero-h: clamp(380px, 34vw, 520px);
+}
+*/
+/* ============================================================
+   FIX PATCH — Table gridlines & hover + Expectations text column
+   Paste at END of CSS
 ============================================================ */
 
-.kpa-section {
-  margin-bottom: 16px;
-  border: 1px solid var(--border-dark);
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--bg-panel);
+/* -----------------------------
+   1) EVIDENCE LOG TABLE — bring back gridlines + hover
+------------------------------ */
+
+/* Table container needs a visible edge */
+.table-container,
+#evidenceTableWrap,
+#evidenceTableContainer{
+  border: 1px solid rgba(120,132,142,0.35) !important;
+  background: rgba(255,255,255,0.40) !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
 }
 
-.kpa-header {
-  background: linear-gradient(180deg, var(--bg-panel), var(--bg-card));
-  padding: 12px 16px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background 0.2s;
+/* Make table opaque enough so borders are visible */
+.vamp-table,
+#evidenceTable,
+table{
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
+  background: rgba(255,255,255,0.38) !important;
 }
 
-.kpa-header:hover {
-  background: var(--bg-panel);
+/* Header row: clearer separation */
+.vamp-table thead th,
+#evidenceTable thead th,
+table thead th{
+  background: linear-gradient(
+    180deg,
+    rgba(108,61,145,0.14),
+    rgba(0,136,156,0.08)
+  ) !important;
+  color: rgba(17,18,22,0.92) !important;
+  font-weight: 900 !important;
+
+  border-bottom: 2px solid rgba(120,132,142,0.42) !important;
+  border-right: 1px solid rgba(120,132,142,0.30) !important;
 }
 
-.kpa-header strong {
-  color: var(--red-main);
-  font-family: 'Cinzel', serif;
-  letter-spacing: 1px;
+.vamp-table thead th:last-child,
+#evidenceTable thead th:last-child,
+table thead th:last-child{
+  border-right: none !important;
 }
 
-.expand-icon {
-  font-size: 18px;
-  color: var(--grey-dim);
-  transition: transform 0.2s;
+/* Body cells: restore column separators + row borders */
+.vamp-table td,
+#evidenceTable td,
+table td{
+  border-bottom: 1px solid rgba(120,132,142,0.30) !important;
+  border-right: 1px solid rgba(120,132,142,0.22) !important;
+  color: rgba(26,31,38,0.92) !important;
+
+  background: rgba(255,255,255,0.32) !important;
 }
 
-.kpa-body {
-  background: var(--bg-black);
-  padding: 16px;
+.vamp-table td:last-child,
+#evidenceTable td:last-child,
+table td:last-child{
+  border-right: none !important;
 }
 
-.month-section {
-  margin-bottom: 12px;
-  padding: 8px;
-  background: var(--bg-card);
-  border-radius: 4px;
+/* Zebra striping so rows read easily */
+.vamp-table tbody tr:nth-child(even) td,
+#evidenceTable tbody tr:nth-child(even) td,
+table tbody tr:nth-child(even) td{
+  background: rgba(0,136,156,0.06) !important;
 }
 
-.month-section strong {
-  color: var(--grey-muted);
-  font-size: 13px;
-  display: block;
-  margin-bottom: 6px;
+/* Hover highlight (strong + obvious) */
+.vamp-table tbody tr:hover td,
+#evidenceTable tbody tr:hover td,
+table tbody tr:hover td{
+  background: rgba(0,136,156,0.14) !important;
+  border-bottom-color: rgba(0,136,156,0.45) !important;
 }
 
-.task-item {
-  display: flex;
-  align-items: center;
-  padding: 6px 8px;
-  margin-bottom: 4px;
-  background: var(--bg-panel);
-  border-radius: 4px;
-  transition: background 0.2s;
+/* Optional: make the play/preview button column pop */
+.vamp-table td button,
+#evidenceTable td button{
+  border: 1px solid rgba(120,132,142,0.28) !important;
+  background: rgba(255,255,255,0.55) !important;
 }
 
-.task-item:hover {
-  background: rgba(200, 0, 50, 0.05);
+/* -----------------------------
+   2) EXPECTATIONS LAYOUT — stop “pushed to the right”
+   Goal: main task text expands, actions stay compact
+------------------------------ */
+
+/* The problem is usually a grid with 1fr 1fr or a huge left spacer.
+   Force any split/grid inside the expectations container to: 1fr + compact rail. */
+#monthlyExpectationsContainer .split,
+#monthlyExpectationsContainer .kpa-body,
+#monthlyExpectationsContainer .month-row,
+#monthlyExpectationsContainer .task-row{
+  display: grid !important;
+  grid-template-columns: 1fr 260px !important;  /* text | actions/meta */
+  gap: 16px !important;
+  align-items: start !important;
 }
 
-.task-item input[type="checkbox"] {
-  margin-right: 12px;
-  cursor: pointer;
+/* Prevent text column from being squeezed */
+#monthlyExpectationsContainer .split > *,
+#monthlyExpectationsContainer .kpa-body > *,
+#monthlyExpectationsContainer .month-row > *,
+#monthlyExpectationsContainer .task-row > *{
+  min-width: 0 !important;
 }
 
-.task-item label {
-  flex: 1;
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--grey-text);
+/* If there is a big empty spacer div, hide it (safe: only inside monthly container) */
+#monthlyExpectationsContainer .spacer,
+#monthlyExpectationsContainer .left-spacer,
+#monthlyExpectationsContainer .empty-col{
+  display: none !important;
 }
 
-.task-item label span {
-  color: var(--grey-dim);
-  font-size: 12px;
+/* Make “task text” wrap nicely instead of becoming a narrow vertical strip */
+#monthlyExpectationsContainer .task-text,
+#monthlyExpectationsContainer .task-desc,
+#monthlyExpectationsContainer .task-details,
+#monthlyExpectationsContainer .task{
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  max-width: 100% !important;
 }
 
-.btn-small {
-  padding: 4px 8px;
-  font-size: 11px;
-  background: rgba(200, 0, 50, 0.15);
-  border: 1px solid var(--border-red);
-  color: var(--red-main);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
+/* Keep the right rail aligned and readable */
+#monthlyExpectationsContainer .task-actions,
+#monthlyExpectationsContainer .actions,
+#monthlyExpectationsContainer .right-rail{
+  justify-self: end !important;
+  width: 260px !important;
 }
 
-.btn-small:hover {
-  background: rgba(200, 0, 50, 0.3);
-  box-shadow: 0 0 8px var(--red-soft);
+/* On smaller screens: stack */
+@media (max-width: 980px){
+  #monthlyExpectationsContainer .split,
+  #monthlyExpectationsContainer .kpa-body,
+  #monthlyExpectationsContainer .month-row,
+  #monthlyExpectationsContainer .task-row{
+    grid-template-columns: 1fr !important;
+  }
+  #monthlyExpectationsContainer .task-actions,
+  #monthlyExpectationsContainer .actions,
+  #monthlyExpectationsContainer .right-rail{
+    width: 100% !important;
+    justify-self: stretch !important;
+  }
 }
+/* ============================================================
+   EXPECTATIONS HARD FIX — stop “thin right column”
+   Paste at END of CSS
+============================================================ */
+
+/* Your base css defines .split as 1fr 1fr :contentReference[oaicite:1]{index=1}
+   If your injected content lands in col 2, it becomes a thin right strip.
+   Force SINGLE column inside the expectations container. */
+#monthlyExpectationsContainer .split{
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 14px !important;
+}
+
+/* Critical: even if JS injects into the “second column”, make it span full width */
+#monthlyExpectationsContainer .split > *{
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* If any inner wrapper is using fixed widths/margins, kill them */
+#monthlyExpectationsContainer .kpa-section,
+#monthlyExpectationsContainer .kpa-body,
+#monthlyExpectationsContainer .month-section{
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Make task rows read like full-width items again */
+#monthlyExpectationsContainer .task-item{
+  width: 100% !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+}
+
+/* Ensure labels take the available width and wrap normally */
+#monthlyExpectationsContainer .task-item label{
+  flex: 1 !important;           /* you already have flex:1 in base css */
+  min-width: 0 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+/* ============================================================
+   FIX: Evidence Log borders/hover + Expectations “thin right strip”
+   Paste at END of CSS
+============================================================ */
+
 
 /* ============================================================
-   ENHANCED IMPACT SUMMARIES
+   A) EVIDENCE LOG TABLE — gridlines + hover + zebra
 ============================================================ */
 
-.impact-enhanced {
-  font-size: 0.9em;
-  line-height: 1.5;
-  color: var(--grey-text);
+.table-container{
+  border: 1px solid rgba(120,132,142,0.45) !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  background: rgba(255,255,255,0.35) !important;
 }
 
-.impact-enhanced strong {
-  color: var(--red-main);
-  font-weight: 600;
+/* Target your actual table id */
+#evidenceLogTable{
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  background: rgba(255,255,255,0.28) !important;
 }
 
-.impact-separator {
-  color: var(--grey-dim);
-  margin: 0 6px;
+#evidenceLogTable thead th{
+  background: linear-gradient(180deg, rgba(108,61,145,0.18), rgba(0,136,156,0.10)) !important;
+  color: rgba(17,18,22,0.92) !important;
+  font-weight: 900 !important;
+  border-bottom: 2px solid rgba(120,132,142,0.55) !important;
+  border-right: 1px solid rgba(120,132,142,0.35) !important;
+  padding: 12px 10px !important;
 }
 
-.impact-user {
-  color: var(--grey-text);
-  font-style: italic;
+#evidenceLogTable thead th:last-child{
+  border-right: none !important;
 }
 
-.impact-analysis {
-  color: var(--grey-muted);
+#evidenceLogTable tbody td{
+  border-bottom: 1px solid rgba(120,132,142,0.35) !important;
+  border-right: 1px solid rgba(120,132,142,0.25) !important;
+  padding: 12px 10px !important;
+  vertical-align: top !important;
+  background: rgba(255,255,255,0.20) !important;
 }
 
-.impact-details {
-  color: var(--grey-dim);
-  font-size: 0.85em;
+#evidenceLogTable tbody td:last-child{
+  border-right: none !important;
+}
+
+/* Zebra */
+#evidenceLogTable tbody tr:nth-child(even) td{
+  background: rgba(0,136,156,0.07) !important;
+}
+
+/* Hover highlight (make it obvious) */
+#evidenceLogTable tbody tr:hover td{
+  background: rgba(0,136,156,0.16) !important;
+  border-bottom-color: rgba(0,136,156,0.55) !important;
+}
+
+
+
+/* ============================================================
+   B) EXPECTATIONS — STOP “TEXT PUSHED RIGHT / THIN COLUMN”
+============================================================ */
+
+/* The nuke button:
+   Any grid inside monthly expectations becomes 1 column (overrides inline too) */
+#monthlyExpectationsContainer [style*="display:grid"],
+#monthlyExpectationsContainer [style*="display: grid"],
+#monthlyExpectationsContainer .split{
+  grid-template-columns: 1fr !important;
+}
+
+/* If JS injects into column 2, force everything to span full width */
+#monthlyExpectationsContainer *{
+  grid-column: 1 / -1 !important;
+}
+
+/* Prevent any fixed/narrow widths causing skinny columns */
+#monthlyExpectationsContainer,
+#monthlyExpectationsContainer *{
+  max-width: 100% !important;
+}
+
+/* Kill “mystery” left padding/margins that create a giant blank area */
+#monthlyExpectationsContainer *{
+  margin-left: 0 !important;
+}
+
+/* Keep task text wide and readable */
+#monthlyExpectationsContainer .task-item,
+#monthlyExpectationsContainer .month-section,
+#monthlyExpectationsContainer .kpa-body,
+#monthlyExpectationsContainer .kpa-section{
+  width: 100% !important;
+}
+
+/* Make label wrapping behave nicely (no vertical skinny paragraph) */
+#monthlyExpectationsContainer .task-item label,
+#monthlyExpectationsContainer label{
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  line-height: 1.45 !important;
+}
+
+/* If you have action buttons on the right of each task, keep them compact */
+#monthlyExpectationsContainer .task-item{
+  align-items: flex-start !important;
+  gap: 10px !important;
+}
+
+#monthlyExpectationsContainer .task-item button,
+#monthlyExpectationsContainer .btn-small{
+  flex: 0 0 auto !important;
 }

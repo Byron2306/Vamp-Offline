@@ -28,6 +28,12 @@ window.switchToTab = function(tabKey) {
     if (tab) tab.classList.add('active');
     const panel = document.getElementById('tab-' + tabKey);
     if (panel) panel.classList.add('active');
+    
+    // Update evidence month filter when switching to evidence tab
+    if (tabKey === 'evidence') {
+      populateEvidenceMonthFilter();
+    }
+    
     log(`Switched to: ${tabKey}`);
   } catch (e) {
     console.error('switchToTab error', e);
@@ -271,12 +277,14 @@ if (vampInput) {
 ============================================================ */
 
 function collectContext() {
+  const currentTab = document.querySelector(".tab.active")?.dataset.tab || null;
   const context = {
     staff_id: $("staffId")?.value || null,
     cycle_year: $("cycleYear")?.value || null,
+    name: currentProfile?.name || $("name")?.value || null,
     stage: $("stagePill")?.textContent || null,
     scan_month: $("scanMonth")?.value || null,
-    current_tab: document.querySelector(".tab.active")?.dataset.tab || null,
+    current_tab: currentTab,
     expectations_count: currentExpectations.length,
     scan_results_count: currentScanResults.length
   };
@@ -296,6 +304,50 @@ function collectContext() {
       evidence_hints: currentAIGuidanceTask.evidence_hints,
       evidence_required: currentAIGuidanceTask.evidence_required
     };
+  }
+  
+  // Include evidence log summary when on evidence tab
+  if (currentTab === 'evidence' && currentScanResults.length > 0) {
+    const monthFilter = $("evidenceMonthFilter")?.value || 'all';
+    const filtered = monthFilter === 'all' ? currentScanResults : currentScanResults.filter(e => e.month === monthFilter);
+    const avgRating = filtered.reduce((sum, e) => sum + (e.rating || e.brain?.rating || 0), 0) / (filtered.length || 1);
+    const totalEvidence = filtered.length;
+    const mappedCount = filtered.filter(e => (e.mapped_count || (e.mapped_tasks?.length || 0)) > 0).length;
+    const tiers = {};
+    filtered.forEach(e => {
+      const t = e.tier || 'Unknown';
+      tiers[t] = (tiers[t] || 0) + 1;
+    });
+    context.evidence_summary = {
+      total_evidence: totalEvidence,
+      mapped_evidence: mappedCount,
+      avg_rating: avgRating.toFixed(1),
+      month_filter: monthFilter,
+      tier_breakdown: tiers,
+      recent_files: filtered.slice(0, 5).map(e => ({ filename: e.filename, rating: e.rating, tier: e.tier, kpa: e.kpa }))
+    };
+  }
+  
+  // Include current month's tasks when on expectations tab
+  if (currentTab === 'expectations' && currentExpectations.length > 0) {
+    const month = $("scanMonth")?.value;
+    if (month) {
+      const monthTasks = currentExpectations.filter(t => {
+        const taskMonths = t.months || [];
+        const monthNum = parseInt(month);
+        return taskMonths.includes(monthNum) || taskMonths.includes(month);
+      });
+      context.month_tasks = {
+        month: month,
+        total_tasks: monthTasks.length,
+        by_kpa: {},
+        sample_tasks: monthTasks.slice(0, 5).map(t => ({ title: t.title, kpa: t.kpa_code, min_required: t.minimum_count }))
+      };
+      monthTasks.forEach(t => {
+        const kpa = t.kpa_code || 'Unknown';
+        context.month_tasks.by_kpa[kpa] = (context.month_tasks.by_kpa[kpa] || 0) + 1;
+      });
+    }
   }
   
   return context;
@@ -353,6 +405,9 @@ async function enrolOrLoadProfile() {
       $("stagePill").textContent = "Stage: Profile loaded";
       vampSpeak("Your profile is set. Upload your Task Agreement when ready.");
       log(`Enrolled: ${profile.name} (${profile.staff_id})`);
+      
+      // Update evidence month filter with the correct year
+      populateEvidenceMonthFilter();
     } else {
       vampSpeak("Enrolment failed. Please review your details.");
       log("Enrolment failed: " + (await res.text()));
@@ -884,7 +939,7 @@ function renderMonthView(monthKey) {
     
     kpaData.tasks.forEach(task => {
       const taskItem = document.createElement("div");
-      taskItem.style.cssText = "display:flex;align-items:flex-start;padding:10px;margin-bottom:8px;background:var(--panel);border-radius:4px;border-left:3px solid var(--purple);";
+      taskItem.style.cssText = "display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px;margin-bottom:8px;background:var(--panel);border-radius:4px;border-left:3px solid var(--purple);";
       
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
@@ -896,7 +951,7 @@ function renderMonthView(monthKey) {
       
       const label = document.createElement("label");
       label.htmlFor = `task-${task.id}`;
-      label.style.cssText = "flex:1;cursor:pointer;";
+      label.style.cssText = "flex:1 1 640px;min-width:min(520px,100%);cursor:pointer;overflow-wrap:anywhere;word-break:break-word;";
 
       const outputsText = (task.outputs || task.output || "").toString().trim();
       const whatToDoText = (task.what_to_do || task.description || "").toString().trim();
@@ -925,8 +980,7 @@ function renderMonthView(monthKey) {
       const scanBtn = document.createElement("button");
       scanBtn.className = "btn-small";
       scanBtn.textContent = "📎 Scan";
-      scanBtn.style.marginLeft = "8px";
-      scanBtn.onclick = () => {
+            scanBtn.onclick = () => {
         currentScanTargetTaskId = task.id;
         const targetInput = $("scanTargetTaskId");
         if (targetInput) targetInput.value = task.id;
@@ -944,10 +998,15 @@ function renderMonthView(monthKey) {
         vampSpeak("Upload evidence for the selected task.");
       };
       
+      const actions = document.createElement("div");
+      actions.className = "task-actions";
+      actions.style.cssText = "display:flex;gap:8px;align-items:flex-start;flex:0 0 auto;";
+      actions.appendChild(aiBtn);
+      actions.appendChild(scanBtn);
+
       taskItem.appendChild(checkbox);
       taskItem.appendChild(label);
-      taskItem.appendChild(aiBtn);
-      taskItem.appendChild(scanBtn);
+      taskItem.appendChild(actions);
       
       tasksList.appendChild(taskItem);
     });
@@ -1069,52 +1128,107 @@ async function checkMonthStatus() {
     const statusPill = $("monthStatusPill");
     const reviewBox = $("monthReviewBox");
     
-    // Build visual per-task progress display
+    // Fetch no-evidence tasks for this month
+    let noEvidenceTasks = new Set();
+    try {
+      const neRes = await fetch(`/api/task/no-evidence/list?staff_id=${staffId}&year=${monthKey.split('-')[0]}&month=${monthKey}`);
+      const neData = await neRes.json();
+      noEvidenceTasks = new Set((neData.no_evidence_tasks || []).map(t => t.task_id));
+    } catch (e) {
+      console.error("Failed to fetch no-evidence tasks:", e);
+    }
+    
+    // Build visual per-task progress display with "No Evidence" option
     const taskStatusHtml = (data.task_status || [])
       .filter(t => t.minimum_required > 0)
       .map(t => {
-        const progress = Math.min(100, (t.evidence_count / t.minimum_required) * 100);
-        const statusClass = t.met ? 'ok' : 'bad';
-        const statusIcon = t.met ? '✓' : '⚠';
+        const isNoEvidence = noEvidenceTasks.has(t.task_id);
+        const progress = isNoEvidence ? 100 : Math.min(100, (t.evidence_count / t.minimum_required) * 100);
+        const statusClass = (t.met || isNoEvidence) ? 'ok' : 'bad';
+        const statusIcon = isNoEvidence ? '⊘' : (t.met ? '✓' : '⚠');
+        const statusText = isNoEvidence ? 'No Evidence' : `${t.evidence_count}/${t.minimum_required}`;
+        const borderColor = isNoEvidence ? 'var(--gold)' : (t.met ? 'var(--green)' : 'var(--red)');
+        
+        // Show action button only for incomplete tasks
+        const actionBtn = (!t.met && !isNoEvidence) 
+          ? `<button class="btn" style="font-size:10px;padding:2px 6px;margin-left:8px;" 
+               onclick="markTaskNoEvidence('${t.task_id}', '${t.title.replace(/'/g, "\\'")}')">
+               No Evidence
+             </button>`
+          : (isNoEvidence 
+              ? `<button class="btn" style="font-size:10px;padding:2px 6px;margin-left:8px;opacity:0.6;" 
+                   onclick="removeNoEvidence('${t.task_id}')">
+                   Undo
+                 </button>` 
+              : '');
+        
         return `
-          <div style="margin-bottom:12px;padding:8px;background:var(--panel);border-radius:4px;border-left:3px solid ${t.met ? 'var(--green)' : 'var(--red)'};">
+          <div style="margin-bottom:12px;padding:8px;background:var(--panel);border-radius:4px;border-left:3px solid ${borderColor};">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
               <span style="font-weight:600;color:var(--text);">${statusIcon} ${t.kpa_code}: ${t.title}</span>
-              <span class="pill ${statusClass}">${t.evidence_count}/${t.minimum_required}</span>
+              <div style="display:flex;align-items:center;">
+                <span class="pill ${statusClass}">${statusText}</span>
+                ${actionBtn}
+              </div>
             </div>
             <div style="width:100%;height:6px;background:var(--panel-dark);border-radius:3px;overflow:hidden;">
-              <div style="width:${progress}%;height:100%;background:${t.met ? 'var(--green)' : 'var(--purple)'};transition:width 0.3s;"></div>
+              <div style="width:${progress}%;height:100%;background:${isNoEvidence ? 'var(--gold)' : (t.met ? 'var(--green)' : 'var(--purple)')};transition:width 0.3s;"></div>
             </div>
           </div>
         `;
       }).join('');
     
-    if (data.complete) {
-      statusPill.textContent = `Complete ✓ (${data.tasks_met}/${data.tasks_total})`;
+    // Recount completion including no-evidence tasks
+    const effectiveTasksMet = data.tasks_met + noEvidenceTasks.size;
+    const effectiveComplete = effectiveTasksMet >= data.tasks_total;
+    
+    if (effectiveComplete) {
+      statusPill.textContent = `Complete ✓ (${effectiveTasksMet}/${data.tasks_total})`;
       statusPill.className = "pill ok";
       reviewBox.innerHTML = `
         <div style="color:#8ff0b2;font-weight:bold;margin-bottom:12px;">✓ Month Complete</div>
         <div style="margin-bottom:12px;">${data.message || 'All expectations for this month have been met.'}</div>
+        ${noEvidenceTasks.size > 0 ? `<div style="margin-bottom:12px;color:var(--gold);">ℹ️ ${noEvidenceTasks.size} task(s) marked as "No Evidence"</div>` : ''}
         <div style="font-weight:600;margin-bottom:8px;">Task Progress:</div>
         ${taskStatusHtml || '<div class="muted">No task details available</div>'}
       `;
-      vampSpeak(`${monthKey} is complete! All ${data.tasks_met} tasks met.`);
+      // Use AI message in main area with voice
+      vampSpeak(data.message || `${monthKey} is complete! ${effectiveTasksMet} tasks accounted for.`);
+      if (data.audio_url) {
+        playVoiceResponse(data.audio_url);
+      }
     } else {
-      statusPill.textContent = `Incomplete ⚠️ (${data.tasks_met}/${data.tasks_total})`;
+      statusPill.textContent = `Incomplete ⚠️ (${effectiveTasksMet}/${data.tasks_total})`;
       statusPill.className = "pill bad";
       reviewBox.innerHTML = `
         <div style="color:#ff6b9d;font-weight:bold;margin-bottom:12px;">⚠️ Month Incomplete</div>
         <div style="margin-bottom:12px;">${data.message || 'Some expectations are not yet met.'}</div>
         <div style="padding:8px;background:var(--panel);border-radius:4px;margin-bottom:12px;color:var(--red);">
-          <strong>Missing:</strong> ${data.missing || 'Upload more evidence to meet requirements.'}
+          <strong>Missing:</strong> ${data.missing || 'Upload more evidence or mark tasks as "No Evidence".'}
         </div>
         <div style="font-weight:600;margin-bottom:8px;">Task Progress:</div>
         ${taskStatusHtml || '<div class="muted">No task details available</div>'}
+        <div class="muted" style="margin-top:8px;font-size:11px;">
+          💡 Tip: Click "No Evidence" on tasks where you have no supporting documents.
+        </div>
       `;
-      vampSpeak(`This month needs more evidence. ${data.tasks_met} of ${data.tasks_total} tasks complete.`);
+      // Use AI message in main area with voice
+      vampSpeak(data.message || `This month needs more evidence. ${effectiveTasksMet} of ${data.tasks_total} tasks complete.`);
+      if (data.audio_url) {
+        playVoiceResponse(data.audio_url);
+      }
     }
     
-    log(`Month ${monthKey} status: ${data.complete ? 'Complete' : 'Incomplete'}`);
+    // Update lock button state
+    const lockBtn = $("lockMonthBtn");
+    if (lockBtn) {
+      const isLocked = await checkMonthLockStatus();
+      if (!isLocked) {
+        lockBtn.disabled = !effectiveComplete;
+      }
+    }
+    
+    log(`Month ${monthKey} status: ${effectiveComplete ? 'Complete' : 'Incomplete'}`);
   } catch (e) {
     vampSpeak("Could not check month status.");
     log("Month check error: " + e.message);
@@ -1134,9 +1248,18 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
     vampSpeak("Please select files to scan.");
     return;
   }
+
+  const staffId = $("staffId")?.value;
+  const monthValue = $("scanMonth")?.value;
+  if (!staffId || !monthValue) {
+    vampSpeak("Please provide Staff ID and Month before scanning.");
+    return;
+  }
   
   const targetTaskId = $("scanTargetTaskId")?.value;
   const lockToTask = $("scanLockToTask")?.checked;
+  const useBrain = $("scanUseBrain") ? $("scanUseBrain").checked : true;
+  const useContextual = $("scanUseContextual") ? $("scanUseContextual").checked : false;
   
   // If locking to task, show explanation modal first
   if (lockToTask && targetTaskId) {
@@ -1145,8 +1268,8 @@ $("scanUploadBtn")?.addEventListener("click", async () => {
       files: files,
       targetTaskId: targetTaskId,
       month: $("scanMonth").value,
-      useBrain: $("scanUseBrain").checked,
-      useContextual: $("scanUseContextual").checked
+      useBrain: useBrain,
+      useContextual: useContextual
     };
     
     // Open explanation modal
@@ -1170,17 +1293,18 @@ async function performScan(files, targetTaskId, userExplanation, isLocked) {
   for (let i = 0; i < files.length; i++) {
     fd.append("files", files[i]);
   }
-  fd.append("staff_id", $("staffId").value);
-  fd.append("month", $("scanMonth").value);
-  fd.append("use_brain", $("scanUseBrain").checked);
-  fd.append("use_contextual", $("scanUseContextual").checked);
+  const staffId = $("staffId")?.value;
+  const monthValue = $("scanMonth")?.value;
+  const useBrain = $("scanUseBrain") ? $("scanUseBrain").checked : true;
+  const useContextual = $("scanUseContextual") ? $("scanUseContextual").checked : false;
+  fd.append("staff_id", staffId || "");
+  fd.append("month", monthValue || "");
+  fd.append("use_brain", useBrain);
+  fd.append("use_contextual", useContextual);
 
   if (targetTaskId) {
     fd.append("target_task_id", targetTaskId);
-  }
-  
-  // Lock-to-task mode with user explanation
-  if (isLocked && targetTaskId) {
+    // Always assert mapping when a target task is provided (user explicitly chose this task)
     fd.append("asserted_mapping", "true");
     if (userExplanation) {
       fd.append("user_explanation", userExplanation);
@@ -1193,7 +1317,10 @@ async function performScan(files, targetTaskId, userExplanation, isLocked) {
       body: fd,
       signal: abortController.signal
     });
-    if (!res.ok) throw new Error("Scan failed");
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(errText || "Scan failed");
+    }
     
     const data = await res.json();
     currentScanResults = data.results || [];
@@ -1702,15 +1829,23 @@ function closeModal(modalId) {
   }
 }
 
-// AI Guidance submission
+// AI Guidance submission - now routes to main VAMP panel with voice
 $("submitGuidanceBtn")?.addEventListener("click", async () => {
   const question = $("aiGuidanceInput")?.value.trim();
   if (!question) return;
   
-  vampBusy("Consulting VAMP…");
+  // Close the modal and show response in main VAMP area
+  closeModal('aiGuidanceModal');
+  
+  // Show user question in bubbles
+  pushBubble(question, "user");
+  vampBusy("Let me think about that…");
   
   try {
-    const res = await fetch("/api/ai/guidance", {
+    // Use voice-enabled endpoint for natural response
+    const endpoint = voiceEnabled ? "/api/vamp/ask-voice" : "/api/vamp/ask";
+    
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1722,19 +1857,17 @@ $("submitGuidanceBtn")?.addEventListener("click", async () => {
     if (!res.ok) throw new Error("AI guidance failed");
     
     const data = await res.json();
+    const answer = data.answer || data.guidance || "I don't have specific guidance for that right now.";
     
-    const responseSection = $("aiGuidanceResponse");
-    const responseDiv = responseSection?.querySelector(".modal-response");
-    
-    if (responseDiv) {
-      responseDiv.textContent = data.guidance || data.answer || "No guidance available.";
-      responseSection.style.display = "block";
-    }
-    
-    vampSpeak("I have provided guidance in the modal.");
+    vampSpeak(answer);
     log("AI guidance received");
+    
+    // Play voice response if available
+    if (data.audio_url) {
+      playVoiceResponse(data.audio_url);
+    }
   } catch (e) {
-    vampSpeak("Could not get AI guidance. Ensure Ollama is running.");
+    vampSpeak("I'm having trouble connecting right now. Try again in a moment.");
     log("AI guidance error: " + e.message);
   }
 });
@@ -1903,6 +2036,32 @@ async function loadEvidenceLog(monthFilter = 'all') {
   } catch (e) {
     vampSpeak("Could not load evidence log.");
     log("Evidence log error: " + e.message);
+  }
+}
+
+function populateEvidenceMonthFilter() {
+  const year = $("cycleYear")?.value;
+  if (!year) return;
+  
+  const select = $("evidenceMonthFilter");
+  if (!select) return;
+  
+  // Clear existing options except "All Months"
+  select.innerHTML = '<option value="all">All Months</option>';
+  
+  // Add months for the cycle year
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  
+  for (let i = 0; i < 12; i++) {
+    const monthValue = `${year}-${String(i + 1).padStart(2, '0')}`;
+    const monthName = `${monthNames[i]} ${year}`;
+    const option = document.createElement("option");
+    option.value = monthValue;
+    option.textContent = monthName;
+    select.appendChild(option);
   }
 }
 
@@ -2097,7 +2256,8 @@ function updateVoiceStatusDisplay(data) {
       <p style="color:var(--green);">✅ Voice model trained and ready</p>
       <p style="color:var(--text);font-size:0.9em;margin-top:8px;">
         Device: ${data.device || 'Unknown'}<br>
-        Voice: ${data.config?.voice_name || 'Default'}<br>
+        Voice Name: ${data.config?.voice_name || data.voice_name || 'Default'}<br>
+        Voice ID: ${data.voice_id || 'n/a'}<br>
         Training files: ${data.training_files_available}<br>
         Trained: ${data.config?.last_trained || 'Unknown'}
       </p>
@@ -2107,6 +2267,8 @@ function updateVoiceStatusDisplay(data) {
       <p style="color:var(--yellow);">⚠️ Voice system available but not trained</p>
       <p style="color:var(--text);font-size:0.9em;margin-top:8px;">
         Device: ${data.device || 'Unknown'}<br>
+        Voice Name: ${data.config?.voice_name || data.voice_name || 'Default'}<br>
+        Voice ID: ${data.voice_id || 'n/a'}<br>
         Training files available: ${data.training_files_available}<br>
         Upload voice samples and train the model to enable voice responses.
       </p>
@@ -2541,4 +2703,402 @@ async function loadKPAScores(month) {
   } catch (error) {
     console.error("Failed to load KPA scores:", error);
   }
+}
+
+/* ============================================================
+   MONTH LOCKING & MID-YEAR REVIEW
+============================================================ */
+
+// Check if current month is locked
+async function checkMonthLockStatus() {
+  const staffId = $("staffId")?.value;
+  const monthKey = $("currentMonthSelect")?.value;
+  if (!staffId || !monthKey) return;
+  
+  const year = monthKey.split('-')[0];
+  
+  try {
+    const res = await fetch(`/api/month/status?staff_id=${staffId}&year=${year}`);
+    const data = await res.json();
+    
+    const lockBtn = $("lockMonthBtn");
+    const lockPill = $("monthLockPill");
+    
+    const isLocked = data.locked_months?.some(m => m.month === monthKey);
+    
+    if (lockBtn) {
+      lockBtn.disabled = isLocked;
+      lockBtn.textContent = isLocked ? "🔒 Month Locked" : "🔒 Lock Month";
+    }
+    if (lockPill) {
+      lockPill.style.display = isLocked ? "inline-block" : "none";
+      lockPill.className = "pill ok";
+    }
+    
+    return isLocked;
+  } catch (e) {
+    console.error("Check lock status error:", e);
+    return false;
+  }
+}
+
+// Lock the current month
+$("lockMonthBtn")?.addEventListener("click", async () => {
+  const staffId = $("staffId")?.value;
+  const monthKey = $("currentMonthSelect")?.value;
+  
+  if (!staffId || !monthKey) {
+    vampSpeak("Please select a staff profile and month first.");
+    return;
+  }
+  
+  if (!confirm(`Are you sure you want to lock ${monthKey}? This confirms all tasks are complete or marked as no-evidence.`)) {
+    return;
+  }
+  
+  vampBusy("Locking month...");
+  
+  try {
+    const res = await fetch("/api/month/lock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ staff_id: staffId, month: monthKey })
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      vampSpeak(`Month ${monthKey} locked successfully!`);
+      
+      const lockBtn = $("lockMonthBtn");
+      const lockPill = $("monthLockPill");
+      if (lockBtn) {
+        lockBtn.disabled = true;
+        lockBtn.textContent = "🔒 Month Locked";
+      }
+      if (lockPill) {
+        lockPill.style.display = "inline-block";
+      }
+      
+      // Refresh review status
+      loadReviewStatus();
+      renderMonthLockGrid();
+    } else {
+      vampSpeak(`Cannot lock month: ${data.error || "Unknown error"}`);
+      if (data.missing_count) {
+        alert(`Cannot lock - ${data.missing_count} tasks are not complete.\n\nEither upload evidence or mark tasks as "No Evidence".`);
+      }
+    }
+  } catch (e) {
+    vampSpeak("Failed to lock month.");
+    console.error("Lock month error:", e);
+  }
+});
+
+// Mark a task as "No Evidence"
+async function markTaskNoEvidence(taskId, taskTitle) {
+  const staffId = $("staffId")?.value;
+  const monthKey = $("currentMonthSelect")?.value;
+  
+  if (!staffId || !monthKey) {
+    vampSpeak("Please select a staff profile and month first.");
+    return;
+  }
+  
+  const reason = prompt(`Mark task as "No Evidence Available"?\n\nTask: ${taskTitle}\n\nOptionally provide a reason:`);
+  
+  if (reason === null) return; // Cancelled
+  
+  try {
+    const res = await fetch("/api/task/no-evidence", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        staff_id: staffId,
+        task_id: taskId,
+        month: monthKey,
+        reason: reason
+      })
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      vampSpeak("Task marked as no evidence available.");
+      // Refresh the month status
+      checkMonthStatus();
+    } else {
+      vampSpeak(data.error || "Failed to mark task.");
+    }
+  } catch (e) {
+    vampSpeak("Failed to mark task as no evidence.");
+    console.error("No evidence error:", e);
+  }
+}
+
+// Remove "No Evidence" declaration
+async function removeNoEvidence(taskId) {
+  const staffId = $("staffId")?.value;
+  const monthKey = $("currentMonthSelect")?.value;
+  
+  if (!confirm("Remove 'No Evidence' declaration for this task?")) return;
+  
+  try {
+    const res = await fetch("/api/task/no-evidence", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        staff_id: staffId,
+        task_id: taskId,
+        month: monthKey
+      })
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      vampSpeak("No-evidence declaration removed.");
+      checkMonthStatus();
+    } else {
+      vampSpeak(data.error || "Failed to remove declaration.");
+    }
+  } catch (e) {
+    console.error("Remove no evidence error:", e);
+  }
+}
+
+// Load and display review status
+async function loadReviewStatus() {
+  const staffId = $("staffId")?.value;
+  const year = $("currentMonthSelect")?.value?.split('-')[0];
+  
+  if (!staffId || !year) return;
+  
+  try {
+    const res = await fetch(`/api/review/status?staff_id=${staffId}&year=${year}`);
+    const data = await res.json();
+    
+    const statusDiv = $("midyearReviewStatus");
+    const genBtn = $("generateMidyearBtn");
+    
+    if (data.midyear) {
+      const my = data.midyear;
+      let html = `
+        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+          <div>
+            <strong>Months Locked:</strong> ${my.locked_count} / ${my.required_count}
+          </div>
+          <div>
+            <span class="pill ${my.ready ? 'ok' : 'bad'}">${my.ready ? 'Ready for Review' : 'Not Ready'}</span>
+          </div>
+        </div>
+      `;
+      
+      if (!my.ready && my.months_unlocked?.length > 0) {
+        html += `
+          <div style="margin-top:8px;color:var(--red);">
+            <strong>Unlock months to lock:</strong> ${my.months_unlocked.join(', ')}
+          </div>
+        `;
+      }
+      
+      if (my.review_exists) {
+        html += `
+          <div style="margin-top:8px;color:var(--green);">
+            ✓ Mid-year review generated on ${new Date(my.review_date).toLocaleDateString()}
+          </div>
+        `;
+      }
+      
+      if (statusDiv) statusDiv.innerHTML = html;
+      if (genBtn) genBtn.disabled = !my.ready;
+    }
+  } catch (e) {
+    console.error("Load review status error:", e);
+  }
+}
+
+// Render month lock grid
+async function renderMonthLockGrid() {
+  const staffId = $("staffId")?.value;
+  const year = $("currentMonthSelect")?.value?.split('-')[0];
+  const grid = $("monthLockGrid");
+  
+  if (!staffId || !year || !grid) return;
+  
+  try {
+    const res = await fetch(`/api/month/status?staff_id=${staffId}&year=${year}`);
+    const data = await res.json();
+    
+    const lockedSet = new Set(data.locked_months?.map(m => m.month) || []);
+    const months = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    
+    let html = '';
+    months.forEach((name, idx) => {
+      const monthKey = `${year}-${String(idx + 1).padStart(2, '0')}`;
+      const isLocked = lockedSet.has(monthKey);
+      const isMidyear = idx < 6;
+      
+      html += `
+        <div style="padding:8px;text-align:center;border-radius:4px;
+                    background:${isLocked ? 'var(--green)' : 'var(--panel)'};
+                    color:${isLocked ? '#000' : 'var(--text)'};
+                    border:1px solid ${isMidyear ? 'var(--purple)' : 'var(--gold)'};">
+          <div style="font-size:10px;opacity:0.7;">${isMidyear ? 'H1' : 'H2'}</div>
+          <div style="font-weight:bold;">${name}</div>
+          <div style="font-size:11px;">${isLocked ? '🔒' : '○'}</div>
+        </div>
+      `;
+    });
+    
+    grid.innerHTML = html;
+  } catch (e) {
+    console.error("Render month lock grid error:", e);
+  }
+}
+
+// Generate mid-year review
+$("generateMidyearBtn")?.addEventListener("click", async () => {
+  const staffId = $("staffId")?.value;
+  const year = $("currentMonthSelect")?.value?.split('-')[0];
+  
+  if (!staffId || !year) {
+    vampSpeak("Please select a staff profile first.");
+    return;
+  }
+  
+  vampBusy("Generating mid-year review...");
+  
+  try {
+    const res = await fetch("/api/review/midyear", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ staff_id: staffId, year: parseInt(year) })
+    });
+    
+    const data = await res.json();
+    
+    if (data.error) {
+      vampSpeak(data.error);
+      if (data.unlocked_months) {
+        alert(`Cannot generate mid-year review.\n\nPlease lock these months first:\n${data.unlocked_months.join('\n')}`);
+      }
+      return;
+    }
+    
+    // Display the review
+    displayMidyearReview(data);
+    vampSpeak("Mid-year review generated successfully!");
+    
+  } catch (e) {
+    vampSpeak("Failed to generate mid-year review.");
+    console.error("Mid-year review error:", e);
+  }
+});
+
+// Display mid-year review content
+function displayMidyearReview(data) {
+  const content = $("midyearReviewContent");
+  if (!content) return;
+  
+  const totals = data.totals || {};
+  const byKpa = data.by_kpa || {};
+  
+  let kpaRows = Object.entries(byKpa).map(([kpa, stats]) => `
+    <tr>
+      <td>${kpa}</td>
+      <td>${stats.tasks_completed} / ${stats.tasks_total}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="flex:1;height:8px;background:var(--panel-dark);border-radius:4px;overflow:hidden;">
+            <div style="width:${stats.completion_rate}%;height:100%;background:${stats.completion_rate >= 80 ? 'var(--green)' : 'var(--purple)'}"></div>
+          </div>
+          <span>${stats.completion_rate}%</span>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  
+  content.innerHTML = `
+    <h3 style="color:var(--purple);margin-bottom:12px;">📊 Mid-Year Review Summary</h3>
+    <p style="margin-bottom:16px;font-style:italic;">${data.ai_summary || ''}</p>
+    
+    <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:12px;margin-bottom:16px;">
+      <div style="padding:12px;background:var(--panel-dark);border-radius:4px;text-align:center;">
+        <div style="font-size:24px;font-weight:bold;color:var(--green);">${totals.tasks_completed}</div>
+        <div style="font-size:11px;opacity:0.7;">Tasks Completed</div>
+      </div>
+      <div style="padding:12px;background:var(--panel-dark);border-radius:4px;text-align:center;">
+        <div style="font-size:24px;font-weight:bold;color:var(--gold);">${totals.tasks_no_evidence}</div>
+        <div style="font-size:11px;opacity:0.7;">No Evidence</div>
+      </div>
+      <div style="padding:12px;background:var(--panel-dark);border-radius:4px;text-align:center;">
+        <div style="font-size:24px;font-weight:bold;color:var(--purple);">${totals.evidence_count}</div>
+        <div style="font-size:11px;opacity:0.7;">Evidence Items</div>
+      </div>
+      <div style="padding:12px;background:var(--panel-dark);border-radius:4px;text-align:center;">
+        <div style="font-size:24px;font-weight:bold;color:${totals.completion_rate >= 80 ? 'var(--green)' : 'var(--red)'};">${totals.completion_rate}%</div>
+        <div style="font-size:11px;opacity:0.7;">Completion Rate</div>
+      </div>
+    </div>
+    
+    <h4 style="margin-bottom:8px;">KPA Breakdown</h4>
+    <table class="vamp-table" style="font-size:12px;">
+      <thead>
+        <tr><th>KPA</th><th>Tasks</th><th>Completion</th></tr>
+      </thead>
+      <tbody>${kpaRows || '<tr><td colspan="3">No KPA data</td></tr>'}</tbody>
+    </table>
+  `;
+  
+  content.style.display = "block";
+}
+
+// Check mid-year readiness
+$("checkMidyearBtn")?.addEventListener("click", async () => {
+  await loadReviewStatus();
+  await renderMonthLockGrid();
+  vampSpeak("Review status updated.");
+});
+
+// Update checkMonthStatus to also enable/disable lock button
+const originalCheckMonthStatus = window.checkMonthStatus || (async () => {});
+
+// Hook into the existing checkMonthStatus to update lock button
+document.addEventListener("DOMContentLoaded", () => {
+  // Check lock status when month changes
+  $("currentMonthSelect")?.addEventListener("change", () => {
+    checkMonthLockStatus();
+  });
+  
+  // Initial load
+  setTimeout(() => {
+    loadReviewStatus();
+    renderMonthLockGrid();
+  }, 1000);
+});
+
+// Override checkMonthStatus to also update lock button state
+const _origCheckMonthStatus = typeof checkMonthStatus === 'function' ? checkMonthStatus : null;
+if (_origCheckMonthStatus) {
+  window.checkMonthStatus = async function() {
+    await _origCheckMonthStatus();
+    
+    // After checking status, update lock button based on completion
+    const statusPill = $("monthStatusPill");
+    const lockBtn = $("lockMonthBtn");
+    
+    if (statusPill && lockBtn) {
+      const isComplete = statusPill.classList.contains("ok");
+      const isLocked = await checkMonthLockStatus();
+      
+      if (!isLocked) {
+        lockBtn.disabled = !isComplete;
+        lockBtn.title = isComplete ? "Lock this month" : "Complete all tasks first";
+      }
+    }
+  };
 }

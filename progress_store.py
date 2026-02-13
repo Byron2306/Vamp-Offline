@@ -130,6 +130,42 @@ class ProgressStore:
                         PRIMARY KEY (evidence_id, task_id)
                     );
                     CREATE INDEX IF NOT EXISTS idx_asserted_staff_year ON asserted_mappings(staff_id, year);
+                    
+                    -- Month locking table
+                    CREATE TABLE IF NOT EXISTS month_locks(
+                        staff_id TEXT NOT NULL,
+                        year INTEGER NOT NULL,
+                        month TEXT NOT NULL,  -- Format: "2025-01"
+                        locked_at TEXT NOT NULL,
+                        locked_by TEXT,
+                        tasks_completed INTEGER NOT NULL DEFAULT 0,
+                        tasks_total INTEGER NOT NULL DEFAULT 0,
+                        evidence_count INTEGER NOT NULL DEFAULT 0,
+                        PRIMARY KEY (staff_id, year, month)
+                    );
+                    
+                    -- Task no-evidence declarations
+                    CREATE TABLE IF NOT EXISTS task_no_evidence(
+                        staff_id TEXT NOT NULL,
+                        year INTEGER NOT NULL,
+                        task_id TEXT NOT NULL,
+                        month TEXT NOT NULL,
+                        reason TEXT,
+                        declared_at TEXT NOT NULL,
+                        PRIMARY KEY (staff_id, year, task_id, month)
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_no_evidence_staff_year ON task_no_evidence(staff_id, year);
+                    
+                    -- Mid-year and end-year review snapshots
+                    CREATE TABLE IF NOT EXISTS review_snapshots(
+                        staff_id TEXT NOT NULL,
+                        year INTEGER NOT NULL,
+                        review_type TEXT NOT NULL,  -- "midyear" or "endyear"
+                        created_at TEXT NOT NULL,
+                        months_included TEXT NOT NULL,  -- JSON array of months
+                        summary_json TEXT NOT NULL,  -- Full aggregated data
+                        PRIMARY KEY (staff_id, year, review_type)
+                    );
                     """
                 )
                 con.commit()
@@ -462,3 +498,180 @@ class ProgressStore:
             "missing_tasks": missing,
             "by_kpa": by_kpa,
         }
+
+    # ----------------------------
+    # Month Locking
+    # ----------------------------
+    def lock_month(self, staff_id: str, year: int, month: str, *, 
+                   tasks_completed: int = 0, tasks_total: int = 0, 
+                   evidence_count: int = 0, locked_by: str = "user") -> bool:
+        """Lock a month, preventing further changes. Returns True if newly locked."""
+        with self._lock:
+            con = self._connect()
+            try:
+                con.execute(
+                    """
+                    INSERT OR REPLACE INTO month_locks
+                    (staff_id, year, month, locked_at, locked_by, tasks_completed, tasks_total, evidence_count)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (staff_id, int(year), month, _utc_now_iso(), locked_by, 
+                     tasks_completed, tasks_total, evidence_count)
+                )
+                con.commit()
+                return True
+            finally:
+                con.close()
+
+    def unlock_month(self, staff_id: str, year: int, month: str) -> bool:
+        """Unlock a month. Returns True if was locked."""
+        with self._lock:
+            con = self._connect()
+            try:
+                cur = con.execute(
+                    "DELETE FROM month_locks WHERE staff_id=? AND year=? AND month=?",
+                    (staff_id, int(year), month)
+                )
+                con.commit()
+                return cur.rowcount > 0
+            finally:
+                con.close()
+
+    def is_month_locked(self, staff_id: str, year: int, month: str) -> bool:
+        """Check if a month is locked."""
+        with self._lock:
+            con = self._connect()
+            try:
+                cur = con.execute(
+                    "SELECT 1 FROM month_locks WHERE staff_id=? AND year=? AND month=?",
+                    (staff_id, int(year), month)
+                )
+                return cur.fetchone() is not None
+            finally:
+                con.close()
+
+    def get_locked_months(self, staff_id: str, year: int) -> List[Dict[str, Any]]:
+        """Get all locked months for a staff/year."""
+        with self._lock:
+            con = self._connect()
+            try:
+                rows = con.execute(
+                    """SELECT * FROM month_locks WHERE staff_id=? AND year=? ORDER BY month""",
+                    (staff_id, int(year))
+                ).fetchall()
+                return [dict(r) for r in rows]
+            finally:
+                con.close()
+
+    # ----------------------------
+    # Task No-Evidence Declarations
+    # ----------------------------
+    def declare_no_evidence(self, staff_id: str, year: int, task_id: str, month: str, 
+                            reason: str = "") -> bool:
+        """Declare that a task has no evidence available."""
+        with self._lock:
+            con = self._connect()
+            try:
+                con.execute(
+                    """
+                    INSERT OR REPLACE INTO task_no_evidence
+                    (staff_id, year, task_id, month, reason, declared_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (staff_id, int(year), task_id, month, reason, _utc_now_iso())
+                )
+                con.commit()
+                return True
+            finally:
+                con.close()
+
+    def remove_no_evidence(self, staff_id: str, year: int, task_id: str, month: str) -> bool:
+        """Remove a no-evidence declaration."""
+        with self._lock:
+            con = self._connect()
+            try:
+                cur = con.execute(
+                    "DELETE FROM task_no_evidence WHERE staff_id=? AND year=? AND task_id=? AND month=?",
+                    (staff_id, int(year), task_id, month)
+                )
+                con.commit()
+                return cur.rowcount > 0
+            finally:
+                con.close()
+
+    def get_no_evidence_tasks(self, staff_id: str, year: int, month: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get all tasks declared as having no evidence."""
+        with self._lock:
+            con = self._connect()
+            try:
+                if month:
+                    rows = con.execute(
+                        "SELECT * FROM task_no_evidence WHERE staff_id=? AND year=? AND month=?",
+                        (staff_id, int(year), month)
+                    ).fetchall()
+                else:
+                    rows = con.execute(
+                        "SELECT * FROM task_no_evidence WHERE staff_id=? AND year=?",
+                        (staff_id, int(year))
+                    ).fetchall()
+                return [dict(r) for r in rows]
+            finally:
+                con.close()
+
+    def is_task_no_evidence(self, staff_id: str, year: int, task_id: str, month: str) -> bool:
+        """Check if a task is marked as having no evidence."""
+        with self._lock:
+            con = self._connect()
+            try:
+                cur = con.execute(
+                    "SELECT 1 FROM task_no_evidence WHERE staff_id=? AND year=? AND task_id=? AND month=?",
+                    (staff_id, int(year), task_id, month)
+                )
+                return cur.fetchone() is not None
+            finally:
+                con.close()
+
+    # ----------------------------
+    # Review Snapshots (Mid-year / End-year)
+    # ----------------------------
+    def save_review_snapshot(self, staff_id: str, year: int, review_type: str,
+                             months_included: List[str], summary: Dict[str, Any]) -> bool:
+        """Save a mid-year or end-year review snapshot."""
+        with self._lock:
+            con = self._connect()
+            try:
+                con.execute(
+                    """
+                    INSERT OR REPLACE INTO review_snapshots
+                    (staff_id, year, review_type, created_at, months_included, summary_json)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (staff_id, int(year), review_type, _utc_now_iso(),
+                     json.dumps(months_included), json.dumps(summary, ensure_ascii=False))
+                )
+                con.commit()
+                return True
+            finally:
+                con.close()
+
+    def get_review_snapshot(self, staff_id: str, year: int, review_type: str) -> Optional[Dict[str, Any]]:
+        """Get a review snapshot."""
+        with self._lock:
+            con = self._connect()
+            try:
+                row = con.execute(
+                    "SELECT * FROM review_snapshots WHERE staff_id=? AND year=? AND review_type=?",
+                    (staff_id, int(year), review_type)
+                ).fetchone()
+                if row:
+                    return {
+                        "staff_id": row["staff_id"],
+                        "year": row["year"],
+                        "review_type": row["review_type"],
+                        "created_at": row["created_at"],
+                        "months_included": json.loads(row["months_included"]),
+                        "summary": json.loads(row["summary_json"])
+                    }
+                return None
+            finally:
+                con.close()

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import List, Dict, Any
+import json
 
 import pandas as pd
 from openpyxl import Workbook
@@ -10,6 +11,72 @@ from backend.staff_profile import StaffProfile
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE_DIR = REPO_ROOT / "backend" / "data" / "evidence"
+
+# New helper to load NWU values for enriched outcomes
+def _load_nwu_values() -> Dict[str, Any]:
+    values_path = REPO_ROOT / "backend" / "data" / "nwu_values_vocabulary.json"
+    if values_path.exists():
+        with open(values_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+# New helper to generate verbose qualitative KPI descriptions
+def _enhance_kpi_description(kpi: Any) -> str:
+    description = (getattr(kpi, "description", "") or "").strip()
+    outputs = (getattr(kpi, "outputs", "") or "").strip()
+    
+    # If description is empty or auto-generated, build a verbose narrative from outputs
+    if not description or getattr(kpi, "generated_by_ai", False):
+        if outputs:
+            # Parse outputs into quantitative tasks (e.g., split by bullets or commas)
+            tasks = [line.strip("- •").strip() for line in outputs.split("\n") if line.strip()]
+            if tasks:
+                # Create a descriptive narrative: "Deliver [task1] by [details], ensuring [task2] through [measures], and achieve [task3] via [evidence]"
+                narrative_parts = []
+                for i, task in enumerate(tasks[:3]):  # Limit to top 3 for brevity
+                    if i == 0:
+                        narrative_parts.append(f"Deliver {task.lower()} by preparing detailed plans and executing key actions")
+                    elif i == 1:
+                        narrative_parts.append(f"ensure {task.lower()} through regular monitoring and assessment")
+                    else:
+                        narrative_parts.append(f"achieve {task.lower()} via targeted deliverables and evidence collection")
+                description = ". ".join(narrative_parts).capitalize() + "."
+            else:
+                description = "Execute specified outputs by completing assigned tasks, tracking progress, and providing measurable evidence of delivery."
+        else:
+            description = "Fulfill key responsibilities by undertaking quantitative tasks, meeting deadlines, and demonstrating impact through documented outcomes."
+    
+    # Append qualitative emphasis on outputs as tasks
+    if outputs:
+        description += f" This involves specific quantitative tasks such as {outputs[:100].lower()}..., ensuring thorough completion and alignment with performance goals."
+    
+    return description
+
+# New helper to enrich outcomes with verbose NWU values
+def _enrich_outcomes(kpi: Any) -> str:
+    base_outcomes = (getattr(kpi, "outcomes", "") or "").strip()
+    values = _load_nwu_values()
+    
+    # Start with base outcomes if present
+    enriched = base_outcomes
+    
+    # Append descriptive phrases for core NWU values
+    value_descriptors = []
+    for value, details in list(values.items())[:5]:  # Limit to top 5 values for conciseness
+        if isinstance(details, dict) and "description" in details:
+            desc = details["description"][:50]  # Truncate for brevity
+            value_descriptors.append(f"Demonstrates {value} by {desc.lower()}")
+        else:
+            value_descriptors.append(f"Embodies {value} through committed and impactful actions")
+    
+    if value_descriptors:
+        enriched += ("; " if enriched else "") + "; ".join(value_descriptors)
+    
+    # Default if still empty
+    if not enriched:
+        enriched = "Advances Excellence, Integrity, Innovation, Accountability, and Social Responsiveness through dedicated performance and value-driven outcomes."
+    
+    return enriched
 
 KPA_DEFINITIONS: Dict[str, str] = {
     "KPA1": "Teaching and Learning",
@@ -21,16 +88,18 @@ KPA_DEFINITIONS: Dict[str, str] = {
 
 
 def _render_kpi_cell(kpi: Any) -> str:
-    """Combine KPI description with measurable details for export."""
-
-    description = (getattr(kpi, "description", "") or "").strip()
+    """Combine KPI description with measurable details for export, now with verbose qualitative descriptors and enriched outcomes."""
+    
+    # Enhanced description
+    description = _enhance_kpi_description(kpi)
+    
     details: List[str] = []
-
+    
     measure = (getattr(kpi, "measure", "") or "").strip()
     target = (getattr(kpi, "target", "") or "").strip()
     due = (getattr(kpi, "due", "") or "").strip()
     evidence_types = getattr(kpi, "evidence_types", []) or []
-
+    
     if measure:
         details.append(f"Measure: {measure}")
     if target:
@@ -40,11 +109,16 @@ def _render_kpi_cell(kpi: Any) -> str:
     evidence_text = "; ".join(str(e).strip() for e in evidence_types if str(e).strip())
     if evidence_text:
         details.append(f"Evidence: {evidence_text}")
-
+    
+    # Enriched outcomes (integrated into details for the cell)
+    enriched_outcomes = _enrich_outcomes(kpi)
+    if enriched_outcomes:
+        details.append(f"Outcomes: {enriched_outcomes}")
+    
     if details:
         suffix = "; ".join(details)
         return f"{description} ({suffix})" if description else suffix
-
+    
     return description
 
 

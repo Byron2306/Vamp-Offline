@@ -1,11 +1,91 @@
 from __future__ import annotations
+import json
+from pathlib import Path
 
-"""Batch 10 – Deterministic PA Excel export.
+def _load_json_vocab(path: str):
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return None
 
-This module renders the canonical :class:`PerformanceContract` into the official
-NWU Performance Agreement Excel layout (``pa-report`` sheet) without adding any
-AI-generated content or scoring fields.
-"""
+# Load mapping vocabularies
+vocab_dir = Path(__file__).parent.parent
+KPI_TAXONOMY = _load_json_vocab(str(vocab_dir / 'kpi_taxonomy_nwu_education.json')) or {}
+OUTCOMES_LIBRARY = _load_json_vocab(str(vocab_dir / 'outcomes_library.json')) or []
+VALUES_INDEX = _load_json_vocab(str(vocab_dir / 'values_index.json')) or {}
+
+# Extract detailed KPIs from KPA guidelines
+KPA_DETAILED_KPI_MAP = {
+    "Teaching and Learning, including Higher Degree Supervision": [
+        "STLES results (Student Teaching and Learning Evaluation Surveys)",
+        "Peer reviews of teaching (e.g., observation reports)",
+        "eFundi LMS activity reports",
+        "Teaching portfolios, including reflective narratives",
+        "Pass and throughput rates for modules taught",
+        "Curriculum development (e.g., new modules, curriculum renewal)",
+        "Contact hours and module credits",
+        "Teaching awards (e.g., Institutional Teaching Excellence Award - ITEA)",
+        "Assessment and moderation compliance (aligned with NWU's policy)",
+        "Supervision of undergraduate and honours students",
+        "Use of innovative pedagogy, such as blended or AI-assisted learning"
+    ],
+    "Personal Research, Innovation and/or Creative Outputs": [
+        "DHET-accredited journal articles (with ISSN/DOI)",
+        "Conference papers (national or international)",
+        "Books or book chapters (accredited)",
+        "NRF rating status (e.g., Y1, C2)",
+        "Research funding/grants (applications and awards)",
+        "Research supervision (Master's and PhD graduations)",
+        "Ethics approval letters (REC/HREC)",
+        "Innovation outputs (e.g., patents, software, creative works)",
+        "Research awards or commendations",
+        "Editorial board membership or invited keynote talks"
+    ],
+    "Academic Leadership, Management and Administration": [
+        "Head of Department, Program Leader, or Entity Director roles",
+        "Faculty or institutional committee membership",
+        "Mentorship of junior academics or tutors",
+        "Accreditation or re-accreditation reports led",
+        "Strategic planning or policy input",
+        "Development and management of academic programs",
+        "Performance management of reporting staff",
+        "Leadership in transformation or equity initiatives",
+        "Meeting minutes or official project documentation"
+    ],
+    "Social Responsiveness and Industry Involvement": [
+        "Registered community engagement projects",
+        "Service-learning initiatives in curriculum",
+        "Public lectures or science engagement activities",
+        "Signed MoUs with NGOs, schools, or local government",
+        "Community-based research with impact reports",
+        "Media participation (e.g., radio, TV, newspapers)",
+        "Recognition or awards for societal impact",
+        "Advisory board or committee service",
+        "Volunteer work using academic expertise"
+    ],
+    "OHS (Occupational Health and Safety)": [
+        "Completed OHS training/induction (mandatory NWU modules)",
+        "Risk assessment documents for labs, fieldwork, and events",
+        "Zero-incident reports for labs or teaching spaces",
+        "Incident reporting records (if applicable)",
+        "Participation in OHS committees or audits",
+        "Evidence of student OHS induction",
+        "Compliance with COVID-19 or pandemic protocols",
+        "Use of NWU OHS tools (e.g., digital safety platforms)"
+    ],
+}
+
+# Use detailed KPIs
+KPA_KPI_MAP = KPA_DETAILED_KPI_MAP
+
+# Use all core values for outcomes
+all_values = [v["name"] for v in VALUES_INDEX.get("core_values", [])] if VALUES_INDEX else ["Excellence", "Innovation", "Integrity", "Social Responsiveness"]
+KPA_OUTCOME_MAP = {kpa: "; ".join(all_values) for kpa in KPA_KPI_MAP.keys()}
+
+
+
+
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -27,7 +107,7 @@ KPA_ORDER: List[str] = [
     "People Management",
 ]
 
-HEADERS: List[str] = ["KPA Name", "Outputs", "KPIs", "Weight", "Hours", "Outcomes", "Active"]
+HEADERS: List[str] = ["KPA Name", "KPA Description", "Outputs", "KPIs", "Weight", "Hours", "Outcomes", "Active"]
 
 DEFAULT_PLACEHOLDER = "Not Available"
 
@@ -65,7 +145,14 @@ def _kpa_lookup(contract: PerformanceContract) -> Dict[str, MergedKPA]:
     return lookup
 
 
-def _render_outputs(raw_outputs: object) -> str:
+def _render_outputs(kpa_name: str, raw_outputs: object) -> str:
+    # For Teaching & Learning, summarize as bullet list of key tasks
+    if "teaching" in kpa_name.lower():
+        mapped = KPA_KPI_MAP.get(kpa_name, [])
+        if mapped:
+            return "\n".join(f"• {kpi}" for kpi in mapped)
+        return "Complete all module planning, assessment design, lesson delivery, and evidence upload for each assigned module."
+    # For other KPAs, fallback to original logic
     if raw_outputs is None:
         return ""
     if isinstance(raw_outputs, str):
@@ -102,7 +189,12 @@ def _extract_kpi_fields(raw: object) -> Optional[Dict[str, str]]:
     return {"text": str(raw).strip(), "measure": DEFAULT_PLACEHOLDER, "target": DEFAULT_PLACEHOLDER}
 
 
-def _render_kpis(raw_kpis: object) -> str:
+def _render_kpis(kpa_name: str, raw_kpis: object) -> str:
+    # Use mapped KPIs if available
+    mapped = KPA_KPI_MAP.get(kpa_name, [])
+    if mapped:
+        return "\n".join(f"• {kpi}" for kpi in mapped)
+    # Fallback to original logic
     if raw_kpis is None:
         return ""
     items: List[Dict[str, str]] = []
@@ -137,7 +229,11 @@ def _render_kpis(raw_kpis: object) -> str:
     return "\n\n".join(blocks)
 
 
-def _render_outcomes(raw_outcomes: object) -> str:
+def _render_outcomes(kpa_name: str, raw_outcomes: object) -> str:
+    mapped = KPA_OUTCOME_MAP.get(kpa_name)
+    if mapped:
+        return mapped
+    # Fallback to original logic
     if raw_outcomes is None:
         return "To be evaluated at year-end"
     if isinstance(raw_outcomes, str):
@@ -150,6 +246,21 @@ def _render_outcomes(raw_outcomes: object) -> str:
     return str(raw_outcomes).strip() or "To be evaluated at year-end"
 
 
+def _render_description(raw_desc: object) -> str:
+    if raw_desc is None:
+        return DEFAULT_PLACEHOLDER
+    if isinstance(raw_desc, str):
+        return raw_desc.strip() or DEFAULT_PLACEHOLDER
+    if isinstance(raw_desc, dict):
+        # common keys we might find
+        text = raw_desc.get("description") or raw_desc.get("text") or raw_desc.get("kpa_description")
+        return str(text).strip() if text else DEFAULT_PLACEHOLDER
+    if isinstance(raw_desc, Iterable):
+        parts = [str(item).strip() for item in raw_desc if str(item).strip()]
+        return "\n".join(parts) if parts else DEFAULT_PLACEHOLDER
+    return str(raw_desc).strip() or DEFAULT_PLACEHOLDER
+
+
 def _validate_rows(rows: List[List[object]]) -> None:
     if len(rows) < len(KPA_ORDER):
         raise ValueError("PA export aborted: missing KPA rows")
@@ -157,7 +268,8 @@ def _validate_rows(rows: List[List[object]]) -> None:
     weight_total = 0.0
     for row in rows:
         try:
-            weight_total += float(row[3] or 0)
+            # weight is now at index 4 after adding KPA Description column
+            weight_total += float(row[4] or 0)
         except Exception:
             continue
 
@@ -166,18 +278,19 @@ def _validate_rows(rows: List[List[object]]) -> None:
 
 
 def _apply_layout(ws) -> None:
-    ws.column_dimensions["A"].width = 40
+    ws.column_dimensions["A"].width = 30
     ws.column_dimensions["B"].width = 50
-    ws.column_dimensions["C"].width = 60
-    ws.column_dimensions["D"].width = 10
+    ws.column_dimensions["C"].width = 45
+    ws.column_dimensions["D"].width = 45
     ws.column_dimensions["E"].width = 10
-    ws.column_dimensions["F"].width = 40
-    ws.column_dimensions["G"].width = 8
+    ws.column_dimensions["F"].width = 10
+    ws.column_dimensions["G"].width = 40
+    ws.column_dimensions["H"].width = 8
 
     wrap_alignment = Alignment(wrap_text=True, vertical="top")
-    for row in ws.iter_rows(min_row=3, max_col=7):
+    for row in ws.iter_rows(min_row=3, max_col=8):
         for cell in row:
-            if cell.column_letter in {"B", "C", "F"}:
+            if cell.column_letter in {"B", "C", "D", "G"}:
                 cell.alignment = wrap_alignment
 
     bold_font = Font(bold=True)
@@ -197,14 +310,15 @@ def generate_pa_report(batch10_input: Batch10Input, output_dir: Path) -> Path:
         kpa_key = _normalise_key(kpa_name)
         kpa = lookup.get(kpa_key)
 
-        outputs = _render_outputs(kpa.outputs if kpa else None)
-        kpis = _render_kpis(kpa.kpis if kpa else None)
+        description = _render_description(getattr(kpa, "context", {}) if kpa else None)
+        outputs = _render_outputs(kpa_name, kpa.outputs if kpa else None)
+        kpis = _render_kpis(kpa_name, kpa.kpis if kpa else None)
         weight = float(kpa.weight_pct) if kpa else 0.0
         hours = float(kpa.hours) if kpa else 0.0
-        outcomes = _render_outcomes(kpa.outcomes if kpa else None)
+        outcomes = _render_outcomes(kpa_name, kpa.outcomes if kpa else None)
         active_flag = "Y" if (kpa.active if kpa else True) else "N"
 
-        rows.append([kpa_name, outputs, kpis, weight, hours, outcomes, active_flag])
+        rows.append([kpa_name, description, outputs, kpis, weight, hours, outcomes, active_flag])
 
     _validate_rows(rows)
 

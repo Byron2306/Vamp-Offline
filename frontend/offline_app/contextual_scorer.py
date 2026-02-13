@@ -233,25 +233,33 @@ Start your reply directly with the JSON object, no prose before or after.
 
 
 def _query_ollama(prompt: str) -> str:
-    if requests is None:
-        raise RuntimeError("requests not installed – cannot call Ollama")
+    # Prefer the centralized LLM wrapper which already supports Groq (cloud)
+    try:
+        from backend.llm import ollama_client  # uses Groq when configured
 
-    url = f"{OLLAMA_HOST}/api/generate"
-    payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": prompt,
-        "stream": False,
-        # Ask Ollama to enforce JSON output when possible.
-        "format": "json",
-        "options": {
-            "temperature": float(os.getenv("VAMP_LLM_TEMPERATURE", "0.25")),
-            "num_predict": OLLAMA_NUM_PREDICT,
-        },
-    }
-    resp = requests.post(url, json=payload, timeout=OLLAMA_TIMEOUT)
-    resp.raise_for_status()
-    data = resp.json()
-    return (data.get("response") or "").strip()
+        # Use the shared wrapper; request JSON format to encourage structured output
+        return ollama_client.query_ollama(prompt, format="json", timeout=OLLAMA_TIMEOUT)
+    except Exception:
+        # Fallback: attempt direct Ollama HTTP call if available (best-effort)
+        if requests is None:
+            raise RuntimeError("requests not installed – cannot call Ollama")
+
+        url = f"{OLLAMA_HOST}/api/generate"
+        payload = {
+            "model": OLLAMA_MODEL,
+            "prompt": prompt,
+            "stream": False,
+            # Ask Ollama to enforce JSON output when possible.
+            "format": "json",
+            "options": {
+                "temperature": float(os.getenv("VAMP_LLM_TEMPERATURE", "0.25")),
+                "num_predict": OLLAMA_NUM_PREDICT,
+            },
+        }
+        resp = requests.post(url, json=payload, timeout=OLLAMA_TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+        return (data.get("response") or "").strip()
 
 
 def _parse_llm_json(raw_text: str) -> Dict[str, Any]:
