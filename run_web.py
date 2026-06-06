@@ -7,6 +7,9 @@ import os
 import json
 import time
 import logging
+import argparse
+import subprocess
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
@@ -19,7 +22,8 @@ import requests
 REQUEST_LOGGING_ENABLED = True
 REQUEST_LOGGING_DURATION = 60  # seconds to keep logging after server start
 REQUEST_LOGGING_START = time.time()
-REQUEST_LOG_FILE = Path('./logs/eagi_requests.log')
+APP_ROOT = Path(os.getenv("VAMP_APP_ROOT", Path(__file__).resolve().parent)).resolve()
+REQUEST_LOG_FILE = Path(os.getenv("VAMP_LOG_DIR", APP_ROOT / "logs")) / "vamp_requests.log"
 
 # Temporary safety switch: when True, prevent automatic KPA/weight dumps
 DISABLE_AUTO_KPA = True
@@ -57,18 +61,63 @@ except ImportError as e:
     BRAIN_SCORER_AVAILABLE = False
     brain_score_evidence = None
 
+try:
+    from backend.outlook_evidence_collector import collect_outlook_candidates, describe_search_plan_queries
+    OUTLOOK_COLLECTOR_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import collect_outlook_candidates: {e}")
+    OUTLOOK_COLLECTOR_AVAILABLE = False
+    collect_outlook_candidates = None
+    describe_search_plan_queries = None
+
+try:
+    from backend.efundi_evidence_collector import collect_efundi_candidates
+    EFUNDI_COLLECTOR_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import collect_efundi_candidates: {e}")
+    EFUNDI_COLLECTOR_AVAILABLE = False
+    collect_efundi_candidates = None
+
+try:
+    from backend.work_context import (
+        draft_work_context_from_ta,
+        ensure_work_context_schema,
+        interview_questions,
+        load_work_context,
+        save_work_context,
+    )
+    WORK_CONTEXT_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import work_context helpers: {e}")
+    WORK_CONTEXT_AVAILABLE = False
+    draft_work_context_from_ta = None
+    ensure_work_context_schema = None
+    interview_questions = None
+    load_work_context = None
+    save_work_context = None
+
+try:
+    from backend.runtime_dependencies import dependency_status, install_playwright_chromium
+    RUNTIME_DEPENDENCIES_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import runtime dependency helpers: {e}")
+    RUNTIME_DEPENDENCIES_AVAILABLE = False
+    dependency_status = None
+    install_playwright_chromium = None
+
 print(f"Expectation engine available: {EXPECTATION_ENGINE_AVAILABLE}")
 
 # Flask setup
-app = Flask(__name__, static_folder='.')
+app = Flask(__name__, static_folder=str(APP_ROOT))
 CORS(app)
 
 # Configuration
-UPLOAD_FOLDER = Path("./uploads")
-DATA_FOLDER = Path("./backend/data")
+UPLOAD_FOLDER = Path(os.getenv("VAMP_UPLOAD_DIR", APP_ROOT / "uploads")).expanduser()
+DATA_FOLDER = Path(os.getenv("VAMP_DATA_DIR", APP_ROOT / "backend" / "data")).expanduser()
 CONTRACTS_FOLDER = DATA_FOLDER / "contracts"
 EVIDENCE_FOLDER = DATA_FOLDER / "evidence"
-UPLOAD_FOLDER.mkdir(exist_ok=True)
+UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+DATA_FOLDER.mkdir(parents=True, exist_ok=True)
 
 # LLM Provider Configuration (Groq by default, fallback to Ollama)
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")  # "groq" or "ollama"
@@ -83,7 +132,8 @@ GROQ_TIMEOUT = float(os.getenv("GROQ_TIMEOUT", "60"))
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")
 OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "180"))
-PORT = int(os.getenv("PORT", "5000"))
+DEFAULT_PORT = int(os.getenv("PORT", "5050"))
+PORT = DEFAULT_PORT
 
 # Global state
 profiles = {}
@@ -157,7 +207,7 @@ def query_ollama(prompt: str, context: Dict = None) -> str:
 
 
 def build_vamp_prompt(question: str, context: Dict | None = None) -> str:
-    """Build a persona-anchored prompt for Eagi with optional month-review constraints."""
+    """Build a persona-anchored prompt for VAMP with optional month-review constraints."""
     ctx = context or {}
     name = ctx.get('name') or ctx.get('staff_name') or ctx.get('staff') or "there"
     month = ctx.get('scan_month') or ctx.get('month')
@@ -168,9 +218,10 @@ def build_vamp_prompt(question: str, context: Dict | None = None) -> str:
         is_month_review = True
 
     instructions = [
-        "You are Eagi, an academic performance agreement assistant at North-West University (NWU).",
+        "You are VAMP, Byron Bunt's Virtual Academic Management Partner and gothic academic performance assistant.",
         f"Address the user by name in the first sentence (use '{name}').",
-        "Identify yourself as Eagi.",
+        "Identify yourself as VAMP.",
+        "Keep the Dracula gothic persona tasteful and professional: sharp, warm, evidence-focused, and never gimmicky.",
         "Keep responses concise and actionable.",
         "When asked about specific tasks, recommendations, or KPAs, provide detailed, specific answers based on NWU policies and the user's context.",
         "For general questions, focus exclusively on NWU academic matters, performance agreements, and related administrative processes.",
@@ -240,13 +291,13 @@ def run_mock_ai(prompt: str, context: Dict = None) -> str:
         prompt_lc = (user_text or "").lower()
         
         # Personalized greeting
-        greeting = f"Hi {name}, Eagi here."
+        greeting = f"Hi {name}, VAMP here."
 
         # Short greeting handler: if the user just said 'hi' or similar, reply briefly
         short_greetings = ["hi", "hello", "hey", "hiya"]
         # If the user text is a single short greeting, respond succinctly
         if prompt_lc.strip() in short_greetings or (len(prompt_lc.split()) <= 2 and any(g in prompt_lc for g in short_greetings)):
-            return f"Hi {name}, I'm Eagi. How can I help you today?"
+            return f"Hi {name}, I'm VAMP. How can I help you today?"
         
         # Evidence log / score questions when on evidence tab
         evidence_summary = ctx.get('evidence_summary')
@@ -307,9 +358,9 @@ def run_mock_ai(prompt: str, context: Dict = None) -> str:
 
             return f"{greeting} For {task_month}, you have {total} tasks to complete. Breakdown by KPA: {kpa_breakdown}. Some key tasks: {'; '.join(sample_titles) if sample_titles else 'None yet'}. Upload evidence for each task, then check month status to see what's still needed."
         
-        # Eagi system knowledge responses
+        # VAMP system knowledge responses
         if any(kw in prompt_lc for kw in ["what can you do", "what are you", "who are you", "your capabilities", "help me", "how do you work"]):
-            return f"{greeting} I'm Eagi, your academic performance agreement assistant at North-West University. I help you track your Performance Agreement by: 1) Importing your Task Agreement Excel to generate monthly expectations across all 5 KPAs, 2) Scanning and classifying evidence files using NWU Brain scoring, 3) Mapping evidence to specific tasks, 4) Tracking completion per month, and 5) Generating your final PA report with weights and percentages. Just upload your TA, then scan evidence files for each month!"
+            return f"{greeting} I'm VAMP, your Virtual Academic Management Partner for academic performance evidence at North-West University. I help you track your Performance Agreement by: 1) Importing your Task Agreement Excel to generate monthly expectations across all 5 KPAs, 2) Scanning and classifying evidence files using NWU Brain scoring, 3) Mapping evidence to specific tasks, 4) Tracking completion per month, and 5) Generating your final PA report with weights and percentages. Upload your TA, then scan evidence files for each month."
         
         # KPA info: disabled when DISABLE_AUTO_KPA is True; otherwise require explicit question intent
         if not DISABLE_AUTO_KPA and any(kw in prompt_lc for kw in ["kpa", "key performance", "performance area"]) and any(qw in prompt_lc for qw in ["what", "explain", "describe", "list", "tell me"]):
@@ -419,6 +470,16 @@ def enrol_profile():
                 name = data.get('name') or 'Unknown'
                 position = data.get('position') or 'Academic'
                 faculty = data.get('faculty') or ''
+                school = data.get('school') or ''
+                subject_group = data.get('subject_group') or ''
+                research_entity = data.get('research_entity') or ''
+                campus = data.get('campus') or ''
+                director = data.get('director') or ''
+                subject_group_leader = data.get('subject_group_leader') or ''
+                executive_dean = data.get('executive_dean') or ''
+                research_dean = data.get('research_dean') or ''
+                school_admin = data.get('school_admin') or ''
+                modules_context = data.get('modules_context') or ''
                 manager = data.get('manager') or ''
 
                 # Prefer helper that also loads existing contract JSON
@@ -429,6 +490,16 @@ def enrol_profile():
                         position=position,
                         cycle_year=int(cycle_year),
                         faculty=faculty,
+                        school=school,
+                        subject_group=subject_group,
+                        research_entity=research_entity,
+                        campus=campus,
+                        director=director,
+                        subject_group_leader=subject_group_leader,
+                        executive_dean=executive_dean,
+                        research_dean=research_dean,
+                        school_admin=school_admin,
+                        modules_context=modules_context,
                         line_manager=manager,
                     )
                 else:
@@ -438,6 +509,16 @@ def enrol_profile():
                         position=position,
                         cycle_year=int(cycle_year),
                         faculty=faculty,
+                        school=school,
+                        subject_group=subject_group,
+                        research_entity=research_entity,
+                        campus=campus,
+                        director=director,
+                        subject_group_leader=subject_group_leader,
+                        executive_dean=executive_dean,
+                        research_dean=research_dean,
+                        school_admin=school_admin,
+                        modules_context=modules_context,
                         line_manager=manager,
                         kpas=[],
                     )
@@ -449,6 +530,16 @@ def enrol_profile():
                     "name": data.get('name', 'Unknown'),
                     "position": data.get('position', 'Academic'),
                     "faculty": data.get('faculty', 'Unknown'),
+                    "school": data.get('school', ''),
+                    "subject_group": data.get('subject_group', ''),
+                    "research_entity": data.get('research_entity', ''),
+                    "campus": data.get('campus', ''),
+                    "director": data.get('director', ''),
+                    "subject_group_leader": data.get('subject_group_leader', ''),
+                    "executive_dean": data.get('executive_dean', ''),
+                    "research_dean": data.get('research_dean', ''),
+                    "school_admin": data.get('school_admin', ''),
+                    "modules_context": data.get('modules_context', ''),
                     "manager": data.get('manager', 'Unknown')
                 }
         else:
@@ -459,6 +550,16 @@ def enrol_profile():
                 "name": data.get('name', 'Unknown'),
                 "position": data.get('position', 'Academic'),
                 "faculty": data.get('faculty', 'Unknown'),
+                "school": data.get('school', ''),
+                "subject_group": data.get('subject_group', ''),
+                "research_entity": data.get('research_entity', ''),
+                "campus": data.get('campus', ''),
+                "director": data.get('director', ''),
+                "subject_group_leader": data.get('subject_group_leader', ''),
+                "executive_dean": data.get('executive_dean', ''),
+                "research_dean": data.get('research_dean', ''),
+                "school_admin": data.get('school_admin', ''),
+                "modules_context": data.get('modules_context', ''),
                 "manager": data.get('manager', 'Unknown')
             }
         
@@ -539,11 +640,15 @@ def import_task_agreement():
                     except Exception as e:
                         print(f"Warning: could not upsert tasks after import: {e}")
 
+                    work_context, context_questions = _ensure_work_context_draft(staff_id, int(cycle_year), ta_summary)
+
                     return jsonify({
                         "status": "success",
                         "tasks_count": len(expectations.get('tasks', [])),
                         "kpas_count": len(expectations.get('kpa_summary', {})),
                         "expectations_path": str(expectations_file),
+                        "work_context": work_context,
+                        "context_questions": context_questions,
                         "message": "Uploaded TA parsed and persisted; existing contract (if any) was ignored."
                     })
                 except Exception as parse_error:
@@ -585,10 +690,14 @@ def import_task_agreement():
                 except Exception as e:
                     print(f"Warning: could not upsert tasks after import: {e}")
 
+                work_context, context_questions = _ensure_work_context_draft(staff_id, int(cycle_year), ta_summary)
+
                 return jsonify({
                     "status": "success",
                     "tasks_count": len(expectations.get('tasks', [])),
                     "kpas_count": len(expectations.get('kpa_summary', {})),
+                    "work_context": work_context,
+                    "context_questions": context_questions,
                     "message": f"Generated {len(expectations.get('tasks', []))} tasks from existing contract"
                 })
         
@@ -635,11 +744,15 @@ def import_task_agreement():
                 except Exception as e:
                     print(f"Warning: could not upsert tasks after import: {e}")
 
+                work_context, context_questions = _ensure_work_context_draft(staff_id, int(cycle_year), ta_summary)
+
                 return jsonify({
                     "status": "success",
                     "tasks_count": len(expectations.get('tasks', [])),
                     "kpas_count": len(expectations.get('kpa_summary', {})),
-                    "expectations_path": str(expectations_file)
+                    "expectations_path": str(expectations_file),
+                    "work_context": work_context,
+                    "context_questions": context_questions,
                 })
             except Exception as parse_error:
                 print(f"TA parsing failed: {parse_error}")
@@ -656,6 +769,247 @@ def import_task_agreement():
 # ============================================================
 # EXPECTATIONS & PROGRESS
 # ============================================================
+
+def _load_ta_summary_for_context(staff_id: str, year: int) -> dict:
+    ta_file = CONTRACTS_FOLDER / f"ta_summary_{staff_id}_{year}.json"
+    contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{year}.json"
+    for path in (ta_file, contract_file):
+        if path.exists():
+            try:
+                return json.loads(path.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+    return {}
+
+
+def _ensure_work_context_draft(staff_id: str, year: int, ta_summary: dict) -> tuple[dict, list]:
+    if not WORK_CONTEXT_AVAILABLE or load_work_context is None or draft_work_context_from_ta is None or save_work_context is None:
+        return {}, []
+    existing = load_work_context(staff_id, year) or {}
+    context = existing or save_work_context(staff_id, year, draft_work_context_from_ta(staff_id, year, ta_summary or {}))
+    if ensure_work_context_schema is not None:
+        context = ensure_work_context_schema(context, ta_summary or {})
+    questions = interview_questions(context) if interview_questions else []
+    return context, questions
+
+
+@app.route('/api/work-context', methods=['GET'])
+def get_work_context():
+    try:
+        if not WORK_CONTEXT_AVAILABLE or load_work_context is None:
+            return jsonify({"error": "Work context helpers unavailable"}), 500
+        staff_id = request.args.get('staff_id')
+        year = int(request.args.get('year') or datetime.now().year)
+        if not staff_id:
+            return jsonify({"error": "Missing staff_id"}), 400
+        context = load_work_context(staff_id, year) or {}
+        if ensure_work_context_schema is not None:
+            context = ensure_work_context_schema(context, _load_ta_summary_for_context(staff_id, year))
+        return jsonify({"work_context": context, "exists": bool(context)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/work-context/draft', methods=['POST'])
+def draft_work_context():
+    try:
+        if not WORK_CONTEXT_AVAILABLE or draft_work_context_from_ta is None or save_work_context is None:
+            return jsonify({"error": "Work context helpers unavailable"}), 500
+        data = request.json or {}
+        staff_id = str(data.get('staff_id') or '').strip()
+        year = int(data.get('year') or datetime.now().year)
+        overwrite = bool(data.get('overwrite', False))
+        if not staff_id:
+            return jsonify({"error": "Missing staff_id"}), 400
+        existing = load_work_context(staff_id, year) if load_work_context else {}
+        if existing and not overwrite:
+            context = existing
+        else:
+            ta_summary = data.get('ta_summary') if isinstance(data.get('ta_summary'), dict) else _load_ta_summary_for_context(staff_id, year)
+            context = draft_work_context_from_ta(staff_id, year, ta_summary or {})
+            context = save_work_context(staff_id, year, context)
+        if ensure_work_context_schema is not None:
+            context = ensure_work_context_schema(context, _load_ta_summary_for_context(staff_id, year))
+        questions = interview_questions(context) if interview_questions else []
+        return jsonify({"work_context": context, "questions": questions, "question_count": len(questions)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/work-context/questions', methods=['GET'])
+def get_work_context_questions():
+    try:
+        if not WORK_CONTEXT_AVAILABLE or load_work_context is None or interview_questions is None:
+            return jsonify({"error": "Work context helpers unavailable"}), 500
+        staff_id = request.args.get('staff_id')
+        year = int(request.args.get('year') or datetime.now().year)
+        if not staff_id:
+            return jsonify({"error": "Missing staff_id"}), 400
+        ta_summary = _load_ta_summary_for_context(staff_id, year)
+        context = load_work_context(staff_id, year) or {}
+        if not context and draft_work_context_from_ta is not None:
+            context = draft_work_context_from_ta(staff_id, year, ta_summary)
+        if ensure_work_context_schema is not None:
+            context = ensure_work_context_schema(context, ta_summary)
+        questions = interview_questions(context)
+        return jsonify({"questions": questions, "question_count": len(questions), "work_context": context})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/work-context', methods=['POST'])
+def update_work_context():
+    try:
+        if not WORK_CONTEXT_AVAILABLE or save_work_context is None:
+            return jsonify({"error": "Work context helpers unavailable"}), 500
+        data = request.json or {}
+        staff_id = str(data.get('staff_id') or '').strip()
+        year = int(data.get('year') or datetime.now().year)
+        context = data.get('work_context') if isinstance(data.get('work_context'), dict) else data.get('context')
+        if not staff_id or not isinstance(context, dict):
+            return jsonify({"error": "Missing staff_id or work_context"}), 400
+        if ensure_work_context_schema is not None:
+            context = ensure_work_context_schema(context, _load_ta_summary_for_context(staff_id, year))
+        saved = save_work_context(staff_id, year, context)
+        questions = interview_questions(saved) if interview_questions else []
+        return jsonify({"status": "success", "work_context": saved, "questions": questions, "question_count": len(questions)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/dependencies/status', methods=['GET'])
+def get_dependency_status():
+    try:
+        if not RUNTIME_DEPENDENCIES_AVAILABLE or dependency_status is None:
+            return jsonify({"error": "Runtime dependency helpers unavailable"}), 500
+        return jsonify({"success": True, "dependencies": dependency_status()})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/dependencies/install-playwright', methods=['POST'])
+def install_playwright_dependency():
+    try:
+        if not RUNTIME_DEPENDENCIES_AVAILABLE or install_playwright_chromium is None:
+            return jsonify({"error": "Runtime dependency helpers unavailable"}), 500
+        result = install_playwright_chromium()
+        status_code = 200 if result.get("ok") else 500
+        return jsonify({"success": bool(result.get("ok")), "result": result}), status_code
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def _brain_feedback_fields(meta):
+    """Return normalized qualitative NWU brain feedback fields from evidence meta."""
+    brain = meta.get("brain") if isinstance(meta, dict) else {}
+    if not isinstance(brain, dict):
+        brain = {}
+    return {
+        "assessment_summary": brain.get("assessment_summary") or meta.get("assessment_summary") or "",
+        "evidence_strengths": brain.get("evidence_strengths") or meta.get("evidence_strengths") or [],
+        "review_flags": brain.get("review_flags") or meta.get("review_flags") or [],
+        "recommended_actions": brain.get("recommended_actions") or meta.get("recommended_actions") or [],
+        "route_confidence": brain.get("route_confidence", meta.get("route_confidence")),
+    }
+
+_OUTLOOK_GENERIC_MATCH_TERMS = {
+    "and", "the", "for", "with", "from", "this", "that", "task", "agreement",
+    "performance", "research", "project", "progress", "work", "academic",
+    "faculty", "education", "school", "dear", "regards", "prof", "bunt",
+}
+
+def _selected_outlook_task_ids(candidate: dict, requested_task_ids: list[str] | None = None) -> list[str]:
+    """Choose conservative task assertions from an Outlook evidence candidate.
+
+    Broad Outlook searches should not let one email satisfy several expectation
+    tasks merely because the module code or generic words overlap. A task-click
+    search may assert exactly that requested task; month-wide collection only
+    asserts the single best non-generic match.
+    """
+    requested = [str(tid) for tid in (requested_task_ids or []) if str(tid)]
+    raw_ids = [str(tid) for tid in (candidate.get("task_candidates") or []) if str(tid)]
+    matched = candidate.get("matched_tasks") or []
+    source = str(candidate.get("source") or "").lower()
+    is_direct_lms = source.startswith("efundi")
+
+    if len(requested) == 1 and requested[0] in raw_ids:
+        return [requested[0]]
+
+    usable: list[dict] = []
+    for item in matched:
+        if not isinstance(item, dict):
+            continue
+        task_id = str(item.get("task_id") or "")
+        if not task_id:
+            continue
+        if requested and task_id not in requested:
+            continue
+        terms = [str(t).lower() for t in (item.get("matched_terms") or []) if str(t).strip()]
+        if terms and all(t in _OUTLOOK_GENERIC_MATCH_TERMS for t in terms):
+            continue
+
+        quality = item.get("match_quality") or {}
+        strong_signals = []
+        if isinstance(quality, dict):
+            for key in ("module_hits", "evidence_hits", "attachment_hits", "phrase_hits"):
+                strong_signals.extend(quality.get(key) or [])
+
+        score = float(item.get("score") or 0.0)
+        if not strong_signals and score < 4.0:
+            continue
+        usable.append(item)
+
+    if usable:
+        usable.sort(key=lambda item: float(item.get("score") or 0.0), reverse=True)
+        return [str(usable[0].get("task_id"))]
+
+    if is_direct_lms and len(raw_ids) == 1:
+        return raw_ids
+    return []
+
+
+def _profile_context_terms(staff_id: str, year: int) -> list[str]:
+    """Return enrolment context terms that can safely enrich evidence searches."""
+    safe_id = str(staff_id).replace("/", "-").replace("\\", "-")
+    path = CONTRACTS_FOLDER / f"contract_{safe_id}_{int(year)}.json"
+    if not path.exists():
+        return []
+    try:
+        profile = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+
+    fields = [
+        "faculty",
+        "school",
+        "subject_group",
+        "research_entity",
+        "campus",
+        "director",
+        "subject_group_leader",
+        "executive_dean",
+        "research_dean",
+        "school_admin",
+        "modules_context",
+        "line_manager",
+        "manager",
+    ]
+    terms: list[str] = []
+    seen: set[str] = set()
+    for field in fields:
+        value = str(profile.get(field) or "").strip()
+        if not value:
+            continue
+        chunks = [value]
+        if field in {"modules_context", "school_admin", "director", "subject_group_leader", "executive_dean", "research_dean"}:
+            chunks.extend(part.strip() for part in re.split(r"[,;/|]+", value) if part.strip())
+        for chunk in chunks:
+            marker = chunk.lower()
+            if len(chunk) < 3 or marker in seen:
+                continue
+            seen.add(marker)
+            terms.append(chunk)
+    return terms
 
 @app.route('/api/progress', methods=['GET'])
 def get_progress():
@@ -794,8 +1148,11 @@ def get_progress():
             task_completion = {tid: True for tid in completed_ids}
 
         # Evidence list for Evidence Log (include top mapped task)
+        include_unmapped = str(request.args.get('include_unmapped') or '').lower() in ('1', 'true', 'yes')
         evidence_rows = store.list_evidence(staff_id, int(year), month_bucket=month if month else None)
         evidence_list = []
+        hidden_unmapped_count = 0
+        seen_evidence_keys = set()
         for ev in evidence_rows:
             evd = dict(ev)
             meta = {}
@@ -835,14 +1192,30 @@ def get_progress():
             except Exception:
                 pass
 
+            source_meta = meta.get("outlook") or meta.get("efundi") or {}
+            is_automated_source = isinstance(source_meta, dict) and bool(source_meta.get("source"))
+            if not include_unmapped and not mapped_tasks and is_automated_source and not meta.get("user_enhanced"):
+                hidden_unmapped_count += 1
+                continue
+
             file_path = evd.get("file_path")
             filename = meta.get("filename") or (Path(file_path).name if file_path else None)
+            display_key = (
+                str(file_path or filename or evd["evidence_id"]).lower(),
+                str(top_task_id or meta.get("target_task_id") or "").lower(),
+                str(meta.get("task") or "").lower(),
+            )
+            if display_key in seen_evidence_keys:
+                hidden_unmapped_count += 1
+                continue
+            seen_evidence_keys.add(display_key)
 
             # Extract rating from brain scorer if available
             brain_data = meta.get("brain", {})
             rating = brain_data.get("rating") if isinstance(brain_data, dict) else None
             rating_label = brain_data.get("rating_label", "") if isinstance(brain_data, dict) else ""
             user_enhanced = meta.get("user_enhanced", False)
+            feedback = _brain_feedback_fields(meta)
             
             evidence_list.append({
                 "evidence_id": evd["evidence_id"],
@@ -860,11 +1233,33 @@ def get_progress():
                 "confidence": top_conf if top_conf is not None else float(meta.get("confidence") or 0.0),
                 "rating": rating,
                 "rating_label": rating_label,
+                **feedback,
                 "user_enhanced": user_enhanced,
                 "brain": brain_data,
                 "meta": meta,
                 "file_path": file_path or "",
             })
+
+        evidence_list.sort(
+            key=lambda item: (
+                int(item.get("mapped_count") or 0) <= 0,
+                -float(item.get("confidence") or 0.0),
+                str(item.get("date") or ""),
+            )
+        )
+        include_all_evidence = str(request.args.get('include_all_evidence') or '').lower() in ('1', 'true', 'yes')
+        if not include_all_evidence:
+            capped = []
+            per_task_counts = {}
+            for item in evidence_list:
+                task_key = item.get("task_id") or item.get("task") or item.get("evidence_id")
+                count = per_task_counts.get(task_key, 0)
+                if count >= 3:
+                    hidden_unmapped_count += 1
+                    continue
+                per_task_counts[task_key] = count + 1
+                capped.append(item)
+            evidence_list = capped
         
         resp = {
             "progress": {
@@ -875,6 +1270,7 @@ def get_progress():
                 "completed_count": int(progress.get("completed_tasks", 0)),
                 "missing_tasks": progress.get("missing_tasks", []),
                 "by_kpa": progress.get("by_kpa", {}),
+                "hidden_unmapped_evidence": hidden_unmapped_count,
             },
             "evidence": evidence_list,
             "task_completion": task_completion,
@@ -911,13 +1307,16 @@ def rebuild_expectations():
         if not staff_id or not year:
             return jsonify({"error": "Missing staff_id or year"}), 400
         
-        # Load contract
+        # Prefer the parsed TA summary. The enrolment contract only contains
+        # profile context and is not rich enough to rebuild expectation tasks.
+        ta_file = CONTRACTS_FOLDER / f"ta_summary_{staff_id}_{year}.json"
         contract_file = CONTRACTS_FOLDER / f"contract_{staff_id}_{year}.json"
-        
-        if not contract_file.exists():
-            return jsonify({"error": "Contract not found. Import TA first."}), 404
-        
-        with open(contract_file, 'r') as f:
+        source_file = ta_file if ta_file.exists() else contract_file
+
+        if not source_file.exists():
+            return jsonify({"error": "TA summary/contract not found. Import TA first."}), 404
+
+        with open(source_file, 'r') as f:
             contract_data = json.load(f)
         
         # Build expectations
@@ -943,6 +1342,7 @@ def rebuild_expectations():
                 "status": "success",
                 "tasks_count": len(expectations.get('tasks', [])),
                 "kpas_count": len(expectations.get('kpa_summary', {})),
+                "work_context_applied": expectations.get("work_context_applied", {}),
                 "message": f"Rebuilt {len(expectations.get('tasks', []))} tasks"
             })
         else:
@@ -1369,6 +1769,190 @@ def check_month_completion():
 # MONTH LOCKING & NO-EVIDENCE DECLARATIONS
 # ============================================================
 
+_RISK_REVIEW_CATEGORIES = {
+    "deadline_or_delivery": {
+        "terms": [
+            "lateness",
+            "overdue",
+            "missed deadline",
+            "deadline missed",
+            "late submission",
+            "submitted late",
+            "late report",
+            "delayed",
+            "delay",
+            "extension",
+            "not submitted",
+            "outstanding",
+            "pending",
+            "follow up",
+            "follow-up",
+        ],
+        "label": "deadline/delivery context",
+    },
+    "complaint_or_escalation": {
+        "terms": [
+            "complaint",
+            "grievance",
+            "concern",
+            "escalation",
+            "disciplinary",
+            "appeal",
+            "query",
+            "dissatisfied",
+            "unhappy",
+        ],
+        "label": "complaint/escalation context",
+    },
+    "absence_or_capacity": {
+        "terms": [
+            "absence",
+            "absent",
+            "leave",
+            "sick leave",
+            "medical",
+            "doctor",
+            "appointment",
+            "wellness",
+            "employee wellness",
+            "counselling",
+            "mental health",
+            "burnout",
+            "capacity",
+            "workload",
+        ],
+        "label": "absence/capacity/wellness context",
+    },
+    "compliance_or_safety": {
+        "terms": [
+            "non-compliance",
+            "compliance issue",
+            "compliance concern",
+            "compliance risk",
+            "risk",
+            "ohs",
+            "safety",
+            "security",
+            "incident",
+            "hazard",
+            "popia",
+            "dalro",
+            "audit",
+            "access",
+            "campus entry",
+        ],
+        "label": "compliance/safety context",
+    },
+}
+
+
+def _risk_review_for_month(store, staff_id: str, year: int, month: str) -> Dict[str, Any]:
+    """Build a humane pre-lock review of possible context/risk signals.
+
+    This is intentionally not a punitive scorer. It flags signals that may need
+    an explanation or supporting evidence before the month becomes immutable.
+    """
+    evidence_rows = [dict(row) for row in store.list_evidence(staff_id, year, month_bucket=month)]
+    no_evidence_rows = store.get_no_evidence_tasks(staff_id, year, month)
+    findings: list[dict] = []
+
+    def _add_findings(source: str, title: str, text: str, ref: str = "") -> None:
+        lowered = (text or "").lower()
+        for category, cfg in _RISK_REVIEW_CATEGORIES.items():
+            hits = []
+            for term in cfg["terms"]:
+                term_l = term.lower()
+                pattern = r"(?<![a-z0-9])" + re.escape(term_l).replace(r"\ ", r"\s+") + r"(?![a-z0-9])"
+                if re.search(pattern, lowered):
+                    hits.append(term)
+            if not hits:
+                continue
+            findings.append(
+                {
+                    "category": category,
+                    "label": cfg["label"],
+                    "source": source,
+                    "title": title[:180],
+                    "reference": ref,
+                    "matched_terms": sorted(set(hits))[:8],
+                    "preview": re.sub(r"\s+", " ", text or "")[:320],
+                    "tone": "context_needed",
+                }
+            )
+
+    for row in evidence_rows:
+        meta = {}
+        try:
+            meta = json.loads(row.get("meta_json") or "{}")
+        except Exception:
+            meta = {}
+        parts = [
+            row.get("file_path", ""),
+            meta.get("filename", ""),
+            meta.get("subject", ""),
+            meta.get("title", ""),
+            meta.get("impact_summary", ""),
+            meta.get("assessment_summary", ""),
+            meta.get("user_explanation", ""),
+            meta.get("body_preview", ""),
+            meta.get("row_preview", ""),
+        ]
+        _add_findings("evidence", meta.get("subject") or meta.get("filename") or Path(row.get("file_path", "")).name, " ".join(str(p or "") for p in parts), row.get("evidence_id", ""))
+
+    for item in no_evidence_rows:
+        _add_findings(
+            "no_evidence_declaration",
+            item.get("task_id", "No-evidence declaration"),
+            item.get("reason", ""),
+            item.get("task_id", ""),
+        )
+
+    categories = sorted({finding["category"] for finding in findings})
+    supportive_terms = {"medical", "doctor", "wellness", "leave", "counselling", "mental health", "employee wellness"}
+    has_support_context = any(
+        any(term in " ".join(finding.get("matched_terms") or []) for term in supportive_terms)
+        for finding in findings
+    )
+    return {
+        "month": month,
+        "reviewed_sources": {
+            "evidence_items": len(evidence_rows),
+            "no_evidence_declarations": len(no_evidence_rows),
+        },
+        "finding_count": len(findings),
+        "categories": categories,
+        "findings": findings[:20],
+        "has_support_or_wellness_context": has_support_context,
+        "requires_acknowledgement": True,
+        "summary": (
+            "No obvious risk/compliance/context signals were found in the currently ingested evidence. "
+            "Still confirm that there are no known complaints, absences, missed deadlines, or compliance matters before locking."
+            if not findings
+            else "VAMP found possible risk/context signals. This is not punitive: add a short explanation or supporting evidence before locking so the record is fair and honest."
+        ),
+        "recommended_context_prompt": (
+            "If anything affected delivery this month, briefly explain the context and point to supporting evidence such as approved leave, medical documentation, wellness appointments, revised deadlines, or remedial actions."
+        ),
+    }
+
+
+@app.route('/api/month/risk-review', methods=['POST'])
+def month_risk_review():
+    try:
+        data = request.json or {}
+        staff_id = data.get('staff_id')
+        month = data.get('month')
+        if not staff_id or not month:
+            return jsonify({"error": "Missing staff_id or month"}), 400
+        year = int(month.split('-')[0])
+        from progress_store import ProgressStore
+        store = ProgressStore()
+        return jsonify({"success": True, "risk_review": _risk_review_for_month(store, staff_id, year, month)})
+    except Exception as e:
+        print(f"Month risk review error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/month/lock', methods=['POST'])
 def lock_month():
     """Lock a month after all tasks are completed or declared."""
@@ -1376,6 +1960,8 @@ def lock_month():
         data = request.json
         staff_id = data.get('staff_id')
         month = data.get('month')
+        risk_review_ack = bool(data.get('risk_review_ack'))
+        risk_context_note = str(data.get('risk_context_note') or '').strip()
         
         if not staff_id or not month:
             return jsonify({"error": "Missing staff_id or month"}), 400
@@ -1388,6 +1974,14 @@ def lock_month():
         # Check if already locked
         if store.is_month_locked(staff_id, year, month):
             return jsonify({"error": "Month is already locked", "locked": True}), 400
+
+        risk_review = _risk_review_for_month(store, staff_id, year, month)
+        if not risk_review_ack:
+            return jsonify({
+                "error": "Risk/context review required before locking",
+                "risk_review_required": True,
+                "risk_review": risk_review,
+            }), 409
         
         # Get month completion status first
         month_num = int(month.split('-')[1])
@@ -1448,7 +2042,9 @@ def lock_month():
             staff_id, year, month,
             tasks_completed=len(task_ids_with_evidence),
             tasks_total=tasks_total,
-            evidence_count=evidence_count
+            evidence_count=evidence_count,
+            risk_review=risk_review,
+            risk_context_note=risk_context_note,
         )
         return jsonify({
             "success": True,
@@ -2305,6 +2901,608 @@ def scan_upload():
         print(f"Scan error: {e}")
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/api/outlook/collect', methods=['POST'])
+def collect_outlook_evidence():
+    """Collect month-targeted evidence candidates from Outlook Web and ingest them into VAMP."""
+    try:
+        if not OUTLOOK_COLLECTOR_AVAILABLE or collect_outlook_candidates is None:
+            return jsonify({"error": "Outlook collector is unavailable. Ensure Playwright dependencies are installed."}), 500
+
+        data = request.json or {}
+        staff_id = str(data.get('staff_id') or '').strip()
+        month = str(data.get('month') or '').strip()
+        mode = str(data.get('mode') or 'month_all_tasks').strip()
+        task_ids_requested = data.get('task_ids') or []
+        max_messages = max(1, min(int(data.get('max_messages') or 12), 50))
+        include_body_only = bool(data.get('include_body_only_candidates', True))
+        include_calendar_events = bool(data.get('include_calendar_events', True))
+        headless = bool(data.get('headless', False))
+
+        if not staff_id or not month:
+            return jsonify({"error": "Missing staff_id or month"}), 400
+
+        # month may be "2", "02", or "2026-02"
+        _month_parts = month.split('-')
+        if len(_month_parts) >= 2 and len(_month_parts[0]) == 4:
+            _year_from_month, _month_num_str = int(_month_parts[0]), _month_parts[1]
+        else:
+            _year_from_month, _month_num_str = None, _month_parts[-1]
+        year = int(data.get('year') or _year_from_month or datetime.now().year)
+
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent))
+        from progress_store import ProgressStore
+        from mapper import ensure_tasks, map_evidence_to_tasks
+        import hashlib
+
+        store = ProgressStore()
+
+        expectations_file = CONTRACTS_FOLDER.parent / 'staff_expectations' / f'expectations_{staff_id}_{year}.json'
+        expectations_data = None
+        if expectations_file.exists():
+            with open(expectations_file, 'r', encoding='utf-8') as f:
+                expectations_data = json.load(f)
+
+        ensure_tasks(store, staff_id=staff_id, year=year, expectations=expectations_data)
+
+        month_num = int(_month_num_str)
+        task_rows = [dict(row) for row in store.list_tasks_for_window(year, [month_num], kpa_code=None)]
+        if not task_rows:
+            return jsonify({"error": f"No expectation tasks found for {month}"}), 404
+
+        evidence_counts: dict[str, int] = {}
+        if mode == 'incomplete_tasks':
+            con = store._connect()
+            try:
+                cur = con.execute(
+                    """
+                    SELECT et.task_id, COUNT(DISTINCT et.evidence_id) as count
+                    FROM evidence e
+                    JOIN evidence_task et ON e.evidence_id = et.evidence_id
+                    WHERE e.staff_id = ? AND e.year = ? AND e.month_bucket LIKE ?
+                    GROUP BY et.task_id
+                    """,
+                    (staff_id, year, f"{month}%"),
+                )
+                evidence_counts = {row[0]: int(row[1]) for row in cur.fetchall()}
+            finally:
+                con.close()
+
+        plans = []
+        for row in task_rows:
+            task_id = row.get('task_id')
+            if task_ids_requested and task_id not in task_ids_requested:
+                continue
+            min_required = int(row.get('min_required') or 0)
+            current_count = int(evidence_counts.get(task_id, 0))
+            if mode == 'incomplete_tasks' and min_required > 0 and current_count >= min_required:
+                continue
+            try:
+                hints_payload = json.loads(row.get('hints_json') or '{}')
+            except Exception:
+                hints_payload = {}
+            hints = [str(item).strip() for item in (hints_payload.get('hints') or []) if str(item).strip()]
+
+            # Enrich with KPA-specific evidence keywords so searches target the RIGHT emails.
+            # These are terms that actually appear in Outlook emails Byron would receive as evidence.
+            _KPA_OUTLOOK_KEYWORDS: dict[str, list[str]] = {
+                'KPA1': [
+                    'eFundi', 'HISE312', 'HISE411', 'ERTP671', 'LERP671',
+                    'assessment', 'marks', 'moderation', 'lecture', 'student',
+                    'teaching practice', 'WIL', 'study guide', 'gradebook',
+                ],
+                'KPA2': [
+                    'OHS', 'safety', 'POPIA', 'compliance', 'audit',
+                ],
+                'KPA3': [
+                    'research', 'supervision', 'postgraduate', 'publication',
+                    'article', 'journal', 'Citesaga', 'WorkReady', 'AI GBL',
+                    'conference', 'NRF',
+                ],
+                'KPA4': [
+                    'committee', 'minutes', 'agenda', 'meeting',
+                    'Faculty Board', 'school management', 'SMC',
+                    'academic', 'circular', 'policy',
+                ],
+            }
+            kpa = row.get('kpa_code') or ''
+            kpa_extras = _KPA_OUTLOOK_KEYWORDS.get(kpa, [])
+            title_l = (row.get('title') or '').lower()
+            if kpa == 'KPA1' and any(marker in title_l for marker in ('ror', 'orientation', 'reception', 'registration')):
+                kpa_extras = [
+                    'ROR', 'orientation', 'orientation programme',
+                    'student orientation', 'registration', 'reception',
+                    'welcome',
+                ]
+            elif kpa == 'KPA1' and any(marker in title_l for marker in ('jan:', 'efundi', 'study guide', 'reading list', 'assessment planning', 'module planning')):
+                kpa_extras = [
+                    'eFundi', 'announcement', 'content upload', 'study unit',
+                    'resources', 'study guide', 'reading list', 'rubric',
+                    'assessment plan', 'module plan',
+                ]
+            elif kpa == 'KPA3' and any(marker in title_l for marker in ('supervision', 'postgraduate')):
+                kpa_extras = [
+                    'postgraduate', 'supervision', 'supervisor', 'supervisee',
+                    'MEd', 'PhD', 'proposal', 'thesis', 'dissertation',
+                    'ethics', 'progress meeting',
+                ]
+            elif kpa == 'KPA3' and 'workready' in title_l:
+                kpa_extras = [
+                    'WorkReady', 'work-ready', 'work readiness', 'work-readiness',
+                    'intervention', 'ethics', 'publication', 'article', 'manuscript',
+                    'project planning', 'project status',
+                ]
+            elif kpa == 'KPA3' and ('citesaga' in title_l or 'cite saga' in title_l):
+                kpa_extras = [
+                    'Citesaga', 'CiteSaga', 'cite saga', 'citation game',
+                    'book chapter', 'AOSIS', 'publication', 'article', 'manuscript',
+                    'InfoEd', 'project status',
+                ]
+            elif kpa == 'KPA3' and any(marker in title_l for marker in ('ai and gbl', 'ai gbl', 'gbl project')):
+                kpa_extras = [
+                    'AI GBL', 'AI and GBL', 'game-based learning', 'game based learning',
+                    'game based pedagogy', 'gamified learning', 'gamification',
+                    'play-based learning', 'play based learning', 'playful learning',
+                    'serious games', 'educational game', 'learning game',
+                    'VAMP', 'SERAPH', 'AI project', 'AI system', 'artificial intelligence',
+                    'agentic AI', 'LLM', 'prototype', 'software prototype',
+                    'invention disclosure', 'technology disclosure', 'IP disclosure',
+                    'D2026', 'D2026-164', 'tech transfer', 'commercialisation',
+                    'intervention', 'ethics', 'publication', 'article', 'manuscript',
+                    'project status',
+                ]
+            elif kpa == 'KPA3' and 'professional development' in title_l:
+                kpa_extras = [
+                    'research workshop', 'writing school', 'webinar', 'seminar',
+                    'training', 'professional development', 'NRF',
+                ]
+            elif kpa == 'KPA3' and 'publication' in title_l:
+                kpa_extras = [
+                    'publication', 'article', 'journal', 'manuscript', 'draft',
+                    'conference', 'Citesaga', 'WorkReady', 'AI GBL', 'Prosper',
+                ]
+            elif kpa == 'KPA4' and 'committee' in title_l:
+                kpa_extras = [
+                    'minutes', 'agenda', 'meeting', 'committee', 'Teams meeting',
+                    'Faculty Forum', 'Mentorship', 'School Management',
+                    'SMC', 'Subject Group', 'Research Focus Area',
+                    'professional development',
+                ]
+            # Merge: task-specific hints first (they're more precise), then KPA extras for coverage
+            merged_keywords = hints[:]
+            for kw in kpa_extras:
+                if kw.lower() not in {h.lower() for h in merged_keywords}:
+                    merged_keywords.append(kw)
+
+            plans.append(
+                {
+                    'task_id': task_id,
+                    'kpa_code': kpa,
+                    'title': row.get('title', ''),
+                    'keywords': merged_keywords,
+                    'min_required': min_required,
+                }
+            )
+
+        if not plans:
+            return jsonify({"error": f"No target tasks available for Outlook collection in {month}"}), 404
+
+        profile_terms = _profile_context_terms(staff_id, year)
+        if profile_terms:
+            for plan in plans:
+                existing = {str(kw).lower() for kw in (plan.get('context_terms') or [])}
+                for term in profile_terms:
+                    if term.lower() not in existing:
+                        plan.setdefault('context_terms', []).append(term)
+                        existing.add(term.lower())
+
+        search_diagnostics = []
+        if describe_search_plan_queries is not None:
+            try:
+                search_diagnostics = describe_search_plan_queries(plans, month_bucket=month)
+            except Exception:
+                search_diagnostics = []
+
+        outlook_state_dir = DATA_FOLDER / 'outlook'
+        outlook_state_dir.mkdir(parents=True, exist_ok=True)
+        safe_staff_id = secure_filename(staff_id) or staff_id.replace('/', '-').replace('\\', '-')
+        staff_outlook_dir = outlook_state_dir / safe_staff_id
+        staff_outlook_dir.mkdir(parents=True, exist_ok=True)
+        storage_state = str(staff_outlook_dir / f'state_{year}.json')
+        downloads_dir = str(staff_outlook_dir / 'downloads')
+
+        candidates = collect_outlook_candidates(
+            month_bucket=month,
+            search_plans=plans,
+            storage_state=storage_state,
+            downloads_dir=downloads_dir,
+            max_messages=max_messages,
+            headless=headless,
+            include_body_only_candidates=include_body_only,
+            include_calendar_events=include_calendar_events,
+        )
+
+        results = []
+        rejected_candidates = []
+        for candidate in candidates:
+            attachment_paths = [path for path in (candidate.get('attachment_paths') or []) if path]
+            body_artifact_path = candidate.get('body_artifact_path') or ''
+            primary_path = attachment_paths[0] if attachment_paths else body_artifact_path
+            if not primary_path:
+                continue
+
+            text_parts = [
+                candidate.get('subject', ''),
+                candidate.get('sender', ''),
+                candidate.get('recipients', ''),
+                candidate.get('received_at', ''),
+                candidate.get('body_text', ''),
+                ' '.join(candidate.get('attachment_names') or []),
+            ]
+            for attachment_path in attachment_paths:
+                try:
+                    text_parts.append(extract_text_from_file(attachment_path))
+                except Exception:
+                    continue
+            file_text = '\n'.join(part for part in text_parts if part)
+
+            brain_ctx = None
+            if BRAIN_SCORER_AVAILABLE and brain_score_evidence is not None:
+                try:
+                    brain_ctx = brain_score_evidence(
+                        path=Path(primary_path),
+                        full_text=file_text,
+                        kpa_hint_code=candidate.get('kpa_hint_code'),
+                    )
+                except Exception as brain_error:
+                    print(f"[OUTLOOK] Brain scoring failed for {primary_path}: {brain_error}")
+
+            sha1 = hashlib.sha1(file_text.encode(errors='ignore')).hexdigest()
+            evidence_id = f"ev_{staff_id}_{month}_{sha1[:10]}"
+            had_task_candidates = bool(candidate.get('task_candidates'))
+            selected_task_ids = _selected_outlook_task_ids(candidate, task_ids_requested)
+            if not selected_task_ids:
+                rejected_candidates.append({
+                    'subject': candidate.get('subject', ''),
+                    'source': candidate.get('source', ''),
+                    'reason': 'No strong task-level match after relevance gating',
+                    'search_reason': candidate.get('search_reason') or '',
+                    'matched_tasks': candidate.get('matched_tasks') or [],
+                })
+                continue
+            # Outlook collection is launched from a concrete task/KPA search plan.
+            # Prefer that targeted KPA for routing; the brain scorer can still
+            # provide rating/tier, but should not override the known search target.
+            kpa_code = candidate.get('kpa_hint_code') or (brain_ctx or {}).get('primary_kpa_code') or ''
+            impact_summary = candidate.get('search_reason') or 'Collected from Outlook for targeted monthly evidence search.'
+            source_context = candidate.get('source_context') or {}
+            source_boost = float(source_context.get('confidence_boost') or 0.0)
+            confidence = min(0.98, (0.9 if candidate.get('task_candidates') else 0.55) + source_boost)
+
+            store.insert_evidence(
+                evidence_id=evidence_id,
+                sha1=sha1,
+                staff_id=staff_id,
+                year=year,
+                month_bucket=month,
+                kpa_code=kpa_code,
+                rating=((brain_ctx or {}).get('rating_label') or ''),
+                tier=((brain_ctx or {}).get('tier_label') or ''),
+                file_path=str(primary_path),
+                meta={
+                    'filename': Path(primary_path).name,
+                    'date': datetime.utcnow().date().isoformat(),
+                    'timestamp': datetime.utcnow().replace(microsecond=0).isoformat() + 'Z',
+                    'impact_summary': impact_summary,
+                    'confidence': confidence,
+                    'task': candidate.get('evidence_type_hint') or 'outlook_message',
+                    'source_context': source_context,
+                    'target_task_id': selected_task_ids[0] if selected_task_ids else '',
+                    'brain': brain_ctx or {},
+                    'outlook': {
+                        'staff_id': staff_id,
+                        'source': candidate.get('source'),
+                        'source_message_id': candidate.get('source_message_id'),
+                        'source_url': candidate.get('source_url'),
+                        'subject': candidate.get('subject'),
+                        'sender': candidate.get('sender'),
+                        'recipients': candidate.get('recipients'),
+                        'received_at': candidate.get('received_at'),
+                        'attachment_names': candidate.get('attachment_names') or [],
+                        'attachment_paths': attachment_paths,
+                        'matched_tasks': candidate.get('matched_tasks') or [],
+                        'search_reason': candidate.get('search_reason') or '',
+                        'source_context': source_context,
+                    },
+                },
+            )
+
+            mapped_tasks = []
+            if not selected_task_ids and not had_task_candidates:
+                mapped_tasks = map_evidence_to_tasks(
+                    store,
+                    evidence_id=evidence_id,
+                    staff_id=staff_id,
+                    year=year,
+                    month_bucket=month,
+                    kpa_code=kpa_code,
+                    meta={
+                        'filename': Path(primary_path).name,
+                        'impact_summary': impact_summary,
+                        'evidence_type': candidate.get('evidence_type_hint') or 'outlook_message',
+                        'summary': candidate.get('body_text') or '',
+                        'snippet': candidate.get('subject', ''),
+                    },
+                    mapped_by='outlook_collect:v1',
+                )
+
+            for matched_task_id in selected_task_ids:
+                try:
+                    store.upsert_mapping(
+                        evidence_id,
+                        matched_task_id,
+                        mapped_by='outlook_collect:targeted',
+                        confidence=0.9,
+                    )
+                except Exception:
+                    continue
+
+            try:
+                mapped_tasks = [
+                    {
+                        "task_id": m["task_id"],
+                        "kpa_code": m["kpa_code"],
+                        "title": m["title"],
+                        "confidence": float(m["confidence"] or 0.0),
+                        "mapped_by": m["mapped_by"],
+                    }
+                    for m in store.list_mappings_for_evidence(evidence_id)
+                ]
+            except Exception:
+                mapped_tasks = mapped_tasks or []
+
+            results.append(
+                {
+                    'date': datetime.utcnow().strftime('%Y-%m-%d'),
+                    'file': Path(primary_path).name,
+                    'evidence_id': evidence_id,
+                    'kpa_code': kpa_code,
+                    'tier': (brain_ctx or {}).get('tier_label', ''),
+                    'rating': (brain_ctx or {}).get('rating'),
+                    'rating_label': (brain_ctx or {}).get('rating_label', ''),
+                    'impact_summary': impact_summary,
+                    'confidence': confidence,
+                    'source_context': source_context,
+                    'status': 'Collected',
+                    'mapped_tasks': mapped_tasks,
+                    'mapped_count': len(mapped_tasks),
+                    'subject': candidate.get('subject', ''),
+                    'source': 'outlook_playwright',
+                }
+            )
+
+        return jsonify(
+            {
+                'success': True,
+                'month': month,
+                'mode': mode,
+                'results': results,
+                'collected_count': len(results),
+                'rejected_count': len(rejected_candidates),
+                'rejected_candidates': rejected_candidates[:25],
+                'search_diagnostics': search_diagnostics,
+                'storage_state': storage_state,
+            }
+        )
+    except Exception as e:
+        print(f"Outlook collect error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/efundi/collect', methods=['POST'])
+def collect_efundi_evidence():
+    """Collect direct eFundi/LMS evidence for module-linked monthly tasks."""
+    try:
+        if not EFUNDI_COLLECTOR_AVAILABLE or collect_efundi_candidates is None:
+            return jsonify({"error": "eFundi collector is unavailable. Ensure Playwright dependencies are installed."}), 500
+
+        data = request.json or {}
+        staff_id = str(data.get('staff_id') or '').strip()
+        month = str(data.get('month') or '').strip()
+        task_ids_requested = data.get('task_ids') or []
+        max_items = max(1, min(int(data.get('max_items') or data.get('max_messages') or 20), 50))
+        headless = bool(data.get('headless', False))
+
+        if not staff_id or not month:
+            return jsonify({"error": "Missing staff_id or month"}), 400
+
+        _month_parts = month.split('-')
+        if len(_month_parts) >= 2 and len(_month_parts[0]) == 4:
+            _year_from_month, _month_num_str = int(_month_parts[0]), _month_parts[1]
+        else:
+            _year_from_month, _month_num_str = None, _month_parts[-1]
+        year = int(data.get('year') or _year_from_month or datetime.now().year)
+        month_num = int(_month_num_str)
+
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent))
+        from progress_store import ProgressStore
+        from mapper import ensure_tasks
+        import hashlib
+
+        store = ProgressStore()
+        expectations_file = CONTRACTS_FOLDER.parent / 'staff_expectations' / f'expectations_{staff_id}_{year}.json'
+        expectations_data = None
+        if expectations_file.exists():
+            with open(expectations_file, 'r', encoding='utf-8') as f:
+                expectations_data = json.load(f)
+        ensure_tasks(store, staff_id=staff_id, year=year, expectations=expectations_data)
+
+        task_rows = [dict(row) for row in store.list_tasks_for_window(year, [month_num], kpa_code='KPA1')]
+        plans = []
+        for row in task_rows:
+            task_id = row.get('task_id')
+            if task_ids_requested and task_id not in task_ids_requested:
+                continue
+            try:
+                hints_payload = json.loads(row.get('hints_json') or '{}')
+            except Exception:
+                hints_payload = {}
+            hints = [str(item).strip() for item in (hints_payload.get('hints') or []) if str(item).strip()]
+            title = row.get('title') or ''
+            if not any(marker in title.upper() for marker in ('HISE', 'ERTP', 'LERP', 'SSCE')):
+                continue
+            merged = hints[:]
+            for kw in ['eFundi', 'LMS', 'module site', 'announcement', 'resources', 'assignment', 'gradebook', 'assessment']:
+                if kw.lower() not in {h.lower() for h in merged}:
+                    merged.append(kw)
+            plans.append({
+                'task_id': task_id,
+                'kpa_code': row.get('kpa_code') or 'KPA1',
+                'title': title,
+                'keywords': merged,
+                'min_required': int(row.get('min_required') or 0),
+            })
+
+        if not plans:
+            return jsonify({"error": f"No module-linked KPA1 tasks found for eFundi collection in {month}"}), 404
+
+        profile_terms = _profile_context_terms(staff_id, year)
+        if profile_terms:
+            for plan in plans:
+                existing = {str(kw).lower() for kw in (plan.get('context_terms') or [])}
+                for term in profile_terms:
+                    if term.lower() not in existing:
+                        plan.setdefault('context_terms', []).append(term)
+                        existing.add(term.lower())
+
+        efundi_state_dir = DATA_FOLDER / 'efundi'
+        efundi_state_dir.mkdir(parents=True, exist_ok=True)
+        safe_staff_id = secure_filename(staff_id) or staff_id.replace('/', '-').replace('\\', '-')
+        staff_efundi_dir = efundi_state_dir / safe_staff_id
+        staff_efundi_dir.mkdir(parents=True, exist_ok=True)
+        storage_state = str(staff_efundi_dir / f'state_{year}.json')
+        downloads_dir = str(staff_efundi_dir / 'downloads')
+
+        candidates = collect_efundi_candidates(
+            month_bucket=month,
+            search_plans=plans,
+            storage_state=storage_state,
+            downloads_dir=downloads_dir,
+            max_items=max_items,
+            headless=headless,
+        )
+
+        results = []
+        for candidate in candidates:
+            attachment_paths = [path for path in (candidate.get('attachment_paths') or []) if path]
+            body_artifact_path = candidate.get('body_artifact_path') or ''
+            primary_path = body_artifact_path or (attachment_paths[0] if attachment_paths else '')
+            if not primary_path:
+                continue
+
+            file_text = '\n'.join([
+                candidate.get('subject', ''),
+                candidate.get('sender', ''),
+                candidate.get('received_at', ''),
+                candidate.get('body_text', ''),
+                ' '.join(candidate.get('attachment_names') or []),
+            ])
+            sha1 = hashlib.sha1(file_text.encode(errors='ignore')).hexdigest()
+            evidence_id = f"ev_{staff_id}_{month}_{sha1[:10]}"
+            selected_task_ids = _selected_outlook_task_ids(candidate, task_ids_requested)
+            source_context = candidate.get('source_context') or {}
+            confidence = min(0.98, 0.9 + float(source_context.get('confidence_boost') or 0.0))
+
+            store.insert_evidence(
+                evidence_id=evidence_id,
+                sha1=sha1,
+                staff_id=staff_id,
+                year=year,
+                month_bucket=month,
+                kpa_code='KPA1',
+                rating='',
+                tier='',
+                file_path=str(primary_path),
+                meta={
+                    'filename': Path(primary_path).name,
+                    'date': datetime.utcnow().date().isoformat(),
+                    'timestamp': datetime.utcnow().replace(microsecond=0).isoformat() + 'Z',
+                    'impact_summary': candidate.get('search_reason') or 'Collected from direct eFundi/LMS module-site evidence.',
+                    'confidence': confidence,
+                    'task': candidate.get('evidence_type_hint') or 'efundi_lms_snapshot',
+                    'source_context': source_context,
+                    'target_task_id': selected_task_ids[0] if selected_task_ids else '',
+                    'efundi': {
+                        'staff_id': staff_id,
+                        'source': candidate.get('source'),
+                        'source_url': candidate.get('source_url'),
+                        'subject': candidate.get('subject'),
+                        'module_code': (candidate.get('meta') or {}).get('module_code'),
+                        'attachment_names': candidate.get('attachment_names') or [],
+                        'attachment_paths': attachment_paths,
+                        'search_reason': candidate.get('search_reason') or '',
+                    },
+                },
+            )
+
+            for matched_task_id in selected_task_ids:
+                try:
+                    store.upsert_mapping(
+                        evidence_id,
+                        matched_task_id,
+                        mapped_by='efundi_collect:direct_lms',
+                        confidence=confidence,
+                    )
+                except Exception:
+                    continue
+
+            mapped_tasks = []
+            try:
+                mapped_tasks = [
+                    {
+                        "task_id": m["task_id"],
+                        "kpa_code": m["kpa_code"],
+                        "title": m["title"],
+                        "confidence": float(m["confidence"] or 0.0),
+                        "mapped_by": m["mapped_by"],
+                    }
+                    for m in store.list_mappings_for_evidence(evidence_id)
+                ]
+            except Exception:
+                pass
+
+            results.append({
+                'date': datetime.utcnow().strftime('%Y-%m-%d'),
+                'file': Path(primary_path).name,
+                'evidence_id': evidence_id,
+                'kpa_code': 'KPA1',
+                'impact_summary': candidate.get('search_reason') or '',
+                'confidence': confidence,
+                'source_context': source_context,
+                'status': 'Collected',
+                'mapped_tasks': mapped_tasks,
+                'mapped_count': len(mapped_tasks),
+                'subject': candidate.get('subject', ''),
+                'source': 'efundi_playwright',
+            })
+
+        return jsonify({
+            'success': True,
+            'month': month,
+            'results': results,
+            'collected_count': len(results),
+            'storage_state': storage_state,
+        })
+    except Exception as e:
+        print(f"eFundi collect error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
 def extract_text_from_file(filepath: str) -> str:
     """
     Robust text extraction from various file types with OCR fallback.
@@ -2709,10 +3907,113 @@ def get_evidence():
     """
     try:
         staff_id = request.args.get('staff_id')
-        
-        # Return empty evidence list for fresh start
+        year = int(request.args.get('year') or datetime.now().year)
+        month = request.args.get('month')
+        kpa_code = request.args.get('kpa_code')
+
+        if not staff_id:
+            return jsonify({"error": "Missing staff_id"}), 400
+
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent))
+        from progress_store import ProgressStore
+
+        store = ProgressStore()
+        include_unmapped = str(request.args.get('include_unmapped') or '').lower() in ('1', 'true', 'yes')
+        rows = store.list_evidence(
+            staff_id=staff_id,
+            year=year,
+            month_bucket=month if month else None,
+            kpa_code=kpa_code if kpa_code else None,
+        )
+
         evidence = []
-        
+        seen_evidence_keys = set()
+        for row in rows:
+            evd = dict(row)
+            try:
+                meta = json.loads(evd.get("meta_json") or "{}")
+            except Exception:
+                meta = {}
+
+            mapped_tasks = []
+            try:
+                for mapping in store.list_mappings_for_evidence(evd["evidence_id"]):
+                    mapped_tasks.append({
+                        "task_id": mapping["task_id"],
+                        "title": mapping["title"],
+                        "confidence": float(mapping["confidence"] or 0.0),
+                        "mapped_by": mapping["mapped_by"],
+                        "kpa_code": mapping["kpa_code"],
+                    })
+            except Exception:
+                mapped_tasks = []
+
+            source_meta = meta.get("outlook") or meta.get("efundi") or {}
+            is_automated_source = isinstance(source_meta, dict) and bool(source_meta.get("source"))
+            if not include_unmapped and not mapped_tasks and is_automated_source and not meta.get("user_enhanced"):
+                continue
+
+            brain_data = meta.get("brain") if isinstance(meta.get("brain"), dict) else {}
+            file_path = evd.get("file_path") or ""
+            display_key = (
+                str(file_path or meta.get("filename") or evd.get("evidence_id") or "").lower(),
+                str((mapped_tasks[0]["task_id"] if mapped_tasks else meta.get("target_task_id", "")) or "").lower(),
+                str(meta.get("task") or "").lower(),
+            )
+            if display_key in seen_evidence_keys:
+                continue
+            seen_evidence_keys.add(display_key)
+            feedback = _brain_feedback_fields(meta)
+            evidence.append({
+                "evidence_id": evd.get("evidence_id"),
+                "staff_id": evd.get("staff_id"),
+                "date": meta.get("date") or meta.get("timestamp") or "",
+                "filename": meta.get("filename") or (Path(file_path).name if file_path else ""),
+                "file": meta.get("filename") or (Path(file_path).name if file_path else ""),
+                "file_path": file_path,
+                "kpa": evd.get("kpa_code") or "",
+                "kpa_code": evd.get("kpa_code") or "",
+                "month": evd.get("month_bucket") or "",
+                "month_bucket": evd.get("month_bucket") or "",
+                "task": (mapped_tasks[0]["title"] if mapped_tasks else meta.get("task", "")),
+                "task_id": (mapped_tasks[0]["task_id"] if mapped_tasks else meta.get("target_task_id", "")),
+                "mapped_tasks": mapped_tasks,
+                "mapped_count": len(mapped_tasks),
+                "tier": evd.get("tier") or meta.get("tier") or "",
+                "rating": brain_data.get("rating"),
+                "rating_label": brain_data.get("rating_label", evd.get("rating") or ""),
+                **feedback,
+                "impact_summary": meta.get("impact_summary") or "",
+                "confidence": (
+                    float(mapped_tasks[0]["confidence"])
+                    if mapped_tasks
+                    else float(meta.get("confidence") or 0.0)
+                ),
+                "brain": brain_data,
+                "meta": meta,
+            })
+
+        evidence.sort(
+            key=lambda item: (
+                int(item.get("mapped_count") or 0) <= 0,
+                -float(item.get("confidence") or 0.0),
+                str(item.get("date") or ""),
+            )
+        )
+        include_all_evidence = str(request.args.get('include_all_evidence') or '').lower() in ('1', 'true', 'yes')
+        if not include_all_evidence:
+            capped = []
+            per_task_counts = {}
+            for item in evidence:
+                task_key = item.get("task_id") or item.get("task") or item.get("evidence_id")
+                count = per_task_counts.get(task_key, 0)
+                if count >= 3:
+                    continue
+                per_task_counts[task_key] = count + 1
+                capped.append(item)
+            evidence = capped
+
         return jsonify({"evidence": evidence})
     
     except Exception as e:
@@ -2975,6 +4276,8 @@ def get_kpa_scores():
     try:
         staff_id = request.args.get('staff_id')
         month = request.args.get('month')  # e.g., "2025-02" or "all"
+        year = int(request.args.get('year') or (month.split('-')[0] if month and '-' in month else datetime.now().year))
+        include_unmapped = str(request.args.get('include_unmapped') or '').lower() in ('1', 'true', 'yes')
         
         if not staff_id:
             return jsonify({"error": "Missing staff_id"}), 400
@@ -2985,25 +4288,63 @@ def get_kpa_scores():
         
         store = ProgressStore()
         
-        # Get all evidence for staff
-        evidence_rows = store.list_evidence(staff_id=staff_id)
-        
-        # Filter by month if specified
-        if month and month != 'all':
-            evidence_rows = [r for r in evidence_rows if r.get("month_bucket", "").startswith(month)]
+        con = store._connect()
+        try:
+            where_month = ""
+            args = [staff_id, year]
+            if month and month != 'all':
+                where_month = " AND e.month_bucket LIKE ?"
+                args.append(f"{month}%")
+            linked_rows = con.execute(
+                f"""
+                SELECT DISTINCT e.evidence_id, t.kpa_code AS mapped_kpa, e.meta_json
+                FROM evidence e
+                JOIN evidence_task et ON e.evidence_id = et.evidence_id
+                JOIN tasks t ON t.task_id = et.task_id
+                WHERE e.staff_id = ? AND e.year = ?{where_month}
+                """,
+                args,
+            ).fetchall()
+
+            evidence_rows = [
+                {"evidence_id": r["evidence_id"], "kpa_code": r["mapped_kpa"], "meta_json": r["meta_json"]}
+                for r in linked_rows
+            ]
+
+            if include_unmapped:
+                unmapped_rows = con.execute(
+                    f"""
+                    SELECT e.evidence_id, e.kpa_code, e.meta_json
+                    FROM evidence e
+                    LEFT JOIN evidence_task et ON e.evidence_id = et.evidence_id
+                    WHERE e.staff_id = ? AND e.year = ?{where_month}
+                    GROUP BY e.evidence_id
+                    HAVING COUNT(et.task_id) = 0
+                    """,
+                    args,
+                ).fetchall()
+                evidence_rows.extend([dict(r) for r in unmapped_rows])
+        finally:
+            con.close()
         
         # Group by KPA and calculate averages
         kpa_scores = {}
         kpa_counts = {}
+        kpa_feedback = {}
+        kpa_route_confidence = {}
         
         for row in evidence_rows:
-            kpa_code = row.get("kpa_code", "")
+            row_d = dict(row)
+            kpa_code = row_d.get("kpa_code", "")
             if not kpa_code:
                 continue
             
             # Try to get rating from brain scorer results
             rating = None
-            meta = row.get("meta", {})
+            try:
+                meta = json.loads(row_d.get("meta_json") or "{}")
+            except Exception:
+                meta = {}
             brain_data = meta.get("brain", {})
             
             if isinstance(brain_data, dict):
@@ -3020,8 +4361,32 @@ def get_kpa_scores():
                         if kpa_code not in kpa_scores:
                             kpa_scores[kpa_code] = 0.0
                             kpa_counts[kpa_code] = 0
+                            kpa_feedback[kpa_code] = {
+                                "assessment_summaries": [],
+                                "evidence_strengths": [],
+                                "review_flags": [],
+                                "recommended_actions": [],
+                                "sample_evidence_ids": [],
+                            }
+                            kpa_route_confidence[kpa_code] = []
                         kpa_scores[kpa_code] += rating
                         kpa_counts[kpa_code] += 1
+
+                        feedback = _brain_feedback_fields(meta)
+                        bucket = kpa_feedback[kpa_code]
+                        if feedback["assessment_summary"] and len(bucket["assessment_summaries"]) < 5:
+                            bucket["assessment_summaries"].append(feedback["assessment_summary"])
+                        if row_d.get("evidence_id") and len(bucket["sample_evidence_ids"]) < 8:
+                            bucket["sample_evidence_ids"].append(row_d["evidence_id"])
+                        for source_key in ("evidence_strengths", "review_flags", "recommended_actions"):
+                            for item in feedback.get(source_key) or []:
+                                if item and item not in bucket[source_key] and len(bucket[source_key]) < 8:
+                                    bucket[source_key].append(item)
+                        try:
+                            if feedback["route_confidence"] is not None:
+                                kpa_route_confidence[kpa_code].append(float(feedback["route_confidence"]))
+                        except (TypeError, ValueError):
+                            pass
                 except (ValueError, TypeError):
                     pass
         
@@ -3030,6 +4395,11 @@ def get_kpa_scores():
         for kpa_code in kpa_scores:
             if kpa_counts[kpa_code] > 0:
                 averages[kpa_code] = round(kpa_scores[kpa_code] / kpa_counts[kpa_code], 2)
+                confidences = kpa_route_confidence.get(kpa_code) or []
+                if confidences:
+                    kpa_feedback[kpa_code]["average_route_confidence"] = round(sum(confidences) / len(confidences), 2)
+                else:
+                    kpa_feedback[kpa_code]["average_route_confidence"] = None
         
         # Add KPA names
         kpa_names = {
@@ -3043,9 +4413,13 @@ def get_kpa_scores():
         result = {
             "ok": True,
             "staff_id": staff_id,
+            "year": year,
             "month": month,
+            "source": "linked_evidence_task",
+            "include_unmapped": include_unmapped,
             "scores": averages,
             "counts": kpa_counts,
+            "feedback": kpa_feedback,
             "kpa_names": kpa_names
         }
         
@@ -3079,10 +4453,10 @@ def ask_vamp():
         
         # Short-greeting shortcut: avoid calling LLM for simple greetings
         q_lc = (question or "").strip().lower()
-        short_greetings = {"hi", "hello", "hey", "hiya", "hi eagi", "hello eagi", "hey eagi"}
+        short_greetings = {"hi", "hello", "hey", "hiya", "hi vamp", "hello vamp", "hey vamp", "hi eagi", "hello eagi", "hey eagi"}
         name = context.get('name') or context.get('staff_name') or 'there'
         if q_lc in short_greetings or (len(q_lc.split()) <= 2 and any(g in q_lc for g in short_greetings)):
-            return jsonify({"answer": f"Hi {name}, I'm Eagi. How can I help you today?"})
+            return jsonify({"answer": f"Hi {name}, I'm VAMP. How can I help you today?"})
 
         # Query Ollama with VAMP persona instructions
         prompt = build_vamp_prompt(question, context)
@@ -3507,14 +4881,122 @@ except ImportError as e:
     sanitize_for_speech = None
     get_tts_client = None
 
+try:
+    from backend.llm import voice_cloner as local_voice_cloner
+    VOICE_CLONER_AVAILABLE = bool(getattr(local_voice_cloner, "OPENVOICE_AVAILABLE", False))
+    get_voice_cloner = local_voice_cloner.get_voice_cloner
+    local_text_to_speech = local_voice_cloner.text_to_speech
+    if VOICE_CLONER_AVAILABLE:
+        print("✓ OpenVoice local voice cloning loaded successfully")
+    else:
+        print(f"Warning: OpenVoice local voice cloning not available: {getattr(local_voice_cloner, 'OPENVOICE_IMPORT_ERROR', 'unknown import error')}")
+except Exception as e:
+    print(f"Warning: OpenVoice local voice cloning not available: {e}")
+    VOICE_CLONER_AVAILABLE = False
+    get_voice_cloner = None
+    local_text_to_speech = None
+
+def synthesize_vamp_voice(text: str):
+    """Prefer local trained OpenVoice; fall back to ElevenLabs when needed."""
+    clean_text = sanitize_for_speech(text) if sanitize_for_speech else text
+    sidecar_python = Path(".venv-openvoice/bin/python")
+    sidecar_script = Path("scripts/synthesize_kaimil_sidecar.py")
+    sidecar_embedding = Path("cache/voice/Conversational kAImil_embedding.pt")
+    sidecar_configured = sidecar_python.exists() and sidecar_script.exists() and sidecar_embedding.exists()
+    if sidecar_configured:
+        try:
+            proc = subprocess.run(
+                [
+                    str(sidecar_python),
+                    str(sidecar_script),
+                    "--text",
+                    clean_text,
+                    "--voice-name",
+                    "Conversational kAImil",
+                ],
+                cwd=str(Path(__file__).resolve().parent),
+                env={**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parent)},
+                text=True,
+                capture_output=True,
+                timeout=240,
+            )
+            if proc.returncode == 0 and proc.stdout.strip():
+                payload = json.loads(proc.stdout.strip().splitlines()[-1])
+                audio_path = Path(payload.get("path", ""))
+                if payload.get("success") and audio_path.exists():
+                    return audio_path, "openvoice_sidecar"
+            else:
+                print(f"OpenVoice sidecar failed: {proc.stderr[-1200:]}")
+        except Exception as e:
+            print(f"OpenVoice sidecar synthesis failed; falling back if possible: {e}")
+        # Avoid mixing in the old EAGIBOT/ElevenLabs voice when the local VAMP
+        # voice is configured. A failed local generation should be silent, not
+        # a different character speaking first.
+        return None, "openvoice_sidecar"
+    if VOICE_CLONER_AVAILABLE and local_text_to_speech:
+        try:
+            audio_path = local_text_to_speech(clean_text)
+            if audio_path:
+                return audio_path, "openvoice"
+        except Exception as e:
+            print(f"OpenVoice synthesis failed; falling back if possible: {e}")
+    if ELEVENLABS_AVAILABLE and text_to_speech:
+        try:
+            audio_path = text_to_speech(clean_text)
+            if audio_path:
+                return audio_path, "elevenlabs"
+        except Exception as e:
+            print(f"ElevenLabs synthesis failed: {e}")
+    return None, "none"
+
 @app.route('/api/voice/status', methods=['GET'])
 def voice_status():
-    """Get ElevenLabs TTS status"""
+    """Get local/ElevenLabs TTS status."""
     try:
+        sidecar_python = Path(".venv-openvoice/bin/python")
+        sidecar_script = Path("scripts/synthesize_kaimil_sidecar.py")
+        sidecar_embedding = Path("cache/voice/Conversational kAImil_embedding.pt")
+        if sidecar_python.exists() and sidecar_script.exists() and sidecar_embedding.exists():
+            return jsonify({
+                "available": True,
+                "engine": "openvoice_sidecar",
+                "openvoice_available": True,
+                "is_trained": True,
+                "voice_name": "Conversational kAImil",
+                "embedding_path": str(sidecar_embedding),
+                "training_files_available": len(list(Path("data/voice_samples").glob("kaimil_*.wav"))),
+                "sidecar_python": str(sidecar_python),
+            })
+
+        local_status = None
+        if VOICE_CLONER_AVAILABLE and get_voice_cloner:
+            try:
+                local_status = get_voice_cloner().status()
+            except Exception as e:
+                local_status = {"error": str(e), "openvoice_available": False}
+
+        if local_status:
+            payload = {
+                "available": True,
+                "engine": "openvoice",
+                **local_status,
+            }
+            if ELEVENLABS_AVAILABLE and get_tts_client:
+                try:
+                    client = get_tts_client()
+                    voice_info = client.get_voice_info()
+                    payload["fallback_engine"] = "elevenlabs"
+                    payload["fallback_voice_id"] = client.VOICE_ID
+                    payload["fallback_voice_name"] = voice_info.get("name") if voice_info else getattr(client, "VOICE_NAME_HINT", "Conversational kAImil")
+                    payload["quota"] = client.check_quota()
+                except Exception:
+                    pass
+            return jsonify(payload)
+
         if not ELEVENLABS_AVAILABLE:
             return jsonify({
                 "available": False,
-                "error": "ElevenLabs TTS not available"
+                "error": "No voice engine available. Install OpenVoice for local training or configure ElevenLabs."
             })
         
         client = get_tts_client()
@@ -3525,6 +5007,7 @@ def voice_status():
             "available": True,
             "engine": "elevenlabs",
             "voice_id": client.VOICE_ID,
+            "configured_voice_name": getattr(client, "VOICE_NAME_HINT", "Conversational kAImil"),
             "voice_name": voice_info.get("name") if voice_info else "Unknown",
             "quota": quota
         })
@@ -3540,7 +5023,7 @@ def voice_train():
             return jsonify({"error": "Voice cloner not available"}), 503
         
         data = request.json
-        voice_name = data.get('voice_name', 'vamp_voice')
+        voice_name = data.get('voice_name', 'Conversational kAImil')
         
         # Get uploaded files from training directory
         cloner = get_voice_cloner()
@@ -3593,22 +5076,15 @@ def voice_upload():
 
 @app.route('/api/voice/synthesize', methods=['POST'])
 def voice_synthesize():
-    """Convert text to speech using ElevenLabs"""
+    """Convert text to speech using local OpenVoice when trained, otherwise ElevenLabs."""
     try:
-        if not ELEVENLABS_AVAILABLE:
-            return jsonify({"error": "ElevenLabs TTS not available"}), 503
-        
         data = request.json
         text = data.get('text')
         
         if not text:
             return jsonify({"error": "No text provided"}), 400
         
-        # Sanitize text first
-        clean_text = sanitize_for_speech(text)
-        
-        # Generate speech using ElevenLabs
-        audio_path = text_to_speech(clean_text)
+        audio_path, engine = synthesize_vamp_voice(text)
         
         if audio_path is None:
             return jsonify({"error": "Speech generation failed"}), 500
@@ -3618,7 +5094,7 @@ def voice_synthesize():
             "success": True,
             "audio_url": f"/api/voice/audio/{audio_path.name}",
             "filename": audio_path.name,
-            "engine": "elevenlabs"
+            "engine": engine
         })
     
     except Exception as e:
@@ -3627,18 +5103,27 @@ def voice_synthesize():
 
 @app.route('/api/voice/audio/<filename>')
 def voice_audio(filename):
-    """Serve generated audio files from ElevenLabs"""
+    """Serve generated audio files from local OpenVoice or ElevenLabs caches."""
     try:
-        if not ELEVENLABS_AVAILABLE:
-            return jsonify({"error": "ElevenLabs TTS not available"}), 503
-        
-        client = get_tts_client()
-        audio_path = client.cache_dir / filename
-        
-        if not audio_path.exists():
-            return jsonify({"error": "Audio file not found"}), 404
-        
-        return send_from_directory(str(client.cache_dir), filename, mimetype='audio/mpeg')
+        search_dirs = []
+        if VOICE_CLONER_AVAILABLE and get_voice_cloner:
+            try:
+                search_dirs.append(get_voice_cloner().cache_dir)
+            except Exception:
+                pass
+        sidecar_cache = Path("cache/voice")
+        if sidecar_cache.exists():
+            search_dirs.append(sidecar_cache)
+        if ELEVENLABS_AVAILABLE and get_tts_client:
+            search_dirs.append(get_tts_client().cache_dir)
+
+        for cache_dir in search_dirs:
+            audio_path = Path(cache_dir) / filename
+            if audio_path.exists():
+                mimetype = 'audio/wav' if audio_path.suffix.lower() == '.wav' else 'audio/mpeg'
+                return send_from_directory(str(cache_dir), filename, mimetype=mimetype)
+
+        return jsonify({"error": "Audio file not found"}), 404
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -3646,7 +5131,7 @@ def voice_audio(filename):
 @app.route('/api/vamp/ask-voice', methods=['POST'])
 def ask_vamp_voice():
     """
-    Ask VAMP for AI guidance with voice response using ElevenLabs
+    Ask VAMP for AI guidance with voice response.
     """
     try:
         data = request.json
@@ -3658,52 +5143,32 @@ def ask_vamp_voice():
         
         # Short-greeting shortcut: avoid calling LLM for simple greetings
         q_lc = (question or "").strip().lower()
-        short_greetings = {"hi", "hello", "hey", "hiya", "hi eagi", "hello eagi", "hey eagi"}
+        short_greetings = {"hi", "hello", "hey", "hiya", "hi vamp", "hello vamp", "hey vamp", "hi eagi", "hello eagi", "hey eagi"}
         name = context.get('name') or context.get('staff_name') or 'there'
         if q_lc in short_greetings or (len(q_lc.split()) <= 2 and any(g in q_lc for g in short_greetings)):
-            clean_answer = f"Hi {name}, I'm Eagi. How can I help you today?"
-            audio_url = None
-            # Try to generate voice for the greeting if ElevenLabs is available
-            if ELEVENLABS_AVAILABLE and sanitize_for_speech:
-                try:
-                    audio_path = text_to_speech(sanitize_for_speech(clean_answer))
-                    if audio_path:
-                        audio_url = f"/api/voice/audio/{audio_path.name}"
-                except Exception as _:
-                    audio_url = None
+            clean_answer = f"Hi {name}, I'm VAMP. How can I help you today?"
+            audio_path, engine = synthesize_vamp_voice(clean_answer)
+            audio_url = f"/api/voice/audio/{audio_path.name}" if audio_path else None
             return jsonify({
                 "answer": clean_answer,
                 "audio_url": audio_url,
                 "has_voice": audio_url is not None,
-                "voice_engine": "elevenlabs" if ELEVENLABS_AVAILABLE else "none"
+                "voice_engine": engine
             })
 
         # Query Ollama for text response with VAMP persona instructions
         prompt = build_vamp_prompt(question, context)
         answer = query_ollama(prompt, context)
         
-        # Sanitize text for speech (remove asterisks, markdown, etc.)
-        if ELEVENLABS_AVAILABLE and sanitize_for_speech:
-            clean_answer = sanitize_for_speech(answer)
-        else:
-            clean_answer = answer
-        
-        # Generate voice using ElevenLabs
-        audio_url = None
-        if ELEVENLABS_AVAILABLE:
-            try:
-                audio_path = text_to_speech(clean_answer)
-                if audio_path:
-                    # Serve from cache directory
-                    audio_url = f"/api/voice/audio/{audio_path.name}"
-            except Exception as voice_error:
-                print(f"ElevenLabs voice generation failed (non-fatal): {voice_error}")
+        clean_answer = sanitize_for_speech(answer) if sanitize_for_speech else answer
+        audio_path, engine = synthesize_vamp_voice(clean_answer)
+        audio_url = f"/api/voice/audio/{audio_path.name}" if audio_path else None
         
         return jsonify({
             "answer": clean_answer,
             "audio_url": audio_url,
             "has_voice": audio_url is not None,
-            "voice_engine": "elevenlabs" if ELEVENLABS_AVAILABLE else "none"
+            "voice_engine": engine
         })
     
     except Exception as e:
@@ -3833,6 +5298,16 @@ def sync_expectations_to_db():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Run the VAMP web UI/API server.")
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=DEFAULT_PORT,
+        help=f"Port to bind the web server to (default: {DEFAULT_PORT}).",
+    )
+    args = parser.parse_args()
+    PORT = args.port
+
     print("=" * 60)
     print("VAMP Web Server Starting")
     print("=" * 60)

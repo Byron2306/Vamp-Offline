@@ -201,11 +201,11 @@ def _score_tier(text: str) -> Tuple[str, Dict[str, int]]:
 
     # Default if nothing matched
     if not scores:
-        return "Developmental", {}
+        return "Compliance", {}
 
     best_tier = max(scores, key=scores.get)
     if scores[best_tier] == 0:
-        best_tier = "Developmental"
+        best_tier = "Compliance"
 
     return best_tier, scores
 
@@ -311,6 +311,94 @@ def _aggregate_score(tier_label: str, values_score: float, policy_hits: Dict[str
     return rating_raw, band_label
 
 
+def _route_confidence(primary_kpa_code: str, kpa_scores: Dict[str, float]) -> float:
+    ordered = sorted(kpa_scores.values(), reverse=True)
+    best = float(kpa_scores.get(primary_kpa_code, 0.0))
+    second = float(ordered[1]) if len(ordered) > 1 else 0.0
+    if best <= 0:
+        return 0.35
+    return round(min(0.95, max(0.4, 0.55 + (best - second) / 8.0)), 2)
+
+
+def _quality_feedback(
+    *,
+    primary_kpa_code: str,
+    primary_kpa_name: str,
+    tier_label: str,
+    rating_label: str,
+    values: Dict[str, Any],
+    policies: Dict[str, Any],
+    kpa_scores: Dict[str, float],
+    tier_scores: Dict[str, int],
+    kpa_hint_code: str | None,
+) -> Dict[str, Any]:
+    strengths: List[str] = []
+    flags: List[str] = []
+    actions: List[str] = []
+
+    route_conf = _route_confidence(primary_kpa_code, kpa_scores)
+    policy_hits = policies.get("hits", [])
+    value_hits = [v.get("name") for v in values.get("hits", []) if v.get("name")]
+
+    if route_conf >= 0.75:
+        strengths.append(f"Clear KPA routing to {primary_kpa_code} ({primary_kpa_name}).")
+    else:
+        flags.append("KPA routing is weak; confirm the evidence is linked to the intended expectation task.")
+
+    if kpa_hint_code and kpa_hint_code != primary_kpa_code:
+        flags.append(
+            f"Automated routing preferred {primary_kpa_code}, but the collection/task context suggested {kpa_hint_code}."
+        )
+
+    if tier_label == "Transformational":
+        strengths.append("Contains language associated with broader institutional, sector, or high-impact outcomes.")
+    elif tier_label == "Developmental":
+        strengths.append("Shows improvement, development, or progression beyond a bare compliance artefact.")
+    else:
+        flags.append("Evidence appears compliance-level unless paired with outcome or impact context.")
+
+    if value_hits:
+        strengths.append("NWU values signal detected: " + ", ".join(value_hits[:3]) + ".")
+    else:
+        actions.append("Add a short note explaining which NWU value or strategic priority this evidence supports.")
+
+    if policy_hits:
+        strengths.append("Policy alignment detected: " + ", ".join([p.get("code") or p.get("id") for p in policy_hits[:3]]) + ".")
+    elif primary_kpa_code in {"KPA2", "KPA3", "KPA4"}:
+        actions.append("Where applicable, attach or mention the relevant policy, committee, ethics, OHS, or governance context.")
+
+    if not any(tier_scores.values()):
+        actions.append("Add outcome evidence if available: approval, submission confirmation, attendance/minutes, feedback, marks, publication status, or impact.")
+
+    if primary_kpa_code == "KPA1":
+        actions.append("For teaching evidence, prefer artefacts that show the module, date, assessment/learning activity, and student-facing output.")
+    elif primary_kpa_code == "KPA2":
+        actions.append("For OHS evidence, include proof of completion, compliance action, risk/safety context, or attendance.")
+    elif primary_kpa_code == "KPA3":
+        actions.append("For research evidence, include project/output status such as draft, submission, acceptance, review, presentation, or publication.")
+    elif primary_kpa_code == "KPA4":
+        actions.append("For leadership evidence, include agenda/minutes/action items or the governance decision being supported.")
+    elif primary_kpa_code == "KPA5":
+        actions.append("For social responsiveness, include partner/community context and evidence of engagement or impact.")
+
+    summary = (
+        f"Routed to {primary_kpa_code} ({primary_kpa_name}) with {route_conf:.0%} routing confidence. "
+        f"Rated {rating_label} as {tier_label.lower()} evidence. "
+    )
+    if flags:
+        summary += "Review note: " + flags[0]
+    elif strengths:
+        summary += strengths[0]
+
+    return {
+        "assessment_summary": summary,
+        "evidence_strengths": strengths[:4],
+        "review_flags": flags[:4],
+        "recommended_actions": actions[:4],
+        "route_confidence": route_conf,
+    }
+
+
 # ---------- Public API ----------
 
 def brain_score_evidence(
@@ -354,6 +442,17 @@ def brain_score_evidence(
         values_score=values["score"],
         policy_hits=policies,
     )
+    feedback = _quality_feedback(
+        primary_kpa_code=primary_kpa_code,
+        primary_kpa_name=primary_kpa_name,
+        tier_label=tier_label,
+        rating_label=rating_label,
+        values=values,
+        policies=policies,
+        kpa_scores=kpa_scores,
+        tier_scores=tier_scores,
+        kpa_hint_code=kpa_hint_code,
+    )
 
     return {
         "primary_kpa_code": primary_kpa_code,
@@ -366,4 +465,5 @@ def brain_score_evidence(
         "policy_hits": policies.get("hits", []),
         "kpa_route_scores": kpa_scores,
         "tier_scores": tier_scores,
+        **feedback,
     }

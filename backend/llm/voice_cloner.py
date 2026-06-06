@@ -14,6 +14,7 @@ import numpy as np
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 import hashlib
+from scipy import signal
 
 # Will be installed via requirements
 try:
@@ -107,6 +108,62 @@ class VoiceCloner:
         """Save voice configuration"""
         with open(self.config_file, 'w') as f:
             json.dump(self.config, f, indent=2)
+
+    def _build_reference_sample(
+        self,
+        voice_files: List[Path],
+        voice_name: str,
+        target_sr: int = 24000,
+        max_seconds: float = 45.0,
+    ) -> Path:
+        """Create one strong reference WAV from multiple snippets for embedding extraction."""
+        ranked = []
+        for path in voice_files:
+            try:
+                audio, sr = sf.read(str(path), always_2d=False)
+                if audio.ndim > 1:
+                    audio = np.mean(audio, axis=1)
+                audio = audio.astype(np.float32)
+                if sr != target_sr:
+                    gcd = int(np.gcd(sr, target_sr))
+                    audio = signal.resample_poly(audio, target_sr // gcd, sr // gcd).astype(np.float32)
+                if len(audio) == 0:
+                    continue
+                rms = float(np.sqrt(np.mean(np.square(audio))))
+                duration = len(audio) / target_sr
+                if duration >= 3.0 and rms > 0.002:
+                    ranked.append((rms, duration, path, audio))
+            except Exception as e:
+                print(f"Skipping unusable voice sample {path}: {e}")
+
+        if not ranked:
+            raise ValueError("No usable voice snippets found for reference sample")
+
+        ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
+        silence = np.zeros(int(0.18 * target_sr), dtype=np.float32)
+        chunks = []
+        total = 0.0
+        selected_files = []
+        for _rms, duration, path, audio in ranked:
+            if total >= max_seconds:
+                break
+            remaining = max_seconds - total
+            take = audio[: int(min(duration, remaining) * target_sr)]
+            if len(take) < int(2.0 * target_sr):
+                continue
+            peak = float(np.max(np.abs(take)) or 1.0)
+            if peak > 0.98:
+                take = take / peak * 0.96
+            chunks.extend([take, silence])
+            total += len(take) / target_sr
+            selected_files.append(str(path))
+
+        reference = np.concatenate(chunks).astype(np.float32)
+        output = self.cache_dir / f"{voice_name}_reference.wav"
+        sf.write(str(output), reference, target_sr, subtype="PCM_16")
+        self.config["reference_files"] = selected_files
+        self.config["reference_path"] = str(output)
+        return output
     
     def _load_models(self):
         """Load OpenVoice models (lazy loading)"""
@@ -115,13 +172,25 @@ class VoiceCloner:
         
         print("Loading OpenVoice V2 models...")
         
-        # Load base speaker TTS model
-        ckpt_base = str(self.model_dir / "base_speakers" / "EN")
-        self.base_speaker = BaseSpeakerTTS(ckpt_base, device=self.device)
+        # Older OpenVoice bundles included a base speaker TTS checkpoint at
+        # base_speakers/EN. OpenVoice V2 Hugging Face bundles often include
+        # only tone-converter assets plus speaker embeddings; that is enough
+        # for training/extracting the target speaker embedding.
+        ckpt_base = self.model_dir / "base_speakers" / "EN"
+        if (ckpt_base / "config.json").exists():
+            self.base_speaker = BaseSpeakerTTS(str(ckpt_base / "config.json"), device=self.device)
+            self.base_speaker.load_ckpt(str(ckpt_base / "checkpoint.pth"))
+        else:
+            self.base_speaker = None
+            print(f"Base speaker TTS checkpoint not found at {ckpt_base}; converter-only mode enabled.")
         
         # Load tone color converter
-        ckpt_converter = str(self.model_dir / "converter")
-        self.tone_converter = ToneColorConverter(ckpt_converter, device=self.device)
+        ckpt_converter = self.model_dir / "converter"
+        self.tone_converter = ToneColorConverter(
+            str(ckpt_converter / "config.json"),
+            device=self.device,
+        )
+        self.tone_converter.load_ckpt(str(ckpt_converter / "checkpoint.pth"))
         
         print("Models loaded successfully")
     
@@ -144,17 +213,15 @@ class VoiceCloner:
         # Load models if not already loaded
         self._load_models()
         
-        # Extract speaker embedding from voice samples
-        # OpenVoice V2 uses multiple samples to create robust embedding
-        reference_speaker = str(voice_files[0])  # Primary reference
+        # OpenVoice extracts one speaker embedding, so build one strong reference
+        # from the best snippets instead of accidentally using only the first file.
+        reference_speaker = str(self._build_reference_sample(voice_files, voice_name))
         
         try:
-            # Extract tone color embedding
-            self.target_se, audio_name = se_extractor.get_se(
-                reference_speaker, 
-                self.tone_converter,
-                vad=True  # Voice Activity Detection for better quality
-            )
+            # Extract tone color embedding directly. The higher-level
+            # se_extractor path tries to segment with Whisper/CUDA, which is
+            # unnecessary for our pre-cleaned combined reference sample.
+            self.target_se = self.tone_converter.extract_se(reference_speaker)
             
             # Save the embedding
             embedding_path = self.cache_dir / f"{voice_name}_embedding.pt"
@@ -229,6 +296,11 @@ class VoiceCloner:
         
         # Load models if needed
         self._load_models()
+        if self.base_speaker is None:
+            raise RuntimeError(
+                "OpenVoice converter is trained, but no local base speaker TTS checkpoint is installed. "
+                "Install a compatible base TTS model or route generated base speech through the converter."
+            )
         
         # Generate output path if not provided
         if output_path is None:

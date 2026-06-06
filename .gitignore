@@ -57,6 +57,23 @@ Thumbs.db
 uploads/
 *.log
 
+# Local/private runtime data
+logs/
+models/
+cache/voice/
+data/voice_samples/
+data/voice_work/
+backend/data/outlook/
+backend/data/efundi/
+backend/data/work_context/
+backend/data/*.db
+backend/data/**/*.db
+backend/data/**/*.bak
+backend/data/**/*.pre_rebuild_bak
+progress.db
+ToolboxSetup_*.deb
+VAMP promo.mp4
+
 # Test and coverage
 .pytest_cache/
 .coverage

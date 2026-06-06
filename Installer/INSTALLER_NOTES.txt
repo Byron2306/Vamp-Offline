@@ -1,0 +1,13 @@
+VAMP installs as a local desktop web app.
+
+Some runtime tools are intentionally downloaded after installation:
+
+- Playwright Chromium is required for Outlook and eFundi browser automation.
+  Open VAMP, go to Runtime Dependencies, and choose Install Browser Automation.
+
+- Ollama is optional for local LLM scoring.
+  Install it from https://ollama.com/download if you want local AI models,
+  then run: ollama pull llama3.2:3b
+
+This keeps the installer smaller and lets each user repair or update browser
+automation and local models in their own profile.

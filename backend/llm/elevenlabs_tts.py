@@ -15,8 +15,9 @@ class ElevenLabsTTS:
     """ElevenLabs Text-to-Speech client for VAMP"""
     
     # ElevenLabs API Configuration
-    API_KEY = "sk_3a731462651229ff1429fad7723c7293539c278e8abbc5e3"
-    VOICE_ID = "fg9UOhv3XQS23oOSsHiS"
+    API_KEY = os.getenv("ELEVENLABS_API_KEY", "sk_3a731462651229ff1429fad7723c7293539c278e8abbc5e3")
+    VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "fg9UOhv3XQS23oOSsHiS")
+    VOICE_NAME_HINT = os.getenv("ELEVENLABS_VOICE_NAME", "Conversational kAImil")
     API_BASE_URL = "https://api.elevenlabs.io/v1"
     
     def __init__(self, cache_dir: Optional[Path] = None):

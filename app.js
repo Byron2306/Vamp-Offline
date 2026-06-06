@@ -19,6 +19,56 @@ const scanLog = (msg) => {
   }
 };
 
+async function collectOutlookEvidence({ monthKey, taskIds = [], mode = "incomplete_tasks", maxMessages = 12 } = {}) {
+  const staffId = $("staffId")?.value;
+  const year = $("cycleYear")?.value || monthKey?.split("-")?.[0];
+
+  if (!staffId || !monthKey || !year) {
+    vampSpeak("Please enrol a staff profile and select a month first.");
+    return null;
+  }
+
+  const label = taskIds.length > 0 ? `task-targeted Outlook evidence for ${monthKey}` : `Outlook evidence for ${monthKey}`;
+  vampBusy(`Collecting ${label}…`);
+  log(`Starting ${label}`);
+
+  const res = await fetch("/api/outlook/collect", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      staff_id: staffId,
+      year: parseInt(year, 10),
+      month: monthKey,
+      mode,
+      task_ids: taskIds,
+      max_messages: maxMessages,
+      include_body_only_candidates: true
+    })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data?.error || "Outlook collection failed");
+  }
+
+  const count = Array.isArray(data.results) ? data.results.length : 0;
+  const spoken = taskIds.length > 0
+    ? `Outlook collection complete. ${count} evidence item${count === 1 ? "" : "s"} ingested for the selected task.`
+    : `Outlook collection complete. ${count} evidence item${count === 1 ? "" : "s"} ingested.`;
+  vampSpeak(spoken);
+  log(`Outlook collection complete: ${count} evidence items for ${monthKey}`);
+
+  try {
+    await loadExpectations();
+    loadEvidence(monthKey);
+    updateYearTimeline();
+  } catch (refreshErr) {
+    console.warn("Refresh after Outlook collection failed", refreshErr);
+  }
+
+  return data;
+}
+
 // Fallback global tab switcher so inline `onclick="switchToTab(...)"` never fails
 window.switchToTab = function(tabKey) {
   try {
@@ -145,6 +195,8 @@ const VAMP_STATE = {
 };
 
 let currentVampState = VAMP_STATE.IDLE;
+let latestWorkContext = null;
+let latestContextQuestions = [];
 
 function vampIdle(text = "Awaiting instruction…") {
   currentVampState = VAMP_STATE.IDLE;
@@ -183,6 +235,214 @@ function vampSpeak(text) {
   
   // Don't auto-return to idle - let voice audio control this
   // The playVoiceResponse function will call vampIdle() when audio ends
+}
+
+/* ============================================================
+   WORK CONTEXT INTERVIEW
+============================================================ */
+
+function parseContextMonths(text) {
+  const monthNames = {
+    jan: 1, january: 1, feb: 2, february: 2, mar: 3, march: 3,
+    apr: 4, april: 4, may: 5, jun: 6, june: 6, jul: 7, july: 7,
+    aug: 8, august: 8, sep: 9, sept: 9, september: 9, oct: 10, october: 10,
+    nov: 11, november: 11, dec: 12, december: 12
+  };
+  const found = new Set();
+  const raw = String(text || "").toLowerCase();
+  raw.replace(/\b(1[0-2]|0?[1-9])\b/g, (m) => {
+    found.add(parseInt(m, 10));
+    return m;
+  });
+  raw.replace(/[a-z]+/g, (m) => {
+    if (monthNames[m]) found.add(monthNames[m]);
+    return m;
+  });
+  return Array.from(found).filter((m) => m >= 1 && m <= 12).sort((a, b) => a - b);
+}
+
+function splitContextList(text) {
+  return String(text || "")
+    .split(/[,;\n|]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function findContextEntry(context, question) {
+  if (!context || !question) return null;
+  if (question.target === "supervision") return context.supervision || null;
+  if (["teaching_learning", "community_engagement", "ohs", "administration"].includes(question.target)) {
+    context[question.target] = context[question.target] || {};
+    return context[question.target];
+  }
+  const items = Array.isArray(context[question.target]) ? context[question.target] : [];
+  return items.find((item) => String(item.name || "").toLowerCase() === String(question.name || "").toLowerCase()) || null;
+}
+
+function applyContextAnswers(context, questions) {
+  const updated = JSON.parse(JSON.stringify(context || {}));
+  (questions || []).forEach((question, index) => {
+    const answerEl = document.querySelector(`[data-context-answer-index="${index}"]`);
+    const answer = answerEl?.value?.trim();
+    if (!answer) return;
+
+    const entry = findContextEntry(updated, question);
+    if (!entry) return;
+
+    if (question.type === "months") {
+      const months = parseContextMonths(answer);
+      if (months.length) entry.active_months = months;
+      entry.status_note = answer;
+    } else if (question.type === "people") {
+      const people = splitContextList(answer);
+      entry.collaborators = Array.from(new Set([...(entry.collaborators || []), ...people]));
+    } else if (question.type === "phase_by_month") {
+      entry.phase_notes = answer;
+    } else if (question.type === "current_status") {
+      entry.current_status = answer;
+    } else if (question.type === "evidence_locations") {
+      entry.evidence_locations = answer;
+    } else if (question.type === "target_output") {
+      entry.target_venue_or_output = answer;
+    } else if (question.type === "student_stages") {
+      entry.stage_by_student = answer;
+    } else if (question.type === "ohs_scope") {
+      entry.confirmed_scope = answer;
+      entry.needs_scope_review = false;
+    } else if (question.type === "teaching_exceptions") {
+      entry.exceptions_or_notes = answer;
+      entry.needs_exception_review = false;
+    } else if (question.type === "community_windows") {
+      entry.confirmed_windows = answer;
+      const months = parseContextMonths(answer);
+      if (months.length) entry.active_months = months;
+    } else if (question.type === "admin_calendar") {
+      entry.fixed_calendar_notes = answer;
+      entry.needs_exception_review = false;
+    } else {
+      entry.notes = [entry.notes, answer].filter(Boolean).join(" | ");
+    }
+  });
+  updated.status = "staff_confirmed_context";
+  updated.updated_at = new Date().toISOString();
+  return updated;
+}
+
+function renderWorkContextPanel(context, questions) {
+  const panel = $("workContextPanel");
+  const list = $("contextQuestionList");
+  const jsonBox = $("workContextJson");
+  if (!panel || !list || !jsonBox) return;
+
+  latestWorkContext = context || {};
+  latestContextQuestions = Array.isArray(questions) ? questions : [];
+  panel.style.display = "block";
+  jsonBox.value = JSON.stringify(latestWorkContext, null, 2);
+
+  if (!latestContextQuestions.length) {
+    list.innerHTML = `<div class="muted">Context is complete enough to build expectations. Edit the JSON only if a month, collaborator, abbreviation, or project phase is wrong.</div>`;
+    return;
+  }
+
+  list.innerHTML = latestContextQuestions.map((question, index) => `
+    <div style="margin-bottom:10px;">
+      <label>${question.question}</label>
+      <textarea data-context-answer-index="${index}" rows="2" style="width:100%;" placeholder="Answer briefly; VAMP will use this to time and target evidence searches."></textarea>
+    </div>
+  `).join("");
+}
+
+function renderDependencyStatus(dependencies) {
+  const logEl = $("dependencyLog");
+  const pill = $("dependencyPill");
+  if (!logEl || !pill) return;
+  const pw = dependencies?.playwright || {};
+  const ollama = dependencies?.ollama || {};
+  const ok = Boolean(pw.installed);
+  pill.textContent = ok ? "Browser automation ready" : "Browser automation needed";
+  pill.classList.toggle("ok", ok);
+  pill.classList.toggle("bad", !ok);
+  logEl.textContent = [
+    `Playwright Chromium: ${pw.installed ? "installed" : "not installed"}`,
+    pw.executable ? `Browser path: ${pw.executable}` : `Browser folder: ${pw.browsers_path || "unknown"}`,
+    "",
+    `Ollama: ${ollama.installed ? "running" : "not detected"}`,
+    ollama.installed ? `Models: ${(ollama.models || []).join(", ") || "none listed"}` : `Install: ${ollama.install_url || "https://ollama.com/download"}`,
+    ollama.installed ? `Recommended model: ${ollama.recommended_model || "llama3.2:3b"} ${ollama.recommended_model_installed ? "(installed)" : "(not pulled yet)"}` : "",
+    ollama.installed ? "" : `Recommended after install: ${(ollama.commands || []).join(" && ")}`,
+  ].filter((line) => line !== null).join("\n");
+}
+
+async function checkDependencies() {
+  const res = await fetch("/api/dependencies/status");
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error || "Dependency check failed");
+  renderDependencyStatus(data.dependencies || {});
+  return data.dependencies || {};
+}
+
+async function loadWorkContextInterview({ draft = false } = {}) {
+  const staffId = $("staffId")?.value?.trim();
+  const year = $("cycleYear")?.value?.trim();
+  if (!staffId || !year) return;
+
+  const url = draft ? "/api/work-context/draft" : `/api/work-context/questions?staff_id=${encodeURIComponent(staffId)}&year=${encodeURIComponent(year)}`;
+  const options = draft
+    ? {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ staff_id: staffId, year: parseInt(year, 10), overwrite: false })
+      }
+    : {};
+
+  const res = await fetch(url, options);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error || "Could not load work context");
+  renderWorkContextPanel(data.work_context || {}, data.questions || []);
+  log(`Work context ready: ${data.question_count || 0} clarification question(s)`);
+}
+
+async function saveWorkContextAndRebuild() {
+  const staffId = $("staffId")?.value?.trim();
+  const year = $("cycleYear")?.value?.trim();
+  if (!staffId || !year) {
+    vampSpeak("Load your profile before saving work context.");
+    return;
+  }
+
+  let context;
+  try {
+    context = JSON.parse($("workContextJson")?.value || "{}");
+  } catch (e) {
+    vampSpeak("The context JSON is not valid.");
+    log("Context save error: invalid JSON");
+    return;
+  }
+
+  context = applyContextAnswers(context, latestContextQuestions);
+  vampBusy("Saving your work context and rebuilding expectations…");
+
+  const saveRes = await fetch("/api/work-context", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ staff_id: staffId, year: parseInt(year, 10), work_context: context })
+  });
+  const saveData = await saveRes.json();
+  if (!saveRes.ok) throw new Error(saveData?.error || "Context save failed");
+
+  renderWorkContextPanel(saveData.work_context || context, saveData.questions || []);
+
+  const rebuildRes = await fetch("/api/expectations/rebuild", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ staff_id: staffId, year: parseInt(year, 10) })
+  });
+  const rebuildData = await rebuildRes.json();
+  if (!rebuildRes.ok) throw new Error(rebuildData?.error || "Expectation rebuild failed");
+
+  vampSpeak(`Context saved. Rebuilt ${rebuildData.tasks_count} contextual expectations.`);
+  log(`Context saved and expectations rebuilt: ${rebuildData.tasks_count} tasks`);
+  await loadExpectations();
 }
 
 function showVampOverlay(text) {
@@ -225,6 +485,11 @@ if (vampBtn) {
 
     pushBubble(q, "user");
     vampInput.value = "";
+
+    if (window.currentAudio) {
+      try { window.currentAudio.pause(); } catch (e) {}
+      window.currentAudio = null;
+    }
 
     vampBusy("Consulting the archives…");
 
@@ -384,7 +649,17 @@ async function enrolOrLoadProfile() {
     name: $("name")?.value,
     position: $("position")?.value,
     faculty: $("faculty")?.value,
-    manager: $("manager")?.value
+    campus: $("campus")?.value,
+    school: $("school")?.value,
+    subject_group: $("subjectGroup")?.value,
+    research_entity: $("researchEntity")?.value,
+    manager: $("manager")?.value,
+    director: $("director")?.value,
+    subject_group_leader: $("subjectGroupLeader")?.value,
+    executive_dean: $("executiveDean")?.value,
+    research_dean: $("researchDean")?.value,
+    school_admin: $("schoolAdmin")?.value,
+    modules_context: $("modulesContext")?.value
   };
 
   try {
@@ -408,6 +683,7 @@ async function enrolOrLoadProfile() {
       
       // Update evidence month filter with the correct year
       populateEvidenceMonthFilter();
+      loadWorkContextInterview().catch((err) => log("Work context load skipped: " + err.message));
     } else {
       vampSpeak("Enrolment failed. Please review your details.");
       log("Enrolment failed: " + (await res.text()));
@@ -456,6 +732,11 @@ $("taUploadBtn")?.addEventListener("click", async () => {
       const tasksCount = data.tasks_count || 0;
       vampSpeak(`Your agreed work has been fully understood. ${tasksCount} tasks extracted.`);
       log(`TA imported: ${tasksCount} tasks found`);
+      if (data.work_context) {
+        renderWorkContextPanel(data.work_context, data.context_questions || []);
+      } else {
+        loadWorkContextInterview({ draft: true }).catch((err) => log("Work context draft failed: " + err.message));
+      }
       
       // Auto-load expectations
       setTimeout(() => loadExpectations(), 500);
@@ -480,6 +761,47 @@ $("taUploadBtn")?.addEventListener("click", async () => {
 ============================================================ */
 
 $("refreshStatusBtn")?.addEventListener("click", refreshStatusIndicators);
+$("draftContextBtn")?.addEventListener("click", () => {
+  loadWorkContextInterview({ draft: true })
+    .then(() => vampSpeak("I drafted the work context from the Task Agreement."))
+    .catch((e) => {
+      vampSpeak("Could not draft the work context.");
+      log("Context draft error: " + e.message);
+    });
+});
+$("saveContextBtn")?.addEventListener("click", () => {
+  saveWorkContextAndRebuild().catch((e) => {
+    vampSpeak("Could not save the work context.");
+    log("Context save error: " + e.message);
+  });
+});
+
+$("dependencyCheckBtn")?.addEventListener("click", () => {
+  checkDependencies()
+    .then(() => vampSpeak("Dependency status updated."))
+    .catch((e) => {
+      vampSpeak("Could not check dependencies.");
+      log("Dependency check error: " + e.message);
+    });
+});
+
+$("installPlaywrightBtn")?.addEventListener("click", async () => {
+  if (!confirm("Download and install Playwright Chromium for Outlook/eFundi automation? This may take several minutes.")) return;
+  vampBusy("Installing browser automation...");
+  const logEl = $("dependencyLog");
+  if (logEl) logEl.textContent = "Downloading Playwright Chromium. Please wait...";
+  try {
+    const res = await fetch("/api/dependencies/install-playwright", { method: "POST" });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data?.result?.error || data?.error || "Install failed");
+    await checkDependencies();
+    vampSpeak("Browser automation installed.");
+  } catch (e) {
+    vampSpeak("Browser automation install failed.");
+    if (logEl) logEl.textContent = `Install failed: ${e.message}`;
+    log("Dependency install error: " + e.message);
+  }
+});
 
 async function refreshStatusIndicators() {
   const staffId = $("staffId")?.value?.trim();
@@ -997,11 +1319,30 @@ function renderMonthView(monthKey) {
         attachScanPanelTo(scanHost);
         vampSpeak("Upload evidence for the selected task.");
       };
+
+      const outlookBtn = document.createElement("button");
+      outlookBtn.className = "btn-small";
+      outlookBtn.textContent = "📬 Outlook";
+      outlookBtn.onclick = async () => {
+        try {
+          await collectOutlookEvidence({
+            monthKey,
+            taskIds: [task.id],
+            mode: "specific_tasks",
+            maxMessages: 8
+          });
+        } catch (e) {
+          vampSpeak("Task-targeted Outlook collection failed.");
+          log("Task Outlook collection error: " + e.message);
+          console.error("Task Outlook collection error", e);
+        }
+      };
       
       const actions = document.createElement("div");
       actions.className = "task-actions";
       actions.style.cssText = "display:flex;gap:8px;align-items:flex-start;flex:0 0 auto;";
       actions.appendChild(aiBtn);
+      actions.appendChild(outlookBtn);
       actions.appendChild(scanBtn);
 
       taskItem.appendChild(checkbox);
@@ -2000,6 +2341,17 @@ $("scanEvidenceBtn")?.addEventListener("click", () => {
   vampSpeak("Upload your evidence files and I'll classify them for you.");
 });
 
+$("collectOutlookBtn")?.addEventListener("click", async () => {
+  const monthKey = $("currentMonthSelect")?.value;
+  try {
+    await collectOutlookEvidence({ monthKey, mode: "incomplete_tasks", maxMessages: 12 });
+  } catch (e) {
+    vampSpeak("Outlook evidence collection failed.");
+    log("Outlook collection error: " + e.message);
+    console.error("Outlook collection error", e);
+  }
+});
+
 $("closeScanSection")?.addEventListener("click", () => {
   restoreScanPanelHome({ hide: true });
   clearTargetedScanState();
@@ -2211,13 +2563,14 @@ $("evidenceMonthFilter")?.addEventListener("change", () => {
 
 let voiceEnabled = false;
 let currentAudio = null;
+const VAMP_VOICE_NAME = "Conversational kAImil";
 
 async function checkVoiceStatus() {
   try {
     const resp = await fetch('/api/voice/status');
     const data = await resp.json();
     
-    if (data.available) {
+    if (data.available && data.engine !== 'openvoice_sidecar') {
       voiceEnabled = true;
       if (data.engine === 'elevenlabs') {
         log("✓ ElevenLabs TTS ready");
@@ -2226,6 +2579,9 @@ async function checkVoiceStatus() {
       } else {
         log("⚠ Voice available but not trained. Upload voice samples to train.");
       }
+    } else if (data.available && data.engine === 'openvoice_sidecar') {
+      voiceEnabled = false;
+      log("ℹ Local voice disabled for now; text guidance remains active.");
     } else {
       log("ℹ Voice TTS not available");
     }
@@ -2256,7 +2612,7 @@ function updateVoiceStatusDisplay(data) {
       <p style="color:var(--green);">✅ Voice model trained and ready</p>
       <p style="color:var(--text);font-size:0.9em;margin-top:8px;">
         Device: ${data.device || 'Unknown'}<br>
-        Voice Name: ${data.config?.voice_name || data.voice_name || 'Default'}<br>
+        Voice Name: ${data.config?.voice_name || (data.voice_name && data.voice_name !== 'Unknown' ? data.voice_name : '') || data.configured_voice_name || VAMP_VOICE_NAME}<br>
         Voice ID: ${data.voice_id || 'n/a'}<br>
         Training files: ${data.training_files_available}<br>
         Trained: ${data.config?.last_trained || 'Unknown'}
@@ -2267,7 +2623,7 @@ function updateVoiceStatusDisplay(data) {
       <p style="color:var(--yellow);">⚠️ Voice system available but not trained</p>
       <p style="color:var(--text);font-size:0.9em;margin-top:8px;">
         Device: ${data.device || 'Unknown'}<br>
-        Voice Name: ${data.config?.voice_name || data.voice_name || 'Default'}<br>
+        Voice Name: ${data.config?.voice_name || (data.voice_name && data.voice_name !== 'Unknown' ? data.voice_name : '') || data.configured_voice_name || VAMP_VOICE_NAME}<br>
         Voice ID: ${data.voice_id || 'n/a'}<br>
         Training files available: ${data.training_files_available}<br>
         Upload voice samples and train the model to enable voice responses.
@@ -2352,7 +2708,7 @@ async function trainVoice() {
     const resp = await fetch('/api/voice/train', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ voice_name: 'vamp_voice' })
+      body: JSON.stringify({ voice_name: VAMP_VOICE_NAME })
     });
     
     const data = await resp.json();
@@ -2477,10 +2833,37 @@ if ($("testVoiceBtn")) {
    INIT
 ============================================================ */
 
+function rebuildMonthSelect(year) {
+  const sel = $("currentMonthSelect");
+  if (!sel) return;
+  const MONTHS = ["January","February","March","April","May","June",
+                  "July","August","September","October","November","December"];
+  const y = parseInt(year, 10);
+  if (!y || isNaN(y)) return;
+  const prev = sel.value;
+  sel.innerHTML = MONTHS.map((m, i) => {
+    const val = `${y}-${String(i+1).padStart(2,'0')}`;
+    return `<option value="${val}">${m} ${y}</option>`;
+  }).join('');
+  // restore selection if same year, otherwise default to current real month or first
+  if (prev && prev.startsWith(String(y))) {
+    sel.value = prev;
+  } else {
+    const now = new Date();
+    const defaultVal = `${y}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    sel.value = sel.querySelector(`[value="${defaultVal}"]`) ? defaultVal : `${y}-01`;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   vampIdle();
   log("VAMP interface initialised.");
   log("System ready. Begin by enrolling your profile.");
+
+  // Populate month dropdown from cycleYear and keep in sync
+  rebuildMonthSelect($("cycleYear")?.value || new Date().getFullYear());
+  $("cycleYear")?.addEventListener("input", () => rebuildMonthSelect($("cycleYear").value));
+  $("cycleYear")?.addEventListener("change", () => rebuildMonthSelect($("cycleYear").value));
 
   // Capture the scan panel's original DOM location so we can move it inline and restore safely
   rememberScanPanelHome();
@@ -2752,20 +3135,50 @@ $("lockMonthBtn")?.addEventListener("click", async () => {
     return;
   }
   
-  if (!confirm(`Are you sure you want to lock ${monthKey}? This confirms all tasks are complete or marked as no-evidence.`)) {
+  if (!confirm(`Before ${monthKey} is locked, VAMP will run a final risk/context review for complaints, absence, compliance issues, missed deadlines, and support context. Continue?`)) {
     return;
   }
   
-  vampBusy("Locking month...");
+  vampBusy("Reviewing month before lock...");
   
   try {
-    const res = await fetch("/api/month/lock", {
+    const lockPayload = { staff_id: staffId, month: monthKey };
+    let res = await fetch("/api/month/lock", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ staff_id: staffId, month: monthKey })
+      body: JSON.stringify(lockPayload)
     });
     
-    const data = await res.json();
+    let data = await res.json();
+
+    if (res.status === 409 && data.risk_review_required) {
+      const review = data.risk_review || {};
+      const findings = review.findings || [];
+      const findingText = findings.length
+        ? findings.slice(0, 8).map((f, i) => `${i + 1}. ${f.label || f.category}: ${f.title || "Untitled"}\n   Terms: ${(f.matched_terms || []).join(", ")}\n   ${f.preview || ""}`).join("\n\n")
+        : "No obvious risk/context signals were found in the evidence already ingested.";
+      const message = `${review.summary || "Risk/context review complete."}\n\n${findingText}\n\n${review.recommended_context_prompt || "Add any context needed before locking."}`;
+      const contextNote = prompt(message + "\n\nOptional context note for the lock record:", "");
+      if (contextNote === null) {
+        vampSpeak("Month lock cancelled so you can review context first.");
+        return;
+      }
+      if (!confirm("Lock this month with the risk/context review acknowledged and saved?")) {
+        vampSpeak("Month lock cancelled.");
+        return;
+      }
+      vampBusy("Locking month with risk review acknowledged...");
+      res = await fetch("/api/month/lock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...lockPayload,
+          risk_review_ack: true,
+          risk_context_note: contextNote || ""
+        })
+      });
+      data = await res.json();
+    }
     
     if (data.success) {
       vampSpeak(`Month ${monthKey} locked successfully!`);

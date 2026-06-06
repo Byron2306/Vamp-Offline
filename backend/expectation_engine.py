@@ -10,6 +10,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 # Where we stash the JSON summary that the LLM can use
 EXPECT_DIR = os.path.join("backend", "data", "staff_expectations")
 os.makedirs(EXPECT_DIR, exist_ok=True)
+WORK_CONTEXT_DIR = Path("backend") / "data" / "work_context"
 
 MODULE_CODE_RE = re.compile(r"[A-Z]{2,6}\s?\d{3,4}[A-Z]{0,3}")
 MONTH_TOKENS = {
@@ -128,6 +129,230 @@ def _extract_month_tokens(text: str) -> List[str]:
             if candidate and candidate in MONTH_TOKENS:
                 tokens.append(candidate.title())
     return tokens
+
+
+def _load_work_context(staff_id: str, year: int) -> Dict[str, Any]:
+    path = WORK_CONTEXT_DIR / f"work_context_{str(staff_id).replace('/', '-').replace(chr(92), '-')}_{int(year)}.json"
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _context_months(value: Any) -> List[int]:
+    raw = value if isinstance(value, list) else ([] if value in (None, "") else [value])
+    months: List[int] = []
+    for item in raw:
+        try:
+            month = int(item)
+        except Exception:
+            continue
+        if 1 <= month <= 12 and month not in months:
+            months.append(month)
+    return months
+
+
+def _context_tokens(*values: Any) -> set[str]:
+    blob = " ".join(str(v or "") for v in values)
+    return set(re.findall(r"[a-z0-9]{3,}", blob.lower()))
+
+
+def _dedupe_strings(values: List[Any]) -> List[str]:
+    seen: set[str] = set()
+    result: List[str] = []
+    for value in values:
+        text = str(value or "").strip()
+        if not text:
+            continue
+        key = text.lower()
+        if key not in seen:
+            seen.add(key)
+            result.append(text)
+    return result
+
+
+def _context_entries(work_context: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
+    entries: List[Tuple[str, Dict[str, Any]]] = []
+    for kind in ("projects", "publications", "committees"):
+        for item in work_context.get(kind) or []:
+            if isinstance(item, dict):
+                entries.append((kind, item))
+    supervision = work_context.get("supervision")
+    if isinstance(supervision, dict):
+        entries.append(("supervision", supervision))
+    for kind in ("ohs", "community_engagement", "teaching_learning", "administration"):
+        item = work_context.get(kind)
+        if isinstance(item, dict):
+            entries.append((kind, item))
+    return entries
+
+
+def _match_context_entry(task: Dict[str, Any], kind: str, entry: Dict[str, Any]) -> bool:
+    title = str(task.get("title") or "")
+    outputs = str(task.get("outputs") or "")
+    task_blob = f"{title} {outputs}".lower()
+    kpa_code = str(task.get("kpa_code") or "").upper()
+
+    if kind in {"projects", "publications"} and kpa_code != "KPA3":
+        return False
+    if kind == "committees" and kpa_code != "KPA4":
+        return False
+    if kind == "supervision" and kpa_code != "KPA3":
+        return False
+    if kind == "ohs" and kpa_code != "KPA2":
+        return False
+    if kind == "administration" and kpa_code != "KPA4":
+        return False
+    if kind == "teaching_learning" and kpa_code != "KPA1":
+        return False
+    if kind == "community_engagement" and kpa_code not in {"KPA1", "KPA5"}:
+        return False
+
+    if kind == "supervision":
+        return "supervision" in task_blob or "postgraduate" in task_blob
+    if kind == "ohs":
+        return any(term in task_blob for term in ("ohs", "occupational health", "safety", "compliance"))
+    if kind == "teaching_learning":
+        return any(term in task_blob for term in ("semester", "module", "efundi", "assessment", "teaching", "marks", "moderation"))
+    if kind == "community_engagement":
+        return any(
+            term in task_blob
+            for term in (
+                "teaching practice",
+                "tprac",
+                "wil",
+                "community",
+                "engagement",
+                "school visit",
+                "service learning",
+                "volunteer",
+                "industry",
+                "commercial",
+                "technology transfer",
+                "tech transfer",
+                "disclosure",
+            )
+        )
+    if kind == "administration":
+        return any(term in task_blob for term in ("committee", "meeting", "forum", "administration", "management", "leadership"))
+    if kind == "committees" and not any(term in task_blob for term in ("committee", "meeting", "forum", "administration", "management")):
+        return False
+
+    names = [entry.get("name"), *(entry.get("aliases") or [])]
+    for name in names:
+        name_text = str(name or "").strip().lower()
+        if not name_text:
+            continue
+        if name_text in task_blob:
+            return True
+        name_tokens = _context_tokens(name_text)
+        task_tokens = _context_tokens(task_blob)
+        if len(name_tokens) < 2:
+            continue
+        if name_tokens and len(name_tokens.intersection(task_tokens)) / max(1, len(name_tokens)) >= 0.6:
+            return True
+    return False
+
+
+def _phase_months(entry: Dict[str, Any]) -> List[int]:
+    phase_by_month = entry.get("phase_by_month") or {}
+    if not isinstance(phase_by_month, dict):
+        return []
+    return _context_months(list(phase_by_month.keys()))
+
+
+def _apply_work_context_to_tasks(
+    staff_id: str,
+    year: int,
+    tasks: List[Dict[str, Any]],
+    work_context: Dict[str, Any],
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    if not work_context:
+        return tasks, {"applied": False}
+
+    adjusted = 0
+    suppressed = 0
+    entries = _context_entries(work_context)
+    for task in tasks:
+        for kind, entry in entries:
+            if not _match_context_entry(task, kind, entry):
+                continue
+
+            active_months = _context_months(entry.get("active_months")) or _phase_months(entry)
+            status = str(entry.get("status") or "").lower()
+            if active_months:
+                task["months"] = active_months
+            elif status in {"not_applicable", "not applicable", "deferred", "dormant"}:
+                task["months"] = []
+                task["minimum_count"] = 0
+                suppressed += 1
+
+            aliases = entry.get("aliases") or []
+            collaborators = entry.get("collaborators") or entry.get("people") or []
+            evidence_types = entry.get("evidence_types") or []
+            evidence_scope = entry.get("evidence_scope") or []
+            exclusion_terms = entry.get("exclusion_terms") or []
+            phase_terms: List[str] = []
+            phase_by_month = entry.get("phase_by_month") or {}
+            if isinstance(phase_by_month, dict):
+                phase_terms = [str(v) for v in phase_by_month.values() if str(v).strip()]
+            context_terms = [
+                entry.get("current_status"),
+                entry.get("completed_to_date"),
+                entry.get("next_milestones"),
+                entry.get("evidence_locations"),
+                entry.get("confirmed_scope"),
+                entry.get("stage_by_student"),
+                entry.get("exceptions_or_notes"),
+                entry.get("confirmed_windows"),
+                entry.get("fixed_calendar_notes"),
+                entry.get("target_venue_or_output"),
+            ]
+
+            task["evidence_hints"] = _dedupe_strings(
+                list(task.get("evidence_hints") or [])
+                + list(aliases)
+                + list(collaborators)
+                + list(evidence_types)
+                + list(evidence_scope)
+                + phase_terms
+                + [str(term) for term in context_terms if str(term or "").strip()]
+            )
+            if exclusion_terms:
+                task["exclusion_terms"] = _dedupe_strings(list(task.get("exclusion_terms") or []) + list(exclusion_terms))
+            task["contextualized"] = True
+            task["context_source"] = {
+                "kind": kind,
+                "name": entry.get("name") or kind,
+                "status": entry.get("status") or "",
+                "active_months": active_months,
+            }
+            context_note = str(
+                entry.get("notes")
+                or entry.get("status_note")
+                or entry.get("current_status")
+                or entry.get("stage_by_student")
+                or entry.get("confirmed_scope")
+                or ""
+            ).strip()
+            if context_note:
+                task["outputs"] = f"{task.get('outputs', '')} | Context: {context_note}".strip(" |")
+            if phase_terms:
+                task["what_to_do"] = f"{task.get('what_to_do', '')} Context phases: {', '.join(_dedupe_strings(phase_terms)[:6])}."
+            adjusted += 1
+            break
+
+    tasks = [task for task in tasks if task.get("months")]
+    return tasks, {
+        "applied": True,
+        "status": work_context.get("status", ""),
+        "adjusted_tasks": adjusted,
+        "suppressed_tasks": suppressed,
+        "source": "work_context",
+    }
 
 
 def _fold_people_management_summary(
@@ -1195,47 +1420,26 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 })
                 task_counter += 1
         
-        # ROR Teaching Activities (January preparation, February event)
+        # ROR Teaching Activities (January only – NWU orientation runs late January)
         if teaching_ror:
             ror_details = " | ".join(teaching_ror)
-            # January: Preparation
+            # January: both preparation AND delivery happen in January at NWU
             tasks.append({
                 "id": f"task_{task_counter:03d}",
                 "kpa_code": "KPA1",
                 "kpa_name": "Teaching and Learning",
-                "title": "ROR Preparation: Orientation Programme",
+                "title": "ROR: Orientation Programme (Preparation & Delivery)",
                 "cadence": "annual",
                 "months": [1],
                 "minimum_count": 1,
-                "stretch_count": 2,
-                "evidence_hints": ["ror", "reception", "orientation", "registration", "presentation", "preparation"],
-                "outputs": f"Preparation for ROR: {ror_details[:100]}",
-                "what_to_do": "Prepare presentation materials and content for Reception, Orientation and Registration (ROR) programme.",
+                "stretch_count": 3,
+                "evidence_hints": ["ror", "reception", "orientation", "registration", "presentation", "preparation", "attendance", "programme schedule"],
+                "outputs": f"ROR preparation and delivery: {ror_details[:100]}",
+                "what_to_do": "Prepare and deliver presentations for the Reception, Orientation and Registration (ROR) programme in January. ROR runs during the last week of January at NWU — both preparation and event delivery are January activities.",
                 "evidence_required": _evidence_required(
                     "KPA1",
-                    ["presentation slides", "preparation notes", "ror materials"],
-                    f"ROR preparation: {ror_details[:80]}",
-                ),
-            })
-            task_counter += 1
-            
-            # February: Actual presentations
-            tasks.append({
-                "id": f"task_{task_counter:03d}",
-                "kpa_code": "KPA1",
-                "kpa_name": "Teaching and Learning",
-                "title": "ROR Event: Orientation Programme Delivery",
-                "cadence": "annual",
-                "months": [2],
-                "minimum_count": 1,
-                "stretch_count": 2,
-                "evidence_hints": ["ror", "reception", "orientation", "registration", "presentation", "attendance"],
-                "outputs": f"ROR programme delivery: {ror_details[:100]}",
-                "what_to_do": "Deliver presentations and materials at Reception, Orientation and Registration (ROR) event.",
-                "evidence_required": _evidence_required(
-                    "KPA1",
-                    ["attendance register", "presentation evidence", "photos", "programme schedule"],
-                    f"ROR event: {ror_details[:80]}",
+                    ["presentation slides", "attendance register", "programme schedule", "ror materials"],
+                    f"ROR preparation and delivery: {ror_details[:80]}",
                 ),
             })
             task_counter += 1
@@ -1308,7 +1512,7 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "kpa_name": "Research, Innovation & Creative Outputs",
                 "title": f"Research Project: {project_name}",
                 "cadence": "research_ongoing",
-                "months": [2, 4, 6, 7, 8, 10],  # Bi-monthly progress + July winter research
+                "months": [1, 2, 4, 6, 7, 8, 10],  # Jan annual kick-off/ethics + bi-monthly progress + July winter research
                 "minimum_count": 1,
                 "stretch_count": 2,
                 "evidence_hints": ["research", "project", "progress", "data", "analysis", project_name.lower()],
@@ -1356,10 +1560,10 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "kpa_name": "Research, Innovation & Creative Outputs",
                 "title": f"Publication: {pub_name}",
                 "cadence": "research_publication",
-                "months": [3, 6, 7, 9, 11],  # Quarterly milestones + July writing
+                "months": [1, 3, 6, 7, 9, 11],  # Jan planning kick-off + quarterly milestones + July writing
                 "minimum_count": 1,
                 "stretch_count": 2,
-                "evidence_hints": ["publication", "manuscript", "book", "chapter", "draft", "review"],
+                "evidence_hints": ["publication", "manuscript", "book", "chapter", "draft", "review", "research plan", "ethics application"],
                 "outputs": publication,
                 "what_to_do": f"Write and publish {pub_name}: drafting, peer review, revisions, final submission.",
                 "evidence_required": _evidence_required(
@@ -1404,7 +1608,7 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "kpa_name": "Research, Innovation & Creative Outputs",
                 "title": f"Research Leadership: {role_name}",
                 "cadence": "research_leadership",
-                "months": [3, 6, 7, 9, 12],  # Quarterly + July planning
+                "months": [1, 3, 6, 7, 9, 12],  # Jan annual planning + quarterly + July
                 "minimum_count": 1,
                 "stretch_count": 2,
                 "evidence_hints": ["leadership", "sdl", "research entity", "coordination", role_name.lower()],
@@ -1426,7 +1630,7 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "kpa_name": "Research, Innovation & Creative Outputs",
                 "title": "Research Professional Development",
                 "cadence": "professional_development",
-                "months": [3, 6, 7, 9],  # Throughout year + July winter schools
+                "months": [1, 3, 6, 7, 9],  # Jan annual PD planning + throughout year + July winter schools
                 "minimum_count": 1,
                 "stretch_count": 3,
                 "evidence_hints": ["workshop", "colloquium", "writing school", "training", "professional development"],
@@ -1553,7 +1757,7 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 "kpa_name": "Research, Innovation & Creative Outputs",
                 "title": "Postgraduate supervision meetings & progress tracking",
                 "cadence": "semester",
-                "months": [3, 6, 9, 12],
+                "months": [1, 3, 6, 9, 12],  # Jan resume/status check + quarterly
                 "minimum_count": 4,
                 "stretch_count": 8,
                 "evidence_hints": ["supervision", "postgraduate", "masters", "phd", "meeting", "progress report"],
@@ -1832,6 +2036,9 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
                 })
                 task_counter += 1
     
+    work_context = _load_work_context(staff_id, year)
+    tasks, work_context_applied = _apply_work_context_to_tasks(staff_id, year, tasks, work_context)
+
     # Build lead/lag indicators per KPA
     lead_lag = {
         "KPA1": {"lead": "Teaching delivery", "lag": "Assessment completion"},
@@ -1869,6 +2076,8 @@ def build_expectations_from_ta(staff_id: str, year: int, ta_summary: Dict[str, A
         "tasks": tasks,
         "by_month": by_month,
         "lead_lag": lead_lag,
+        "work_context": work_context,
+        "work_context_applied": work_context_applied,
         "teaching_modules": teaching_modules_metadata,
         "task_count": len(tasks),
         "months": [f"{year}-{m:02d}" for m in range(1, 13)]

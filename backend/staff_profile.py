@@ -55,6 +55,16 @@ class StaffProfile:
     position: str
     cycle_year: int
     faculty: str = ""
+    school: str = ""
+    subject_group: str = ""
+    research_entity: str = ""
+    campus: str = ""
+    director: str = ""
+    subject_group_leader: str = ""
+    executive_dean: str = ""
+    research_dean: str = ""
+    school_admin: str = ""
+    modules_context: str = ""
     line_manager: str = ""
     kpas: List[KPA] = field(default_factory=list)
     flags: List[str] = field(default_factory=list)
@@ -96,6 +106,16 @@ class StaffProfile:
             position=data.get("position", ""),
             cycle_year=int(data.get("cycle_year", 0)),
             faculty=data.get("faculty", ""),
+            school=data.get("school", ""),
+            subject_group=data.get("subject_group", ""),
+            research_entity=data.get("research_entity", ""),
+            campus=data.get("campus", ""),
+            director=data.get("director", ""),
+            subject_group_leader=data.get("subject_group_leader", ""),
+            executive_dean=data.get("executive_dean", ""),
+            research_dean=data.get("research_dean", ""),
+            school_admin=data.get("school_admin", ""),
+            modules_context=data.get("modules_context", ""),
             line_manager=data.get("line_manager", ""),
             kpas=kpas,
             flags=data.get("flags", []),
@@ -140,6 +160,16 @@ def create_or_load_profile(
     position: str,
     cycle_year: int,
     faculty: str = "",
+    school: str = "",
+    subject_group: str = "",
+    research_entity: str = "",
+    campus: str = "",
+    director: str = "",
+    subject_group_leader: str = "",
+    executive_dean: str = "",
+    research_dean: str = "",
+    school_admin: str = "",
+    modules_context: str = "",
     line_manager: str = "",
 ) -> StaffProfile:
     """
@@ -154,6 +184,16 @@ def create_or_load_profile(
         position=position,
         cycle_year=cycle_year,
         faculty=faculty,
+        school=school,
+        subject_group=subject_group,
+        research_entity=research_entity,
+        campus=campus,
+        director=director,
+        subject_group_leader=subject_group_leader,
+        executive_dean=executive_dean,
+        research_dean=research_dean,
+        school_admin=school_admin,
+        modules_context=modules_context,
         line_manager=line_manager,
         kpas=[],
     )

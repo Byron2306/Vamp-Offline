@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>EAGI BOT Offline (HTML)</title>
+  <title>VAMP Offline</title>
   <link rel="stylesheet" href="./vamp.css"/>
 </head>
 
@@ -18,8 +18,8 @@
          alt="NWU"
          class="nwu-logo"/>
     <div>
-      <div class="title">EAGI BOT Offline</div>
-      <div class="muted">Virtual Academic Management Partner — NWU</div>
+      <div class="title">VAMP Offline</div>
+      <div class="muted">Virtual Academic Management Partner — Dracula Gothic Edition</div>
     </div>
   </div>
 
@@ -47,7 +47,6 @@
         playsinline
         loop
         style="border-radius: 18px; box-shadow: 0 0 32px rgba(108,61,145,0.18), 0 0 0 6px rgba(108,61,145,0.16); border: 3px solid var(--nwu-dark); background: transparent; max-width: 220px; margin: 0 auto; display: block; object-fit:cover;">
-        <source src="backend/contracts/02177020232809800000000000000000000ffffac1802049fc990.mp4" type="video/mp4">
         <source src="./vampire.mp4" type="video/mp4">
         Your browser does not support the video tag.
       </video>
@@ -57,8 +56,8 @@
   <div class="vamp-dialogue">
 
     <div class="vamp-identity">
-      <h1 class="vamp-name">EAGI BOT</h1>
-      <div class="vamp-role">Your Performance Guide</div>
+      <h1 class="vamp-name">VAMP</h1>
+      <div class="vamp-role">Your Gothic Performance Steward</div>
     </div>
 
     <!-- Floating dialogue bubbles -->
@@ -71,10 +70,10 @@
     <!-- ALWAYS AVAILABLE Ask-VAMP -->
     <div class="ask-vamp">
       <textarea id="ask-vamp-input"
-                placeholder="Ask EAGI BOT for guidance, clarification, or support…"
+                placeholder="Ask VAMP for guidance, clarification, or support..."
                 rows="2"></textarea>
       <button id="ask-vamp-btn" class="btn glow">
-        Ask EAGI BOT
+        Ask VAMP
       </button>
     </div>
 
@@ -110,11 +109,21 @@
 
       <div class="form grid3">
         <div><label>Staff ID</label><input id="staffId"/></div>
-        <div><label>Cycle year</label><input id="cycleYear" value="2025"/></div>
+        <div><label>Cycle year</label><input id="cycleYear" value="2026"/></div>
         <div><label>Name</label><input id="name"/></div>
         <div><label>Position</label><input id="position"/></div>
-        <div><label>Faculty</label><input id="faculty"/></div>
+        <div><label>Faculty</label><input id="faculty" placeholder="Faculty of Education"/></div>
+        <div><label>Campus</label><input id="campus" placeholder="Potchefstroom / Mahikeng / Vanderbijlpark"/></div>
+        <div><label>School</label><input id="school" placeholder="School of Professional Studies in Education"/></div>
+        <div><label>Subject group</label><input id="subjectGroup" placeholder="Curriculum Studies"/></div>
+        <div><label>Research entity</label><input id="researchEntity" placeholder="SDL / Edu-HRight / other"/></div>
         <div><label>Manager</label><input id="manager"/></div>
+        <div><label>School director</label><input id="director" placeholder="Prof. Martha Matashu"/></div>
+        <div><label>Subject group leader</label><input id="subjectGroupLeader" placeholder="Nicolaas van Deventer"/></div>
+        <div><label>Executive dean</label><input id="executiveDean" placeholder="Prof. Lloyd Conley"/></div>
+        <div><label>Dean for research</label><input id="researchDean" placeholder="Prof. Josef de Beer"/></div>
+        <div><label>Admin / Secretary</label><input id="schoolAdmin" placeholder="PA, administrator, secretary"/></div>
+        <div><label>Modules / LMS context</label><input id="modulesContext" placeholder="HISE312, HISE411, ERTP671..."/></div>
       </div>
 
       <div class="row" style="margin-top:12px;">
@@ -132,6 +141,24 @@
         <span class="pill" id="taPill">No TA imported</span>
       </div>
 
+      <div id="workContextPanel" style="display:none;margin-top:14px;padding:14px;background:var(--panel-dark);border:1px solid var(--border);border-radius:8px;">
+        <div class="card-h">
+          <div>
+            <div class="card-title">Work Context Interview</div>
+            <div class="muted">Resolve project timing, collaborators, committees, supervision, and local NWU jargon before expectations are locked.</div>
+          </div>
+          <div class="right">
+            <button class="btn" id="draftContextBtn" type="button">Draft Context</button>
+            <button class="btn glow" id="saveContextBtn" type="button">Save & Rebuild</button>
+          </div>
+        </div>
+        <div id="contextQuestionList" style="margin-top:12px;"></div>
+        <details style="margin-top:12px;">
+          <summary class="muted" style="cursor:pointer;">Edit structured context JSON</summary>
+          <textarea id="workContextJson" rows="10" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;"></textarea>
+        </details>
+      </div>
+
       <!-- Year timeline: visual progress across months -->
       <div id="yearTimelineContainer" style="margin-top:12px;">
         <div class="card-title">Year Progress</div>
@@ -140,6 +167,17 @@
           <!-- Timeline months will be injected here by app.js -->
         </div>
       </div>
+
+      <hr class="sep"/>
+
+      <div class="card-title">Runtime Dependencies</div>
+      <div class="muted">Outlook/eFundi automation uses Playwright Chromium. Local LLM use requires Ollama if you choose Ollama instead of Groq.</div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" id="dependencyCheckBtn" type="button">Check Dependencies</button>
+        <button class="btn glow" id="installPlaywrightBtn" type="button">Install Browser Automation</button>
+        <span class="pill" id="dependencyPill">Not checked</span>
+      </div>
+      <pre class="log" id="dependencyLog" style="margin-top:10px;max-height:180px;">Dependency status not checked.</pre>
     </div>
   </section>
 
@@ -152,6 +190,7 @@
           <div class="muted">Track progress month-by-month across all KPAs.</div>
         </div>
         <div class="right" style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" id="collectOutlookBtn" title="Collect month-targeted evidence from Outlook">📬 Outlook Evidence</button>
           <button class="btn" id="scanEvidenceBtn" title="Scan and link evidence to tasks">📎 Scan Evidence</button>
           <button class="btn glow" id="rebuildExpBtn">Rebuild Expectations</button>
         </div>
@@ -196,20 +235,7 @@
       <div class="form grid2">
         <div>
           <label>Current Month</label>
-          <select id="currentMonthSelect">
-            <option value="2025-01">January 2025</option>
-            <option value="2025-02">February 2025</option>
-            <option value="2025-03">March 2025</option>
-            <option value="2025-04">April 2025</option>
-            <option value="2025-05">May 2025</option>
-            <option value="2025-06">June 2025</option>
-            <option value="2025-07">July 2025</option>
-            <option value="2025-08">August 2025</option>
-            <option value="2025-09">September 2025</option>
-            <option value="2025-10">October 2025</option>
-            <option value="2025-11">November 2025</option>
-            <option value="2025-12">December 2025</option>
-          </select>
+          <select id="currentMonthSelect"></select>
         </div>
         <div class="row" style="align-items:flex-end;">
           <button class="btn glow" id="checkMonthStatusBtn">Check Month Status</button>
@@ -227,7 +253,7 @@
       <div class="box" style="margin-top:12px;">
         <div class="box-h">AI Month Review</div>
         <div class="evidence" id="monthReviewBox">
-          Upload evidence for the current month, then click "Check Month Status" to have EAGI BOT assess whether you've met your expectations.
+          Upload evidence for the current month, then click "Check Month Status" to have VAMP assess whether you've met your expectations.
         </div>
         <div class="row" style="gap:8px;margin-top:12px;">
           <button class="btn" id="lockMonthBtn" disabled title="Lock this month when all tasks are complete">🔒 Lock Month</button>
@@ -356,7 +382,7 @@
       <div class="card-h">
         <div>
           <div class="card-title">🎙️ Voice Settings</div>
-          <div class="muted">Configure OpenVoice V2 voice cloning for EAGI BOT</div>
+          <div class="muted">Configure the VAMP voice profile: Conversational kAImil</div>
         </div>
       </div>
 
@@ -370,8 +396,8 @@
       <div class="box" style="margin-top:16px;">
         <div class="box-h">📤 Upload Voice Samples</div>
         <p style="margin-bottom:12px;color:var(--text);">
-          Upload 3-5 audio files (WAV, MP3, FLAC) with clear speech from the voice you want to clone.
-          Each file should be 5-30 seconds of clear, high-quality speech.
+          Upload clean voice snippets for the Romanian-accented VAMP profile.
+          Short, dry recordings with no music or room echo work best.
         </p>
         <input type="file" id="voiceSampleInput" accept=".wav,.mp3,.flac,.m4a,.ogg" multiple style="margin-bottom:12px;"/>
         <button class="btn" id="uploadVoiceSampleBtn">Upload Voice Sample(s)</button>
@@ -382,10 +408,10 @@
       <div class="box warning" style="margin-top:16px;">
         <div class="box-h">🎯 Train Voice Model</div>
         <p style="margin-bottom:12px;color:var(--text);">
-          After uploading voice samples, click below to train the voice cloning model.
-          This may take a few minutes.
+          After uploading voice samples, click below to extract the local voice profile.
+          Playback currently uses the configured ElevenLabs voice.
         </p>
-        <button class="btn glow" id="trainVoiceBtn">Train Voice Model</button>
+        <button class="btn glow" id="trainVoiceBtn">Train Conversational kAImil</button>
         <div id="voiceTrainStatus" style="margin-top:8px;"></div>
       </div>
 

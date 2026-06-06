@@ -5,7 +5,7 @@ from __future__ import annotations
 Evidence -> task mapping rules.
 
 This module is deliberately conservative:
-- It always maps evidence to at least "its KPA/month" tasks when possible.
+- It maps evidence only when there is a concrete task signal.
 - It boosts confidence when filename/evidence_type/snippet matches task hints.
 """
 
@@ -13,6 +13,14 @@ import json
 import re
 import uuid
 from typing import Any, Dict, List, Optional, Tuple
+
+_GENERIC_TASK_TOKENS = {
+    "academic", "agenda", "and", "assessment", "committee", "data", "education",
+    "evidence", "faculty", "meeting", "minutes", "module", "performance",
+    "project", "progress", "report", "research", "school", "staff", "student",
+    "task", "teaching", "the", "with", "work",
+}
+
 
 try:
     from .progress_store import ProgressStore, TaskRow
@@ -33,6 +41,102 @@ def _parse_month(month_bucket: str) -> Optional[int]:
         return None
 
 
+def _recover_metadata_mappings(store: ProgressStore, staff_id: str, year: int, current_task_rows: List[Dict[str, Any]]) -> int:
+    """Recover non-manual collector mappings after task-id regeneration.
+
+    Automatic mappings are not stored as human assertions. When the task catalog is
+    rebuilt, SQLite cascades old edges away, so we recreate only links that can be
+    tied back to a current task by exact stored title or direct module-code match.
+    """
+    by_id = {str(r.get("task_id")): r for r in current_task_rows if r.get("task_id")}
+    by_month_kpa_title = {
+        (
+            str(r.get("window_start") or "")[:7],
+            str(r.get("kpa_code") or ""),
+            str(r.get("title") or "").strip().lower(),
+        ): r
+        for r in current_task_rows
+    }
+
+    recovered = 0
+    try:
+        evidence_rows = [dict(row) for row in store.list_evidence(staff_id, int(year))]
+    except Exception:
+        return 0
+
+    for ev in evidence_rows:
+        evidence_id = str(ev.get("evidence_id") or "")
+        if not evidence_id:
+            continue
+        try:
+            if store.list_mappings_for_evidence(evidence_id):
+                continue
+        except Exception:
+            pass
+
+        try:
+            meta = json.loads(ev.get("meta_json") or "{}")
+        except Exception:
+            meta = {}
+        month = str(ev.get("month_bucket") or "")[:7]
+        ev_kpa = str(ev.get("kpa_code") or "")
+
+        target = None
+        outlook = meta.get("outlook") if isinstance(meta.get("outlook"), dict) else {}
+        efundi = meta.get("efundi") if isinstance(meta.get("efundi"), dict) else {}
+
+        if outlook:
+            for match in outlook.get("matched_tasks") or []:
+                if not isinstance(match, dict):
+                    continue
+                quality = match.get("match_quality") if isinstance(match.get("match_quality"), dict) else {}
+                strong_signals: List[str] = []
+                for key in ("module_hits", "evidence_hits", "attachment_hits", "phrase_hits"):
+                    strong_signals.extend([str(v).lower() for v in (quality.get(key) or []) if str(v).strip()])
+                terms = [str(t).lower() for t in (match.get("matched_terms") or []) if str(t).strip()]
+                score = float(match.get("score") or 0.0)
+                if not strong_signals and (not terms or all(t in _GENERIC_TASK_TOKENS for t in terms)):
+                    continue
+                if not strong_signals and score < 4.0:
+                    continue
+                title = str(match.get("title") or "").strip().lower()
+                candidate = by_month_kpa_title.get((month, ev_kpa, title))
+                if candidate:
+                    if ev_kpa == "KPA2":
+                        blob = json.dumps(meta).lower()
+                        if not any(term in blob for term in ("ohs", "safety", "compliance", "declaration", "popia", "dalro")):
+                            continue
+                    target = candidate
+                    break
+        elif efundi:
+            module_code = str(efundi.get("module_code") or "").replace(" ", "").lower()
+            for row in current_task_rows:
+                if str(row.get("window_start") or "")[:7] != month:
+                    continue
+                if str(row.get("kpa_code") or "") != ev_kpa:
+                    continue
+                title = str(row.get("title") or "").replace(" ", "").lower()
+                if module_code and module_code in title:
+                    target = row
+                    break
+            if target is None:
+                target_id = str(meta.get("target_task_id") or "")
+                candidate = by_id.get(target_id)
+                if candidate and str(candidate.get("window_start") or "")[:7] == month and str(candidate.get("kpa_code") or "") == ev_kpa:
+                    target = candidate
+
+        if not target:
+            continue
+        try:
+            mapped_by = "efundi_collect:direct_lms" if efundi else "outlook_collect:targeted"
+            confidence = 0.98 if efundi else 0.9
+            store.upsert_mapping(evidence_id, target["task_id"], mapped_by=mapped_by, confidence=confidence)
+            recovered += 1
+        except Exception:
+            continue
+    return recovered
+
+
 def ensure_tasks(
     store: ProgressStore,
     *,
@@ -41,16 +145,73 @@ def ensure_tasks(
     expectations: Optional[Dict[str, Any]] = None,
 ) -> int:
     """Ensure a staff/year task catalog exists in sqlite; return count inserted."""
-    # Preserve persisted asserted mappings for this staff/year so user-asserted mappings survive a rebuild
+    # Preserve all evidence-task mappings for this staff/year. Task rebuilds
+    # delete rows from tasks, and sqlite cascades that into evidence_task. Without
+    # this, merely refreshing progress can make collected evidence stop counting.
     preserved_mappings: List[Tuple[str, str, str, float, str]] = []
     try:
         try:
-            preserved_mappings = store.get_asserted_mappings_for_staff_year(staff_id, int(year))
+            preserved_mappings = store.get_mappings_for_staff_year(staff_id, int(year))
         except Exception:
             preserved_mappings = []
+        try:
+            existing_keys = {(m[0], m[1]) for m in preserved_mappings if len(m) >= 2}
+            asserted_rows = store.get_asserted_mappings_for_staff_year(staff_id, int(year))
+            asserted_titles: Dict[Tuple[str, str], str] = {}
+            try:
+                con = store._connect()
+                try:
+                    ev_ids = [row[0] for row in asserted_rows if row and row[0]]
+                    if ev_ids:
+                        placeholders = ",".join(["?"] * len(ev_ids))
+                        for ev in con.execute(
+                            f"SELECT evidence_id, meta_json FROM evidence WHERE evidence_id IN ({placeholders})",
+                            ev_ids,
+                        ).fetchall():
+                            try:
+                                meta = json.loads(ev["meta_json"] or "{}")
+                            except Exception:
+                                meta = {}
+                            target_task_id = meta.get("target_task_id") or ""
+                            outlook = meta.get("outlook") if isinstance(meta.get("outlook"), dict) else {}
+                            for match in outlook.get("matched_tasks") or []:
+                                if not isinstance(match, dict):
+                                    continue
+                                task_id = match.get("task_id") or ""
+                                title = match.get("title") or ""
+                                if task_id and title:
+                                    asserted_titles[(ev["evidence_id"], task_id)] = title
+                            if target_task_id and meta.get("task"):
+                                asserted_titles.setdefault((ev["evidence_id"], target_task_id), meta.get("task") or "")
+                finally:
+                    con.close()
+            except Exception:
+                asserted_titles = {}
 
-        # Preserve task_ids referenced by asserted mappings so user-locked tasks survive rebuilds
-        preserve_task_ids = list({m[1] for m in preserved_mappings if len(m) >= 2 and m[1]})
+            for evidence_id, task_id, mapped_by, confidence in asserted_rows:
+                if (evidence_id, task_id) not in existing_keys:
+                    preserved_mappings.append(
+                        (
+                            evidence_id,
+                            task_id,
+                            mapped_by,
+                            float(confidence),
+                            asserted_titles.get((evidence_id, task_id), ""),
+                        )
+                    )
+        except Exception:
+            pass
+
+        # Only asserted/manual task rows are protected from deletion. Automatic
+        # mappings are restored after rebuild when their task still exists, so
+        # stale generated tasks do not accumulate.
+        preserve_task_ids = list(
+            {
+                m[1]
+                for m in preserved_mappings
+                if len(m) >= 4 and m[1] and "asserted" in str(m[2])
+            }
+        )
         try:
             deleted = store.clear_tasks_for_staff_year_preserve(staff_id, int(year), preserve_task_ids)
         except Exception:
@@ -71,10 +232,13 @@ def ensure_tasks(
     else:
         inserted = store.upsert_tasks(default_tasks_for_year(staff_id, int(year)))
 
-    # Restore preserved mappings where the task still exists in the tasks table
+    # Restore preserved mappings where the task still exists in the tasks table,
+    # or relink by old title when deterministic task IDs changed.
     try:
         # Get current task ids and titles for the year
-        current_task_rows = store.list_tasks_for_window(int(year), list(range(1, 13)), kpa_code=None)
+        current_task_rows = [
+            dict(row) for row in store.list_tasks_for_window(int(year), list(range(1, 13)), kpa_code=None)
+        ]
         current_task_ids = set([r["task_id"] for r in current_task_rows])
         # Helper: simple token overlap title matcher
         def _title_tokens(s: str) -> set:
@@ -123,6 +287,9 @@ def ensure_tasks(
                     store.upsert_mapping(evidence_id, candidate_id, mapped_by=mapped_by, confidence=confidence)
                 except Exception:
                     continue
+        recovered = _recover_metadata_mappings(store, staff_id, int(year), current_task_rows)
+        if recovered:
+            print(f"Recovered {recovered} collector mappings for staff {staff_id} year {year}")
     except Exception:
         pass
 
@@ -177,7 +344,7 @@ def map_evidence_to_tasks(
         return []
 
     signal = _text_signal(meta)
-    signal_tokens = set(re.findall(r"[a-z0-9]{3,}", signal))
+    signal_tokens = set(re.findall(r"[a-z0-9]{3,}", signal)) - _GENERIC_TASK_TOKENS
 
     def _tokens_for_task(row: Dict[str, Any]) -> Tuple[set[str], List[str]]:
         try:
@@ -187,7 +354,7 @@ def map_evidence_to_tasks(
         hints = hints_payload.get("hints") or []
         hint_terms = [str(h).strip().lower() for h in hints if str(h).strip()]
         blob = " ".join([row.get("title") or ""] + hint_terms)
-        return set(re.findall(r"[a-z0-9]{3,}", blob.lower())), hint_terms
+        return set(re.findall(r"[a-z0-9]{3,}", blob.lower())) - _GENERIC_TASK_TOKENS, hint_terms
 
     scored: List[Tuple[float, Dict[str, Any], int, int]] = []
     for t in task_rows:
@@ -205,14 +372,17 @@ def map_evidence_to_tasks(
                 if term and term in signal:
                     hint_hits += 1
 
-            base = 0.30 if kpa_code_norm else 0.15
-            conf = base + 0.55 * overlap_ratio + min(0.30, 0.10 * hint_hits)
+            if not overlap and not hint_hits:
+                continue
+
+            base = 0.18 if kpa_code_norm else 0.10
+            conf = base + 0.60 * overlap_ratio + min(0.30, 0.10 * hint_hits)
             scored.append((float(conf), row, hint_hits, len(overlap)))
         except Exception:
             continue
 
     scored.sort(key=lambda x: (x[0], x[2], x[3]), reverse=True)
-    threshold = 0.35 if kpa_code_norm else 0.45
+    threshold = 0.42 if kpa_code_norm else 0.52
 
     mapped: List[Dict[str, Any]] = []
     for conf, row, _, _ in scored[: max_links * 2]:
@@ -228,37 +398,6 @@ def map_evidence_to_tasks(
             )
         except Exception:
             continue
-
-    if not mapped and kpa_code_norm:
-        # Safe fallback: map to first task in month/KPA (single link only).
-        try:
-            pick = dict(task_rows[0])
-            store.upsert_mapping(evidence_id, pick["task_id"], mapped_by=mapped_by + ":fallback", confidence=0.35)
-            mapped.append(
-                {"task_id": pick["task_id"], "kpa_code": pick["kpa_code"], "title": pick["title"], "confidence": 0.35}
-            )
-        except Exception:
-            pass
-
-    if not mapped and not kpa_code_norm:
-        # Conservative fallback: one KPA1 mapping.
-        try:
-            all_rows = store.list_tasks_for_window(int(year), [month], kpa_code=None)
-            pick = None
-            for r in all_rows:
-                if str(r.get("kpa_code") or "") == "KPA1":
-                    pick = r
-                    break
-            if pick is None and all_rows:
-                pick = all_rows[0]
-            if pick is not None:
-                pick_d = dict(pick)
-                store.upsert_mapping(evidence_id, pick_d["task_id"], mapped_by=mapped_by + ":fallback", confidence=0.25)
-                mapped.append(
-                    {"task_id": pick_d["task_id"], "kpa_code": pick_d["kpa_code"], "title": pick_d["title"], "confidence": 0.25}
-                )
-        except Exception:
-            pass
 
     return mapped
 

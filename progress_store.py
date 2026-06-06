@@ -141,6 +141,8 @@ class ProgressStore:
                         tasks_completed INTEGER NOT NULL DEFAULT 0,
                         tasks_total INTEGER NOT NULL DEFAULT 0,
                         evidence_count INTEGER NOT NULL DEFAULT 0,
+                        risk_review_json TEXT,
+                        risk_context_note TEXT,
                         PRIMARY KEY (staff_id, year, month)
                     );
                     
@@ -168,6 +170,11 @@ class ProgressStore:
                     );
                     """
                 )
+                existing_cols = {row[1] for row in con.execute("PRAGMA table_info(month_locks)").fetchall()}
+                if "risk_review_json" not in existing_cols:
+                    con.execute("ALTER TABLE month_locks ADD COLUMN risk_review_json TEXT")
+                if "risk_context_note" not in existing_cols:
+                    con.execute("ALTER TABLE month_locks ADD COLUMN risk_context_note TEXT")
                 con.commit()
             finally:
                 con.close()
@@ -304,9 +311,9 @@ class ProgressStore:
                             new_meta[key] = existing_meta.get(key)
 
                     # Preserve previous rating/tier if new values are empty or generic
-                    if (not rating or str(rating).strip().lower() in ("", "n/a", "none")) and existing.get("rating"):
+                    if (not rating or str(rating).strip().lower() in ("", "n/a", "none")) and existing["rating"]:
                         rating = existing["rating"]
-                    if (not tier or str(tier).strip().lower() in ("", "n/a", "none")) and existing.get("tier"):
+                    if (not tier or str(tier).strip().lower() in ("", "n/a", "none")) and existing["tier"]:
                         tier = existing["tier"]
 
                     # Also merge other meta keys, preferring new_meta values
@@ -430,6 +437,37 @@ class ProgressStore:
             finally:
                 con.close()
 
+    def clear_mappings_for_evidence(
+        self,
+        evidence_id: str,
+        *,
+        preserve_asserted: bool = True,
+        mapped_by_prefixes: Optional[List[str]] = None,
+    ) -> int:
+        """Remove mapping edges for one evidence row; optionally preserve manual assertions."""
+        with self._lock:
+            con = self._connect()
+            try:
+                clauses = ["evidence_id=?"]
+                args: List[Any] = [evidence_id]
+                if preserve_asserted:
+                    clauses.append("mapped_by NOT LIKE ?")
+                    args.append("%asserted%")
+                if mapped_by_prefixes:
+                    prefix_clauses = []
+                    for prefix in mapped_by_prefixes:
+                        prefix_clauses.append("mapped_by LIKE ?")
+                        args.append(f"{prefix}%")
+                    clauses.append("(" + " OR ".join(prefix_clauses) + ")")
+                cur = con.execute(
+                    "DELETE FROM evidence_task WHERE " + " AND ".join(clauses),
+                    args,
+                )
+                con.commit()
+                return int(cur.rowcount or 0)
+            finally:
+                con.close()
+
     def get_mappings_for_staff_year(self, staff_id: str, year: int) -> List[Tuple[str, str, str, float, str]]:
         """Return list of (evidence_id, task_id, mapped_by, confidence, task_title) for a staff/year."""
         with self._lock:
@@ -473,10 +511,21 @@ class ProgressStore:
                 """
                 args: List[Any] = [staff_id, int(year)] + [p + "%" for p in prefixes]
                 mapped = set([row["task_id"] for row in con.execute(q, args).fetchall()])
+
+                no_evidence_q = """
+                    SELECT DISTINCT task_id
+                    FROM task_no_evidence
+                    WHERE staff_id=? AND year=? AND month IN (""" + ",".join(["?"] * len(prefixes)) + """)
+                """
+                no_evidence_args: List[Any] = [staff_id, int(year)] + prefixes
+                no_evidence = set(
+                    row["task_id"] for row in con.execute(no_evidence_q, no_evidence_args).fetchall()
+                )
             finally:
                 con.close()
 
-        missing = [dict(r) for r in task_rows if r["task_id"] not in mapped]
+        accounted = mapped | no_evidence
+        missing = [dict(r) for r in task_rows if r["task_id"] not in accounted]
 
         # completion % by kpa
         by_kpa: Dict[str, Dict[str, Any]] = {}
@@ -484,7 +533,7 @@ class ProgressStore:
             k = r["kpa_code"]
             by_kpa.setdefault(k, {"expected": 0, "completed": 0, "pct": 0.0})
             by_kpa[k]["expected"] += 1
-            if r["task_id"] in mapped:
+            if r["task_id"] in accounted:
                 by_kpa[k]["completed"] += 1
         for k, v in by_kpa.items():
             v["pct"] = 0.0 if v["expected"] == 0 else round(100.0 * v["completed"] / v["expected"], 1)
@@ -494,7 +543,7 @@ class ProgressStore:
             "year": int(year),
             "months": months,
             "expected_tasks": len(task_rows),
-            "completed_tasks": len(mapped),
+            "completed_tasks": len(accounted.intersection(set(task_ids))),
             "missing_tasks": missing,
             "by_kpa": by_kpa,
         }
@@ -504,7 +553,9 @@ class ProgressStore:
     # ----------------------------
     def lock_month(self, staff_id: str, year: int, month: str, *, 
                    tasks_completed: int = 0, tasks_total: int = 0, 
-                   evidence_count: int = 0, locked_by: str = "user") -> bool:
+                   evidence_count: int = 0, locked_by: str = "user",
+                   risk_review: Optional[Dict[str, Any]] = None,
+                   risk_context_note: str = "") -> bool:
         """Lock a month, preventing further changes. Returns True if newly locked."""
         with self._lock:
             con = self._connect()
@@ -512,11 +563,13 @@ class ProgressStore:
                 con.execute(
                     """
                     INSERT OR REPLACE INTO month_locks
-                    (staff_id, year, month, locked_at, locked_by, tasks_completed, tasks_total, evidence_count)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    (staff_id, year, month, locked_at, locked_by, tasks_completed, tasks_total, evidence_count, risk_review_json, risk_context_note)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (staff_id, int(year), month, _utc_now_iso(), locked_by, 
-                     tasks_completed, tasks_total, evidence_count)
+                     tasks_completed, tasks_total, evidence_count,
+                     json.dumps(risk_review or {}, ensure_ascii=False),
+                     risk_context_note or "")
                 )
                 con.commit()
                 return True

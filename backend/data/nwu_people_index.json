@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "source_note": "Seeded from public NWU Faculty of Education staff/support pages and known VAMP evidence senders. Refreshable later via a public-page scraper.",
+  "people": [
+    {
+      "name": "Deon Van Tonder",
+      "email": "deon.vantonder@nwu.ac.za",
+      "role": "Deputy Director; Professor",
+      "unit": "School of Commerce and Social Sciences in Education",
+      "aliases": ["Deon", "D Van Tonder", "DT Deon Van Tonder", "Prof Deon van Tonder", "Deon van Tonder"]
+    },
+    {
+      "name": "Martha Matashu",
+      "email": "",
+      "role": "School Director",
+      "unit": "School of Commerce and Social Sciences in Education",
+      "aliases": ["Prof Martha Matashu", "Martha Matashu", "M Matashu"]
+    },
+    {
+      "name": "Nicolaas van Deventer",
+      "email": "",
+      "role": "Subject Group Leader: History Education",
+      "unit": "School of Commerce and Social Sciences in Education",
+      "aliases": ["Nicolaas van Deventer", "N van Deventer", "Prof Nicolaas van Deventer", "Subject Group Leader History Education"]
+    },
+    {
+      "name": "Lloyd Conley",
+      "email": "",
+      "role": "Executive Dean",
+      "unit": "Faculty of Education",
+      "aliases": ["Prof Lloyd Conley", "Lloyd Conley", "L Conley", "Executive Dean"]
+    },
+    {
+      "name": "Josef de Beer",
+      "email": "",
+      "role": "Dean for Research",
+      "unit": "Faculty of Education",
+      "aliases": ["Prof Josef de Beer", "Josef de Beer", "J de Beer", "Dean for Research"]
+    },
+    {
+      "name": "Elsa Mentz",
+      "email": "elsa.mentz@nwu.ac.za",
+      "role": "Head of Self-Directed Learning research entity; Professor",
+      "unit": "Self-Directed Learning",
+      "aliases": ["Elsa", "Prof Elsa Mentz", "EM Elsa Mentz", "Elsa Mentz"]
+    },
+    {
+      "name": "Dorothy Laubscher",
+      "email": "",
+      "role": "Head of Self-Directed Learning research entity; Professor",
+      "unit": "Self-Directed Learning",
+      "aliases": ["Dorothy", "Prof Dorothy Laubscher", "Dorothy Laubscher", "D Laubscher"]
+    },
+    {
+      "name": "Clea McLaren",
+      "email": "clea.mclaren@nwu.ac.za",
+      "role": "BEdHons Administrator",
+      "unit": "Professional Studies in Education Support Staff",
+      "aliases": ["Clea", "C McLaren"]
+    },
+    {
+      "name": "Rina Steyn",
+      "email": "rina.steyn@nwu.ac.za",
+      "role": "Personal Assistant of School Director",
+      "unit": "Professional Studies in Education Support Staff",
+      "aliases": ["Rina", "R Steyn"]
+    },
+    {
+      "name": "Maggie Jasson",
+      "email": "maggie.jasson@nwu.ac.za",
+      "role": "Administrative Assistant",
+      "unit": "Professional Studies in Education Support Staff",
+      "aliases": ["Maggie", "M Jasson"]
+    },
+    {
+      "name": "Rene Dekiewit",
+      "email": "rene.jansevanrensburg@nwu.ac.za",
+      "role": "Senior Undergraduate Administrator",
+      "unit": "Professional Studies in Education Support Staff",
+      "aliases": ["Rene", "Rene Janse van Rensburg", "René Dekiewit"]
+    },
+    {
+      "name": "Katlego Sebetlele",
+      "email": "katlego.sebetlele@nwu.ac.za",
+      "role": "Financial Administrator",
+      "unit": "Professional Studies in Education Support Staff",
+      "aliases": ["Katlego", "K Sebetlele"]
+    },
+    {
+      "name": "Mary de Beer",
+      "email": "mary.debeer@nwu.ac.za",
+      "role": "Faculty Administrator: Office of the Executive Dean",
+      "unit": "Faculty of Education",
+      "aliases": ["Mary", "Mary DeBeer", "M de Beer"]
+    },
+    {
+      "name": "Anja Visser",
+      "email": "anja.visser@nwu.ac.za",
+      "role": "Curriculum Studies Subject Group Chair; Senior Lecturer",
+      "unit": "Curriculum Studies",
+      "aliases": ["Anja", "Dr Anja Visser"]
+    },
+    {
+      "name": "Grantt Gouws",
+      "email": "grantt.gouws@nwu.ac.za",
+      "role": "Lecturer",
+      "unit": "Curriculum Studies",
+      "aliases": ["Grantt", "GG Grantt Gouws"]
+    },
+    {
+      "name": "Eddie Kok",
+      "email": "21190275@nwu.ac.za",
+      "role": "Lecturer; Philosophy of Education and WIL",
+      "unit": "Curriculum Studies",
+      "aliases": ["Eddie", "Eddie Kok", "EK Eddie Kok"]
+    },
+    {
+      "name": "Carolina Botha",
+      "email": "carolina.botha@nwu.ac.za",
+      "role": "Associate Professor and Programme Leader: MEd Structured",
+      "unit": "Curriculum Studies",
+      "aliases": ["Carolina", "Prof Carolina Botha"]
+    },
+    {
+      "name": "Dawid Olivier",
+      "email": "",
+      "role": "Colleague / module-related correspondent",
+      "unit": "Faculty of Education",
+      "aliases": ["Dawid Olivier", "DO Dawid Olivier"]
+    },
+    {
+      "name": "Naledi Makunye",
+      "email": "",
+      "role": "Colleague / module-related correspondent",
+      "unit": "Faculty of Education",
+      "aliases": ["Naledi Makunye", "NM Naledi Makunye"]
+    },
+    {
+      "name": "Tiisetso Malgas",
+      "email": "",
+      "role": "School secretary / administrative support",
+      "unit": "School of Commerce and Social Sciences in Education",
+      "aliases": ["Tiisetso Malgas", "TM Tiisetso Malgas", "Tiisetso", "T Malgas"]
+    },
+    {
+      "name": "eFundi",
+      "email": "efundi@nwu.ac.za",
+      "role": "Learning Management System",
+      "unit": "NWU eFundi",
+      "aliases": ["HISE312-2026", "efundi@nwu.ac.za", "eFundi"]
+    }
+  ]
+}

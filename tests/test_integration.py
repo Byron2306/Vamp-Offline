@@ -16,12 +16,19 @@ from backend.expectation_engine import parse_task_agreement
 WEIGHT_TOLERANCE = 1.0  # Allow 1% tolerance for total weight validation
 
 
+def _b_bunt_2026_ta_path() -> Path:
+    downloads_path = Path("/home/byron/Downloads/B Bunt 2026 FEDU_Task_Agreement_Form (5).xlsx")
+    if downloads_path.exists():
+        return downloads_path
+    return Path("B Bunt 2026 FEDU_Task_Agreement_Form (5).xlsx")
+
+
 class TestIntegration:
     """Integration tests for end-to-end workflows."""
 
     def test_ta_parsing_with_real_file(self):
         """Test that we can parse the actual TA file without crashing."""
-        ta_file = Path("Bunt B 2026 FEDU_Task_Agreement_Form (5).xlsx")
+        ta_file = _b_bunt_2026_ta_path()
         
         if not ta_file.exists():
             pytest.skip("TA file not found")
@@ -45,7 +52,7 @@ class TestIntegration:
 
     def test_contract_import_workflow(self):
         """Test creating a profile and importing TA contract."""
-        ta_file = Path("Bunt B 2026 FEDU_Task_Agreement_Form (5).xlsx")
+        ta_file = _b_bunt_2026_ta_path()
         
         if not ta_file.exists():
             pytest.skip("TA file not found")
