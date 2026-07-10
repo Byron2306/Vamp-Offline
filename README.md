@@ -1,7 +1,7 @@
 # VAMP - Evidence-Based Performance Assessment
 
 <p align="center">
-  <img src="VAMP.png" alt="BEAST mascot" width="520" style="max-width: 92%; height: auto;">
+  <img src="VAMP.png" alt="BEAST mascot" width="700" style="max-width: 92%; height: auto;">
 </p>
 
 VAMP (Virtual Academic Management Partner) is a comprehensive system for managing academic performance agreements and evidence-based assessment for NWU (North-West University) staff.
