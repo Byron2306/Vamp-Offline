@@ -1,6 +1,10 @@
 # VAMP Offline - Evidence-Based Performance Assessment
 
-VAMP (Validation, Assessment, and Management Platform) Offline is a comprehensive system for managing academic performance agreements and evidence-based assessment for NWU (North-West University) staff.
+<p align="center">
+  <img src="VAMP.png" alt="BEAST mascot" width="520" style="max-width: 92%; height: auto;">
+</p>
+
+VAMP (Virtual Academic Management Partner) is a comprehensive system for managing academic performance agreements and evidence-based assessment for NWU (North-West University) staff.
 
 ## Features
 
