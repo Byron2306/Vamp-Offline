@@ -1,4 +1,4 @@
-# VAMP Offline - Evidence-Based Performance Assessment
+# VAMP - Evidence-Based Performance Assessment
 
 <p align="center">
   <img src="VAMP.png" alt="BEAST mascot" width="520" style="max-width: 92%; height: auto;">
