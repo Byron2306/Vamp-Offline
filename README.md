@@ -8,10 +8,10 @@ VAMP (Virtual Academic Management Partner) is a comprehensive system for managin
 
 ## Features
 
-- **Task Agreement (TA) Parsing**: Import and parse NWU Task Agreement Excel files
+- **Task Agreement (TA) Parsing**: Import and parse Task Agreement Excel files
 - **Performance Agreement (PA) Management**: Read and generate PA reports
 - **Evidence Extraction**: Extract text from various document formats (PDF, DOCX, XLSX, PPTX, TXT)
-- **Deterministic Scoring**: Score evidence using NWU brain scorer with KPA routing and tier detection
+- **Deterministic Scoring**: Score evidence using its policy brain scorer with KPA routing and tier detection
 - **Evidence Aggregation**: Aggregate evidence across KPIs and KPAs with completion tracking
 - **PA Report Generation**: Generate standardized PA Excel reports
 - **🎙️ Voice Cloning (NEW)**: AI voice responses using OpenVoice V2 - VAMP can speak to you!
