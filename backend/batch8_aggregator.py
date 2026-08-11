@@ -254,9 +254,16 @@ def aggregate_performance(
             if mapping is None:
                 continue
             kpa_code, permitted_evidence = mapping
+            if matched.kpa_code != kpa_code:
+                continue
             if permitted_evidence and score.evidence_type not in permitted_evidence:
                 continue
             if acs <= 0:
+                continue
+            match_strength = _clamp(
+                float(getattr(matched, "match_strength", 0.0) or 0.0)
+            )
+            if match_strength < 0.50:
                 continue
             result = kpi_results.get(matched.kpi_id)
             if result is None:
@@ -267,7 +274,7 @@ def aggregate_performance(
                     status="NOT ACHIEVED",
                     contributing_artefacts=0,
                 )
-            result.completion += acs
+            result.completion += acs * match_strength
             result.contributing_artefacts += 1
             kpi_results[matched.kpi_id] = result
             kpa_contribution_files[kpa_code].add(score.filename)

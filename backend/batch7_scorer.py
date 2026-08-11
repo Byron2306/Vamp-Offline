@@ -9,6 +9,7 @@ understanding/mapping passes; everything else is deterministic and auditable.
 """
 
 import json
+from backend.vamp_epistemic_authority import authorize_scoring_passes, authorized_pair_set
 from dataclasses import dataclass, field, asdict
 from typing import Any, Callable, Dict, List, Optional, Sequence
 
@@ -145,6 +146,7 @@ PASS_A_PROMPT = (
     '  "claims": [\n'
     '    {\n'
     '      "claim": "string",\n'
+    '      "exact_span": "verbatim source text",\n'
     '      "quantifier": "number | null",\n'
     '      "timeframe": "string | null"\n'
     "    }\n"
@@ -399,11 +401,31 @@ def score_artefact(
             extract_status=ctx.artefact.extract_status,
         )
 
-    matched_kpis = pass_b.matched_kpis
-    completion_estimate = pass_b.completion_estimate
+    epistemic_authority = authorize_scoring_passes(ctx, pass_a, pass_b)
+    authorized_pairs = authorized_pair_set(epistemic_authority)
+    matched_kpis = [
+        matched
+        for matched in pass_b.matched_kpis
+        if (matched.kpa_code, matched.kpi_id) in authorized_pairs
+    ]
+    completion_estimate = min(
+        pass_b.completion_estimate,
+        float(epistemic_authority.get("completion_cap", 0.0) or 0.0),
+    )
     recommended_rating = pass_b.recommended_rating
     recommended_tier = pass_b.recommended_tier or "Needs Review"
     impact_summary = pass_b.impact_summary
+    epistemic_status_override = None
+    if not epistemic_authority.get("passed"):
+        epistemic_status_override = "NEEDS_REVIEW"
+        reason_text = ", ".join(
+            epistemic_authority.get("reasons")
+            or ["epistemic_authority_not_satisfied"]
+        )
+        impact_summary = (
+            impact_summary
+            + f" Epistemic authority withheld: {reason_text}."
+        ).strip()
 
     if not matched_kpis:
         completion_estimate = 0.0
@@ -421,6 +443,7 @@ def score_artefact(
     else:
         status_override = None
 
+    status_override = status_override or epistemic_status_override
     completion_estimate = max(0.0, min(1.0, completion_estimate))
 
     confidence = min(pass_a.confidence, pass_b.confidence)
