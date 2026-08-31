@@ -31,7 +31,7 @@ datas += collect_data_files("playwright")
 
 
 a = Analysis(
-    ["packaging/desktop_launcher.py"],
+    [str(ROOT / "packaging" / "desktop_launcher.py")],
     pathex=[str(ROOT)],
     binaries=[],
     datas=datas,
